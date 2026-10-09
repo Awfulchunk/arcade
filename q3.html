@@ -1,0 +1,73 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tough & J's Arcade - Round 3 Questions</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#1e2433;margin:0;padding:16px;color:#e6e8f0}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#9fb4ff}
+.q{background:#2a3147;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#3b3550;color:#f2e6c8;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#333b55;font-size:15px}
+label:has(input:checked){background:#3a4f9a;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #556;background:#1e2433;color:#e6e8f0;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#aab}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#4b5fd1;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#2a3147;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Tough & J's Arcade, Round 3</h1>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"TANK IO FIXES"},
+{id:"T1",t:"On-screen UI and joysticks",m:1,op:"Bigger sticks, see-through HUD, and buttons pushed to the edges. A layout editor fixes it for good.",o:[
+["Bigger joysticks with a size slider",1],["See-through HUD that fades when you're not using it",1],["Move all buttons to the screen edges",1],["Layout editor: drag and resize every button",1],["Minimal mode: hide the HUD except health",0]]},
+{id:"T2",t:"Flamethrower",m:1,op:"Big damage up close, falling off with distance, and a flame that blinds the screen of whoever's hit. That's what you asked for.",o:[
+["Huge damage point-blank, drops off with range",1],["Blinds the target (orange screen glare for 1-2 s)",1],["Sets tracks on fire for burn damage over time",1],["Shorter range but wider cone",0]]},
+{id:"T3",t:"Damage vs vehicle type",op:"Realistic armor: a TD shell one-shots a Very Light, and light guns ricochet off heavies. That kills the 'soaked 3 shots' problem.",o:[
+["Real armor tiers: big guns one-shot lights, light guns bounce off heavies",1],["Just buff TD and Heavy damage vs lights",0],["Weak-spot hits (rear and tracks) do double",0]]},
+{id:"T4",t:"Same-type duels drag on. Fix?",m:1,op:"Rear and side armor hits plus module damage end fights fast.",o:[
+["Side and rear shots do way more damage",1],["Module damage: tracks, engine, turret, gun can break",1],["Crits: small chance of an ammo rack explosion",1],["Raise all damage 30%",0]]},
+{id:"T5",t:"Tank Garage + engine mechanics",m:1,op:"A detailed damage diagram, plus overdrive with risk, is gold.",o:[
+["Detailed tank diagram showing damage and what needs fixing",1],["Divert fuel to the engine: speed boost, risk of fire or explosion",1],["Field repairs in a match take time and you're vulnerable",1],["Paint and decals",0],["Buy and upgrade parts between matches",0]]},
+{id:"T6",t:"New map type",op:"A ruined industrial zone: factories, rail yards, tight lanes, and big open lots.",o:[
+["Industrial zone: factories, rail yards",1],["Desert canyon",0],["Snow village",0],["Forest with rivers",0]]},
+{s:"EMPIRE CLASH"},
+{id:"E1",t:"Dark zones",m:1,op:"Make the fog deadly: ambushes, stronger monsters deeper in, and jungle, caves and mountains.",o:[
+["Units in the dark get ambushed by hidden monsters",1],["The deeper in, the stronger the enemies and the better the loot",1],["Terrain: jungle slows you, caves hide camps, mountains block",1],["Torches or a scout lower the danger",0]]},
+{id:"E2",t:"Starting forest wall",op:"Each side starts boxed in by thick forest. Chopping it gives wood, your first resource.",o:[
+["Thick forest that must be chopped, and wood is the first resource",1],["Lighter forest, a few open paths",0]]},
+{id:"E3",t:"Soldiers",m:1,op:"Smaller, more human, slower marching in formation, with uniforms.",o:[
+["Smaller, more human, more animated",1],["Slow, realistic marching in formation",1],["Uniform colors per army",1],["Officers who shout and boost nearby troops",0]]},
+{id:"E4",t:"Building and orders",m:1,op:"Tap where workers build, and draw patrol routes and gather points. That's the Empire Earth feel.",o:[
+["Tell workers exactly where to build",1],["Draw patrol routes",1],["Gather points per building",1],["Queue multiple builds",0]]},
+{id:"E5",t:"School / smarter AI",m:1,op:"A School tech that makes the AI scout, hide from big armies, and flank.",o:[
+["School building upgrades your troops' smarts",1],["Enemy AI scouts and hides from big forces",1],["Enemy AI flanks and raids your workers",1]]},
+{s:"CASTLE ROYALE RESTYLE"},
+{id:"R1",t:"New art style",op:"A Zomboid angle mixed with Empire Clash chunk, rounder shapes, and a taller arena.",o:[
+["Zomboid angle + Empire chunk, rounder",1],["Painterly, softer",0],["Dark and gritty",0]]},
+{id:"R2",t:"Map length",op:"About 1.5x taller so troops actually travel and fight mid-field.",o:[
+["1.5x taller",1],["2x taller",0],["1.25x taller",0]]},
+{s:"TANK ROYAL RUMBLE (new game)"},
+{id:"G1",t:"Format",op:"An open world battle royale with a shrinking zone, 20 AI tanks, and loot crates.",o:[
+["Battle royale: shrinking zone, last tank standing",1],["Free roam open world with missions",0],["Team deathmatch on a huge map",0]]},
+{id:"G2",t:"Size of the battle",op:"20 tanks keeps it hectic but smooth on your phone.",o:[
+["10 tanks",0],["20 tanks",1],["40 tanks",0]]},
+{id:"G3",t:"Extras",m:1,op:"Loot crates and the garage carry over. Airdrops are hype.",o:[
+["Loot crates: ammo, armor, repair kits",1],["Airdrops with rare upgrades",1],["Garage upgrades carry between matches",1],["Destructible buildings",0],["Weather and day/night",0]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="ROUND 3 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
