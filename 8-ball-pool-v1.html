@@ -227,12 +227,9 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 function hex2rgb(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
 function shadeHex(h,k){const c=hex2rgb(h).map(v=>clamp(Math.round(k<0?v*(1+k):v+(255-v)*k),0,255));return'rgb('+c.join(',')+')';}
 // ---------- settings ----------
-const CFG_DEF={sound:true,sfxVol:80,amb:true,ambVol:45,vib:true,guide:'first',cam:'3d',tilt:34,fillScreen:true,fillMax:1.5,autoZoom:true,orient:'portrait',gfx:'high',autoGfx:true,shadows:true,reflect:true,lefty:false,
+const CFG_DEF={sound:true,sfxVol:80,amb:true,ambVol:45,vib:true,guide:'first',cam:'tilt',tilt:32,autoZoom:true,orient:'portrait',gfx:'high',autoGfx:true,shadows:true,reflect:true,lefty:false,
  talk:true,names:true,spinAssist:true,shotSpeed:'normal',ballStyle:'classic',confirmShot:false,power:'bar',hints:true,music:false,musVol:50,ooh:false,showFps:false,lastNames:['Tough','Jay']};
 const CFG=Object.assign({},CFG_DEF,LS.json('pool.cfg',{}));
-// v1.1 migration: Jay picked the tilted angle as the main view -> switch saved configs to Always 3D once, and undo
-// the auto 'Graphics lowered' steps that the v1 table-layer bug provoked (auto-lower still works if it really lags).
-if((CFG.ver|0)<2){CFG.ver=2;CFG.cam='3d';CFG.tilt=Math.max(CFG.tilt|0,34);CFG.gfx='high';try{localStorage.setItem('pool.cfg',JSON.stringify(CFG));}catch(e){}}
 function saveCfg(){LS.put('pool.cfg',CFG);}
 // ---------- profile: coins, unlocks, equipped, stats ----------
 const PROF_DEF={coins:100,owned:{cue:['house'],cloth:['green'],table:['dive']},eq:{cue:'house',cloth:'green',table:'dive'},
@@ -244,17 +241,10 @@ function saveProf(){LS.put('pool.prof',PROF);LS.set('pool.best',PROF.st.won);LS.
 function adultOn(){return LS.get('sws_adult')==='1';}
 // ---------- canvas ----------
 const cv=$('cv'),ctx=cv.getContext('2d',{alpha:false});let VW=0,VH=0,DPR=1,QDPR=1;
-// v1.1: the CSS size of the canvas (what touches and drawing use) is the single source of truth; the backing store is
-// whatever whole-pixel size QDPR gives, and every layer derives its scale from the real backing size.
-function cssSize(){const w=cv.clientWidth||window.innerWidth||document.documentElement.clientWidth||360,h=cv.clientHeight||window.innerHeight||document.documentElement.clientHeight||640;return[w,h];}
-let _rsKey='';
-function resize(){const sz=cssSize();VW=sz[0];VH=sz[1];DPR=Math.min(window.devicePixelRatio||1,3);QDPR=Math.max(0.5,Math.min(DPR,GFXQ[CFG.gfx].dpr)*SETUI.res());cv.width=Math.max(1,Math.round(VW*QDPR));cv.height=Math.max(1,Math.round(VH*QDPR));_rsKey=VW+'x'+VH+'@'+(window.devicePixelRatio||1)+'/'+CFG.gfx+'/'+SETUI.res();
+function resize(){VW=window.innerWidth;VH=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,3);QDPR=Math.min(DPR,GFXQ[CFG.gfx].dpr)*SETUI.res();cv.width=Math.round(VW*QDPR);cv.height=Math.round(VH*QDPR);
  if(typeof onResize==='function')onResize();}
 const GFXQ={high:{dpr:2.5,sprite:1,shadow:2,cloth:1,refl:1},med:{dpr:2,sprite:1,shadow:1,cloth:0,refl:0},low:{dpr:1.3,sprite:0.6,shadow:1,cloth:0,refl:0}};
 addEventListener('resize',()=>{clearTimeout(resize._t);resize._t=setTimeout(resize,60);});
-if(window.visualViewport)visualViewport.addEventListener('resize',()=>{clearTimeout(resize._t);resize._t=setTimeout(resize,60);});
-// WebViews / iframes sometimes change size or DPR without a resize event (hidden iframe, immersive bars): check every frame
-function sizeCheck(){const sz=cssSize();if(sz[0]+'x'+sz[1]+'@'+(window.devicePixelRatio||1)+'/'+CFG.gfx+'/'+SETUI.res()!==_rsKey)resize();}
 let toastT=0;function toast(t,ms){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),ms||1800);}
 function buzz(ms){if(CFG.vib&&navigator.vibrate)try{navigator.vibrate(ms);}catch(e){}}
 
@@ -855,46 +845,32 @@ function aiPlanNow(M,W,T,lvl,pid){const g=aiPlan(M,W,T,lvl,pid);let r=g.next();w
 
 // ---- 40-render.js ----
 // ===================== renderer: room, table (top-down -> tilted 3D-ish), per-pixel rolling balls, shadows, cue, guide =====================
-const CAM={flip:0,cu:0,cv:0,zoom:1,pitch:0,tcu:0,tcv:0,tzoom:1,tpitch:0,rot:0,k:100,kz:100,D:3.4,ox:0,oy:0,cosP:1,sinP:0,rx:0,ry:0,rw:100,rh:100,ver:0,bx:0,by:0,fill:0,sy:1};
+const CAM={flip:0,cu:0,cv:0,zoom:1,pitch:0,tcu:0,tcv:0,tzoom:1,tpitch:0,rot:0,k:100,kz:100,D:3.4,ox:0,oy:0,cosP:1,sinP:0,rx:0,ry:0,rw:100,rh:100,ver:0};
 const PJ={x:0,y:0,s:1};
 const CUSH_W=0.052,RAIL_W=0.10,Z_CUSH=0.036,Z_RAIL=0.042,Z_APRON=-0.2;
-function camUpdate(){CAM.cosP=Math.cos(CAM.pitch);CAM.sinP=Math.sin(CAM.pitch);if(CAM.manual){CAM.kz=CAM.k*CAM.zoom;return;}camFitPitch();CAM.kz=CAM.k*CAM.zoom;CAM.ox=CAM.rx+CAM.rw/2-CAM.bx*CAM.kz;CAM.oy=CAM.ry+CAM.rh/2-CAM.by*CAM.kz*CAM.sy;}
-// v1.1: fit the table to the play region using its PROJECTED outline at the current pitch (rails + near apron),
-// so the tilted view fills the screen as much as the flat one. Everything (table layer, balls, cue, input) goes through
-// proj/unproj with the same CAM.ox/oy/kz, so they can never disagree.
-let _fitKey='';
-function camFitPitch(){if(typeof TB==='undefined'||!TB)return;const key=CAM.pitch.toFixed(5)+','+CAM.rot+','+CAM.flip+','+CAM.rx+','+CAM.ry+','+CAM.rw+','+CAM.rh+','+TB.HW+','+TB.HL+','+CAM.fill;if(key===_fitKey)return;_fitKey=key;
- const cu=CAM.cu,cvv=CAM.cv,kz=CAM.kz,ox=CAM.ox,oy=CAM.oy;CAM.cu=0;CAM.cv=0;CAM.kz=1;CAM.ox=0;CAM.oy=0;CAM.sy=1;
- const ex=TB.HW+CUSH_W+RAIL_W+0.012,ey=TB.HL+CUSH_W+RAIL_W+0.012;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
- const P=(x,y,z)=>{proj(x,y,z);if(PJ.x<x0)x0=PJ.x;if(PJ.x>x1)x1=PJ.x;if(PJ.y<y0)y0=PJ.y;if(PJ.y>y1)y1=PJ.y;};
- for(const sx of [-1,1])for(const sy of [-1,1]){P(sx*ex,sy*ey,Z_RAIL);if(CAM.pitch>0.02)P(sx*ex,sy*ey,Z_APRON*0.55);}
- CAM.cu=cu;CAM.cv=cvv;CAM.kz=kz;CAM.ox=ox;CAM.oy=oy;
- const w=Math.max(1e-6,x1-x0),h=Math.max(1e-6,y1-y0);CAM.k=Math.min(CAM.rw/w,CAM.rh/h);CAM.bx=(x0+x1)/2;CAM.by=(y0+y1)/2;
- // 'Fill screen': when the tilted table is width-limited on a tall phone, stretch it vertically (like a slightly lower
- // camera) so it also fills the height. Capped so it never looks squashed; proj/unproj both use CAM.sy.
- const room=(CAM.rh/h)/(CAM.rw/w);CAM.sy=CAM.fill&&CAM.pitch>0.02&&room>1?Math.min(room,1+(CFG.fillMax-1)*Math.min(1,CAM.pitch/0.3)):1;}
+function camUpdate(){CAM.cosP=Math.cos(CAM.pitch);CAM.sinP=Math.sin(CAM.pitch);CAM.kz=CAM.k*CAM.zoom;}
 function proj(x,y,z){let u,v;if(CAM.rot){u=-y;v=x;}else{u=x;v=y;}if(CAM.flip){u=-u;v=-v;}u-=CAM.cu;v-=CAM.cv;
- const vy=v*CAM.cosP-z*CAM.sinP,dist=CAM.D-v*CAM.sinP-z*CAM.cosP,s=CAM.D/Math.max(0.3,dist);PJ.x=CAM.ox+u*CAM.kz*s;PJ.y=CAM.oy+vy*CAM.kz*CAM.sy*s;PJ.s=s*CAM.kz;}
+ const vy=v*CAM.cosP-z*CAM.sinP,dist=CAM.D-v*CAM.sinP-z*CAM.cosP,s=CAM.D/Math.max(0.3,dist);PJ.x=CAM.ox+u*CAM.kz*s;PJ.y=CAM.oy+vy*CAM.kz*s;PJ.s=s*CAM.kz;}
 const UP={x:0,y:0};
-function unproj(sx,sy){const Xc=(sx-CAM.ox)/CAM.kz,Yc=(sy-CAM.oy)/(CAM.kz*CAM.sy),v=Yc*CAM.D/(CAM.D*CAM.cosP+Yc*CAM.sinP),dist=CAM.D-v*CAM.sinP,u=Xc*dist/CAM.D;
+function unproj(sx,sy){const Xc=(sx-CAM.ox)/CAM.kz,Yc=(sy-CAM.oy)/CAM.kz,v=Yc*CAM.D/(CAM.D*CAM.cosP+Yc*CAM.sinP),dist=CAM.D-v*CAM.sinP,u=Xc*dist/CAM.D;
  let uu=u+CAM.cu,vv=v+CAM.cv;if(CAM.flip){uu=-uu;vv=-vv;}if(CAM.rot){UP.x=vv;UP.y=-uu;}else{UP.x=uu;UP.y=vv;}return UP;}
 // table point -> camera (u,v)
 function toUV(x,y,o){if(CAM.rot){o[0]=-y;o[1]=x;}else{o[0]=x;o[1]=y;}if(CAM.flip){o[0]=-o[0];o[1]=-o[1];}return o;}
 // fit the table into the play region
 function camFit(rx,ry,rw,rh){CAM.rx=rx;CAM.ry=ry;CAM.rw=rw;CAM.rh=rh;const ex=TB.HW+CUSH_W+RAIL_W+0.01,ey=TB.HL+CUSH_W+RAIL_W+0.01;const hu=CAM.rot?ey:ex,hv=CAM.rot?ex:ey;
- CAM.k=Math.min(rw/(2*hu),rh/(2*hv));CAM.bx=0;CAM.by=0;CAM.sy=1;CAM.fill=CFG.fillScreen?1:0;_fitKey='';camUpdate();CAM.ver++;}
+ CAM.k=Math.min(rw/(2*hu),rh/(2*hv));CAM.ox=rx+rw/2;CAM.oy=ry+rh/2;camUpdate();CAM.ver++;}
 function camClamp(){// keep the zoomed view over the table
- const ex=TB.HW+CUSH_W+RAIL_W,ey=TB.HL+CUSH_W+RAIL_W,hu=CAM.rot?ey:ex,hv=CAM.rot?ex:ey;const vu=CAM.rw/2/CAM.kz,vv=CAM.rh/2/(CAM.kz*CAM.sy);
+ const ex=TB.HW+CUSH_W+RAIL_W,ey=TB.HL+CUSH_W+RAIL_W,hu=CAM.rot?ey:ex,hv=CAM.rot?ex:ey;const vu=CAM.rw/2/CAM.kz,vv=CAM.rh/2/CAM.kz;
  const mu=Math.max(0,hu-vu),mv=Math.max(0,hv-vv);CAM.cu=clamp(CAM.cu,-mu,mu);CAM.cv=clamp(CAM.cv,-mv,mv);}
 // ---------- cached layers ----------
 let RM=null,RMg=null,TLc=null,TLg=null,tlKey='';
-function mkCanvas(w,h){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));return c;}
+function mkCanvas(w,h){const c=document.createElement('canvas');c.width=Math.max(1,w|0);c.height=Math.max(1,h|0);return c;}
 let CLOTH_PAT=null,NOISE=null;
 function makeNoise(){if(NOISE)return;NOISE=mkCanvas(96,96);const g=NOISE.getContext('2d'),id=g.createImageData(96,96);let s=7;for(let i=0;i<96*96;i++){s=(s*16807)%2147483647;const v=s%40;id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=v<20?0:255;id.data[i*4+3]=(v%20)*1.4;}g.putImageData(id,0,0);}
 function curTable(){return byId(TABLES,PROF.eq.table);}
 function curCloth(){return byId(CLOTHS,PROF.eq.cloth).c;}
 // ---------- room (floor + wall band), screen space ----------
-function renderRoom(){const st=curTable();RM=mkCanvas(cv.width,cv.height);RMg=RM.getContext('2d');const g=RMg;g.setTransform(RM.width/VW,0,0,RM.height/VH,0,0);const w=VW,h=VH;let s=11;const R=()=>{s=(s*16807)%2147483647;return s/2147483647;};
+function renderRoom(){const st=curTable();RM=mkCanvas(VW*QDPR,VH*QDPR);RMg=RM.getContext('2d');const g=RMg;g.setTransform(QDPR,0,0,QDPR,0,0);const w=VW,h=VH;let s=11;const R=()=>{s=(s*16807)%2147483647;return s/2147483647;};
  const f=st.floor;
  if(f==='wood'){g.fillStyle='#2a1a10';g.fillRect(0,0,w,h);const pw=46;for(let x=-pw;x<w+pw;x+=pw){for(let y=-200+R()*200;y<h;){const L=120+R()*220,c=40+R()*24;g.fillStyle='rgb('+(c+18|0)+','+(c*0.62|0)+','+(c*0.36|0)+')';g.fillRect(x+1,y,pw-2,L-2);
    g.strokeStyle='rgba(0,0,0,.18)';g.lineWidth=1;for(let k=0;k<4;k++){g.beginPath();const gx=x+6+R()*(pw-12);g.moveTo(gx,y+4);g.bezierCurveTo(gx+R()*8-4,y+L*0.3,gx+R()*8-4,y+L*0.7,gx+R()*6-3,y+L-6);g.stroke();}
@@ -937,14 +913,10 @@ function buildCushions(){CUSHPOLY=[];const S=TB.segs,n=TB.nseg,near=(ax,ay,bx,by
   const eb=jb?(ox?[bx+(jb[0]-bx)*((TB.HW+CUSH_W-Math.abs(bx))/Math.abs(jb[0]-bx)),by+(jb[1]-by)*((TB.HW+CUSH_W-Math.abs(bx))/Math.abs(jb[0]-bx))]:[bx+(jb[0]-bx)*((TB.HL+CUSH_W-Math.abs(by))/Math.abs(jb[1]-by)),by+(jb[1]-by)*((TB.HL+CUSH_W-Math.abs(by))/Math.abs(jb[1]-by))]):[bx+ox*CUSH_W,by+oy*CUSH_W];
   CUSHPOLY.push({n:[ax,ay,bx,by],b:[eb[0],eb[1],ea[0],ea[1]],ox,oy});}}
 function camMoving(){return typeof GS!=='undefined'&&GS.cam&&GS.cam.t<1?1:0;}
-function tableKey(){return CAM.cu.toFixed(4)+','+CAM.cv.toFixed(4)+','+CAM.kz.toFixed(3)+','+CAM.pitch.toFixed(4)+','+CAM.sy.toFixed(4)+','+CAM.ox.toFixed(2)+','+CAM.oy.toFixed(2)+','+CAM.rot+','+CAM.flip+','+VW+','+VH+','+PROF.eq.table+','+PROF.eq.cloth+','+CFG.gfx+','+QDPR+','+camMoving();}
+function tableKey(){return CAM.cu.toFixed(4)+','+CAM.cv.toFixed(4)+','+CAM.kz.toFixed(3)+','+CAM.pitch.toFixed(4)+','+CAM.rot+','+CAM.flip+','+VW+','+VH+','+PROF.eq.table+','+PROF.eq.cloth+','+CFG.gfx+','+QDPR+','+camMoving();}
 function renderTable(){const key=tableKey();if(key===tlKey&&TLc)return;tlKey=key;
- if(!TLc||TLc.width!==cv.width||TLc.height!==cv.height){TLc=mkCanvas(cv.width,cv.height);TLg=TLc.getContext('2d');}
- const g=TLg,st=curTable(),cloth=curCloth(),Q0=GFXQ[CFG.gfx],Q=camMoving()?{cloth:0}:Q0;
- // (while the camera moves, the fine grain is skipped and redrawn sharp when it stops)
- // v1.1 FIX: these three calls used to sit inside the comment above, so the layer was never cleared and drew at
- // identity scale (CSS px into a QDPR-sized canvas) -> table shrunk into the top-left on every phone (DPR>1).
- g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,TLc.width,TLc.height);g.setTransform(TLc.width/VW,0,0,TLc.height/VH,0,0);
+ if(!TLc||TLc.width!==Math.round(VW*QDPR)||TLc.height!==Math.round(VH*QDPR)){TLc=mkCanvas(VW*QDPR,VH*QDPR);TLg=TLc.getContext('2d');}
+ const g=TLg,st=curTable(),cloth=curCloth(),Q0=GFXQ[CFG.gfx],Q=camMoving()?{cloth:0}:Q0;// while the camera moves, skip the fine grain (redrawn sharp when it stops)g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,TLc.width,TLc.height);g.setTransform(QDPR,0,0,QDPR,0,0);
  const HW=TB.HW,HL=TB.HL,iw=HW+CUSH_W,il=HL+CUSH_W,ow=iw+RAIL_W,ol=il+RAIL_W;
  // floor shadow under the table
  g.fillStyle='rgba(0,0,0,.55)';g.beginPath();polyPath(g,[-ow-0.06,-ol-0.06,ow+0.06,-ol-0.06,ow+0.06,ol+0.06,-ow-0.06,ol+0.06],Z_APRON);g.fill();
@@ -1134,20 +1106,9 @@ function computeLayout(){safeArea();const sa=LAYOUT.sa,L=LAYOUT;const land=VW>VH
  const lefty=CFG.lefty;L.pb.w=38;L.pb.h=Math.max(120,Math.min(340,(L.bot-L.top)*0.62));L.pb.y=L.top+(L.bot-L.top-L.pb.h)/2;L.pb.x=lefty?sa.l+8:VW-sa.r-8-L.pb.w;
  L.spin.r=land?26:30;L.spin.y=L.bot+botH/2;L.spin.x=lefty?VW-sa.r-14-L.spin.r:sa.l+14+L.spin.r;
  L.wheel.w=Math.min(240,VW-L.spin.r*2-130);L.wheel.h=land?34:40;L.wheel.x=VW/2-L.wheel.w/2+(lefty?-20:20);L.wheel.y=L.spin.y-L.wheel.h/2;
- // v1.1: in portrait the table uses the FULL screen width (Jay: fill the whole screen); the power bar sits on the
- // near rail between the side pocket and the corner pocket, so it never covers a pocket. Landscape keeps a side lane.
- const full=!land&&!CAM.rot;
- const tx0=full?sa.l+2:(lefty?L.pb.x+L.pb.w+6:sa.l+6),tx1=full?VW-sa.r-2:(lefty?VW-sa.r-6:L.pb.x-6);
- if(TB){camFit(tx0,L.top+2,tx1-tx0,L.bot-L.top-4);if(!CUSHPOLY)buildCushions();
-  if(full){const sv=[CAM.pitch,CAM.zoom,CAM.cu,CAM.cv];CAM.pitch=aimPitch();CAM.zoom=1;CAM.cu=0;CAM.cv=0;camUpdate();
-   // side pocket (near-ish middle) and near corner pocket on the bar's side, in screen space at the aiming camera
-   let ys=[],xr=[];for(let p=0;p<6;p++){proj(TB.pk[p*3],TB.pk[p*3+1],Z_RAIL);if(lefty?PJ.x<VW/2:PJ.x>VW/2){ys.push(PJ.y);xr.push(PJ.x);}}
-   ys.sort((a,b)=>a-b);const pr=TB.pk[2]*0+0.07*PJ.s;// pocket radius on screen
-   const yTop=ys.length>=3?ys[1]+pr+10:L.top+(L.bot-L.top)*0.5,yBot=ys.length>=3?ys[2]-pr-10:L.bot-10;
-   L.pb.w=32;L.pb.h=clamp(yBot-yTop,120,360);L.pb.y=(yTop+yBot)/2-L.pb.h/2;L.pb.x=lefty?sa.l+4:VW-sa.r-4-L.pb.w;
-   CAM.pitch=sv[0];CAM.zoom=sv[1];CAM.cu=sv[2];CAM.cv=sv[3];camUpdate();}}
+ const tx0=lefty?L.pb.x+L.pb.w+6:sa.l+6,tx1=lefty?VW-sa.r-6:L.pb.x-6;
+ if(TB){camFit(tx0,L.top+4,tx1-tx0,L.bot-L.top-8);if(!CUSHPOLY)buildCushions();}
  tlKey='';}
-function aimPitch(){return CFG.cam==='3d'?CFG.tilt*Math.PI/180:0;}
 function onResize(){computeLayout();renderRoom();renderWall();SPRV++;}
 // ---------- starting / resuming ----------
 function startMatch(cfg,save){MCFG=cfg;const st=curTable();const feel=cfg.opts&&cfg.opts.feel||'forgiving';TB=makeTable(st.len,feel);CUSHPOLY=null;buildCushions();
@@ -1226,14 +1187,13 @@ const TALK_ADULT={
  spin:{mygood:['Damn I\'m good.'],mymiss:['Well sh*t.'],yourmiss:['Oh honey, no.'],yourfoul:['Bless your dumb heart.'],win:['Get your ass back here and practice.'],lose:['Damn, kid.']}};
 // ---------- main frame ----------
 const PRF={up:0,dr:0,tbl:0,bal:0,max:0};let lastT=0,fpsAcc=0,fpsN=0,slowT=0,frameMs=16.7;
-function frame(t){requestAnimationFrame(frame);sizeCheck();const dt=Math.min(0.05,(t-lastT)/1000||0.016);lastT=t;const t0=performance.now();
+function frame(t){requestAnimationFrame(frame);const dt=Math.min(0.05,(t-lastT)/1000||0.016);lastT=t;const t0=performance.now();
  if(!MATCH||GS.st==='menu'){menuFrame(dt);return;}
  if(GS.paused){draw(0);return;}
  update(dt);const t1=performance.now();draw(dt);
  const ms=performance.now()-t0;PRF.up=PRF.up*0.95+(t1-t0)*0.05;PRF.dr=PRF.dr*0.95+(performance.now()-t1)*0.05;if(ms>PRF.max)PRF.max=ms;frameMs=frameMs*0.95+ms*0.05;autoQuality(dt,ms);}
 function autoQuality(dt,ms){if(!CFG.autoGfx)return;fpsAcc+=dt;fpsN++;if(fpsAcc>2){const fps=fpsN/fpsAcc;fpsAcc=0;fpsN=0;
- if((fps<48||frameMs>13)&&GS.st!=='menu'){slowT++;if(slowT>=2){slowT=0;const order=['high','med','low'],k=order.indexOf(CFG.gfx);if(k<2)lowerGfx();}}else slowT=0;}}
-function lowerGfx(){const order=['high','med','low'],k=order.indexOf(CFG.gfx);if(k>=2)return false;CFG.gfx=order[k+1];saveCfg();resize();toast('Graphics lowered to '+(CFG.gfx==='med'?'Medium':'Low')+' to stay smooth');return true;}
+ if((fps<48||frameMs>13)&&GS.st!=='menu'){slowT++;if(slowT>=2){slowT=0;const order=['high','med','low'],k=order.indexOf(CFG.gfx);if(k<2){CFG.gfx=order[k+1];saveCfg();resize();toast('Graphics lowered to '+(CFG.gfx==='med'?'Medium':'Low')+' to stay smooth');}}}else slowT=0;}}
 function update(dt){const M=MATCH;GS.t+=dt;if(GS.bannerT>0)GS.bannerT-=dt;if(GS.talkT>0)GS.talkT-=dt;
  if(M.mode==='speed'&&M.speed.started&&M.winner<0)GS.speedT+=dt;
  if(GS.st==='aim'&&GS.clock>0&&M.phase!=='break'){GS.clock-=dt;if(GS.clock<=0){GS.clock=0;M.opts.clockOut=true;// shot clock foul: tap the cue ball dead-soft
@@ -1716,7 +1676,7 @@ function menuFrame(dt){menuT+=dt;if(GS.paused)return;menuDraw+=dt;if(menuDraw<1/
 // ===================== settings (shared SETUI: collapsible categories + preview pictures), shop previews, logo =====================
 function cfgItem(k,l,d,t,o,extra){return Object.assign({k,l,d,t,o,get:()=>CFG[k],set:v=>{CFG[k]=v;saveCfg();applyCfg(k);}},extra||{});}
 function applyCfg(k){if(k==='gfx'||k==='orient'||k==='lefty'){resize();}if(k==='shadows'||k==='reflect'||k==='ballStyle'){SPRV++;tlKey='';}
- if(/sound|Vol|amb|music/.test(k)){AUD.unlock();AUD.vols();AUD.ambient(true);}if(k==='cam'||k==='tilt'||k==='fillScreen'){SPRV++;computeLayout();}_xbK='';}
+ if(/sound|Vol|amb|music/.test(k)){AUD.unlock();AUD.vols();AUD.ambient(true);}if(k==='cam'||k==='tilt')SPRV++;_xbK='';}
 function poolSpec(){return{game:'pool',sfx:()=>AUD.tick(),cats:[
  {id:'aim',name:'Aim & Controls',icon:'🎯',items:[
   cfgItem('guide','Aim guide length','How much the dotted line shows. Short = only the first ball you hit (fair). Long = where the balls go too.','opt',[['off','Off'],['first','Short'],['obj','Medium'],['long','Long'],['auto','By AI level']],{th:'pguide'}),
@@ -1725,8 +1685,7 @@ function poolSpec(){return{game:'pool',sfx:()=>AUD.tick(),cats:[
   cfgItem('spinAssist','Trick assist line','In Practice, a blue line shows where the cue ball curves when you use spin or raise the cue.','bool',null,{th:'passist'}),
   cfgItem('vib','Vibration','A tiny buzz when you shoot.','bool',null,{th:'vib'})]},
  {id:'camera',name:'Camera',icon:'🎥',items:[
-  cfgItem('cam','Camera view','Tilted 3D = the angled bar-table look the whole time, aiming too (default). Flat aim = straight down while you aim, tilts to 3D when you shoot. Top-down = always straight down.','opt',[['3d','Tilted 3D'],['tilt','Flat aim, tilt on shot'],['top','Top-down']],{th:'pcam'}),
-  cfgItem('fillScreen','Fill the screen','The table stretches to fill the whole phone screen in the tilted view. Off = true proportions with some floor showing.','bool',null,{th:'pcam'}),
+  cfgItem('cam','Camera view','Tilt = flat while you aim, tilts to 3D when you shoot. Top = always straight down. 3D = always angled.','opt',[['tilt','Tilt on shot'],['top','Top-down'],['3d','Always 3D']],{th:'pcam'}),
   cfgItem('tilt','Camera angle','How far the camera leans when it tilts.','range',null,{min:12,max:50,step:2,fmt:v=>v+'°',th:'pcam'}),
   cfgItem('autoZoom','Auto-zoom on tight shots','Zooms in when the cue ball is frozen on a rail or very close to a ball.','bool',null,{th:'pzoom'}),
   cfgItem('orient','Screen layout','Portrait keeps the phone upright. Landscape lays the table sideways (turn your phone). Auto picks by how you hold it.','opt',[['portrait','Portrait'],['landscape','Landscape'],['auto','Auto']],{th:'orient'})]},
@@ -1783,9 +1742,9 @@ function shopPreview(c,tab,id){const g=c.getContext('2d'),w=c.width,h=c.height;g
   g.fillStyle='#fff';g.font='900 11px system-ui';g.textAlign='right';g.fillText(st.size,w-6,h-6);return;}
  // cue: draw with the real in-game cue renderer on a flat camera
  const sv={};for(const k in CAM)sv[k]=CAM[k];const x0=WD.x[0],y0=WD.y[0],eq=PROF.eq.cue,sh=CFG.shadows;
- CAM.manual=1;CAM.rot=0;CAM.flip=0;CAM.pitch=0;CAM.cu=0;CAM.cv=0;CAM.zoom=1;CAM.k=w/0.9;CAM.ox=-0.03*CAM.k;CAM.oy=h/2;camUpdate();WD.x[0]=1.52;WD.y[0]=0;PROF.eq.cue=id;CFG.shadows=false;
+ CAM.rot=0;CAM.flip=0;CAM.pitch=0;CAM.cu=0;CAM.cv=0;CAM.zoom=1;CAM.k=w/0.9;CAM.ox=-0.03*CAM.k;CAM.oy=h/2;camUpdate();WD.x[0]=1.52;WD.y[0]=0;PROF.eq.cue=id;CFG.shadows=false;
  g.save();g.translate(0,h/2);g.scale(1,2.4);g.translate(0,-h/2);try{drawCue(g,0,0,0,0,0,1);}catch(e){}g.restore();
- for(const k in sv)CAM[k]=sv[k];CAM.manual=0;WD.x[0]=x0;WD.y[0]=y0;PROF.eq.cue=eq;CFG.shadows=sh;}
+ for(const k in sv)CAM[k]=sv[k];WD.x[0]=x0;WD.y[0]=y0;PROF.eq.cue=eq;CFG.shadows=sh;}
 function drawLogo(c){if(!c)return;const r=Math.min(2,window.devicePixelRatio||1),w=c.clientWidth||320,h=c.clientHeight||120;c.width=w*r;c.height=h*r;const g=c.getContext('2d');g.setTransform(r,0,0,r,0,0);
  const ball=(x,y,R,col,n,stripe)=>{g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(x+R*0.2,y+R*0.85,R*0.9,R*0.3,0,0,TAU);g.fill();
   g.save();g.beginPath();g.arc(x,y,R,0,TAU);g.clip();g.fillStyle=stripe?'#f4f0e6':col;g.fillRect(x-R,y-R,R*2,R*2);if(stripe){g.fillStyle=col;g.fillRect(x-R,y-R*0.5,R*2,R);}
@@ -1874,11 +1833,6 @@ window.POOL={GS,CFG,PROF,WD,get M(){return MATCH;},get TB(){return TB;},get MCFG
  aimAt:(x,y)=>{GS.aim=Math.atan2(y-WD.y[0],x-WD.x[0]);},powerToSpeed,openPause,closePause,toMenu,resumeSave,TRICKS,PERSONAS,AIL,SCR:()=>SCR,matchOver,AUD};
 Object.assign(window.POOL,{layout:()=>({pb:LAYOUT.pb,spin:LAYOUT.spin,wheel:LAYOUT.wheel,pause:LAYOUT.pause}),spinGeom:spinPanelGeom,cueScreen:()=>{const o={};cueScreen(o);return o;},
  pocketScreen:k=>{proj(TB.pk[k*3],TB.pk[k*3+1],0);return{x:PJ.x,y:PJ.y};},extra:extraAct,PRF});
-// v1.1 regression hooks: screen geometry of balls / cloth / rails, the cached table layer, quality step-down
-Object.assign(window.POOL,{ballScreen:i=>{proj(WD.x[i],WD.y[i],BR);return{x:PJ.x,y:PJ.y,r:BR*PJ.s,on:!!WD.on[i]};},nBalls:()=>WD.n,
- outline:(w)=>{const e=w==='rail'?[TB.HW+CUSH_W+RAIL_W,TB.HL+CUSH_W+RAIL_W,Z_RAIL]:[TB.HW+CUSH_W,TB.HL+CUSH_W,0];const pts=[];for(const sx of [-1,1])for(const sy of [-1,1]){proj(sx*e[0],sy*e[1],e[2]);pts.push([PJ.x,PJ.y]);}return pts;},
- unproj:(x,y)=>{const u=unproj(x,y);return{x:u.x,y:u.y};},tableLayer:()=>TLc,cv:()=>cv,size:()=>({VW,VH,DPR,QDPR,cw:cv.width,ch:cv.height,sy:CAM.sy,pitch:CAM.pitch}),
- lowerGfx,resize,LAYOUT,computeLayout});
 
 })();
 </script>
