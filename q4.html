@@ -1,0 +1,63 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tough & J's Arcade - TRR Round 1 Questions</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#1e2433;margin:0;padding:16px;color:#e6e8f0}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#9fb4ff}
+.q{background:#2a3147;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#3b3550;color:#f2e6c8;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#333b55;font-size:15px}
+label:has(input:checked){background:#3a4f9a;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #556;background:#1e2433;color:#e6e8f0;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#aab}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#4b5fd1;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#2a3147;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Tough & J's Arcade, TRR Round 1</h1>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"WORLD"},
+{id:"W1",t:"Map size and type",op:"One big hand-made-feeling map with towns, forests, rivers, a military base and an industrial zone. Huge is plenty on a phone.",o:[
+["Huge single map (like Survival's Huge, 24000)",1],["Monster map (48000, chunked)",0],["Random generated map every new save",0],["Multiple regions you unlock",0]]},
+{id:"W2",t:"Enemies in the world",m:1,op:"Rival tank crews plus scavenger bandits on foot. No zombies, keeps it grounded like Survival.",o:[
+["Rival tank crews that build their own bases",1],["Bandits on foot who ambush scavengers",1],["Wild animals (wolves, bears)",0],["Zombies like Project Zomboid",0],["Military patrols guarding high-tier loot zones",1]]},
+{id:"W3",t:"Time and survival needs",m:1,op:"Hunger, thirst, fuel and day/night. Skip sleep, it's just annoying on a phone.",o:[
+["Hunger and thirst for the crew",1],["Fuel for the tank",1],["Day/night cycle, nights are dangerous",1],["Weather (rain, storms, fog)",1],["Sleep/fatigue",0],["Sickness and infection from wounds",0]]},
+{s:"RUST MECHANICS"},
+{id:"R1",t:"Gathering",m:1,op:"Crew hops out to chop, mine and scavenge houses. The tank can ram trees for quick wood.",o:[
+["Crew gets out to chop trees, mine rocks, loot houses",1],["Tank can ram trees and crush cars for scrap",1],["Barrels and crates on roads to smash",1],["Hunting animals for food",0]]},
+{id:"R2",t:"Crafting",m:1,op:"A simple workbench tier system (1-3) like Rust. Blueprints you find make loot exciting.",o:[
+["Workbench tiers 1-3 unlock better stuff",1],["Blueprints found in loot",1],["Craft tank parts, ammo, armor plates",1],["Craft weapons for crew on foot",0],["Crafting takes real time",0]]},
+{id:"R3",t:"Base building",m:1,op:"Build pieces like Rust (foundations, walls, doors, roof) in twig, wood, stone, metal. Tool cupboard stops decay.",o:[
+["Rust-style pieces: foundation, walls, doors, roof",1],["Upgrade tiers: twig, wood, stone, metal",1],["Tool cupboard: protects the area, stops decay",1],["Base decays if you don't keep it up",0],["Prefab buildings like Empire Clash instead",0]]},
+{id:"R4",t:"Raiding",m:1,op:"Rival crews raid you while you're out, and you can raid them back. Tank shells breach walls.",o:[
+["Rival crews raid your base while you're away",1],["You can raid rival bases for loot",1],["Explosives / tank shells breach walls",1],["Base defenses: turrets, traps, guards",1],["Offline protection (no raids while app is closed)",1]]},
+{s:"TANK + CREW"},
+{id:"T1",t:"Tank progression",m:1,op:"Start in a junk light tank and build up to a heavy. That's the hook.",o:[
+["Start with a junk tank, upgrade or find better ones",1],["Garage diagram, repairs, fuel-to-engine overdrive (already locked)",1],["Own several tanks parked at base",1],["Pick any tank from the start",0]]},
+{id:"T2",t:"Death",op:"Lose what you carry, keep the base, respawn at base. Classic Rust.",o:[
+["Lose loot on you, keep base, respawn at base",1],["Permadeath, new save",0],["Lose nothing (casual)",0]]},
+{s:"LOOK + FEEL"},
+{id:"L1",t:"Art",op:"Survival's Zomboid iso view with tiny men vs big tanks, but grittier and darker.",o:[
+["Survival's Zomboid iso view, tiny men, gritty",1],["Brighter cartoon",0],["South Park cutout (already in Custom)",0]]},
+{id:"L2",t:"Save system",op:"Autosave plus 3 save slots so you can run different worlds.",o:[
+["Autosave + 3 save slots",1],["One save only",0],["Unlimited slots",0]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="TRR ROUND 1 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
