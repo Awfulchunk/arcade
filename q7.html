@@ -1,0 +1,91 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tough & J's Arcade - Round 7 Questions (Pool)</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#1e2433;margin:0;padding:16px;color:#e6e8f0}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#9fb4ff}
+.q{background:#2a3147;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#3b3550;color:#f2e6c8;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#333b55;font-size:15px}
+label:has(input:checked){background:#3a4f9a;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #556;background:#1e2433;color:#e6e8f0;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#aab}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#4b5fd1;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#2a3147;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Tough & J's Arcade, Round 7: 8-Ball Pool</h1>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"WHERE IT LIVES"},
+{id:"L1",t:"Where does Pool go?",op:"Its own card. Real 8-ball deserves its own spot on the main menu, not stuck next to Hangman.",o:[
+["Its own arcade card",1],["Inside the Chill Games card",0],["Both (own card + shortcut in Chill Games)",0]]},
+{s:"VIEW & CAMERA"},
+{id:"V1",t:"Camera view",op:"Top-down for aiming, then tilt to a slight 3D angle while the balls roll. Clean to aim, looks good after.",o:[
+["Top-down while aiming, tilts to angled 3D-ish when you shoot",1],["Always straight top-down (classic)",0],["Always angled 3D-ish",0],["Let me switch in settings",0]]},
+{id:"V2",t:"Zoom",op:"Pinch zoom plus an auto-zoom on close shots. Phone screens are small.",o:[
+["Pinch to zoom + auto-zoom on tight shots",1],["Pinch zoom only",0],["No zoom, whole table always",0]]},
+{id:"V3",t:"Phone orientation",op:"Sideways. A pool table is long, it fits landscape way better.",o:[
+["Landscape (sideways)",1],["Portrait (upright)",0],["Either, rotates with phone",0]]},
+{s:"CONTROLS"},
+{id:"C1",t:"How do you shoot?",op:"Drag anywhere to aim, then pull a power bar on the side and let go. Easiest on a phone, hard to fat-finger.",o:[
+["Drag to aim + side power bar (pull and release)",1],["Drag back from the cue ball like a slingshot (aim + power in one)",0],["Aim, then tap a power meter that swings (timing)",0]]},
+{id:"C2",t:"Aim helpers",m:1,op:"Short guide line plus a fine-aim wheel. Long guide lines make it too easy against people.",o:[
+["Fine-aim wheel/slider for tiny adjustments",1],["Short aim guide (shows first hit only)",1],["Long aim guide (shows where object ball goes)",0],["Guide length changes with difficulty",0],["Ghost ball outline",0],["No guide at all (pro)",0]]},
+{id:"C3",t:"Spin (english)",op:"A small cue-ball circle in the corner you tap to set top, back or side spin. That's how every good mobile pool game does it.",o:[
+["Tap-the-cue-ball circle for top/back/side spin",1],["Simple buttons: Draw / Follow / Stun",0],["No spin, keep it simple",0]]},
+{s:"PHYSICS"},
+{id:"PH1",t:"How real should it play?",op:"Real but forgiving. Proper spin, cushions and cloth, but don't punish tiny finger slips.",o:[
+["Real but forgiving",1],["Full sim, as real as possible",0],["Arcade-y, bouncy and fast",0]]},
+{id:"PH2",t:"Physics details",m:1,op:"Spin, real cushion bounces, cloth slowdown and balls rattling in the jaws. Skip jump and masse, they're a pain to control on a phone.",o:[
+["Top/back/side spin that actually curves follow & draw",1],["Realistic cushion bounce (angle + speed loss)",1],["Cloth friction (balls slide then roll)",1],["Pocket rattle / jaws (ball can bounce out)",1],["Jump shots",0],["Masse (big curve) shots",0],["Slow-mo replay on great shots",0]]},
+{s:"RULES"},
+{id:"R1",t:"Which 8-ball rules?",op:"Standard pro rules as default, bar rules as an option. Everyone argues about rules, so let you pick.",o:[
+["Pro rules default + bar rules option",1],["Pro / tournament rules only",0],["Bar rules only",0]]},
+{id:"R2",t:"Rule details",m:1,op:"Ball-in-hand on fouls and call pocket on the 8. That's the real game.",o:[
+["Ball-in-hand anywhere after a foul",1],["Call your pocket on the 8 ball",1],["Fouls: scratch, wrong ball first, no rail after hit",1],["Lose if 8 goes in early or you scratch on the 8",1],["Call pocket on every shot",0],["Bar rule: 2 shots after a foul",0],["Behind-the-line only after scratch",0],["Shot clock timer",0]]},
+{s:"VS AI"},
+{id:"A1",t:"AI difficulty levels",op:"Four levels so there's always somebody to beat. Pro should be scary.",o:[
+["4 levels: Rookie, Regular, Shark, Pro",1],["3 levels: Easy, Medium, Hard",0],["One AI that adapts to how good you are",0],["Ladder of opponents you beat one by one",0]]},
+{id:"A2",t:"AI personality",m:1,op:"Each opponent with a name and their own style, plus some light trash talk. Keeps it from feeling like a robot.",o:[
+["Named opponents with different styles (safe player, banger, etc.)",1],["Short trash talk bubbles",1],["AI plays safety shots on harder levels",1],["Pure silent robot, just shoots",0],["Adult trash talk option (behind Adult Mode)",0]]},
+{s:"2 PLAYERS ON ONE PHONE"},
+{id:"T1",t:"Same-phone 2 player",m:1,op:"Pass the phone with a 'your turn' screen, and type in both names. Simple.",o:[
+["Pass-and-play with 'Player 2's turn' screen",1],["Enter both players' names",1],["Head-to-head win counter",1],["Table flips so each player's side faces them",0],["Race-to (best of 3/5/7) matches",0]]},
+{s:"EXTRA MODES (anything not picked goes into Custom Game)"},
+{id:"M1",t:"Extra modes for launch",m:1,op:"8-ball plus Practice is plenty to start. The rest goes in Custom Game anyway.",o:[
+["Practice (free table, reset balls)",1],["9-ball",0],["Trick shot challenges",0],["Speed pool (clear the table on a timer)",0],["Straight pool / 14.1",0],["Snooker-lite",0],["Killer / Cutthroat (3 players)",0]]},
+{s:"PROGRESSION"},
+{id:"G1",t:"Unlocks",m:1,op:"Coins from wins, spent on cues and cloth colors. Keep cues looks-only so it's still fair skill.",o:[
+["Win coins from matches",1],["Unlock cues (looks only)",1],["Unlock cloth colors",1],["Unlock tables (bar, pro hall, garage, etc.)",1],["Cues with stats (better aim/power)",0],["No progression, just play",0]]},
+{s:"LOOK & SOUND"},
+{id:"S1",t:"Table and room style",op:"Smoky dive bar with a green table and a hanging lamp. All drawn in code, no generated pictures.",o:[
+["Dive bar: wood table, green cloth, hanging lamp",1],["Clean pro tournament hall",0],["Neon arcade style (matches Snake .io)",0],["Pick in settings",0]]},
+{id:"S2",t:"Sound",m:1,op:"Clean ball clacks and pocket drops matter most. Bar noise as an option you can turn off.",o:[
+["Real-sounding clacks, cushion thumps, pocket drops",1],["Bar ambience (crowd murmur, jukebox hum) toggle",1],["Crowd 'ooh' on big shots",0],["Background music",0]]},
+{s:"STATS & SAVES"},
+{id:"D1",t:"What to track",m:1,op:"Auto-save mid-game plus basic stats. Nobody wants to lose a match to a phone call.",o:[
+["Auto-save a match in progress",1],["Win/loss vs each AI level",1],["Best break, longest run, potting %",1],["2-player head-to-head record",0],["Shot replay of last game",0]]},
+{s:"SETTINGS & PERFORMANCE"},
+{id:"P1",t:"Settings (with preview pictures like the other games)",m:1,op:"Same as the other games: collapsible settings, each with a simple explanation and a little preview picture.",o:[
+["Aim guide length",1],["Camera view / angle",1],["Sound + ambience volume",1],["Graphics quality (shadows, reflections)",1],["Left-handed layout (power bar on other side)",1],["Ball style (solids/stripes vs red/yellow)",0],["Shot speed (fast-forward slow rolls)",0]]},
+{id:"P2",t:"Performance target on your phone",op:"Lock 60 fps with an auto quality drop if it stutters. Pool lives or dies on smooth rolling.",o:[
+["Smooth 60 fps, auto-lower quality if it lags",1],["Max graphics, 30 fps is fine",0],["Battery saver, simple look",0]]},
+{id:"X",t:"Anything else? Every detail now, so it's built once.",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="POOL ROUND 1 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
