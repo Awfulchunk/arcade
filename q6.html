@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tough & J's Arcade - Round 6 Questions</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#1e2433;margin:0;padding:16px;color:#e6e8f0}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#9fb4ff}
+.q{background:#2a3147;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#3b3550;color:#f2e6c8;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#333b55;font-size:15px}
+label:has(input:checked){background:#3a4f9a;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #556;background:#1e2433;color:#e6e8f0;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#aab}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#4b5fd1;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#2a3147;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Tough & J's Arcade, Round 6</h1>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"WHERE IT LIVES"},
+{id:"P1",t:"Where do the simple games go?",op:"Rename Word Search to a 'Chill Games' card with Word Search and the new games inside. Keeps the main menu clean.",o:[
+["One 'Chill Games' card holding Word Search + the new ones",1],["Each simple game gets its own arcade card",0],["Keep them inside the Word Search card",0]]},
+{s:"SNAKE .IO"},
+{id:"S1",t:"Grow style",op:"Longer, plus slightly thicker as you get huge. That's the classic slither.io feel.",o:[
+["Longer, and a bit thicker when huge (slither.io)",1],["Only longer",0],["Only bigger",0]]},
+{id:"S2",t:"Controls",op:"Floating joystick, plus a hold-to-boost button that burns length.",o:[
+["Floating joystick + boost button",1],["Tap/drag where you want to go",0],["Swipe turns (classic snake)",0]]},
+{id:"S3",t:"Rules",m:1,op:"Hit another snake's body and you die and turn into food. Boosting drops a little length.",o:[
+["Head into body = you die and turn into food",1],["Boost burns length",1],["Bots with names and trash talk",1],["Leaderboard top 10 in-match",1],["Walls kill you (vs wrap around)",0]]},
+{id:"S4",t:"Extras",m:1,op:"Skins and power-ups keep it fresh. Keep it easy.",o:[
+["Unlockable skins (patterns, colors)",1],["Power-ups: magnet, speed, ghost",1],["Gore splat when snakes die (gore setting)",0],["Day/night arena themes",0],["Team mode",0]]},
+{id:"S5",t:"Look",op:"Neon glow on the dark theme. Pops hard and runs smooth.",o:[
+["Neon glow on dark background",1],["Cartoon bright",0],["Pixel retro",0]]},
+{s:"OTHER SIMPLE GAMES (pick any or none)"},
+{id:"O1",t:"Add any of these too?",m:1,op:"If you want more, Hangman, Word Scramble and Block Puzzle are the easiest wins. Or just Snake for now.",o:[
+["Just Snake .io for now",1],["Hangman (gory cartoon dude)",0],["Word Scramble",0],["Wordle-style 5-letter",0],["Block Puzzle (Tetris-ish blast)",0],["Minesweeper",0],["2048",0]]},
+{id:"X",t:"Anything else? Every detail now, so it's built once.",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="ROUND 6 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
