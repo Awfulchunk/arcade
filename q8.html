@@ -1,0 +1,152 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tough & J's Arcade - Round 8 Questions (Planning)</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#1e2433;margin:0;padding:16px;color:#e6e8f0}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#9fb4ff}
+.q{background:#2a3147;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#3b3550;color:#f2e6c8;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#333b55;font-size:15px}
+label:has(input:checked){background:#3a4f9a;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #556;background:#1e2433;color:#e6e8f0;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#aab}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#4b5fd1;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#2a3147;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Tough & J's Arcade, Round 8: Planning (Royale, Castle Wars, Meat Sling, Hold the Bridge)</h1>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div class="op" style="margin:10px 0">📌 Nothing gets built until this is answered. Anything you don't pick goes into Custom Game as an option. Stuff that's already locked in the notes isn't asked again.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"1) CASTLE ROYALE OVERHAUL"},
+{id:"R1",t:"Character body proportions",op:"Big head, small body, about 1 to 3. Reads clearly at the PZ angle when they're tiny on screen, and faces actually show.",o:[
+["Big head, small body (about 1:3, chibi-ish)",1],["Slightly big head (about 1:5, cartoon but more human)",0],["Normal human proportions (about 1:7)",0],["Mixed: each troop type gets its own shape",0]]},
+{id:"R2",t:"Chunky or slim?",op:"Chunky but not blobs. Thick limbs and clear silhouettes. The current round blobs are what look like ass.",o:[
+["Chunky but shaped (thick limbs, clear waist/shoulders)",1],["Slim and more human",0],["Super round blobs (like now)",0],["Depends on the troop (brutes chunky, archers slim)",0]]},
+{id:"R3",t:"Faces",m:1,op:"Big readable eyes and eyebrows that change with mood. That's what makes them feel alive.",o:[
+["Big eyes + eyebrows that change (angry, scared, dead)",1],["Mouths that open on attack/scream",1],["Unique face per troop (beard, scar, missing teeth)",1],["Simple dot eyes, no mouth",0],["No faces, helmets/hoods only",0]]},
+{id:"R4",t:"Outlines and shading",op:"One thick dark outline plus 2-tone shading. Pops on the dark arenas and stays cheap on your phone.",o:[
+["Thick dark outline + 2-tone shading",1],["Thin outline + soft gradient shading",0],["No outline, flat colors",0],["Pick in settings",0]]},
+{id:"R5",t:"How much animation?",op:"Medium-high: proper walk, attack wind-up, hit flinch and death. Idle fidgets only when zoomed in so it doesn't lag.",o:[
+["Walk cycle + wind-up + hit flinch + death",1],["Idle fidgets (scratch, look around) when zoomed in",1],["Squash and stretch on hits",0],["Full extra stuff: emotes, taunts, celebrate when a tower drops",0],["Keep it light, performance first",0]]},
+{id:"R6",t:"Troop variety",m:1,op:"Every troop gets its own body, not a recolor. Plus a team color band so you know whose is whose.",o:[
+["Every troop gets its own body shape, not a recolor",1],["Team color on armor/band so sides are clear",1],["Random small variations (hair, beard, skin tone) per spawn",1],["Men and women versions of soldier troops",0],["Bosses 2-3x bigger with their own look",0]]},
+{id:"R7",t:"PZ camera behavior",op:"Keep the follow-the-fight camera from v4 but with a manual lock button. It already works, just angle it properly.",o:[
+["Follows the biggest fight + swipe to look + lock button",1],["Fixed camera, whole arena always visible",0],["Fully manual pan only",0],["Pick in settings",0]]},
+{id:"R8",t:"PZ tilt amount",op:"Full PZ diamond iso (45° rotated). That's the actual Zomboid look. v4's 3/4 squash isn't it.",o:[
+["Full PZ diamond iso (map rotated 45°)",1],["Straight-on 3/4 tilt, lanes up and down (like now, but steeper)",0],["Light tilt, almost top-down",0],["Let me switch in settings",0]]},
+{id:"R9",t:"Zoom",op:"Pinch zoom with a close-up limit. At max zoom you can see faces and the adult stuff, and zoomed out you see the battle.",o:[
+["Pinch zoom (zoom in close enough to see faces)",1],["Auto-zoom in on big moments (tower down, boss death)",0],["No zoom",0]]},
+{id:"R10",t:"Map length",op:"Keep v4's 1.5x. Longer makes matches drag and the camera has to work harder.",o:[
+["Keep 1.5x taller (current v4)",1],["2x taller",0],["Bigger in every direction (wider lanes too)",0],["Map size option in Custom Game",0]]},
+{id:"R11",t:"Adult Mode: what's shown",m:1,op:"Full nudity on both men and women, with jiggle physics. Cartoon, drawn in code, all adults.",o:[
+["Full nudity, men and women, no censor bars",1],["Jiggle/flop physics",1],["Clothes tear off in pieces as they get hurt",1],["Sex-act animations between troops (cartoon)",0],["Strippers/dancers on the towers",0]]},
+{id:"R12",t:"Adult Mode: when it happens",m:1,op:"On hit plus on death. Idle stuff only when you zoom in, otherwise it clutters the battle.",o:[
+["On hit (clothes come off as HP drops)",1],["On death (naked ragdoll + pose)",1],["Idle when zoomed in (scratching, flashing, humping)",1],["Kings/towers react (moon, flash, taunts)",1],["Victory/defeat screen gag",0]]},
+{id:"R13",t:"Adult cards (pick any)",m:1,op:"Streaker Swarm and the Brothel Wagon. Both are funny and actually useful in a fight.",o:[
+["Streaker Swarm (naked runners, distract towers)",1],["Brothel Wagon (spawns troops that stun enemies)",1],["Viagra Giant (big troop that charges hard)",0],["Flasher (stuns everything that looks at him)",0],["Drunk Orgy (cluster spell, troops stop and party)",0],["Wardrobe Malfunction spell (strips an area)",0]]},
+{id:"R14",t:"Adult sound, voice bubbles, PIN, and gore",m:1,op:"Raunchy bubbles plus moans as a separate toggle. Keep the same PIN as Word Search, and the adult setting separate from gore.",o:[
+["Raunchy voice bubbles (dirty taunts)",1],["Moans/grunts sounds (separate toggle)",1],["Same 18+ PIN as Word Search",1],["Adult Mode separate from Gore (mix any levels)",1],["Its own PIN just for Royale",0],["Mild bubbles only",0]]},
+
+{s:"2) CASTLE WARS ON WHEELS (test patch)"},
+{id:"W1",t:"How do you meet enemy castles?",op:"You see them coming on a range bar from far away, then choose to fight, avoid, or trade. Slow castles need warning.",o:[
+["Seen from far on a range bar, then fight / avoid / trade",1],["Random encounters, they just roll up",0],["Fixed enemy castles placed on the map",0],["They hunt you, you can't avoid them",0]]},
+{id:"W2",t:"What does the castle need to keep going?",m:1,op:"Food, fuel and people at least. Morale makes it deep without being a chore.",o:[
+["Food",1],["Wood/fuel to roll",1],["People (crew count)",1],["Morale",1],["Water",0],["Repair parts (metal, rope)",0],["Ammo stock",0]]},
+{id:"W3",t:"What happens to people inside when things go bad?",m:1,op:"They starve, desert, and die in hits. Real consequences make scavenge stops matter.",o:[
+["They starve if food runs out",1],["They desert if morale is low",1],["They die when rooms get hit or collapse",1],["They riot/mutiny at very low morale",0],["Nobody dies, just slower work",0]]},
+{id:"W4",t:"Is the world endless or does it have a goal?",op:"Endless with milestones like reaching the ocean or beating a boss fortress. Keeps going but still gives you targets.",o:[
+["Endless, with milestones (reach ocean, boss fortress)",1],["Endless, no goals",0],["A goal at the end (reach the Capital / destroy the King)",0],["Campaign of separate levels",0]]},
+{id:"W5",t:"Block types and rooms",m:1,op:"Wood, stone and metal blocks plus the core rooms. Every room has ant people actually working in it.",o:[
+["Blocks: wood, stone, metal",1],["Rooms: cannon deck, barracks, kitchen/food store, workshop, engine/wheel room",1],["Rooms: prison cells",1],["Rooms: lookout tower, chapel/morale, infirmary",0],["Glass/windows, doors, ladders as blocks",0],["Free-build any shape vs grid-only (write which)",0]]},
+{id:"W6",t:"Resources",m:1,op:"Keep it to about 6 so the button screens stay clean.",o:[
+["Food",1],["Wood",1],["Stone",1],["Metal",1],["Gunpowder",1],["People",1],["Gold/trade goods",0],["Cloth/rope",0],["Animals (horses, oxen)",0]]},
+{id:"W7",t:"Scavenge stop text events (like 'found metal and deer')",m:1,op:"Reports with risk. Sometimes your party gets hurt or brings back trouble. That's the fun.",o:[
+["Text report with ~10 options per stop",1],["Risk: party can get hurt, lost, or ambushed",1],["Choices: hunt animals, take metal/wood, take survivors prisoner, recruit survivors, loot ruins",1],["Choose party size before they go",1],["Time spent at a stop matters (longer = more loot, more risk)",0],["Rare finds (blueprints for new cannons/blocks)",0]]},
+{id:"W8",t:"Prisoners",m:1,op:"Put them to work or ransom them. Recruit them slowly if they're loyal enough.",o:[
+["Forced labor",1],["Ransom to enemy castles",1],["Recruit over time (loyalty)",1],["Interrogate for enemy info",0],["Execute (morale hit)",0],["Prison breaks (Custom Game)",0]]},
+{id:"W9",t:"Cannons and ammo",m:1,op:"Start with 3 cannons and 3 ammo types. More comes through blueprints.",o:[
+["Cannon: normal cannon",1],["Cannon: mortar (high arc)",1],["Cannon: ballista/bolt thrower",1],["Cannon: huge siege cannon (slow, massive)",0],["Ammo: iron ball",1],["Ammo: explosive shell",1],["Ammo: chain shot (wrecks wheels)",1],["Ammo: fire/incendiary",0],["Ammo: junk/people (gross)",0]]},
+{id:"W10",t:"Crew and reload",op:"Reload speed depends on how many ants are at the cannon. Losing crew actually slows your fire.",o:[
+["Reload speed = crew at the cannon (fewer = slower)",1],["Fixed reload timer",0],["Ammo has to be carried from storage by ants",0]]},
+{id:"W11",t:"Weak points",m:1,op:"Wheels, powder room and engine. Hitting them wrecks a castle without leveling it.",o:[
+["Wheels (stops it moving)",1],["Powder room (big explosion)",1],["Engine/wheel room",1],["Supports (floors collapse)",0],["Flag/command room (morale crash)",0]]},
+{id:"W12",t:"Timescale",op:"About 1 real minute = 1 game hour, with a fast-forward button. The slow feel stays but you can still get places.",o:[
+["1 real min = 1 game hour, + fast-forward",1],["Real time, no speed-up",0],["Days pass fast (5 min = 1 day)",0],["Speed setting 1x/2x/4x",0]]},
+{id:"W13",t:"Water-wheel rebuild",op:"A long build with scaffolding that you can speed up with more workers and wood. It must feel like a big deal.",o:[
+["Long build, faster with more workers + wood",1],["Fixed long timer",0],["Need special blueprint first",0],["Castle is vulnerable during the rebuild",0]]},
+{id:"W14",t:"Controls",m:1,op:"Buttons for everything, and drag to aim only on cannons. Matches 'button-based with deep mechanics'.",o:[
+["Button menus for build/scavenge/crew/orders",1],["Drag to aim cannons (no guide)",1],["Tap a room to see what the ants are doing",1],["Pinch zoom to see ants up close",1],["Throttle lever for speed",0]]},
+{id:"W15",t:"What's in the test patch of land?",m:1,op:"One stretch of land with forest, a ruin to scavenge, and one enemy castle to fight. Enough to test everything.",o:[
+["Small stretch of forest and plains",1],["One scavenge stop (ruins/village)",1],["One enemy castle to fight",1],["A water crossing to test the wheel rebuild",0],["Two enemy castles",0],["Sandbox mode to build a castle freely",0]]},
+
+{s:"3) MEAT SLING"},
+{id:"M1",t:"Win condition",op:"Destroy their tower core (a flag or a vault) or wipe out all defenders. Gives you two ways to win.",o:[
+["Destroy their core OR kill all defenders",1],["Most damage after X rounds",0],["Tower falls below 20%",0],["Kill all defenders only",0]]},
+{id:"M2",t:"Opponents",m:1,op:"Vs AI plus pass-and-play. The hidden side works perfectly when you pass the phone.",o:[
+["Vs AI",1],["Pass-and-play (hide screen between turns)",1],["Online (later)",0]]},
+{id:"M3",t:"Which of Tough's characters to include?",m:1,op:"All 5. They're each different enough.",o:[
+["Drunk Uncle (wobbly flight, beer-foam burst)",1],["Gym Bro (tap to flex into a stone-busting ball)",1],["Karen (scream shockwave loosens blocks)",1],["Grandpa with walker (wedges in, slowly bulldozes)",1],["Streaker (fast, light, distracts defenders)",1]]},
+{id:"M4",t:"Which of Tough's mechanics to include?",m:1,op:"All but wind as a toggle. Wind on top of blind shooting can feel cheap.",o:[
+["Sonar ping (once a match, reveals a slice)",1],["Spotters: HIT / MISS / CLOSE + which floor",1],["Tower budget (wood/stone/steel/traps/decoys)",1],["Decoy dummies",1],["Wind that changes each round",0]]},
+{id:"M5",t:"Defenders (pick 3)",m:1,op:"Medic, Bouncer and Lookout. One heals, one blocks, one gives info. Balanced.",o:[
+["Medic: patches a damaged block each turn",1],["Bouncer: swats light characters (Granny, Streaker) away",1],["Lookout: reveals one hint about where enemy shots come from",1],["Sniper: shoots down a flying character sometimes",0],["Trapper: sets a hidden spike trap",0],["Wall Guy: holds a busted wall together for 1 turn",0]]},
+{id:"M6",t:"Tower budget",op:"A set number of points with prices for each block. Simple and fair.",o:[
+["Points budget (wood 1, stone 3, steel 5, traps 4)",1],["Fixed number of pieces",0],["Budget grows each round",0]]},
+{id:"M7",t:"Tower build UI",op:"Grid snapping plus an auto-build button. Building blocks by hand on a phone gets old fast.",o:[
+["Grid snap + drag pieces + auto-build button",1],["Free placement with physics",0],["Pre-made tower templates only",0]]},
+{id:"M8",t:"Hit/miss reveal",m:1,op:"Splat sound plus the spotter text and the shot path marked on your side's map. Like Battleship pegs.",o:[
+["Spotter text: HIT / MISS / CLOSE",1],["Marked spots on a grid like Battleship pegs",1],["Sound only (crunch vs thud)",0],["Small blurry preview of damage",0]]},
+{id:"M9",t:"Replay at the end",op:"Full replay of the winner's shots in slow-mo with a skip button.",o:[
+["Winner's shots in slow-mo, skip button",1],["Both players' shots",0],["Only the best 3 shots",0],["Save the replay as a GIF",0]]},
+{id:"M10",t:"Gore level",op:"Full cartoon guts with a setting like the other games.",o:[
+["Full cartoon guts + gore setting",1],["Mild splats",0],["No gore, poof",0]]},
+{id:"M11",t:"Mom's gag in Adult Mode",op:"Adult Mode shows the boobs before they pop. Off by default.",o:[
+["Adult Mode: bare boobs then pop",1],["Same gag in both modes, just censored",0],["Different gag in normal mode (balloons)",0]]},
+{id:"M12",t:"Progression",m:1,op:"Unlock characters by winning, plus tower block skins.",o:[
+["Unlock characters by winning",1],["Unlock tower block skins",1],["Level ladder vs AI",1],["Upgrades to characters (more damage)",0],["Everything open from the start",0]]},
+
+{s:"4) HOLD THE BRIDGE"},
+{id:"B1",t:"Squad size",op:"Start with 4 and grow to about 12. Watching the line get thicker feels good.",o:[
+["Start 4, grow to ~12",1],["Fixed 5",0],["Start 1, grow huge (30+)",0]]},
+{id:"B2",t:"Squad types",m:1,op:"Rifleman, shotgunner, flamer and medic.",o:[
+["Rifleman",1],["Shotgunner",1],["Flamethrower",1],["Medic",1],["Sniper",0],["Rocket guy",0],["Machine gunner",0]]},
+{id:"B3",t:"How barrels work",op:"Numbered barrels on the sides. Shoot the number down to 0 and it gives a gun or a squad member.",o:[
+["Shoot the number to 0 = new gun or squad member",1],["Barrels explode on the horde",0],["Barrels give coins only",0]]},
+{id:"B4",t:"How guns work",op:"Guns upgrade the whole squad's weapon tier. Easy to read.",o:[
+["Gun unlock = whole squad upgrades",1],["Each soldier has their own gun",0],["Guns are temporary power-ups",0]]},
+{id:"B5",t:"Horde types",m:1,op:"Mix of normal, fast, tank, exploder and spitter.",o:[
+["Normal walkers",1],["Fast runners",1],["Big tanky ones",1],["Exploders",1],["Spitters (ranged)",1],["Climbers (jump the bridge)",0],["Shielded ones",0]]},
+{id:"B6",t:"Bosses",op:"Boss every 5 rounds.",o:[
+["Boss every 5 rounds",1],["Boss every 10 rounds",0],["Random bosses",0],["No bosses",0]]},
+{id:"B7",t:"Upgrades between rounds",m:1,op:"Coins for upgrades, plus fixing the barricade.",o:[
+["Spend coins on fire rate, damage, HP",1],["Fix/upgrade the barricade",1],["Pick 1 of 3 random perks",1],["Hire more squad",0]]},
+{id:"B8",t:"Controls",op:"Auto-fire with drag to steer the aim. Easy, but you still make choices.",o:[
+["Auto-fire + drag to steer aim",1],["Fully auto",0],["Manual tap to shoot",0]]},
+{id:"B9",t:"Endless vs levels",op:"Endless with a high-score board.",o:[
+["Endless + high score",1],["Set levels",0],["Both",0]]},
+{id:"B10",t:"Gore",op:"Royale-level gore with a setting.",o:[
+["Royale-level gore + setting",1],["Over the top",0],["Mild",0]]},
+{id:"B11",t:"The look",op:"PZ tilt angle down the bridge like the ad. Dark, foggy night.",o:[
+["Tilted angle down the bridge, foggy night",1],["Top-down",0],["Side view",0],["Bright daytime",0]]},
+
+{s:"ANYTHING ELSE"},
+{id:"X",t:"Anything else? Every detail now, so it's built once.",o:[]}
+];
+
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="ROUND 8 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
