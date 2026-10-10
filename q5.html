@@ -1,0 +1,58 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tough & J's Arcade - Round 5 Questions</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#1e2433;margin:0;padding:16px;color:#e6e8f0}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#9fb4ff}
+.q{background:#2a3147;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#3b3550;color:#f2e6c8;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#333b55;font-size:15px}
+label:has(input:checked){background:#3a4f9a;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #556;background:#1e2433;color:#e6e8f0;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#aab}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#4b5fd1;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#2a3147;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Tough & J's Arcade, Round 5</h1>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"TRR: TANK BUTTONS + UI"},
+{id:"U1",t:"The fix-part buttons around the tank",op:"Move them into a bar along the bottom, with big readable buttons that show each part's %. They never cover the tank or the fight.",o:[
+["Bottom bar of part buttons with %",1],["Bottom sheet that slides up with the tank diagram",0],["Keep around tank but smaller",0]]},
+{id:"U2",t:"Bring the UI up / layout",m:1,op:"Stack the HUD tighter at the top, move the left tabs into the bottom row, and keep the crew bar. That frees up the middle of the screen.",o:[
+["Compact top HUD (gas/hull/ammo + resources in one strip)",1],["Move PACK/CRAFT/BUILD/BASE/GARAGE tabs into the bottom bar",1],["Hide the hint text line (toggle in Settings)",1],["Smaller minimap that taps to expand",1],["Bigger buttons overall",0]]},
+{id:"U3",t:"Performance mode for TRR",op:"Lower render resolution and draw distance are the biggest wins. A smaller visible area also helps a little.",o:[
+["Lower resolution + draw distance options",1],["Cropped play area (black bars)",0],["Both",0]]},
+{s:"MUSIC MIXER (new app)"},
+{id:"M1",t:"What kind of mixer?",m:1,op:"A beat-pad and loop mixer like Groovepad: tap pads and stack loops. It's the most fun on a phone.",o:[
+["Beat pads + loops (Groovepad style)",1],["DJ decks: 2 songs, crossfade, scratch",1],["Step sequencer drum machine",0],["Simple multitrack recorder",0]]},
+{id:"M2",t:"Sounds from where?",m:1,op:"Built-in synth sounds plus your own songs from your phone for the DJ decks.",o:[
+["Built-in sounds made in code (no downloads)",1],["Load my own songs/files from phone",1],["Record from mic",0]]},
+{id:"M3",t:"Extras",m:1,op:"Effects plus saving your mix are the must-haves.",o:[
+["Effects: echo, filter, reverb, speed",1],["Save/export mixes",1],["Visualizer that pulses to the beat",1],["Genre packs (hip hop, trap, rock, lo-fi)",1]]},
+{s:"GAME CREATOR (new app)"},
+{id:"G1",t:"How do you build games?",op:"Templates plus drag-and-drop. Pick a template, place stuff, set simple rules, then hit play.",o:[
+["Templates + drag-and-drop editor",1],["Block coding like Scratch",0],["Describe it in words and it auto-builds",0]]},
+{id:"G2",t:"Which game templates?",m:1,op:"Platformer, top-down shooter, runner and maze cover most simple games.",o:[
+["Platformer (jump and run)",1],["Top-down shooter",1],["Endless runner",1],["Maze / puzzle",1],["Racing",0],["Tap/clicker",0]]},
+{id:"G3",t:"Art and sharing",m:1,op:"Simple shapes and pixel art editor, plus your own photos as sprites. Save games to play in the arcade.",o:[
+["Pixel art editor for sprites",1],["Use my photos as characters/backgrounds",1],["Built-in shape/character pack",1],["Saved games appear as playable cards in the arcade",1]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="ROUND 5 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
