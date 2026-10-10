@@ -223,7 +223,7 @@ function fmtTime(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+Stri
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 // ---------- settings (one JSON blob) ----------
 const CFG_DEF={sound:true,vib:true,gore:'some',particles:'full',
- snLook:'matte',snTheme:'day',snWalls:false,snBots:14,snStick:60,snSpeed:'normal',snNames:true,snTalk:true,snMode:'ffa',
+ snLook:'matte',snTheme:'day',snWalls:false,snBots:14,snStick:60,snNames:true,snTalk:true,snMode:'ffa',
  mnSize:'easy',mnHold:true,mnQuick:true,
  hgPack:'mixed',hgLives:6,
  scPack:'mixed',scWords:10,scTimer:true,
@@ -325,13 +325,13 @@ const SN=(function(){
  const FOODC=['#e07a62','#f2c94c','#6fae5a','#5a9ad6','#8e6fd6','#e8933a','#3fb3a8','#e8e4da'];
  const TEAMC=[{c:'#4f86d6',d:'#2f5aa0'},{c:'#e8933a',d:'#a8602a'}];
  // ---- pools ----
- const fx=new Float32Array(NF),fy=new Float32Array(NF),fv=new Float32Array(NF),fc=new Uint8Array(NF),fa=new Uint8Array(NF),fr=new Float32Array(NF),fd=new Float32Array(NF);let fCount=0;const FD=0.55,STEP=1/60,PATH=4096,PS=2;
+ const fx=new Float32Array(NF),fy=new Float32Array(NF),fv=new Float32Array(NF),fc=new Uint8Array(NF),fa=new Uint8Array(NF),fr=new Float32Array(NF);let fCount=0;
  const fHead=new Int32Array(GN*GN).fill(-1),fNext=new Int32Array(NF);
  const bHead=new Int32Array(GN*GN).fill(-1),BMAX=MAXS*MAXSEG,bS=new Int16Array(BMAX),bI=new Int16Array(BMAX),bNext=new Int32Array(BMAX);
  const px=new Float32Array(NP),py=new Float32Array(NP),pvx=new Float32Array(NP),pvy=new Float32Array(NP),pl=new Float32Array(NP),ps=new Float32Array(NP);const pc=new Array(NP).fill('#fff');let pN=0;
  const dx_=new Float32Array(ND),dy_=new Float32Array(ND),dl=new Float32Array(ND),dsz=new Float32Array(ND);let dN=0;
  const pu=[];for(let i=0;i<NPU;i++)pu.push({on:false,x:0,y:0,k:'mag',t:0});
- const snakes=[];for(let i=0;i<MAXS;i++)snakes.push({i,on:false,alive:false,px:new Float32Array(MAXSEG),py:new Float32Array(MAXSEG),qx:new Float32Array(MAXSEG),qy:new Float32Array(MAXSEG),rx:new Float32Array(MAXSEG),ry:new Float32Array(MAXSEG),tx:new Float32Array(PATH),ty:new Float32Array(PATH),tp:0,tc:0,qn:0,qhx:0,qhy:0,qa:0,rhx:0,rhy:0,ra:0,av:0,ftT:0,ftx:0,fty:0,n:0,mass:10,r:8,x:0,y:0,ang:0,tAng:0,boost:false,dropT:0,
+ const snakes=[];for(let i=0;i<MAXS;i++)snakes.push({i,on:false,alive:false,px:new Float32Array(MAXSEG),py:new Float32Array(MAXSEG),n:0,mass:10,r:8,x:0,y:0,ang:0,tAng:0,boost:false,dropT:0,
   name:'',isP:false,team:-1,skin:SKINS[0],kills:0,resp:0,aiT:0,talk:'',talkT:0,mag:0,spd:0,ghost:0,auto:false,chase:null,flee:0,col:'#fff',dcol:'#000'});
  let me=null,running=false,paused=false,over=false,tPlay=0,camX=A/2,camY=A/2,zoom=1,shake=0,feed=[],feedT=0,lbT=0,lb=[],teamMass=[0,0],bgTile=null,bgKey='';
  const stick={on:false,id:-1,ox:0,oy:0,x:0,y:0},keys={l:false,r:false,b:false};let boostBtn={x:0,y:0,r:38},boostTouch=-1,mouseAim=false,mx=0,my=0,mdown=false,root=null,stat=null;
@@ -339,9 +339,8 @@ const SN=(function(){
  function radius(m){return 7+Math.min(10,Math.sqrt(m)*0.3);}
  function segs(m){return Math.min(MAXSEG,Math.floor(12+m*0.9));}
  function spacing(s){return s.r*0.5;}
- function spdMul(){return CFG.snSpeed==='slow'?0.8:CFG.snSpeed==='fast'?1.25:1;}
  function lenOf(s){return Math.floor(s.mass*10);}
- function addFood(x,y,v,c,dl0){let i=-1;if(fCount<NF){for(let k=0;k<NF;k++)if(!fa[k]){i=k;break;}}else{i=Math.floor(rnd()*NF);}if(i<0)return;if(!fa[i])fCount++;fa[i]=1;fx[i]=clamp(x,8,A-8);fy[i]=clamp(y,8,A-8);fv[i]=v;fc[i]=c==null?Math.floor(rnd()*FOODC.length):c;fr[i]=4+Math.min(7,v*1.8);fd[i]=dl0||0;}
+ function addFood(x,y,v,c){let i=-1;if(fCount<NF){for(let k=0;k<NF;k++)if(!fa[k]){i=k;break;}}else{i=Math.floor(rnd()*NF);}if(i<0)return;if(!fa[i])fCount++;fa[i]=1;fx[i]=clamp(x,8,A-8);fy[i]=clamp(y,8,A-8);fv[i]=v;fc[i]=c==null?Math.floor(rnd()*FOODC.length):c;fr[i]=4+Math.min(7,v*1.8);}
  function ambient(){const target=1150;let n=0;while(fCount<target&&n<40){addFood(rr(20,A-20),rr(20,A-20),rr(0.3,1.1));n++;}}
  function partBurst(x,y,n,col,sp,life,sz){const k=CFG.particles==='off'?0:CFG.particles==='lite'?0.4:1;n=Math.floor(n*k);for(let j=0;j<n;j++){if(pN>=NP)break;const a=rnd()*TAU,v=rr(sp*0.3,sp);px[pN]=x;py[pN]=y;pvx[pN]=Math.cos(a)*v;pvy[pN]=Math.sin(a)*v;pl[pN]=rr(life*0.5,life);ps[pN]=rr(sz*0.6,sz);pc[pN]=col;pN++;}}
  function decal(x,y,s){if(CFG.gore==='off')return;let i=dN<ND?dN++:Math.floor(rnd()*ND);dx_[i]=x;dy_[i]=y;dl[i]=CFG.gore==='lots'?40:18;dsz[i]=s;}
@@ -350,12 +349,11 @@ const SN=(function(){
  function spawn(s,isP,name,skin,team){s.on=true;s.alive=true;s.isP=isP;s.name=name;s.skin=skin;s.team=team;s.mass=isP?10:rr(10,60);s.r=radius(s.mass);s.n=segs(s.mass);s.kills=0;s.mag=s.spd=s.ghost=0;s.boost=false;s.talk='';s.talkT=0;s.flee=0;s.chase=null;
   const tc=team>=0&&CFG.snMode==='team'?TEAMC[team]:null;s.col=tc?tc.c:skin.c;s.dcol=tc?tc.d:skin.d;
   let x,y,tries=0;do{x=rr(300,A-300);y=rr(300,A-300);tries++;}while(tries<20&&nearSnake(x,y,400));s.x=x;s.y=y;s.ang=s.tAng=rnd()*TAU;const sp=spacing(s);
-  const cnt=Math.min(PATH,Math.ceil(s.n*sp/PS)+3),ca=Math.cos(s.ang),sa=Math.sin(s.ang);for(let j=0;j<cnt;j++){s.tx[cnt-1-j]=x-ca*PS*j;s.ty[cnt-1-j]=y-sa*PS*j;}s.tp=cnt-1;s.tc=cnt;s.av=0;s.ftT=0;
-  for(let k=0;k<s.n;k++){s.px[k]=s.qx[k]=s.rx[k]=x-ca*sp*k;s.py[k]=s.qy[k]=s.ry[k]=y-sa*sp*k;}s.qhx=s.rhx=x;s.qhy=s.rhy=y;s.qa=s.ra=s.ang;s.aiT=rnd()*0.2;}
+  for(let k=0;k<s.n;k++){s.px[k]=x-Math.cos(s.ang)*sp*k;s.py[k]=y-Math.sin(s.ang)*sp*k;}s.aiT=rnd()*0.2;}
  function nearSnake(x,y,d){for(const o of snakes)if(o.alive&&Math.abs(o.x-x)<d&&Math.abs(o.y-y)<d)return true;return false;}
  function kill(s,by){if(!s.alive)return;s.alive=false;const gore=CFG.gore;
   // body turns into food
-  const step=Math.max(2,Math.floor(s.n/Math.max(12,s.mass*0.7))),per=s.mass*0.75/Math.max(1,Math.floor(s.n/step));for(let k=0;k<s.n;k+=step){const k2=Math.min(s.n-1,k+1),nx=s.py[k2]-s.py[k],ny=s.px[k]-s.px[k2],nl=Math.sqrt(nx*nx+ny*ny)||1,o=rr(-1.1,1.1)*s.r;addFood(s.px[k]+nx/nl*o+rr(-2,2),s.py[k]+ny/nl*o+rr(-2,2),Math.min(4,per*rr(0.7,1.3)),null,FD+rnd()*0.35);}
+  const step=Math.max(2,Math.floor(s.n/Math.max(12,s.mass*0.7))),per=s.mass*0.75/Math.max(1,Math.floor(s.n/step));for(let k=0;k<s.n;k+=step)addFood(s.px[k]+rr(-s.r,s.r),s.py[k]+rr(-s.r,s.r),Math.min(4,per*rr(0.7,1.3)),null);
   if(gore==='off')partBurst(s.x,s.y,24,s.col,180,0.7,5);else{partBurst(s.x,s.y,gore==='lots'?60:28,'#b0141e',gore==='lots'?320:220,0.9,gore==='lots'?7:5);partBurst(s.x,s.y,14,s.col,160,0.6,5);decal(s.x,s.y,s.r*(gore==='lots'?4:2.5));if(gore==='lots')for(let k=0;k<s.n;k+=Math.max(6,Math.floor(s.n/8)))decal(s.px[k],s.py[k],s.r*1.6);}
   if(Math.hypot(s.x-camX,s.y-camY)<900){sfx(gore==='off'?'pop':'splat');}
   if(by){by.kills++;if(!by.isP)say(by,pick(TALK_KILL));feedAdd((by.isP?'YOU':by.name)+' ate '+(s.isP?'YOU':s.name));}else feedAdd((s.isP?'YOU':s.name)+' hit the wall');
@@ -367,10 +365,9 @@ const SN=(function(){
  // returns the snake whose body is within rad of (x,y), not self
  function hitBody(self,x,y,rad){const cx=Math.floor(x/CELL),cy=Math.floor(y/CELL);for(let gy=cy-1;gy<=cy+1;gy++){if(gy<0||gy>=GN)continue;for(let gx=cx-1;gx<=cx+1;gx++){if(gx<0||gx>=GN)continue;for(let e=bHead[gx+gy*GN];e>=0;e=bNext[e]){const o=snakes[bS[e]];if(o===self||friends(self,o))continue;const k=bI[e],dx=o.px[k]-x,dy=o.py[k]-y,rr2=rad+o.r*0.85;if(dx*dx+dy*dy<rr2*rr2)return o;}}}return null;}
  // ---- AI (also drives the player in demo/test mode) ----
- const DIRS=[0,-0.6,0.6,-1.3,1.3];
  function ai(s,dt){s.aiT-=dt;if(s.aiT>0)return;s.aiT=0.12+rnd()*0.08;const r=s.r;
   // danger ahead? probe 3 directions
-  let best=0,bestScore=-1e9;
+  let best=0,bestScore=-1e9;const DIRS=[0,-0.6,0.6,-1.3,1.3];
   for(let j=0;j<DIRS.length;j++){const a=s.ang+DIRS[j];let sc=-Math.abs(DIRS[j])*0.5;for(let d=1;d<=3;d++){const qx=s.x+Math.cos(a)*r*3.2*d,qy=s.y+Math.sin(a)*r*3.2*d;if(qx<r*2||qy<r*2||qx>A-r*2||qy>A-r*2){sc-=(4-d)*3;break;}if(!s.ghost&&hitBody(s,qx,qy,r*1.2)){sc-=(4-d)*4;break;}}if(sc>bestScore){bestScore=sc;best=j;}}
   if(bestScore<-0.9){s.tAng=s.ang+DIRS[best];s.boost=bestScore<-6&&s.mass>30&&rnd()<0.3;return;}
   // flee from bigger heads, chase smaller ones, otherwise eat
@@ -378,42 +375,31 @@ const SN=(function(){
   for(const o of snakes){if(!o.alive||o===s||friends(s,o))continue;const dx=o.x-s.x,dy=o.y-s.y,d2=dx*dx+dy*dy;if(d2>320*320)continue;
    if(o.mass>s.mass*1.3&&d2<200*200){tx=s.x-dx;ty=s.y-dy;found=true;boost=s.mass>25&&rnd()<0.5;break;}
    if(s.mass>o.mass*1.5&&s.mass>30&&rnd()<0.5){tx=o.x+Math.cos(o.ang)*o.r*7;ty=o.y+Math.sin(o.ang)*o.r*7;found=true;boost=d2<220*220&&rnd()<0.6;break;}}
-  if(!found&&s.ftT>0){tx=s.ftx;ty=s.fty;found=true;}
-  if(!found){let bv=0;const cx=Math.floor(s.x/CELL),cy=Math.floor(s.y/CELL);for(let gy=cy-2;gy<=cy+2;gy++){if(gy<0||gy>=GN)continue;for(let gx=cx-2;gx<=cx+2;gx++){if(gx<0||gx>=GN)continue;for(let i=fHead[gx+gy*GN];i>=0;i=fNext[i]){if(!fa[i]||fd[i]>0)continue;const dx=fx[i]-s.x,dy=fy[i]-s.y,d=Math.sqrt(dx*dx+dy*dy)+40,ang=Math.abs(((Math.atan2(dy,dx)-s.ang+Math.PI*3)%TAU)-Math.PI);if(ang>1.9)continue;const v=fv[i]/d/(1+ang*0.9);if(v>bv){bv=v;tx=fx[i];ty=fy[i];found=true;}}}}
-   if(found){s.ftx=tx;s.fty=ty;s.ftT=0.45+rnd()*0.4;}
+  if(!found){let bv=0;const cx=Math.floor(s.x/CELL),cy=Math.floor(s.y/CELL);for(let gy=cy-3;gy<=cy+3;gy++){if(gy<0||gy>=GN)continue;for(let gx=cx-3;gx<=cx+3;gx++){if(gx<0||gx>=GN)continue;for(let i=fHead[gx+gy*GN];i>=0;i=fNext[i]){const dx=fx[i]-s.x,dy=fy[i]-s.y,d=Math.sqrt(dx*dx+dy*dy)+20,ang=Math.abs(((Math.atan2(dy,dx)-s.ang+Math.PI*3)%TAU)-Math.PI),v=fv[i]/d/(1+ang*0.6);if(v>bv){bv=v;tx=fx[i];ty=fy[i];found=true;}}}}
    for(const p of pu)if(p.on&&Math.abs(p.x-s.x)<300&&Math.abs(p.y-s.y)<300){tx=p.x;ty=p.y;found=true;}}
   if(!found){tx=A/2+rr(-600,600);ty=A/2+rr(-600,600);}
-  s.tAng=Math.atan2(ty-s.y,tx-s.x)+Math.sin(tPlay*1.3+s.i*1.7)*0.18;s.boost=boost;
-  if(!s.isP){if(rnd()<0.004)say(s,pick(TALK_IDLE));}}
+  s.tAng=Math.atan2(ty-s.y,tx-s.x);s.boost=boost;
+  if(!s.isP){s.talkT-=0;if(rnd()<0.004)say(s,pick(TALK_IDLE));}}
  // ---- simulation ----
- function stepSnake(s,dt){if(s.ftT>0)s.ftT-=dt;const m=spdMul(),turn=3.6*Math.sqrt(m)/(1+(s.r-7)*0.09);let da=((s.tAng-s.ang+Math.PI*3)%TAU)-Math.PI;
-  const want=clamp(da*7,-turn,turn);s.av+=(want-s.av)*Math.min(1,dt*14);s.ang+=s.av*dt; // capped turn rate with easing
-  const canBoost=s.mass>12||s.spd>0,boosting=(s.boost&&canBoost)||s.spd>0,base=100*m;const v=(boosting?base*1.8:base)*(s.spd>0&&s.boost?1.12:1);
-  if(s.boost&&canBoost&&s.spd<=0){s.mass-=2.4*dt;s.dropT-=dt;if(s.dropT<=0){s.dropT=0.2;addFood(s.px[s.n-1],s.py[s.n-1],0.4,null,FD);}}
+ function stepSnake(s,dt){const turn=4.6/(1+(s.r-7)*0.09);let da=((s.tAng-s.ang+Math.PI*3)%TAU)-Math.PI;s.ang+=clamp(da,-turn*dt,turn*dt);
+  const canBoost=s.mass>12||s.spd>0,boosting=(s.boost&&canBoost)||s.spd>0;const v=(boosting?300:150)*(s.spd>0&&s.boost?1.15:1);
+  if(s.boost&&canBoost&&s.spd<=0){s.mass-=2.4*dt;s.dropT-=dt;if(s.dropT<=0){s.dropT=0.14;addFood(s.px[s.n-1],s.py[s.n-1],0.28,null);}}
   let nx=s.x+Math.cos(s.ang)*v*dt,ny=s.y+Math.sin(s.ang)*v*dt;const r=s.r;
   if(nx<r||nx>A-r||ny<r||ny>A-r){if(CFG.snWalls){kill(s,null);return;}nx=clamp(nx,r,A-r);ny=clamp(ny,r,A-r);if(!s.isP||s.auto)s.tAng=Math.atan2(A/2-ny,A/2-nx);} // walls just block you
-  s.x=nx;s.y=ny;
-  // head trail (a point every PS px); body segments are placed along it at equal spacing = smooth, no corner-cutting
-  {const lx=s.tx[s.tp],ly=s.ty[s.tp],ddx=nx-lx,ddy=ny-ly;if(ddx*ddx+ddy*ddy>=PS*PS){s.tp=(s.tp+1)%PATH;s.tx[s.tp]=nx;s.ty[s.tp]=ny;if(s.tc<PATH)s.tc++;}}
-  s.r=radius(s.mass);const wantN=segs(s.mass);while(s.n<wantN){s.px[s.n]=s.qx[s.n]=s.px[s.n-1];s.py[s.n]=s.qy[s.n]=s.py[s.n-1];s.n++;}if(s.n>wantN)s.n=wantN;
-  placeBody(s);
-  // eat: only what the head touches; a small nudge right next to the mouth; magnet = bigger but limited
-  const mag=s.mag>0,er=r+(mag?70:10),cx=Math.floor(s.x/CELL),cy=Math.floor(s.y/CELL),g=mag?2:1;
-  for(let gy=cy-g;gy<=cy+g;gy++){if(gy<0||gy>=GN)continue;for(let gx=cx-g;gx<=cx+g;gx++){if(gx<0||gx>=GN)continue;for(let i=fHead[gx+gy*GN];i>=0;i=fNext[i]){if(!fa[i]||fd[i]>0)continue;const ddx=fx[i]-s.x,ddy=fy[i]-s.y,d2=ddx*ddx+ddy*ddy,eat=r+fr[i]+1;
-    if(d2<eat*eat){fa[i]=0;fCount--;s.mass+=fv[i];if(s.isP&&!s.auto&&rnd()<0.5)sfx('eat');}else if(d2<er*er){const d=Math.sqrt(d2),pull=(mag?170:45)*dt;fx[i]-=ddx/d*pull;fy[i]-=ddy/d*pull;}}}}
-  for(const p of pu)if(p.on&&Math.abs(p.x-s.x)<r+16&&Math.abs(p.y-s.y)<r+16){p.on=false;s[p.k]=8;if(s.isP&&!s.auto){sfx('ok');toast(p.k==='mag'?'🧲 MAGNET! pulls nearby food in':p.k==='spd'?'⚡ SPEED! free boost':'👻 GHOST! slide through snakes',1800);}}
+  s.x=nx;s.y=ny;s.px[0]=nx;s.py[0]=ny;
+  // grow / shrink
+  s.r=radius(s.mass);const want=segs(s.mass);while(s.n<want){s.px[s.n]=s.px[s.n-1];s.py[s.n]=s.py[s.n-1];s.n++;}if(s.n>want)s.n=want;
+  const sp=spacing(s);for(let k=1;k<s.n;k++){const ddx=s.px[k-1]-s.px[k],ddy=s.py[k-1]-s.py[k],d=Math.sqrt(ddx*ddx+ddy*ddy);if(d>sp){const f=(d-sp)/d;s.px[k]+=ddx*f;s.py[k]+=ddy*f;}}
+  // eat
+  const er=r+(s.mag>0?150:14),cx=Math.floor(s.x/CELL),cy=Math.floor(s.y/CELL),g=s.mag>0?2:1;
+  for(let gy=cy-g;gy<=cy+g;gy++){if(gy<0||gy>=GN)continue;for(let gx=cx-g;gx<=cx+g;gx++){if(gx<0||gx>=GN)continue;for(let i=fHead[gx+gy*GN];i>=0;i=fNext[i]){if(!fa[i])continue;const ddx=fx[i]-s.x,ddy=fy[i]-s.y,d2=ddx*ddx+ddy*ddy;
+    if(d2<(r+fr[i]+4)*(r+fr[i]+4)){fa[i]=0;fCount--;s.mass+=fv[i];if(s.isP&&!s.auto&&rnd()<0.5)sfx('eat');}else if(d2<er*er){const d=Math.sqrt(d2),pull=(s.mag>0?260:90)*dt;fx[i]-=ddx/d*pull;fy[i]-=ddy/d*pull;}}}}
+  for(const p of pu)if(p.on&&Math.abs(p.x-s.x)<r+16&&Math.abs(p.y-s.y)<r+16){p.on=false;s[p.k]=8;if(s.isP&&!s.auto){sfx('ok');toast(p.k==='mag'?'🧲 MAGNET! food comes to you':p.k==='spd'?'⚡ SPEED! free boost':'👻 GHOST! slide through snakes',1800);}}
   if(s.mag>0)s.mag-=dt;if(s.spd>0)s.spd-=dt;if(s.ghost>0)s.ghost-=dt;if(s.talkT>0)s.talkT-=dt;}
- function placeBody(s){const sp=spacing(s);s.px[0]=s.x;s.py[0]=s.y;let ax=s.x,ay=s.y,acc=0,target=sp,k=1,j=s.tp,used=0;
-  while(k<s.n&&used<s.tc){const bx=s.tx[j],by=s.ty[j],dx=bx-ax,dy=by-ay,L=Math.sqrt(dx*dx+dy*dy);
-   if(L>0){while(k<s.n&&acc+L>=target){const t=(target-acc)/L;s.px[k]=ax+dx*t;s.py[k]=ay+dy*t;k++;target+=sp;}acc+=L;ax=bx;ay=by;}
-   used++;j=(j-1+PATH)%PATH;}
-  for(;k<s.n;k++){s.px[k]=ax;s.py[k]=ay;} // trail not long enough yet (just grew): tail waits at the end
-  if(s.tc>used+2)s.tc=used+2;}
  function collide(){for(const s of snakes){if(!s.alive||s.ghost>0)continue;const o=hitBody(s,s.x,s.y,s.r*0.6);if(o)kill(s,o);}}
  function sim(dt){
   for(const s of snakes){if(!s.on)continue;if(!s.alive){if(!s.isP&&s.resp>0){s.resp-=dt;if(s.resp<=0)spawn(s,false,s.name,pick(SKINS),s.team);}continue;}
    if(!s.isP||s.auto)ai(s,dt);else playerInput(s);stepSnake(s,dt);}
-  for(let i=0;i<NF;i++)if(fd[i]>0)fd[i]-=dt;
   buildGrids();collide();ambient();
   for(const p of pu){if(p.on)continue;if(rnd()<dt*0.08){p.on=true;p.x=rr(200,A-200);p.y=rr(200,A-200);p.k=pick(['mag','spd','ghost']);}}
   for(let i=0;i<pN;i++){pl[i]-=dt;if(pl[i]<=0){pN--;px[i]=px[pN];py[i]=py[pN];pvx[i]=pvx[pN];pvy[i]=pvy[pN];pl[i]=pl[pN];ps[i]=ps[pN];pc[i]=pc[pN];i--;continue;}px[i]+=pvx[i]*dt;py[i]+=pvy[i]*dt;pvx[i]*=0.92;pvy[i]*=0.92;}
@@ -421,12 +407,6 @@ const SN=(function(){
   lbT-=dt;if(lbT<=0){lbT=0.5;lb.length=0;teamMass[0]=teamMass[1]=0;for(const s of snakes)if(s.alive){lb.push(s);if(s.team>=0)teamMass[s.team]+=s.mass;}lb.sort(byMass);if(lb.length>10)lb.length=10;}
   if(feedT>0)feedT-=dt;tPlay+=dt;}
  function byMass(a,b){return b.mass-a.mass;}
- let acc=0;
- function fixedStep(){for(const s of snakes){if(!s.alive)continue;s.qn=s.n;s.qhx=s.x;s.qhy=s.y;s.qa=s.ang;for(let k=0;k<s.n;k++){s.qx[k]=s.px[k];s.qy[k]=s.py[k];}}
-  sim(STEP);
-  for(const s of snakes){if(!s.alive)continue;for(let k=s.qn;k<s.n;k++){s.qx[k]=s.px[k];s.qy[k]=s.py[k];}}}
- function interp(a){for(const s of snakes){if(!s.alive)continue;const n=s.n;for(let k=0;k<n;k++){s.rx[k]=s.qx[k]+(s.px[k]-s.qx[k])*a;s.ry[k]=s.qy[k]+(s.py[k]-s.qy[k])*a;}
-  s.rhx=s.qhx+(s.x-s.qhx)*a;s.rhy=s.qhy+(s.y-s.qhy)*a;s.ra=s.qa+((((s.ang-s.qa+Math.PI*3)%TAU)-Math.PI))*a;}}
  function playerInput(s){if(stick.on){const dx=stick.x-stick.ox,dy=stick.y-stick.oy;if(dx*dx+dy*dy>64)s.tAng=Math.atan2(dy,dx);}else if(mouseAim){const p=w2s(s.x,s.y);s.tAng=Math.atan2(my-p[1],mx-p[0]);}
   if(keys.l)s.tAng=s.ang-0.6;if(keys.r)s.tAng=s.ang+0.6;s.boost=boostTouch>=0||keys.b||(mouseAim&&mdown);}
  // ---- render ----
@@ -436,7 +416,7 @@ const SN=(function(){
   if(CFG.snLook==='pixel'){g.fillRect(0,0,32,32);g.fillRect(32,32,32,32);}else{for(const [x,y] of [[16,16],[48,48]]){g.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;g.lineTo(x+Math.cos(a)*13,y+Math.sin(a)*13);}g.closePath();g.fill();}}
   bgTile=ctx.createPattern(c,'repeat');bgKey=key;return bgTile;}
  function strokeBody(s,lw,col,dash,off,cap){if(s.n<2)return;ctx.lineWidth=lw;ctx.strokeStyle=col;ctx.lineCap=cap||'round';ctx.lineJoin='round';if(dash)ctx.setLineDash(dash);ctx.beginPath();const o=off||0;
-  const X=s.rx,Y=s.ry;ctx.moveTo(X[s.n-1]+o,Y[s.n-1]+o);const st=s.n>260?2:1;for(let k=s.n-1-st;k>0;k-=st){ctx.lineTo(X[k]+o,Y[k]+o);}ctx.lineTo(s.rhx+o,s.rhy+o);ctx.stroke();if(dash)ctx.setLineDash(NODASH);}
+  let lx=s.px[s.n-1],ly=s.py[s.n-1];ctx.moveTo(lx+o,ly+o);const st=s.n>260?2:1;for(let k=s.n-1-st;k>=0;k-=st){ctx.lineTo(s.px[k]+o,s.py[k]+o);}ctx.lineTo(s.px[0]+o,s.py[0]+o);ctx.stroke();if(dash)ctx.setLineDash(NODASH);}
  const NODASH=[],DSH=[0,0];
  function drawSnake(s,t){const r=s.r,look=CFG.snLook,ghost=s.ghost>0;ctx.globalAlpha=ghost?0.45:1;
   if(look!=='neon'){strokeBody(s,r*2,'rgba(0,0,0,0.22)',null,r*0.35);}
@@ -445,13 +425,13 @@ const SN=(function(){
    const p=s.skin.p;if(CFG.snMode!=='team'||s.team<0){if(p==='stripe'){DSH[0]=r*0.8;DSH[1]=r*1.2;strokeBody(s,r*2,s.dcol,DSH,0,'butt');}else if(p==='dots'){DSH[0]=0.1;DSH[1]=r*1.6;strokeBody(s,r*0.9,s.dcol,DSH);}else if(p==='twotone'){strokeBody(s,r*0.8,s.dcol);}}
    if(look==='cartoon')strokeBody(s,r*0.5,'rgba(255,255,255,0.35)',null,-r*0.45);}
   // head
-  const hx=s.rhx,hy=s.rhy,ca=Math.cos(s.ra),sa=Math.sin(s.ra);ctx.fillStyle=s.col;ctx.beginPath();ctx.arc(hx,hy,r*1.05,0,TAU);ctx.fill();
-  for(let side=-1;side<=1;side+=2){const ex=hx+ca*r*0.35-sa*r*0.5*side,ey=hy+sa*r*0.35+ca*r*0.5*side;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ex,ey,r*0.38,0,TAU);ctx.fill();ctx.fillStyle='#1a1a22';ctx.beginPath();ctx.arc(ex+ca*r*0.14,ey+sa*r*0.14,r*0.19,0,TAU);ctx.fill();}
+  const hx=s.x,hy=s.y,ca=Math.cos(s.ang),sa=Math.sin(s.ang);ctx.fillStyle=s.col;ctx.beginPath();ctx.arc(hx,hy,r*1.05,0,TAU);ctx.fill();
+  for(const side of [-1,1]){const ex=hx+ca*r*0.35-sa*r*0.5*side,ey=hy+sa*r*0.35+ca*r*0.5*side;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ex,ey,r*0.38,0,TAU);ctx.fill();ctx.fillStyle='#1a1a22';ctx.beginPath();ctx.arc(ex+ca*r*0.14,ey+sa*r*0.14,r*0.19,0,TAU);ctx.fill();}
   if(s.boost&&(s.mass>12||s.spd>0)){ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(hx,hy,r*1.5+Math.sin(t*20)*2,0,TAU);ctx.stroke();}
   ctx.globalAlpha=1;}
- function render(t,dt){const T=theme();const ck=1-Math.exp(-(dt||0.016)*10);ctx.setTransform(DPR,0,0,DPR,0,0);
-  const target=me&&me.alive?me:lb[0]||me;if(target){camX+=(target.rhx-camX)*ck;camY+=(target.rhy-camY)*ck;}
-  const base=Math.min(W,H)/430,zr=me&&me.alive?clamp(1.05-(me.r-7)*0.035,0.6,1.05):0.8;zoom+=(base*zr-zoom)*ck*0.35;
+ function render(t){const T=theme();ctx.setTransform(DPR,0,0,DPR,0,0);
+  const target=me&&me.alive?me:lb[0]||me;if(target){camX+=(target.x-camX)*0.15;camY+=(target.y-camY)*0.15;}
+  const base=Math.min(W,H)/430,zr=me&&me.alive?clamp(1.05-(me.r-7)*0.035,0.6,1.05):0.8;zoom+=(base*zr-zoom)*0.05;
   let sx=0,sy=0;if(shake>0){sx=rr(-6,6)*shake;sy=rr(-6,6)*shake;}
   ctx.fillStyle=T.edge;ctx.fillRect(0,0,W,H);
   ctx.save();ctx.translate(W/2+sx,H/2+sy);ctx.scale(zoom,zoom);ctx.translate(-camX,-camY);
@@ -459,13 +439,13 @@ const SN=(function(){
   const vx0=camX-W/2/zoom-40,vx1=camX+W/2/zoom+40,vy0=camY-H/2/zoom-40,vy1=camY+H/2/zoom+40;
   for(let i=0;i<dN;i++){if(dl[i]<=0)continue;ctx.globalAlpha=Math.min(0.6,dl[i]/10);ctx.fillStyle='#7a1018';ctx.beginPath();ctx.arc(dx_[i],dy_[i],dsz[i],0,TAU);ctx.fill();}ctx.globalAlpha=1;
   // food batched by colour
-  for(let c=0;c<FOODC.length;c++){ctx.fillStyle=FOODC[c];ctx.beginPath();for(let i=0;i<NF;i++){if(!fa[i]||fc[i]!==c)continue;const x=fx[i],y=fy[i];if(x<vx0||x>vx1||y<vy0||y>vy1)continue;let rad=fr[i];if(fd[i]>0){const q=clamp(1-fd[i]/FD,0,1);rad=fr[i]*(0.35+0.65*q)+Math.sin(q*Math.PI)*2;}ctx.moveTo(x+rad,y);ctx.arc(x,y,rad,0,TAU);}ctx.fill();}
+  for(let c=0;c<FOODC.length;c++){ctx.fillStyle=FOODC[c];ctx.beginPath();for(let i=0;i<NF;i++){if(!fa[i]||fc[i]!==c)continue;const x=fx[i],y=fy[i];if(x<vx0||x>vx1||y<vy0||y>vy1)continue;ctx.moveTo(x+fr[i],y);ctx.arc(x,y,fr[i],0,TAU);}ctx.fill();}
   ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';for(const p of pu){if(!p.on||p.x<vx0||p.x>vx1||p.y<vy0||p.y>vy1)continue;ctx.fillStyle='rgba(255,255,255,0.18)';ctx.beginPath();ctx.arc(p.x,p.y,16+Math.sin(t*4)*2,0,TAU);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(p.k==='mag'?'🧲':p.k==='spd'?'⚡':'👻',p.x,p.y+1);}
   for(const s of snakes){if(!s.alive)continue;if(s.x+s.n*s.r<vx0-400&&false)continue;drawSnake(s,t);}
   for(let i=0;i<pN;i++){ctx.fillStyle=pc[i];ctx.fillRect(px[i]-ps[i]/2,py[i]-ps[i]/2,ps[i],ps[i]);}
-  if(CFG.snNames||CFG.snTalk){ctx.textAlign='center';ctx.textBaseline='alphabetic';for(const s of snakes){if(!s.alive||s.rhx<vx0||s.rhx>vx1||s.rhy<vy0||s.rhy>vy1)continue;const fs=Math.max(11,12/zoom);ctx.font='800 '+fs+'px system-ui';
-    if(CFG.snNames&&!s.isP){ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText(s.name,s.rhx,s.rhy-s.r-8/zoom);}
-    if(s.talkT>0&&s.talk){const w=ctx.measureText(s.talk).width+14/zoom,yy=s.rhy-s.r-26/zoom;ctx.fillStyle='rgba(255,255,255,0.92)';ctx.fillRect(s.rhx-w/2,yy-fs,w,fs+8/zoom);ctx.fillStyle='#222';ctx.fillText(s.talk,s.rhx,yy+1/zoom);}}}
+  if(CFG.snNames||CFG.snTalk){ctx.textAlign='center';ctx.textBaseline='alphabetic';for(const s of snakes){if(!s.alive||s.x<vx0||s.x>vx1||s.y<vy0||s.y>vy1)continue;const fs=Math.max(11,12/zoom);ctx.font='800 '+fs+'px system-ui';
+    if(CFG.snNames&&!s.isP){ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText(s.name,s.x,s.y-s.r-8/zoom);}
+    if(s.talkT>0&&s.talk){const w=ctx.measureText(s.talk).width+14/zoom,yy=s.y-s.r-26/zoom;ctx.fillStyle='rgba(255,255,255,0.92)';ctx.fillRect(s.x-w/2,yy-fs,w,fs+8/zoom);ctx.fillStyle='#222';ctx.fillText(s.talk,s.x,yy+1/zoom);}}}
   ctx.restore();
   if(CFG.snTheme==='night'){ctx.fillStyle='rgba(10,12,30,0.18)';ctx.fillRect(0,0,W,H);}
   hud(t);}
@@ -520,12 +500,11 @@ const SN=(function(){
    newRound(true);me.auto=true;startScreen();running=true;}, // the match runs behind the start screen as a demo
   stop(){running=false;removeEventListener('pointerdown',onDown);removeEventListener('pointermove',onMove);removeEventListener('pointerup',onUp);removeEventListener('pointercancel',onUp);removeEventListener('keydown',onKey);removeEventListener('keyup',onKey);for(const s of snakes){s.on=false;s.alive=false;}},
   resize(){layout();},pause(p){paused=p;},onBack(){return true;},
-  frame(dt,t){if(!running)return;const run=!paused&&(!popupOpenGame()||(me&&me.auto));let a=1;if(run){acc+=Math.min(dt,0.1);let n=0;while(acc>=STEP&&n<6){fixedStep();acc-=STEP;n++;}if(n>=6)acc=0;a=acc/STEP;}interp(a);if(shake>0)shake-=dt;
-   if(me&&me.auto&&!me.alive&&me.isP&&!over&&!testHold){spawn(me,true,'YOU',skinNow(),me.team);me.auto=true;interp(1);}render(t,dt);if(frameLog)frameLog(dt);},
+  frame(dt,t){if(!running)return;if(!paused&&!popupOpenGame())sim(dt);else if(me&&me.auto&&!paused)sim(dt);if(shake>0)shake-=dt;
+   if(me&&me.auto&&!me.alive&&me.isP&&!over&&!testHold){spawn(me,true,'YOU',skinNow(),me.team);me.auto=true;}render(t);},
   settings:()=>[cfgItem('snBots','Bots','How many computer snakes are in the match.','range',null,{min:4,max:20,step:1,fmt:v=>v+' bots',th:'foe'}),
    cfgItem('snLook','Look','The style of the snakes. Matte is clean and simple.','opt',[['matte','Matte'],['cartoon','Cartoon'],['neon','Neon'],['pixel','Pixel']],{th:'color'}),
    cfgItem('snNames','Bot names','Shows names over the computer snakes.','bool',null,{th:'text'}),
-   cfgItem('snSpeed','Snake speed','How fast every snake slithers. Slow is the most chill. Boost is always a bit under 2× faster.','opt',[['slow','Slow'],['normal','Normal'],['fast','Fast']],{th:'snspeed'}),
    cfgItem('snStick','Joystick size','How big the steering circle is under your thumb.','range',null,{min:40,max:100,step:5,fmt:v=>v+'px',th:'stick'}),
    cfgItem('snTalk','Trash talk','Bots say rude-ish stuff when they eat you or get eaten.','bool',null,{th:'text'}),
    cfgItem('snTheme','Time of day','Day is bright green, night is dark blue.','opt',[['day','Day'],['night','Night']],{th:'light'}),
@@ -533,11 +512,10 @@ const SN=(function(){
   icon(g,w,h,t){g.fillStyle='#46564a';g.fillRect(0,0,w,h);g.lineCap='round';g.lineJoin='round';const path=(ph,yo)=>{g.beginPath();for(let x=20;x<=w-40;x+=6)g.lineTo(x,h/2+yo+Math.sin(x/28+t*3+ph)*22);};
    g.lineWidth=26;g.strokeStyle='#4b7d3c';path(0,-20);g.stroke();g.lineWidth=22;g.strokeStyle='#6fae5a';path(0,-20);g.stroke();g.lineWidth=16;g.strokeStyle='#a8503e';path(2,40);g.stroke();g.lineWidth=13;g.strokeStyle='#e07a62';path(2,40);g.stroke();
    for(let i=0;i<14;i++){g.fillStyle=FOODC[i%8];g.beginPath();g.arc((i*67+t*20)%w,(i*41)%h,4,0,TAU);g.fill();}}};
- let testHold=false,frameLog=null;function popupOpenGame(){return popupOpen()&&!(me&&me.auto);}
- SETUI.TH.snspeed=function(g,w,h,v){const k=v==='slow'?0.8:v==='fast'?1.25:1,x=w*0.62,y=h/2;g.strokeStyle='rgba(255,255,255,0.35)';g.lineWidth=2;for(let i=0;i<3;i++){const L=w*0.18*k*(1-i*0.25);g.beginPath();g.moveTo(x-w*0.3-L,y-6+i*6);g.lineTo(x-w*0.3,y-6+i*6);g.stroke();}g.lineCap='round';g.lineWidth=7;g.strokeStyle='#6fae5a';g.beginPath();g.moveTo(x-w*0.3,y);g.quadraticCurveTo(x-w*0.12,y-6,x,y);g.stroke();g.fillStyle='#6fae5a';g.beginPath();g.arc(x+2,y,5,0,TAU);g.fill();};
+ let testHold=false;function popupOpenGame(){return popupOpen()&&!(me&&me.auto);}
  CHILL.T.snake={demo(sec){newRound(true);$('msgOv').classList.remove('show');testHold=false;return true;},hold(v){testHold=v;},
   state(){let alive=0;for(const s of snakes)if(s.alive)alive++;return{alive,me:me?{alive:me.alive,len:lenOf(me),auto:me.auto}:null,food:fCount,parts:pN,lb:lb.map(s=>(s.isP?'YOU':s.name)+':'+lenOf(s)),t:+tPlay.toFixed(1),feed:feed.slice()};},
-  play(){newRound(false);$('msgOv').classList.remove('show');},killMe(){if(me)kill(me,snakes[1]);},frames(on){if(!on){frameLog=null;return;}const L=window.__snFT=[];frameLog=d=>{if(L.length<20000)L.push(d*1000);};},foodInfo(){let pop=0;for(let i=0;i<NF;i++)if(fa[i]&&fd[i]>0)pop++;return{food:fCount,popping:pop};},grow(m){if(me)me.mass+=m;},snakes};
+  play(){newRound(false);$('msgOv').classList.remove('show');},killMe(){if(me)kill(me,snakes[1]);},grow(m){if(me)me.mass+=m;},snakes};
  return mod;})();
 reg(SN);
 
