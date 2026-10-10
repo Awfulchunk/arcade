@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#4caf3c">
-<title>Empire Clash v5.1 Clash</title>
+<title>Empire Clash v5 Clash</title>
 <style>
 :root{--ink:#2b1d14;--f:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Arial Black",system-ui,sans-serif}
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3f8f34;color:#fff;
@@ -300,7 +300,7 @@ SETUI.perfLoad('empire');
       <button class="btn blue small" id="howBtn">❓ How to play</button>
       <button class="btn grey small" id="setBtn">⚙ Settings</button>
     </div>
-    <div class="ver ink">Tough &amp; J's Arcade · v5.1 Clash · offline</div>
+    <div class="ver ink">Tough &amp; J's Arcade · v5 Clash · offline</div>
   </div>
 </div>
 
@@ -1121,15 +1121,14 @@ function eCollide(u){
   for(const o of (I.ro[row]||ENONE)){const dx=u.x-o.x,dy=u.y-o.y,R=o.r+u.r,d2=dx*dx+dy*dy;if(d2<R*R){const d=Math.sqrt(d2)||0.01;u.x=o.x+dx/d*R;u.y=o.y+dy/d*R;}}
   const dir=eDir(u.side);
   for(const s of (I.rs[row]||ENONE)){
-    if(!s.alive||!s.done||(s.side===u.side&&(s.kind!=='bwall'||s.gate))||s.kind==='tur')continue;
+    if(!s.alive||!s.done||s.side===u.side||s.kind==='tur')continue;
     if(Math.abs(u.x-s.x)>s.hw+u.r||Math.abs(u.y-s.y)>s.hh+u.r)continue;
     const qx=clamp(u.x,s.x-s.hw,s.x+s.hw),qy=clamp(u.y,s.y-s.hh,s.y+s.hh),dx=u.x-qx,dy=u.y-qy,d2=dx*dx+dy*dy;
     if(d2>=u.r*u.r)continue;
     if(d2>1e-6){const d=Math.sqrt(d2);u.x=qx+dx/d*u.r;u.y=qy+dy/d*u.r;}
     else if(s.kind==='wall')u.y=s.y-dir*(s.hh+u.r); // inside a wall: always back out to your own side (no tunnelling)
     else{const px=s.hw-Math.abs(u.x-s.x),py=s.hh-Math.abs(u.y-s.y);if(px<py)u.x=s.x+Math.sign(u.x-s.x||1)*(s.hw+u.r);else u.y=s.y+Math.sign(u.y-s.y||-dir)*(s.hh+u.r);}
-    if(s.side===u.side){}
-    else if(u.d.sup){if(u.st==='go'){u.sx=u.x;u.sy=u.y;}}
+    if(u.d.sup){if(u.st==='go'){u.sx=u.x;u.sy=u.y;}}
     else if(!u.d.sapper&&(!u.tgt||(u.tgt.kind==='unit'&&eGapTo(u,u.tgt)>u.d.range))){u.tgt=s;u.think=0.7;}
   }
   u.x=clamp(u.x,u.r+2,EW-u.r-2);u.y=clamp(u.y,u.r+2,EH-u.r-2);
@@ -1352,7 +1351,7 @@ function eAIStep(side,dt){
   // a gathered wave charges when it's big enough (or waited long enough)
   if(A.gather){const g=A.gather;let at=0,near=0;const P=E.rally[side];
     for(const u of E.units)if(u.alive&&u.side===side&&u.ord==='rally'){at++;if(P&&Math.abs(u.x-P.x)<90&&Math.abs(u.y-P.y)<90)near++;}
-    if(near>=g.need||t>g.until||at===0){if(g.mass)v51Launch(side,A,near);eOrder(side,'charge');A.gather=null;}}
+    if(near>=g.need||t>g.until||at===0){eOrder(side,'charge');A.gather=null;}}
   if(eAIV3(side,A,D,t,k))return; // v3: defend outposts, clear creature camps, watchtower, scouts
   // 1. economy first while it's small, then mixed in
   if(built<bcap&&t>=A.bldT&&(built<3||n>=3+built*1.5||rnd()<0.3)){
@@ -1380,22 +1379,20 @@ function eAIStep(side,dt){
     const ty=ePickW(side,{barri:3,trap:2,tech:tt>40?2:0,mason:eMasonPlan(side,EW/2)&&R.st>110&&R.pt>110?2.5:0});
     if(ty){const x=rr(50,EW-50),y=f-dir*rr(30,60);if(!eDeploy(side,ty,x,y))return;}}
   // 4. attack waves: deploy, gather at a rally point (often a capture point), then charge
-  if(t>A.waveT&&n<cap&&(!A.gather||A.gather.mass)){
+  if(t>A.waveT&&n<cap&&!A.gather){
     const ahead=E.lines.some(L=>L.side!==side&&L.main&&L.slots.every(s=>s&&s.alive));
     const w={grunt:3,rifle:3,gren:tt>40?2:0.5,brute:tt>60?1.6:0.3,sapper:tt>70?(ahead?2:0.8):0.2,mortar:tt>80?1.3:0.3};
-    const size=v51WaveSize(side,tt,D);
+    const size=Math.min(16,2+Math.floor(tt/70*D.esc));
     let rp=null;
-    if(E.cfg.rally&&A.gather&&A.gather.mass&&E.rally[side])rp=E.rally[side];
-    else if(E.cfg.rally){
-      if(v51Doctrine(side)){rp=v51Stage(side);}
-      else if(E.caps.length&&rnd()<0.65){const c=E.caps.filter(c=>c.own!==side).sort((a,b)=>Math.abs(a.y-f)-Math.abs(b.y-f))[0];if(c)rp=eRallyClamp(side,c.x+rr(-30,30),c.y-dir*30);}
+    if(E.cfg.rally){
+      if(E.caps.length&&rnd()<0.65){const c=E.caps.filter(c=>c.own!==side).sort((a,b)=>Math.abs(a.y-f)-Math.abs(b.y-f))[0];if(c)rp=eRallyClamp(side,c.x+rr(-30,30),c.y-dir*30);}
       if(!rp)rp=eRallyClamp(side,rr(EW*0.2,EW*0.8),f+dir*rr(140,240));
       E.rally[side]=rp;}
     const x0=rp?clamp(rp.x+rr(-60,60),60,EW-60):rr(60,EW-60);let sent=0,men=0;
     for(let i=0;i<size&&n+men<cap;i++){const ty=ePickW(side,w);if(!ty)break;if(!eDeploy(side,ty,clamp(x0+rr(-70,70),20,EW-20),f-dir*rr(30,110))){sent++;men+=EU[ty].n;}else break;}
-    if(sent){A.waves++;if(rp&&!(A.gather&&A.gather.mass)){let at=0;for(const u of E.units)if(u.alive&&u.side===side&&u.ord==='rally')at++;A.gather=v51Gather(side,A,D,t,k,at)||{need:Math.max(3,Math.round(at*D.gather)),until:t+40*k*0.8};}}
+    if(sent){A.waves++;if(rp){let at=0;for(const u of E.units)if(u.alive&&u.side===side&&u.ord==='rally')at++;A.gather={need:Math.max(3,Math.round(at*D.gather)),until:t+40*k*0.8};}}
     else if(rp&&!A.gather)E.rally[side]=null;
-    A.waveT=sent?t+Math.max(10,26-tt/25)*D.wave*k*v51WaveGap(side):t+3;
+    A.waveT=sent?t+Math.max(10,26-tt/25)*D.wave*k:t+3;
   }
 }
 
@@ -1710,7 +1707,7 @@ function eNavMarkCirc(G,x,y,r){const N=E.nav,c0=Math.max(0,Math.floor((x-r)/NAVC
 function eNavMarkRect(G,x0,y0,x1,y1){const N=E.nav,c0=Math.max(0,Math.ceil(x0/NAVC-0.5)),c1=Math.min(N.w-1,Math.floor(x1/NAVC-0.5)),r0=Math.max(0,Math.ceil(y0/NAVC-0.5)),r1=Math.min(N.h-1,Math.floor(y1/NAVC-0.5));
   for(let cy=r0;cy<=r1;cy++)for(let cx=c0;cx<=c1;cx++)G[cy*N.w+cx]=1;}
 function eNavGet(side){const N=E.nav;if(N.built[side]!==E.navV){const G=N.g[side];G.set(N.base);const p=5;
-    for(const s of E.structs){if(!s.alive||!s.done||(s.side===side&&!(s.kind==='bwall'&&!s.gate))||s.kind==='tur')continue;eNavMarkRect(G,s.x-s.hw-p,s.y-s.hh-p,s.x+s.hw+p,s.y+s.hh+p);}
+    for(const s of E.structs){if(!s.alive||!s.done||s.side===side||s.kind==='tur')continue;eNavMarkRect(G,s.x-s.hw-p,s.y-s.hh-p,s.x+s.hw+p,s.y+s.hh+p);}
     N.built[side]=E.navV;}return N.g[side];}
 function eNavCell(x,y){const N=E.nav;return clamp(Math.floor(y/NAVC),0,N.h-1)*N.w+clamp(Math.floor(x/NAVC),0,N.w-1);}
 function eNavFree(G,c,R){const N=E.nav,cx=c%N.w,cy=(c/N.w)|0;for(let r=1;r<=R;r++){let best=-1,bd=1e9;
@@ -2305,7 +2302,7 @@ function eRender(){
   for(const u of E.units)if(u.alive&&onScreen(u.x,u.y,u.d.boss?70:40)&&(u.side===0||eVisible(u.x,u.y))){_dl.push(u);if(u.side===1)de++;}
   E.drawnEnemies=de;v5PushObs(_dl);
   _dl.sort((a,b)=>(a.y+(a.kind==='wall'||a.kind==='owall'?-4:0))-(b.y+(b.kind==='wall'||b.kind==='owall'?-4:0)));
-  for(const o of _dl){if(o.kind==='obs'){v5DrawObs(o);continue;}ctx.save();if(KY!==1){ctx.translate(0,o.y);ctx.scale(1,1/KY);ctx.translate(0,-o.y);}V5.cur=o.kind==='unit'||o.kind==='obs'?null:o;V5.n=0;switch(o.kind){case'unit':eDrawUnit(o);break;case'wall':eDrawWall(o);break;case'bar':eDrawBar(o);break;case'tur':eDrawTurret(o);break;case'bld':eDrawBld(o);break;case'hq':eDrawHQs(o);break;case'outpost':eDrawOutpost(o);break;case'owall':eDrawOWall(o);break;case'bwall':v51DrawBW(o);break;case'obs':v5DrawObs(o);break;}ctx.restore();}V5.cur=null;
+  for(const o of _dl){if(o.kind==='obs'){v5DrawObs(o);continue;}ctx.save();if(KY!==1){ctx.translate(0,o.y);ctx.scale(1,1/KY);ctx.translate(0,-o.y);}V5.cur=o.kind==='unit'||o.kind==='obs'?null:o;V5.n=0;switch(o.kind){case'unit':eDrawUnit(o);break;case'wall':eDrawWall(o);break;case'bar':eDrawBar(o);break;case'tur':eDrawTurret(o);break;case'bld':eDrawBld(o);break;case'hq':eDrawHQs(o);break;case'outpost':eDrawOutpost(o);break;case'owall':eDrawOWall(o);break;case'obs':v5DrawObs(o);break;}ctx.restore();}V5.cur=null;
   for(const p of E.proj)if(onScreen(p.x,p.y,60)&&(p.side===0||eVisible(p.x,p.y)))eDrawProj(p);
   eDrawRally(0);eDrawRally(1);eDrawMoveFx();v5DrawOrders();
   if(E.place)eDrawGhost();
@@ -3524,7 +3521,7 @@ function v5ChopUpdate(u,dt){const spd=eSpd(u)*(u.carry?0.8:1);
   const h=v5Home(u)||u,a=Math.atan2(h.y-o.y,h.x-o.x),tx=o.x+Math.cos(a)*(o.r+u.r+3),ty=o.y+Math.sin(a)*(o.r+u.r+3),d=Math.hypot(tx-u.x,ty-u.y);
   if(u.st==='seek'){if(d<7||Math.hypot(o.x-u.x,o.y-u.y)<o.r+u.r+8)u.st='chop';else{eGo(u,tx,ty,spd,dt);u.seekT=(u.seekT||0)+dt;if(u.seekT>14){u.seekT=0;o.claim=Math.max(0,o.claim-1);o.skip=E.t;u.tree=null;}}return;}
   u.seekT=0;u.fx=o.x>u.x?1:-1;u.chopT+=dt;if(((u.chopT*2.2)|0)!==u.chopN){u.chopN=(u.chopT*2.2)|0;u.swing=0.18;o.shake=0.15;if(onScreen(o.x,o.y,40)){v5Snd('chop',o.x,o.y);spawnP(DUST,o.x+rr(-3,3),o.y-4,rr(-40,40),rr(-50,0),0.3,2.5,'#e8c48a');}}
-  o.hp-=dt*(1+0.2*E.up[u.side].spd)*(E.cfg.chopSpeed?+E.cfg.chopSpeed:1);if(o.hp<=0){v5Fell(o,u);u.carry=Math.round(5*(E.cfg.woodYield?+E.cfg.woodYield:1));u.tree=null;}
+  o.hp-=dt*(1+0.2*E.up[u.side].spd)*(E.cfg.chopSpeed?+E.cfg.chopSpeed:1);if(o.hp<=0){v5Fell(o,u);u.carry=Math.round(6*(E.cfg.woodYield?+E.cfg.woodYield:1));u.tree=null;}
 }
 {const _wu=eWorkerUpdate;eWorkerUpdate=function(u,dt){if(u.job==='chop')return v5ChopUpdate(u,dt);return _wu(u,dt);};}
 function v5ForestStep(dt){for(const s of [0,1]){V5.cutT[s]-=dt;if(V5.cutT[s]>0)continue;V5.cutT[s]=3.5;
@@ -4000,245 +3997,6 @@ for(const k of Object.keys(CFG_MAIN))if(customCfg[k]===undefined)customCfg[k]=CF
 
 // per-step hook for all v5 systems
 function v5Step(dt){v5ForestStep(dt);if(typeof v5ZoneStep==='function')v5ZoneStep(dt);if(typeof v5ArmyStep==='function')v5ArmyStep(dt);if(typeof v5CityStep==='function')v5CityStep(dt);if(typeof v5AIStep==="function")v5AIStep(dt);v5PatrolStep(dt);V5.qT=(V5.qT||0)-dt;if(V5.qT<=0){V5.qT=1;v5QueueStep();}}
-
-
-// ================== EMPIRE CLASH v5.1 ==================
-// part 1: forest cache. Trees/rocks are baked into small offscreen chunk layers (per 280x64 world cell, tight bounds,
-// one drawImage each). A chunk falls back to live per-tree drawing while any unit stands inside its depth band
-// (so troops still go behind/in front of trees correctly), while one of its trees is being chopped / damaged,
-// or while its bake is out of date. Rebakes are spread out: max one per frame.
-const V51={fc:null,fcRef:null,fcN:-1,fcQ:0,fcKey:'',fcStable:0,bakes:0,live:0,baked:0};
-function v51CW(){return EW/Math.max(2,Math.round(EW/280));}
-const V51CH=64;
-function v51FIndex(){if(V51.fcRef===E.obs&&V51.fcN===E.obs.length)return V51.fc;
-  const cw=v51CW(),old=V51.fc?V51.fc.map:new Map(),map=new Map(),list=[];
-  for(const o of E.obs){o.kind='obs';const k=Math.floor(o.x/cw)+Math.floor(o.y/V51CH)*64;let c=map.get(k);if(!c){c={k,m:[],sig:0,can:null,cq:0,ckey:'',x0:0,y0:0,x1:0,y1:0,my0:1e9,my1:-1e9,used:0};map.set(k,c);list.push(c);}c.m.push(o);c.sig=(c.sig+((o.seed>>>0)%1000003)+(o.burnt?7:0))%2147483647;}
-  for(const c of list){c.m.sort((a,b)=>a.y-b.y);c.my0=c.m[0].y;c.my1=c.m[c.m.length-1].y;const p=old.get(c.k);
-    if(p&&p.sig===c.sig&&p.m.length===c.m.length){c.can=p.can;c.cq=p.cq;c.ckey=p.ckey;c.x0=p.x0;c.y0=p.y0;c.x1=p.x1;c.y1=p.y1;}
-    else if(p&&p.can){p.can.width=p.can.height=0;}}
-  for(const [k,p] of old)if(!map.has(k)&&p.can){p.can.width=p.can.height=0;}
-  list.sort((a,b)=>a.my0-b.my0);
-  V51.fc={map,list};V51.fcRef=E.obs;V51.fcN=E.obs.length;return V51.fc;}
-function v51Hot(o){return (o.claim||0)>0||(o.hp!==undefined&&o.hp<o.max)||o.shake>0;}
-function v51BakeQ(){const q=EZ*DPR;if(q>2.6||q<0.2)return 0;return Math.round(q*1000)/1000;}
-function v51Bake(c,qb,key){
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const iy=1/KY,R=[];
-  for(const o of c.m){if(o.hp!==undefined&&o.hp<=0)continue;if(v51Hot(o))continue;const f=v5ObsFull(o),w=f.width/V5TS,h=f.height/V5TS,ax=o.x-f.ax,ay=o.y-f.ay*iy;R.push([o,f,ax,ay,w,h*iy]);
-    if(ax<x0)x0=ax;if(ay<y0)y0=ay;if(ax+w>x1)x1=ax+w;if(ay+h*iy>y1)y1=ay+h*iy;}
-  if(!R.length){c.ckey=key;c.cq=qb;c.x0=c.x1=0;return;}
-  const qy=qb*KY;x0=Math.floor(x0*qb-2)/qb;y0=Math.floor(y0*qy-2)/qy;
-  const W=Math.max(1,Math.ceil((x1-x0)*qb+2)),H=Math.max(1,Math.ceil((y1-y0)*qy+2));x1=x0+W/qb;y1=y0+H/qy;
-  let k=c.can;if(!k){k=c.can=mkCanvas(W,H);}else{k.width=W;k.height=H;}
-  const g=k.getContext('2d');g.setTransform(qb,0,0,qb*KY,-x0*qb,-y0*qb*KY);g.imageSmoothingEnabled=true;
-  for(const r of R){const img=v5Lod(r[1],qb);g.drawImage(img,r[2],r[3],r[4],r[5]);}
-  c.x0=x0;c.y0=y0;c.x1=x1;c.y1=y1;c.cq=qb;c.ckey=key;V51.bakes++;}
-function v51ForestOn(){return settings.forestCache!==false&&settings.forestCache!=='off';}
-v5PushObs=function(dl){
-  const r0=camY-20,r1=camY+VH+150,cx0=camX,cx1=camX+VW;
-  const I=v51FIndex(),qb=v51ForestOn()?v51BakeQ():0,key=qb+'|'+KY+'|'+(settings.shadows==='off'?'n':'s')+'|'+v5Depth();
-  // zoom just changed: wait until it settles before rebaking (live meanwhile)
-  if(key!==V51.fcKey){V51.fcKey=key;V51.fcStable=0;}else V51.fcStable++;
-  const bt0=performance.now();let budget=V51.fcStable>8?1:0,live=0,baked=0;const U=E.units;
-  for(const c of I.list){if(c.my1+90<r0)continue;if(c.my0-90>r1)break;
-    const m=c.m;let ok=qb>0&&m.length>=2;
-    let hk=0,hn=0;if(ok)for(const o of m)if(v51Hot(o)){hk=(hk*31+((o.seed>>>0)%9973)+1)%1000003;hn++;}
-    const ck=key+'#'+hk;
-    if(ok&&c.ckey!==ck){if(budget>0){v51Bake(c,qb,ck);if(performance.now()-bt0>2.5)budget=0;}else ok=false;}
-    if(ok&&c.x1>c.x0&&(c.x1<cx0||c.x0>cx1||c.y1<camY-20||c.y0>camY+VH+20)&&!hn)continue;
-    if(ok){let lo=eLowY(c.my0-14);for(;lo<U.length;lo++){const u=U[lo];if(u.y>c.my1+14)break;if(u.alive&&u.x>c.x0-u.r&&u.x<c.x1+u.r){ok=false;break;}}}
-    if(ok){c.used=gameTime;if(c.x1>c.x0){let P=c.pd;if(!P)P=c.pd={kind:'obs',ck:c,x:0,y:0};P.y=c.my1;P.x=(c.x0+c.x1)/2;if(!V51.dbgNC)dl.push(P);baked++;}
-      if(hn){const mid=(c.my0+c.my1)/2;for(const o of m)if(v51Hot(o)){let H=o._hp;if(!H)H=o._hp={kind:'obs',hot:o,x:0,y:0};H.x=o.x;H.y=o.y>=mid?c.my1+0.01:c.my0-0.01;dl.push(H);live++;}}
-      continue;}
-    if(V51.dbgNL)continue;
-    for(const o of m){if(o.x<camX-o.r*1.6||o.x>camX+VW+o.r*1.6||o.y<camY-o.r||o.y>camY+VH+o.r*3.4/KY)continue;dl.push(o);live++;}}
-  V51.live=live;V51.baked=baked;
-  // free bakes nobody has looked at for a while (keeps memory low on phones)
-  if((E.stepN&255)===0)for(const c of I.list)if(c.can&&gameTime-c.used>8){c.can.width=c.can.height=0;c.can=null;c.ckey='';}};
-{const _do=v5DrawObs;v5DrawObs=function(o){if(o.hot)return _do(o.hot);const c=o.ck;if(!c)return _do(o);if(c.can)ctx.drawImage(c.can,c.x0,c.y0,c.x1-c.x0,c.y1-c.y0);};}
-
-// part 2: zone + darkness overlays only blit the rows that actually have something in them
-// (the base and the forest band usually have no dark zones, so those views skip two full-screen upscales)
-function v51ZRows(){const Z=V5.Z;if(Z._rows)return Z._rows;const a=new Uint8Array(Z.h);for(let cy=0;cy<Z.h;cy++){for(let cx=0;cx<Z.w;cx++)if(Z.ty[cy*Z.w+cx]){a[cy]=1;break;}}Z._rows=a;return a;}
-function v51Span(rows,y0,y1){let a=-1,b=-1;for(let r=Math.max(0,y0);r<Math.min(rows.length,y1);r++)if(rows[r]){if(a<0)a=r;b=r;}return a<0?null:[a,b+1];}
-v5DrawZones=function(){const Z=V5.Z;if(!Z||!Z.tex)return;const rows=v51ZRows(),sp=v51Span(rows,Math.floor((camY-40)/ZC)-1,Math.ceil((camY+VH+40)/ZC)+1);if(!sp)return;
-  const x0=Math.max(0,camX-40),x1=Math.min(EW,camX+VW+40),y0=Math.max(0,camY-40,(sp[0]-1)*ZC),y1=Math.min(EH,camY+VH+40,(sp[1]+1)*ZC);if(x1<=x0||y1<=y0)return;
-  ctx.drawImage(Z.tex,x0*0.25,y0*0.25,(x1-x0)*0.25,(y1-y0)*0.25,x0,y0,x1-x0,y1-y0);};
-{const _zc=v5ZoneCan;v5ZoneCan=function(){const Z=V5.Z,before=Z.lastThr,c=_zc();if(Z.lastThr!==before||!Z._dk){const a=Z._dk||(Z._dk=new Uint8Array(Z.h));
-    for(let cy=0;cy<Z.h;cy++){let any=0;for(let cx=0;cx<Z.w;cx++){const i=cy*Z.w+cx;if(Z.d[i]>Z.thr){any=1;break;}}a[cy]=any;}}return c;};}
-v5DrawDark=function(){const Z=V5.Z;if(!Z||!Z.tex)return;const c=v5ZoneCan(),x0=Math.max(0,Math.floor(camX/ZC)-1),x1=Math.min(Z.w,Math.ceil((camX+VW)/ZC)+1);
-  const sp=v51Span(Z._dk,Math.floor(camY/ZC)-1,Math.ceil((camY+VH)/ZC)+1);
-  if(sp&&x1>x0){const y0=Math.max(0,sp[0]-1),y1=Math.min(Z.h,sp[1]+1);ctx.imageSmoothingEnabled=true;ctx.drawImage(c,x0,y0,x1-x0,y1-y0,x0*ZC,y0*ZC,(x1-x0)*ZC,(y1-y0)*ZC);}
-  for(const cm of E.camps)if(cm.cave&&onScreen(cm.x,cm.y,80))v5DrawCave(cm.x,cm.y-30);};
-
-// part 3: SIEGE AI. v5 armies trickled out in small waves, got chewed up by night monsters and the other side's
-// trickle, and nobody ever reached an outpost. Now (after the opening) the AI masses a real army at a staging
-// point just past its own outposts, then marches it out in one go to siege the nearest enemy outpost / the HQ.
-// Every push makes the next one bigger. Rich AIs spend faster instead of sitting on capped resources.
-function v51Rich(side){const R=E.res[side],cap=E.storeCap[side]||ERES_CAP;let n=0;for(const k of ['mp','am','st','pt'])if((R[k]||0)>cap*0.55)n++;return n;}
-function v51Doctrine(side){return E.cfg.siegeAI!==false&&E.t>200;}
-function v51WaveSize(side,tt,D){let s=Math.min(16,2+Math.floor(tt/70*D.esc));if(!v51Doctrine(side))return s;const r=v51Rich(side);return Math.min(26,s+4+r*3);}
-function v51WaveGap(side){if(!v51Doctrine(side))return 1;const r=v51Rich(side);return r>=3?0.35:r>=2?0.5:r>=1?0.7:0.85;}
-function v51Stage(side){const dir=eDir(side),f=E.front[side];
-  // gather at home, just in front of our own wall: our outposts have to hold on their own while the army masses,
-  // so a won battle in the field can actually turn into a siege
-  return eRallyClamp(side,EW*(0.35+rnd()*0.3),f+dir*rr(160,260));}
-function v51Gather(side,A,D,t,k,at){if(!v51Doctrine(side))return null;const S=V51.ai[side];
-  const cap=Math.max(12,Math.round(D.cap*EUNIT_CAP));const need=Math.min(Math.round(cap*0.62),Math.round((16+S.pushes*4)*S.temper));
-  return {need,until:t+(110+S.pushes*10)*S.temper,mass:true};}
-// LANES: a launched army first slides along its own wall to a flank, then marches straight up that flank at one
-// enemy outpost - preferably the one farthest from where the enemy army is marching, so big armies can slip past
-// each other and you get real sieges (and base races) instead of an endless brawl in the middle of the map
-function v51PickLane(side){const es=1-side,ops=E.outposts.filter(o=>o.alive&&o.side===es&&o.home===es);if(!ops.length)return null;
-  const O=V51.ai[es];let avoid=null;if(O&&O.laneX!==undefined&&E.t-O.laneT<150)avoid=O.laneX;
-  if(avoid===null){let sx=0,n=0;for(const u of E.units)if(u.alive&&u.side===es&&u.ord==='push'&&!u.d.worker){sx+=u.x;n++;}if(n>=8)avoid=sx/n;}
-  let best=null,bs=-1e9;for(const o of ops){const sc=(avoid===null?Math.abs(o.x-EW/2)*0.6:Math.abs(o.x-avoid))+rnd()*160;if(sc>bs){bs=sc;best=o;}}return best;}
-function v51Launch(side,A,near){const S=V51.ai[side];S.pushes++;S.lastPush=E.t;S.sent+=near;V51.pushes=(V51.pushes||0)+1;
-  const op=v51PickLane(side);if(op){S.laneOp=op;S.laneX=op.x;S.laneT=E.t;const P=E.rally[side],dir=eDir(side),hy=P?P.y:E.front[side]+dir*200;
-    for(const u of E.units)if(u.alive&&u.side===side&&u.ord==='rally'&&!u.d.sup&&!u.d.worker&&!u.d.hero&&!u.opdef){u.lane=op;u.flank={x:clamp(op.x+rr(-45,45),24,EW-24),y:hy+dir*rr(0,60)};}}
-  if(side===1&&!E.auto)eInfo('⚠ THE ENEMY ARMY IS MARCHING ('+near+' TROOPS)');}
-{const _pg=ePushGoal;ePushGoal=function(u){const L=u.lane;if(L){if(L.alive&&L.side===1-u.side&&eHQShielded(1-u.side))return L;u.lane=null;}return _pg(u);};}
-// each AI gets a temper per match (some mass huge armies late, some hit early and often) so the two sides
-// never trade evenly forever
-function v51MkAI(){return{pushes:0,lastPush:0,sent:0,temper:0.7+rnd()*0.6,exploitT:0};}
-V51.ai=[v51MkAI(),v51MkAI()];
-{const _nm=eNewMatch;eNewMatch=function(c){_nm(c);V51.ai=[v51MkAI(),v51MkAI()];V51.pushes=0;};}
-// marching armies: anything that's out pushing keeps going for the siege target instead of drifting home,
-// and the camp-clearing / outpost-defence helpers can't strip a gathering army below what it needs
-{const _v3=eAIV3;eAIV3=function(side,A,D,t,k){if(A.gather&&A.gather.mass){const hurt=E.outposts.some(o=>o.alive&&o.side===side&&o.hurtT>0);if(!hurt)return false;}return _v3(side,A,D,t,k);};}
-// siege kit: once the doctrine starts, waves bring sappers + mortars + brutes for walls and forts
-{const _pw=ePickW;ePickW=function(side,w){if(w&&w.grunt!==undefined&&w.rifle!==undefined&&w.mortar!==undefined&&v51Doctrine(side)){w=Object.assign({},w);w.sapper=Math.max(w.sapper||0,1.4);w.mortar=Math.max(w.mortar||0,1.2);w.brute=Math.max(w.brute||0,1.2);}return _pw(side,w);};}
-// the AI also spends spare cash on upgrades sooner when it's sitting on full stores
-{const _st=eAIStep;eAIStep=function(side,dt){const A=E.ai[side];if(A&&A.init&&v51Doctrine(side)&&v51Rich(side)>=2){A.upT=Math.min(A.upT,E.t+2);A.uupT=Math.min(A.uupT,E.t+5);}return _st(side,dt);};}
-
-// momentum: when our marching army clearly wins the field (2:1 near the front of the fight), everyone gathering
-// joins the push right away, so a won battle turns into a siege instead of trickling back to a stalemate
-function v51Momentum(dt){if(G.result||E.freezeAI)return;for(const side of (E.auto?[0,1]:[1])){const S=V51.ai[side],A=E.ai[side];if(!S||!v51Doctrine(side))continue;S.exploitT-=dt;if(S.exploitT>0)continue;S.exploitT=4;
-  const dir=eDir(side);let lead=null,mine=0,theirs=0;for(const u of E.units)if(u.alive&&u.side===side&&u.ord==='push'&&!u.d.worker){if(!lead||(u.y-lead.y)*dir>0)lead=u;}
-  if(!lead)continue;for(const u of E.units){if(!u.alive||u.d.worker||Math.abs(u.y-lead.y)>520)continue;if(u.side===side&&u.ord==='push')mine++;else if(u.side===1-side)theirs++;}
-  if(mine>=10&&mine>=theirs*2&&A.gather&&A.gather.mass){let at=0;for(const u of E.units)if(u.alive&&u.side===side&&u.ord==='rally')at++;if(at>=6){v51Launch(side,A,at);eOrder(side,'charge');A.gather=null;S.exploits=(S.exploits||0)+1;}}}}
-{const _s=v5Step;v5Step=function(dt){_s(dt);v51Momentum(dt);};}
-// once every enemy outpost is down, marching armies go for the HQ itself (smashing the border wall on the way)
-{const _pg=ePushGoal;ePushGoal=function(u){const g=_pg(u);if(g)return g;if(!E.cfg.outposts||E.cfg.siegeAI===false)return null;const es=1-u.side;if(eHQShielded(es))return null;const h=E.hq[es];return h&&h.alive?h:null;};}
-// SUPPLY CUT: a side that has lost every outpost is under siege: income halves and its border wall rots,
-// so a won outpost war actually ends in an HQ fight instead of an endless wall brawl
-{const _im=eIncMult;eIncMult=function(side){const m=_im(side);return E&&E.cfg.outposts&&E.cfg.siegeAI!==false&&V51.cut&&V51.cut[side]?m*0.5:m;};}
-function v51SupplyStep(dt){if(!E.cfg.outposts||E.cfg.siegeAI===false||G.result)return;V51.cut=V51.cut||[false,false];
-  for(const s of [0,1]){const cut=eOutpostsLeft(s)===0;if(cut&&!V51.cut[s]){V51.cut[s]=true;E.rateT=0;banner(s===0?'⚠ SUPPLY CUT':'🔥 THEIR SUPPLY IS CUT',s===0?'NO OUTPOSTS LEFT · INCOME HALVED · YOUR WALL IS ROTTING':'NO OUTPOSTS LEFT · THEIR WALL ROTS · GO GET THE HQ',2.6);}
-    else if(!cut&&V51.cut[s]){V51.cut[s]=false;E.rateT=0;}
-    if(V51.cut[s])for(const w of E.structs)if(w.alive&&w.done&&w.side===s&&w.kind==='wall'){w.hp-=w.max*0.012*dt;if(w.hp<=0)eRaze(w,1-s);}}}
-{const _s=v5Step;v5Step=function(dt){_s(dt);v51SupplyStep(dt);};}
-{const _nm=eNewMatch;eNewMatch=function(c){V51.cut=[false,false];_nm(c);};}
-{const _de=eDeployErr;eDeployErr=function(side,type,x,y){const e=_de(side,type,x,y);if(e)return e;if(V51.cut&&V51.cut[side]&&!EU[type].sup){const cap=side===1||E.auto?Math.round((side===1?E.D:EDIFF.normal).cap*EUNIT_CAP):EUNIT_CAP;if(eUnitCount(side)+(EU[type].n||1)>cap*0.45)return'SUPPLY CUT · ARMY LIMIT HALVED';}return'';};}
-
-// part 4: ECONOMY. In v5 every resource sat at the 1500 cap by minute 7: dark-zone ambushes + night raiders paid out
-// ~6000 loot a minute (twice the whole building economy) and wood also came from every chop. Losses never hurt, so
-// nobody could ever out-trade the other side. Now loot is a nice bonus, not the economy, and wood has real uses.
-{const _cd=eCreatureDied;eCreatureDied=function(u,aside){const c=u.camp;if(!c||c.kind!=='ambush')return _cd(u,aside);
-  // replay v5's ambush payout, scaled down (raiders from the night only drop their own small loot)
-  const m=1+c.d*0.6,raid=u.raid!==undefined||!c.amb;const L={};for(const k in (u.d.loot||{}))L[k]=u.d.loot[k]*m*(raid?0.35:0.6);eGive(aside,L,u.x,u.y,false);
-  if(c.cleared||c.units.some(o=>o.alive&&o!==u))return;c.cleared=true;
-  if((aside===0||aside===1)&&!raid){const big={wd:14*m,mp:12*m,st:10*m,pt:8*m,am:8*m};if(c.d>0.8)for(const k in big)big[k]*=1.5;eGive(aside,big,c.x,c.y,true);V5.ambWon=(V5.ambWon||0)+1;}
-  if(c.amb)c.amb.t=E.t;};}
-// wood income: smaller logs, slower lumber camps
-EHQ.out.wd=0.15;EBLD.lumber.out={wd:0.2};
-// wood costs: soldiers' kit, siege gear, upgrades and walls all eat wood now
-const V51WOOD={grunt:4,rifle:5,gren:6,brute:10,sapper:10,mortar:15,barri:18,trap:8,tech:12,mason:30,scout:3,officer:8,drummer:6};
-for(const k in V51WOOD)if(EU[k])EU[k].cost.wd=Math.max(EU[k].cost.wd||0,V51WOOD[k]);
-for(const k in UPG)UPG[k].cost.wd=k==='dmg'?50:k==='arm'?60:40;
-if(typeof AGE_COST!=='undefined')for(const a in AGE_COST)if(AGE_COST[a])AGE_COST[a].wd=Math.round(60+(+a)*50);
-
-// part 5: WALLS. (a) the grey Lego border wall is now a dirt berm topped with sandbags + sharpened stakes
-// (Custom Game: wooden palisade, rough mossy stone, or no border wall). (b) buildable base walls: 🧱 WALLS button,
-// drag (or tap-tap) a line in your zone, add gates, upgrade wood to stone, remove. Enemies have to break through;
-// your own troops only pass through gates.
-function v51Skin(){return (E&&E.cfg&&E.cfg.borderSkin)||'berm';}
-const _v51ws=new Map();
-function v51BermSpr(skin,side,dmg){const key=skin+side+dmg;let c=_v51ws.get(key);if(c)return c;const R=mulberry32(side*7+dmg*13+skin.length*31);
-  c=outlined(60,40,30,23,SS,1.2,g=>{
-    if(skin==='palisade'){for(let i=0;i<8;i++){if(dmg>=3&&i%3===1)continue;const x=-26+i*7.4,h=(dmg>=2&&i%2?13:21)+R()*3;rr2(g,x-3.6,-h+7,7.2,h+5,2,i%2?'#a8703a':'#8a5a30');g.fillStyle='#6b4426';g.fillRect(x+0.6,-h+8,2.8,h+3);poly(g,[x-3.6,-h+8,x+3.6,-h+8,x,-h+1],'#d9a466');}
-      rr2(g,-29,-2,58,3,1.5,'#5a3d24');rr2(g,-29,6,58,3,1.5,'#5a3d24');rr2(g,-4,-17,8,4,1.5,ESIDECOL[side].body);return;}
-    if(skin==='mossy'){for(let r=0;r<2;r++)for(let i=0;i<4;i++){if(dmg>=3&&r===0&&i===2)continue;const x=-28+i*14+(r?7:0)-(r?7:0)*((i===3)?1:0),y=-10+r*10,w=13+R()*2;
-        poly(g,[x,y+9,x+1,y+1,x+w*0.5,y-1,x+w,y+1,x+w,y+9],r?'#7d7a70':'#8e8b80');poly(g,[x+w*0.5,y-1,x+w,y+1,x+w,y+9,x+w*0.6,y+9],r?'#68655c':'#77746a');
-        if(R()<0.7)ell(g,x+3+R()*w*0.6,y+1+R()*2,3+R()*3,1.6,'#5f9a3a');}
-      if(dmg>=1)line(g,-10,-9,-6,6,0.9,INK);if(dmg>=2){g.globalCompositeOperation='destination-out';circ(g,16,-10,5,'#000');g.globalCompositeOperation='source-over';}
-      rr2(g,-4,-14,8,4,1.5,ESIDECOL[side].body);return;}
-    // dirt berm: mounded earth (lit top, shaded front), sandbag row, sharpened stakes leaning out
-    poly(g,[-30,11,-26,1,-14,-3,14,-3,26,1,30,11],'#8a6238');poly(g,[-30,11,-27,6,27,6,30,11],'#6b4a2a');poly(g,[-26,1,-14,-3,14,-3,26,1,18,2,-18,2],'#a57a4a');
-    for(let i=0;i<5;i++)ell(g,-22+R()*44,5+R()*4,1.4+R(),0.9,'#5a3d24');
-    const nb=dmg>=3?3:dmg>=2?4:6;for(let i=0;i<6;i++){if(i>=nb&&i%2)continue;const x=-23+i*9.2;rr2(g,x-4.6,-9,9.2,6.5,3,i%2?'#c9b07a':'#d8c08a');line(g,x-3,-6,x+3,-6,0.6,'rgba(90,60,30,0.5)');g.fillStyle='rgba(255,255,255,0.25)';g.fillRect(x-3,-8.4,5,1.2);}
-    for(let i=0;i<4;i++){const x=-21+i*14+R()*3,sk=dmg>=2&&i%2;if(sk)continue;g.save();g.translate(x,-6);g.rotate(-0.55);rr2(g,-1.3,-13,2.6,13,1,'#8a5a30');poly(g,[-1.3,-13,1.3,-13,0,-17.5],'#e2c08a');g.fillStyle='#6b4426';g.fillRect(0.2,-12,1,11);g.restore();}
-    if(dmg>=1){for(let i=0;i<dmg*2;i++)ell(g,-24+R()*48,-1+R()*6,2.2,1.4,'#5a3d24');}
-    rr2(g,-4,-13,8,3.5,1.5,ESIDECOL[side].body);});
-  c.ax=30;c.ay=23;_v51ws.set(key,c);return c;}
-{const _ws=eWallSprite;eWallSprite=function(main,side,dmg,age){if(!E||!E.cfg)return _ws(main,side,dmg,age);const sk=v51Skin();if(sk==='classic')return _ws(main,side,dmg,age);return v51BermSpr(sk==='none'?'berm':sk,side,dmg||0);};}
-// no border wall: the main lines start knocked down
-{const _nm=eNewMatch;eNewMatch=function(c){_nm(c);V51.bw=[];V51.run=0;if(v51Skin()==='none'){for(const s of E.structs)if(s.kind==='wall'&&s.line&&s.line.main){s.alive=false;s.hp=0;}E.navV++;E.dirty=true;}};}
-if(typeof CUSTOM_SCHEMA!=='undefined')CUSTOM_SCHEMA.push({h:'🧱 WALLS'},{k:'borderSkin',l:'🧱 Border wall look',o:[['berm','DIRT BERM'],['palisade','PALISADE'],['mossy','MOSSY STONE'],['none','NO WALL']]});
-if(typeof CFG_MAIN!=='undefined'&&CFG_MAIN.borderSkin===undefined)CFG_MAIN.borderSkin='berm';
-// ---------- buildable base walls ----------
-const BW={seg:18,hp:{wood:240,stone:620},cost:{wood:{wd:6},gate:{wd:14,pt:4},stone:{st:10,wd:2}}};
-V51.bw=[];V51.run=0;
-function v51BWErr(side,x,y){const T=eTerritory(side);if(x<10||x>EW-10||y<T.y0+8||y>T.y1-8)return'OUTSIDE YOUR ZONE';
-  for(const o of E.obs)if(Math.hypot(o.x-x,o.y-y)<o.r+9)return'A TREE IS IN THE WAY';
-  for(const s of E.structs){if(!s.alive||s.kind==='tur')continue;if(Math.abs(s.x-x)<s.hw+9&&Math.abs(s.y-y)<s.hh+9)return s.kind==='bwall'?'WALL ALREADY THERE':'SOMETHING IS IN THE WAY';}return'';}
-function v51BWPlan(side,ax,ay,bx,by){const d=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.round(d/BW.seg)+1),out=[];
-  for(let i=0;i<n;i++){const t=n===1?0:i/(n-1),x=Math.round((ax+(bx-ax)*t)/2)*2,y=Math.round((ay+(by-ay)*t)/2)*2;out.push({x,y,err:v51BWErr(side,x,y)});}return out;}
-function v51BWBuild(side,ax,ay,bx,by,gate){const P=v51BWPlan(side,ax,ay,bx,by).filter(p=>!p.err),c=gate?BW.cost.gate:BW.cost.wood;if(!P.length)return'CAN\'T BUILD THERE';
-  const run=++V51.run;let n=0;const a=Math.atan2(by-ay,bx-ax);
-  for(const p of P){if(!eCan(side,c))break;ePay(side,c);const hp=BW.hp.wood*(gate?1.3:1)*LF;
-    const s=eAddStruct({kind:'bwall',side,x:p.x,y:p.y,hw:9,hh:7,hp,max:hp,run,gate:!!gate,mat:'wood',a,seed:(rnd()*1e9)|0});V51.bw.push(s);n++;}
-  E.navV++;if(!n)return eMissing(side,c);V51.built=(V51.built||0)+n;return'';}
-function v51BWHit(side,x,y){let b=null,bd=16;for(const s of V51.bw){if(!s.alive||s.side!==side)continue;const d=Math.hypot(s.x-x,s.y-y);if(d<bd){bd=d;b=s;}}return b;}
-function v51BWUp(side,s){const L=V51.bw.filter(w=>w.alive&&w.run===s.run&&w.mat==='wood');if(!L.length)return'ALREADY STONE';let n=0;
-  for(const w of L){if(!eCan(side,BW.cost.stone))break;ePay(side,BW.cost.stone);w.mat='stone';const f=w.hp/w.max;w.max=BW.hp.stone*(w.gate?1.3:1)*LF;w.hp=w.max*Math.max(f,0.8);w.flash=0.3;n++;}
-  return n?'':eMissing(side,BW.cost.stone);}
-function v51BWDel(side,s){const L=V51.bw.filter(w=>w.alive&&w.run===s.run);for(const w of L){w.alive=false;w.hp=0;const c=w.gate?BW.cost.gate:BW.cost.wood;for(const k in c)E.res[side][k]=Math.min(E.storeCap[side],E.res[side][k]+Math.floor(c[k]*0.5));}E.navV++;E.dirty=true;return L.length;}
-function v51BWGate(side,s){if(s.gate)return'';s.gate=true;E.navV++;return'';}
-{const _rz=eRaze;eRaze=function(s,aside){if(s.kind!=='bwall')return _rz(s,aside);if(!s.alive)return;s.alive=false;s.hp=0;E.dirty=true;E.navV++;
-  if(onScreen(s.x,s.y,80)){for(let i=0;i<8;i++){const a=rnd()*TAU,v=rr(50,170);const p=spawnP(CHUNK,s.x,s.y,Math.cos(a)*v,Math.sin(a)*v,rr(1.5,3),rr(3,6),s.mat==='stone'?'#9aa1a8':'#a8703a');if(p){p.z=4;p.vz=rr(90,220);}}sfx('crunch',s.x,s.y,0.7);}
-  if(aside!==s.side&&aside>=0)E.stats.razed[aside]++;};}
-// draw: wood = log stockade post, stone = block; gates = two posts + a swinging door that opens for your own troops
-function v51DrawBW(s){const st=s.mat==='stone',C=ESIDECOL[s.side],f=s.hp/s.max;
-  if(s.gate){let open=0;for(const u of E.units)if(u.alive&&u.side===s.side&&Math.abs(u.x-s.x)<26&&Math.abs(u.y-s.y)<26){open=1;break;}s.open=(s.open||0)+((open?1:0)-(s.open||0))*0.25;
-    for(const dx of [-8,8]){rr2(ctx,s.x+dx-2.5,s.y-15,5,17,1.5,INK);rr2(ctx,s.x+dx-1.8,s.y-14,3.6,15,1,st?'#a9b0b8':'#8a5a30');}
-    const w=13*(1-s.open*0.8);rr2(ctx,s.x-6.5,s.y-10,w,9,1.5,INK);rr2(ctx,s.x-6,s.y-9.5,w-1,8,1,st?'#7d858f':'#c98d52');ctx.fillStyle=C.body;ctx.fillRect(s.x-1.5,s.y-14,3,3);return;}
-  if(st){rr2(ctx,s.x-10,s.y-13,20,16,3,INK);rr2(ctx,s.x-9,s.y-12,18,7,2,'#c7ccd2');rr2(ctx,s.x-9,s.y-5,18,7,2,'#9aa1a8');line(ctx,s.x,s.y-5,s.x,s.y+2,0.8,'#7d858f');}
-  else{for(const dx of [-6,0,6]){rr2(ctx,s.x+dx-3.4,s.y-16,6.8,18,2,INK);rr2(ctx,s.x+dx-2.6,s.y-15,5.2,16,1.5,'#a8703a');poly(ctx,[s.x+dx-2.6,s.y-14.5,s.x+dx+2.6,s.y-14.5,s.x+dx,s.y-19],'#e2c08a');}}
-  if(f<0.5){ctx.strokeStyle=INK;ctx.lineWidth=0.9;ctx.beginPath();ctx.moveTo(s.x-4,s.y-11);ctx.lineTo(s.x+1,s.y-5);ctx.lineTo(s.x-2,s.y);ctx.stroke();}
-  if(s.flash>0){ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(255,255,255,0.4)';ctx.fillRect(s.x-10,s.y-16,20,18);ctx.globalCompositeOperation='source-over';}
-  if(s.hp<s.max)eBar(s.x,s.y-22,16,f,C.hp);}
-// wall-mode UI
-(function(){const o=$('orders');if(!o)return;const b=document.createElement('button');b.id='wallBtn';b.className='obtn';b.innerHTML='🧱<small>WALLS</small>';o.appendChild(b);b.addEventListener('click',()=>v51WallMode(!V51.wm));
-  const bar=document.createElement('div');bar.id='wallBar';bar.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:150px;z-index:40;display:none;gap:6px;padding:6px 8px;border-radius:14px;background:rgba(20,16,30,.88);border:2px solid #000;font:900 11px system-ui;color:#fff;flex-wrap:wrap;justify-content:center;max-width:94vw';
-  bar.innerHTML=[['wall','🧱 WALL'],['gate','🚪 GATE'],['stone','⬆ STONE'],['del','✖ REMOVE'],['done','✔ DONE']].map(a=>'<button data-w="'+a[0]+'" style="font:900 11px system-ui;padding:7px 9px;border-radius:10px;border:2px solid #000;background:#ffe27a;color:#2b1d14">'+a[1]+'</button>').join('')+'<div id="wallTip" style="width:100%;text-align:center;font-size:10px;opacity:.85">DRAG A LINE IN YOUR ZONE · 6 WOOD A PIECE</div>';
-  document.body.appendChild(bar);bar.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const w=t.dataset.w;if(w==='done')return v51WallMode(false);V51.wt=w;V51.wa=null;v51WallBar();sfx('blip');});})();
-function v51WallBar(){const bar=$('wallBar');if(!bar)return;bar.style.display=V51.wm?'flex':'none';for(const b of bar.querySelectorAll('button'))b.style.background=b.dataset.w===V51.wt?'#a6ec6a':'#ffe27a';
-  const tip={wall:'DRAG A LINE IN YOUR ZONE (OR TAP TWO ENDS) · 6 WOOD A PIECE',gate:'DRAW A GATE (14 WOOD + 4 PARTS A PIECE) OR TAP A WALL TO MAKE IT A GATE',stone:'TAP A WALL: THE WHOLE LINE TURNS TO STONE (10 STONE + 2 WOOD A PIECE)',del:'TAP A WALL TO REMOVE ITS LINE (HALF BACK)'}[V51.wt]||'';const t=$('wallTip');if(t)t.textContent=tip;
-  const wb=$('wallBtn');if(wb)wb.classList.toggle('on',!!V51.wm);}
-function v51WallMode(on){if(!E||state!=='playing')return;V51.wm=!!on;V51.wt=V51.wt||'wall';V51.wa=null;V51.drag=null;if(on){E.sel=-1;if(E.place)eCancelPlace();eInfo('🧱 WALLS · DRAG A LINE INSIDE YOUR GREEN ZONE');}v51WallBar();sfx('select');}
-function v51WallTap(wx,wy){const t=V51.wt||'wall';
-  if(t==='stone'||t==='del'||(t==='gate'&&!V51.wa&&v51BWHit(0,wx,wy))){const s=v51BWHit(0,wx,wy);if(!s){eInfo('TAP ONE OF YOUR WALLS');sfx('hit');return;}
-    const e=t==='stone'?v51BWUp(0,s):t==='del'?(v51BWDel(0,s),''):v51BWGate(0,s);if(e){eInfo(e);sfx('hit');}else{floatText(s.x,s.y-20,t==='stone'?'STONE!':t==='del'?'REMOVED':'GATE!','#ffe14d');sfx('pick',s.x,s.y,0.6);}return;}
-  if(!V51.wa){V51.wa={x:wx,y:wy};eInfo('NOW TAP THE OTHER END');return;}
-  const a=V51.wa;V51.wa=null;v51WallCommit(a.x,a.y,wx,wy,t==='gate');}
-function v51WallCommit(ax,ay,bx,by,gate){const e=v51BWBuild(0,ax,ay,bx,by,gate);if(e){eInfo(e);sfx('hit');}else{sfx('build');eInfo('🧱 '+(gate?'GATE':'WALL')+' UP · ENEMIES HAVE TO SMASH THROUGH');}}
-{const _tw=eTapWorld;eTapWorld=function(wx,wy){if(V51.wm)return v51WallTap(wx,wy);return _tw(wx,wy);};}
-{const _pt=ePointer;ePointer=function(ph,id,x,y){
-  if(V51.wm&&E&&state==='playing'){if(ph===0&&eZone(x,y)==='field'&&(V51.wt==='wall'||V51.wt==='gate')){const w=s2w(x,y);const T=eTerritory(0);if(w.y>T.y0&&w.y<T.y1&&!v51BWHit(0,w.x,w.y)){V51.drag={id,a:w,b:w,x0:x,y0:y,moved:false};return;}}
-    const D=V51.drag;if(D&&D.id===id){const w=s2w(x,y);D.b=w;if(Math.hypot(x-D.x0,y-D.y0)>12)D.moved=true;if(ph===2){V51.drag=null;if(D.moved){V51.wa=null;v51WallCommit(D.a.x,D.a.y,D.b.x,D.b.y,V51.wt==='gate');}else v51WallTap(D.a.x,D.a.y);}return;}}
-  return _pt(ph,id,x,y);};}
-function v51DrawWallUI(){if(!V51.wm)return;const T=eTerritory(0);ctx.fillStyle='rgba(166,236,106,0.08)';ctx.fillRect(0,T.y0,EW,T.y1-T.y0);
-  const D=V51.drag,a=D?D.a:V51.wa,b=D?D.b:null;if(!a)return;const P=b?v51BWPlan(0,a.x,a.y,b.x,b.y):[{x:a.x,y:a.y,err:''}];
-  for(const p of P){ctx.fillStyle=p.err?'rgba(255,80,60,0.55)':'rgba(255,225,77,0.6)';ctx.fillRect(p.x-8,p.y-7,16,14);}
-  if(b){const c=(V51.wt==='gate'?BW.cost.gate.wd:BW.cost.wood.wd)*P.filter(p=>!p.err).length;eTextW(c+' WOOD',(a.x+b.x)/2,Math.min(a.y,b.y)-16,11,E.res[0].wd>=c?'#ffe14d':'#ff6a5a');}}
-{const _r=eDrawMoveFx;eDrawMoveFx=function(){_r();v51DrawWallUI();};}
-// the AI fences its HQ front once it can afford it (so you get to break through walls too)
-function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side of (E.auto?[0,1]:[1])){const S=V51.ai[side];if(!S)continue;if(S.wT===undefined)S.wT=60+rnd()*60;S.wT-=dt;if(S.wT>0)continue;S.wT=50+rnd()*40;
-  const R=E.res[side];if(R.wd<140)continue;const n=V51.bw.filter(w=>w.alive&&w.side===side).length;if(n>=40)continue;const hq=E.hq[side];if(!hq||!hq.alive)continue;const dir=eDir(side);
-  const y=hq.y+dir*(hq.hh+60+rnd()*40),x0=hq.x-110-rnd()*40,x1=hq.x+110+rnd()*40;
-  if(!v51BWBuild(side,x0,y,hq.x-16,y,false)){v51BWBuild(side,hq.x-6,y,hq.x+6,y,true);v51BWBuild(side,hq.x+16,y,x1,y,false);}
-  else continue;if(R.st>300)for(const w of V51.bw)if(w.alive&&w.side===side&&w.mat==='wood'&&rnd()<0.3)v51BWUp(side,w);}}
-{const _s=v5Step;v5Step=function(dt){_s(dt);v51AIWalls(dt);for(const w of V51.bw)if(w.flash>0)w.flash-=dt;if(V51.bw.length>200)V51.bw=V51.bw.filter(w=>w.alive);};}
 
 
 })();
