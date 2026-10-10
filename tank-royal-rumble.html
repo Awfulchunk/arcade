@@ -3388,8 +3388,9 @@ function svHUD(){
   // status / hint line
   const why=svWhyStuck();ctx.font='bold 12px "Courier New",monospace';ctx.textAlign='center';
   const msg=SV.msgT>0?SV.msg:SV.ctl?'':(SV.sel===t?'TANK: TAP GROUND TO DRIVE • TAP ENEMY TO FIRE':SV.sel&&SV.sel.role?SV.sel.name+' ('+SV_RN[SV.sel.role]+'): TAP GROUND / HOUSE / ENEMY':'');
-  if(msg){const w=ctx.measureText(msg).width+16;ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(W/2-w/2,safe.t+6,w,18);ctx.fillStyle='#ffe066';ctx.fillText(msg,W/2,safe.t+19);}
-  if(why&&(SV.sel===t||SV.gas<=0||P.tracks<=0)){ctx.fillStyle='#ff6a4a';ctx.fillText('⚠ '+why,W/2,safe.t+38);}
+  const _bb=svBarButtons(),_my=(_bb.length?Math.min(..._bb.map(b=>b.y)):H-safe.b-50)-30-(TRR.on&&TRR.bmode?80:0); // TRR: messages sit just above the bottom bar, never over the HUD
+  if(msg){const mw=W-(W<520?120:200),mx=W<520?(W-100)/2+4:W/2;ctx.font='bold 11px "Courier New",monospace';const L=[];let cur='';for(const wd of String(msg).split(' ')){const tt=cur?cur+' '+wd:wd;if(ctx.measureText(tt).width>mw-14&&cur){L.push(cur);cur=wd;}else cur=tt;}if(cur)L.push(cur);const lines=L.slice(0,3),w=Math.min(mw,Math.max(...lines.map(l=>ctx.measureText(l).width))+16),hh=lines.length*14+6,yy=_my+20-hh;ctx.fillStyle='rgba(0,0,0,0.72)';ctx.fillRect(mx-w/2,yy,w,hh);ctx.fillStyle='#ffe066';lines.forEach((l,i)=>ctx.fillText(l,mx,yy+14+i*14));ctx.font='bold 12px "Courier New",monospace';}
+  if(why&&(SV.sel===t||SV.gas<=0||P.tracks<=0)){ctx.fillStyle='#ff6a4a';ctx.fillText('⚠ '+why,W<520?(W-100)/2+4:W/2,_my-40);}
   // bottom bar
   for(const b of svBarButtons()){const on=b.kind==='tank'?SV.sel===t:b.kind==='crew'?SV.sel===b.c:false;ctx.fillStyle=on?'rgba(90,70,10,0.9)':'rgba(8,10,12,0.82)';ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeStyle=on?'#ffd54a':'#000';ctx.lineWidth=2;ctx.strokeRect(b.x,b.y,b.w,b.h);
     ctx.textAlign='center';ctx.font='bold 11px "Courier New",monospace';
@@ -4507,9 +4508,9 @@ function svFlatExtra(){for(const b of SV.builds||[]){if(!onScreen(b.x,b.y,40))co
 // night overlay: low-res darkness canvas with light holes (crew, tank, headlight cone, campfires)
 let svNightCV=null;
 function svNight(){const dk=svDark();SV.darkNow=dk;if(dk<0.02)return;const lowG=C('gfx')==='low',sc=lowG?4:3,w=Math.ceil(W/sc),h=Math.ceil(H/sc);if(!svNightCV||svNightCV.width!==w||svNightCV.height!==h)svNightCV=mkCanvas(w,h);
-  const g=svNightCV.getContext('2d');g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,w,h);g.fillStyle='rgba(4,8,22,'+(0.86*dk).toFixed(3)+')';g.fillRect(0,0,w,h);g.globalCompositeOperation='destination-out';
+  const g=svNightCV.getContext('2d');g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,w,h);g.fillStyle='rgba(6,12,34,'+(0.86*dk*trrNightMul()).toFixed(3)+')';g.fillRect(0,0,w,h);g.globalCompositeOperation='destination-out';
   const z=svZ()/sc,hole=(x,y,R,a)=>{const p=svW2S(x,y),px=p[0]/sc,py=p[1]/sc,r=R*z;if(px<-r||py<-r||px>w+r||py>h+r)return;const gr=g.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,'rgba(0,0,0,'+a+')');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(px-r,py-r,r*2,r*2);};
-  const t=SV.tank;if(t.alive)hole(t.x,t.y,110,0.75);for(const c of SV.crew)if(!c.dead&&!c.inTank)hole(c.x,c.y,70,0.6);
+  const t=SV.tank;if(t.alive)hole(t.x,t.y,170,0.8);for(const c of SV.crew)if(!c.dead&&!c.inTank)hole(c.x,c.y,105,0.7);if(TRR.on)trrNightHoles(hole);
   for(const b of SV.builds||[])if(b.kind==='fire'&&b.life>0)hole(b.x,b.y,200+Math.sin(gameTime*9+b.x)*8,1);
   if(SV.lights&&t.alive){for(let i=1;i<=5;i++){const d=i*80;hole(t.x+Math.cos(t.body)*d,t.y+Math.sin(t.body)*d,50+i*18,0.95);}}
   for(const f of SV.fx)if(!f.sm&&f.col==='#ffd27a')hole(f.x,f.y,60,0.6);
@@ -5466,7 +5467,7 @@ function trrMenuBgStart(){if(trrMenuBgT)return;trrMenuBgT=1;let last_=performanc
 function trrPanelClose(){const p=document.getElementById('trrPanel');if(p)p.classList.remove('show');}
 
 // settings live inside the game root (under our menu layer): hide the menu while they are open, bring it back after
-setInterval(()=>{const so=$('settings');if(so&&so.classList.contains('show'))so.querySelectorAll('.su-cat').forEach(c=>{const n=c.querySelector('.su-nm');if(n&&/city maze/i.test(n.textContent))c.style.display='none';});if(so&&so.classList.contains('show')&&$('trrMenu').classList.contains('show')){trrMenuHide();TRR.menuAfterSet=1;}if(!TRR.menuAfterSet)return;const o=$('settings');if(o&&o.classList.contains('show'))return;TRR.menuAfterSet=0;if(!TRR.on)trrMenuShow();},300);
+setInterval(()=>{const so=$('settings');if(so&&so.classList.contains('show')&&$('trrMenu').classList.contains('show')){trrMenuHide();TRR.menuAfterSet=1;}if(!TRR.menuAfterSet)return;const o=$('settings');if(o&&o.classList.contains('show'))return;TRR.menuAfterSet=0;if(!TRR.on)trrMenuShow();},300);
 
 
 // ---- trr-10-world.js ----
@@ -5844,7 +5845,7 @@ function trrBlast(x,y,r,d,src){for(const p of trrAllPieces()){if(p.hp<=0||p.k===
 function trrNearFriend(x,y,r){const t=SV.tank;if(t.alive&&Math.abs(t.x-x)<r+t.r&&Math.abs(t.y-y)<r+t.r)return true;for(const c of SV.crew)if(!c.dead&&!c.inTank&&Math.abs(c.x-x)<r&&Math.abs(c.y-y)<r)return true;if(SV.surv)for(const s of SV.surv)if(s.atBase&&Math.abs(s.x-x)<r&&Math.abs(s.y-y)<r)return true;return false;}
 function trrTC(){for(const p of TRR.bld)if(p.k==='tc'&&p.hp>0)return p;return null;}
 function trrCovered(p){const tc=trrTC();return !!tc&&Math.abs(p.gx-tc.gx)<=4&&Math.abs(p.gy-tc.gy)<=4;}
-function trrUpkeepCost(){const c={};for(const p of TRR.bld){if(TRR_PK[p.k].fixed||!trrCovered(p))continue;const m=trrPieceCost(p.k,p.tier);for(const k in m)c[k]=(c[k]||0)+m[k]*0.02;}for(const k in c)c[k]=Math.ceil(c[k]);return c;}
+function trrUpkeepCost(){const c={};for(const p of TRR.bld){if(TRR_PK[p.k].fixed||!trrCovered(p))continue;const m=trrPieceCost(p.k,p.tier);for(const k in m)c[k]=(c[k]||0)+m[k]*0.01;}for(const k in c)c[k]=Math.ceil(c[k]);return c;}
 function trrBldTick(dt){if(!TRR.bld)return;let dirty=false;
  for(const p of TRR.bld){if((p.k==='door'||p.k==='gdoor')&&p.hp>0){const R=trrPieceRect(p),o=trrNearFriend(R[0]+R[2]/2,R[1]+R[3]/2,p.k==='gdoor'?70:46);if(o!==!!p.open){p.open=o;dirty=true;sfx('blip',R[0],R[1],0.3);}}if(p.hitT>0)p.hitT-=dt;}
  if(dirty||TRR.gridDirty)trrGridRebuild();
@@ -5961,7 +5962,7 @@ TRR_HOOK.apply.push(S=>{TRR.paint=S.paint||null;});
 // garage diagram (top-down, parts coloured by health)
 function trrPartCol(v){return v<=0?'#5a1a1a':v<35?'#e04a3a':v<70?'#e8b040':'#4ac070';}
 function trrDrawDiagram(cv){const g=cv.getContext('2d'),W_=cv.width,H_=cv.height,t=SV.tank,P=t.parts;g.setTransform(1,0,0,1,0,0);g.fillStyle='#141733';g.fillRect(0,0,W_,H_);g.strokeStyle='rgba(120,140,255,.1)';for(let x=0;x<W_;x+=20){g.beginPath();g.moveTo(x,0);g.lineTo(x,H_);g.stroke();}for(let y=0;y<H_;y+=20){g.beginPath();g.moveTo(0,y);g.lineTo(W_,y);g.stroke();}
- const cx=W_*0.42,cy=H_/2,s=Math.min(W_,H_)/200;g.save();g.translate(cx,cy);g.scale(s,s);g.lineWidth=2;g.strokeStyle='#000';
+ const cx=W_*0.5,cy=H_/2+6,s=Math.min(W_/360,H_/160);g.save();g.translate(cx,cy);g.scale(s,s);g.lineWidth=2;g.strokeStyle='#000';
  const box=(k,x,y,w,h,lab,lx,ly)=>{g.fillStyle=trrPartCol(P[k]);g.fillRect(x,y,w,h);g.strokeRect(x,y,w,h);if(P[k]<=0){g.beginPath();g.moveTo(x+3,y+3);g.lineTo(x+w-3,y+h-3);g.moveTo(x+w-3,y+3);g.lineTo(x+3,y+h-3);g.strokeStyle='#fff';g.stroke();g.strokeStyle='#000';}
   if(!lab)return;g.strokeStyle='rgba(255,255,255,.45)';g.lineWidth=1;g.beginPath();g.moveTo(x+w/2,y+h/2);g.lineTo(lx,ly);g.stroke();g.lineWidth=2;g.strokeStyle='#000';g.fillStyle='#fff';g.font='bold 10px system-ui';g.textAlign=lx>0?'left':'right';g.fillText(lab+' '+Math.round(P[k])+'%',lx+(lx>0?3:-3),ly+4);};
  g.fillStyle='#3a4048';g.fillRect(-70,-34,140,68);g.strokeRect(-70,-34,140,68);
@@ -6046,7 +6047,7 @@ setInterval(trrTabsSync,300);
  let th=0,n=0;for(const c of SV.crew)if(!c.dead){th+=c.thirst||0;n++;}th=n?th/n:0;g.fillStyle='#9fb6ff';g.fillText('💧',x+5,y+28);g.fillStyle='#262a50';g.fillRect(x+22,y+25,64,6);g.fillStyle=th<30?'#ff6a4a':'#5ab0f0';g.fillRect(x+22,y+25,64*th/100,6);
  g.fillStyle='#ffd54a';g.textAlign='right';g.fillText('DAY '+TRR.day+' · '+trrWxName(true),x+190,y+28);
  // arrow to base when it's off screen
- const B=TRR.base;if(B){svIsoSetup();const p=isoS(B.x,B.y,0);if(p[0]<20||p[0]>W-20||p[1]<70||p[1]>H-90){const cx=W/2,cy=H/2,a=Math.atan2(p[1]-cy,p[0]-cx),r=Math.min(W,H)*0.42,ax=clamp(cx+Math.cos(a)*r,30,W-30),ay=clamp(cy+Math.sin(a)*r,90,H-110);
+ const B=TRR.base;if(B&&!TRR.cfg.br){svIsoSetup();const p=isoS(B.x,B.y,0);if(p[0]<20||p[0]>W-20||p[1]<70||p[1]>H-90){const cx=W/2,cy=H/2,a=Math.atan2(p[1]-cy,p[0]-cx),r=Math.min(W,H)*0.42,ax=clamp(cx+Math.cos(a)*r,30,W-30),ay=clamp(cy+Math.sin(a)*r,90,H-110);
    g.translate(ax,ay);g.fillStyle='rgba(255,213,74,0.85)';g.font='15px sans-serif';g.textAlign='center';g.fillText('🏠',0,-14);g.rotate(a);g.beginPath();g.moveTo(10,0);g.lineTo(-6,-7);g.lineTo(-6,7);g.closePath();g.fill();}}
  g.restore();for(const f of TRR_HOOK.hud)f();};}
 
@@ -6069,7 +6070,7 @@ function trrSpawnSpot(dmin,dmax,test){const t=SV.tank;for(let k=0;k<30;k++){cons
 function trrInTown(x,y){for(const T of SV.map.towns)if(x>T.x0-100&&x<T.x1+100&&y>T.y0-100&&y<T.y1+100)return T;return null;}
 function trrAmbient(){const night=svIsNight(),C_=TRR.cfg;const zMul=C_.zombies==='off'?0:C_.zombies==='lots'?2:1,aMul=C_.animals==='off'?0:1;
  // zombies: a few by day, hordes at night (mostly in towns)
- const zw=Math.round((night?24:7)*zMul),zn=trrCountNear(e=>e.kind==='zombie',2200);if(zn<zw){const s=trrSpawnSpot(520,950,(x,y)=>night||trrInTown(x,y)||rnd()<0.3);if(s){const n=night?3+((rnd()*4)|0):1+((rnd()*2)|0),P={wp:[[s[0],s[1]]],wpi:0,path:null,alert:0};for(let i=0;i<n;i++)trrMkNpc('zombie','zombie',s[0]+rr(-30,30),s[1]+rr(-30,30),P);}}
+ const zw=Math.round((night?16:6)*zMul*((TRR.playT||0)<600?0.6:1)),zn=trrCountNear(e=>e.kind==='zombie',2200);if(zn<zw){const s=trrSpawnSpot(520,950,(x,y)=>night||trrInTown(x,y)||rnd()<0.3);if(s){const n=night?2+((rnd()*3)|0):1+((rnd()*2)|0),P={wp:[[s[0],s[1]]],wpi:0,path:null,alert:0};for(let i=0;i<n;i++)trrMkNpc('zombie','zombie',s[0]+rr(-30,30),s[1]+rr(-30,30),P);}}
  if(aMul){if(trrCountNear(e=>e.kind==='deer',2400)<6){const s=trrSpawnSpot(600,1100,(x,y)=>svForest((x/400)|0,(y/400)|0));if(s){const P={wp:[[s[0],s[1]]],wpi:0};for(let i=0;i<3+((rnd()*3)|0);i++)trrMkNpc('deer','deer',s[0]+rr(-40,40),s[1]+rr(-40,40),P);}}
   if(trrCountNear(e=>e.kind==='wolf',2400)<(night?8:4)){const s=trrSpawnSpot(650,1100,(x,y)=>svForest((x/400)|0,(y/400)|0)||night);if(s){const P={wp:[[s[0],s[1]]],wpi:0};for(let i=0;i<3+((rnd()*3)|0);i++)trrMkNpc('wolf','wild',s[0]+rr(-30,30),s[1]+rr(-30,30),P);}}
   if(trrCountNear(e=>e.kind==='bear',2600)<1&&rnd()<0.5){const s=trrSpawnSpot(700,1200,(x,y)=>svForest((x/400)|0,(y/400)|0));if(s)trrMkNpc('bear','wild',s[0],s[1]);}}
@@ -6193,7 +6194,9 @@ function trrRivUpdate(r,dt){r.reload=Math.max(0,r.reload-dt);r.recoil=Math.max(0
  if(!r.alive||r.bailed){r.seen=svVisible(r.x,r.y)||r.wasSeen?1:0;if(r.seen)r.wasSeen=1;if(r.wreck&&rnd()<dt*(r.stripped?1:4))SV.fx.push({x:r.x+rr(-6,6),y:r.y+rr(-6,6),vx:rr(-4,4),vy:rr(-20,-10),t:2,m:2,col:'#1e1e1e',size:4,sm:1});return;}
  r.asleep=svRivAsleep(r);r.seen=!r.asleep&&svVisible(r.x,r.y)?1:0;if(r.seen)r.wasSeen=1;
  if(r.asleep){trrRivOffscreen(r,dt);return;}
- r.tT=(r.tT||0)-dt;if(r.tT<=0){r.tT=0.6;if(!r.tgt||!trrAlive(r.tgt)||Math.hypot(r.tgt.x-r.x,r.tgt.y-r.y)>640)r.tgt=trrRivTarget(r);if(r.agg&&r.aggT>0&&trrAlive(r.agg)&&Math.hypot(r.agg.x-r.x,r.agg.y-r.y)<700)r.tgt=r.agg;}
+ r.tT=(r.tT||0)-dt;if(r.tT<=0){r.tT=0.6;if(!r.tgt||!trrAlive(r.tgt)||Math.hypot(r.tgt.x-r.x,r.tgt.y-r.y)>640)r.tgt=trrRivTarget(r);if(r.agg&&r.aggT>0&&trrAlive(r.agg)&&Math.hypot(r.agg.x-r.x,r.agg.y-r.y)<700)r.tgt=r.agg;
+  // raiders came for your BASE: they leave your tank alone unless you shoot them
+  if(r.mission==='raid'&&r.raidOn===TRR&&r.tgt===SV.tank&&!(r.agg===SV.tank&&r.aggT>0))r.tgt=null;}
  r.aggT=(r.aggT||0)-dt;r.pathT-=dt;const B=r.fB,tg=r.tgt;
  // coax MG at people on foot
  if(r.mgT<=0){let ct=null,cd=300;for(const c of SV.crew){if(c.dead||c.inTank||c.inside||c.searching||r.peace)continue;const d=Math.hypot(c.x-r.x,c.y-r.y);if(d<cd*svStealth(c)*svSeeMul(c)&&svRivSees(r,c.x,c.y,cd)){cd=d;ct=c;}}
@@ -6203,9 +6206,9 @@ function trrRivUpdate(r,dt){r.reload=Math.max(0,r.reload-dt);r.recoil=Math.max(0
   if(off<0.09&&(tg.rival||tg===SV.tank||d>60))trrRivShoot(r,tg.x,tg.y,tg.rival||tg===SV.tank?0.04:0.07);}
  else{// missions
   if(r.hp<r.maxHp*0.4||r.gas<15)r.mission='home';
-  if(r.mission==='raid'&&r.raidOn){const tB=r.raidOn,tx=tB.x,ty=tB.y,d=Math.hypot(tx-r.x,ty-r.y);if(d>360){if(r.pathT<=0){r.pathT=4;svRivGo(r,tx+rr(-120,120),ty+rr(-120,120),1);}}
-   else{r.path=null;const p=trrNearPiece(r.x,r.y,tB===TRR?'p':tB.fac,520);if(p){const off=svRivAim(r,p._x,p._y,dt);if(off<0.1)trrRivShoot(r,p._x,p._y,0.05);}else{r.mission='home';r.raidOn=null;}}
-   r.raidT=(r.raidT||0)+dt;if(r.raidT>150){r.mission='home';r.raidOn=null;}}
+  if(r.mission==='raid'&&r.raidOn){const tB=r.raidOn,tP=tB===TRR?TRR.base:tB,tx=tP.x,ty=tP.y,d=Math.hypot(tx-r.x,ty-r.y),pc=d<900?trrNearPiece(r.x,r.y,tB===TRR?'p':tB.fac,Math.min(600,shellRange(r.T)*0.9)):null;if(!pc&&d>360){if(r.pathT<=0){r.pathT=4;svRivGo(r,tx+rr(-120,120),ty+rr(-120,120),1);}}
+   else{r.path=null;const p=pc||trrNearPiece(r.x,r.y,tB===TRR?'p':tB.fac,520);if(p){const off=svRivAim(r,p._x,p._y,dt);if(off<0.1)trrRivShoot(r,p._x,p._y,0.05);}else{r.mission='home';r.raidOn=null;}}
+   r.raidAll=(r.raidAll||0)+dt;if(d<900)r.raidT=(r.raidT||0)+dt;if(r.raidT>150||r.raidAll>720){r.mission='home';r.raidOn=null;r.raidAll=0;}}
   else if(r.mission==='home'&&B){const d=Math.hypot(B.x-r.x,B.y-r.y);if(d>260){if(r.pathT<=0){r.pathT=4;svRivGo(r,B.x+rr(-150,150),B.y+BT*3+rr(0,120),1);}}else{r.path=null;r.hp=Math.min(r.maxHp,r.hp+r.maxHp*0.02*dt);r.gas=Math.min(100,r.gas+dt*2);for(const k in r.parts)r.parts[k]=Math.min(100,r.parts[k]+dt*3);if(r.hp>=r.maxHp*0.95)r.mission='patrol';}}
   else{r.mission='patrol';if(!r.path&&r.pathT<=0&&B){r.pathT=6;const a=rnd()*TAU,d=500+rnd()*900;svRivGo(r,clamp(B.x+Math.cos(a)*d,100,SVW-100),clamp(B.y+Math.sin(a)*d,100,SVH-100),1);}}
   r.turret+=clamp(angDiff(r.body,r.turret),-dt,dt);}
@@ -6227,7 +6230,7 @@ function trrRivShoot(r,x,y,spread){if(r.reload>0)return false;if(r.T.flame){if(M
 // rival tanks the player strips: in TRR you can CAPTURE an abandoned one (parks at your base)
 {const _sw=typeof svSwitchTank==='function'?svSwitchTank:null;if(_sw)svSwitchTank=function(r){if(!TRR.on)return _sw(r);if(trrParkCaptured(r)){r.stripped=true;svSay('🔁 CAPTURED '+TYPES[r.type].name+' - IT IS NOW PARKED AT YOUR BASE',3.5);return true;}return false;};}
 // far away: crude simulation so the world keeps moving
-function trrRivOffscreen(r,dt){if(r.mission==='raid'&&r.raidOn){const tB=r.raidOn,d=Math.hypot(tB.x-r.x,tB.y-r.y);if(d>300){const a=Math.atan2(tB.y-r.y,tB.x-r.x),s=30*dt;r.x+=Math.cos(a)*s;r.y+=Math.sin(a)*s;}else{r.raidT=(r.raidT||0)+dt;if(rnd()<dt*0.2){const p=trrNearPiece(r.x,r.y,tB===TRR?'p':tB.fac,600);if(p)trrPieceHurt(p,r.T.dmg*(tB===TRR&&trrRaidProt()?0.15:0.6),r);}if(r.raidT>150){r.mission='home';r.raidOn=null;}}}
+function trrRivOffscreen(r,dt){if(r.mission==='raid'&&r.raidOn){const tB=r.raidOn,tP=tB===TRR?TRR.base:tB,d=Math.hypot(tP.x-r.x,tP.y-r.y);r.raidAll=(r.raidAll||0)+dt;if(r.raidAll>720){r.mission='home';r.raidOn=null;r.raidAll=0;return;}if(d>300){const a=Math.atan2(tP.y-r.y,tP.x-r.x),s=30*dt;r.x+=Math.cos(a)*s;r.y+=Math.sin(a)*s;}else{r.raidT=(r.raidT||0)+dt;if(rnd()<dt*0.2){const p=trrNearPiece(r.x,r.y,tB===TRR?'p':tB.fac,600);if(p)trrPieceHurt(p,r.T.dmg*(tB===TRR&&trrRaidProt()?0.15:0.6),r);}if(r.raidT>150){r.mission='home';r.raidOn=null;}}}
  else if(r.fB){const B=r.fB,d=Math.hypot(B.x-r.x,B.y-r.y);if(d>300){const a=Math.atan2(B.y-r.y,B.x-r.x),s=30*dt;r.x+=Math.cos(a)*s;r.y+=Math.sin(a)*s;}else{r.hp=Math.min(r.maxHp,r.hp+r.maxHp*0.01*dt);}}}
 // ---- faction bases over time: level up, rebuild tanks, send raids, fall when their TC is destroyed ----
 function trrRaidProt(){if(TRR.cfg.raidProt===false)return false;const B=TRR.base,t=SV.tank;return Math.hypot(t.x-B.x,t.y-B.y)>1800;}
@@ -6235,16 +6238,16 @@ function trrFBTick(dt){if(!TRR.fbases)return;for(const B of TRR.fbases){B.t+=dt;
   const tc=B.bld.find(p=>p.k==='tc'&&p.hp>0);if(B.alive&&!tc){B.alive=false;B.deadT=480;svSay('🏴 THE '+B.name+' BASE HAS FALLEN!',4);sfx('big',B.x,B.y,0.5);trrDropLoot(B);}
   if(!B.alive){B.deadT-=dt;if(B.deadT<=0){B.alive=true;B.lvl=Math.max(1,B.lvl-1);trrPlace('tc',B.gx,B.gy,null,0,true,B);if(!B.bld.find(p=>p.k==='box'))trrPlace('box',B.gx,B.gy+1,null,0,true,B);svSay('📻 RADIO: THE '+B.name+' ARE REBUILDING',3);}continue;}
   // level up every ~7 minutes: stronger walls, better tanks, more turrets
-  if(B.t>420*B.lvl&&B.lvl<4){B.lvl++;for(const p of B.bld)if(!TRR_PK[p.k].fixed&&p.tier<Math.min(3,B.lvl)){p.tier=Math.min(3,B.lvl);p.hp=trrPieceHP(p);}if(B.lvl===3)trrPlace('turret',B.gx-1,B.gy+2,null,0,true,B);svSay('📻 RADIO: THE '+B.name+' UPGRADED THEIR BASE AND TANKS (LVL '+B.lvl+')',3.5);}
+  if(B.t>900*B.lvl&&B.lvl<4){B.lvl++;for(const p of B.bld)if(!TRR_PK[p.k].fixed&&p.tier<Math.min(3,B.lvl)){p.tier=Math.min(3,B.lvl);p.hp=trrPieceHP(p);}if(B.lvl===3)trrPlace('turret',B.gx-1,B.gy+2,null,0,true,B);svSay('📻 RADIO: THE '+B.name+' UPGRADED THEIR BASE AND TANKS (LVL '+B.lvl+')',3.5);}
   for(const p of B.bld)if(p.hp>0&&p.hp<trrPieceHP(p))p.hp=Math.min(trrPieceHP(p),p.hp+trrPieceHP(p)*0.004*dt);
   B.tankT-=dt;const want=B.lvl>=3?2:1;if(trrFBTanks(B)<want&&B.tankT<=0){B.tankT=200;trrMkFTank(B,trrFTankType(B));}
   // guards at home (only spawned while you're near)
   const t=SV.tank;if(Math.hypot(t.x-B.x,t.y-B.y)<2200){B.gT=(B.gT||0)-dt;if(B.gT<=0){B.gT=30;let n=0;for(const e of SV.inf)if(e.hp>0&&e.homeB===B)n++;if(n<3+B.lvl){const P={wp:[[B.x-100,B.y+BT*3],[B.x+300,B.y+BT*3],[B.x+300,B.y-60],[B.x-100,B.y-60]],wpi:0,path:null,alert:0};for(let i=0;i<2;i++){const e=trrMkNpc('crewman',B.fac,B.x+rr(-40,40),B.y+BT*3+rr(0,40),P);e.homeB=B;e.keep=1;}}}}
   // raids: pick a target (another crew or you)
-  B.raidT-=dt;if(B.raidT<=0){B.raidT=240+rnd()*240;const opts=TRR.fbases.filter(o=>o!==B&&o.alive);if(TRR.bld.filter(p=>!TRR_PK[p.k].fixed).length>=4&&TRR.cfg.raidsOnYou!==false)opts.push(TRR,TRR);const tB=opts[(rnd()*opts.length)|0];if(!tB)continue;
-   let sent=0;for(const r of SV.rivals)if(r.fB===B&&r.alive&&!r.bailed&&r.hp>r.maxHp*0.6){r.mission='raid';r.raidOn=tB;r.raidT=0;sent++;}
-   if(sent||rnd()<0.5){const near=Math.hypot(SV.tank.x-B.x,SV.tank.y-B.y)<3000||Math.hypot(SV.tank.x-tB.x,SV.tank.y-tB.y)<3000;if(near){const P={wp:[[tB.x,tB.y]],wpi:0,path:null,alert:5};for(let i=0;i<3;i++){const e=trrMkNpc('crewman',B.fac,B.x+rr(-40,40),B.y+BT*3+rr(0,40),P);e.raidB=tB===TRR?'p':tB.fac;e.at=i===0;e.keep=1;}}}
-   if(tB===TRR){TRR.raidAlert={by:B.name,t:20,fac:B.fac};svSay('⚠ RADIO: THE '+B.name+' ARE COMING TO RAID YOUR BASE!',5);sfx('alarm');}else if(rnd()<0.6)svSay('📻 RADIO: THE '+B.name+' ARE ATTACKING THE '+tB.name,3);}}
+  B.raidT-=dt;if(B.raidT<=0){B.raidT=240+rnd()*240;const opts=TRR.fbases.filter(o=>o!==B&&o.alive);if(trrCanRaidYou(B))opts.push(TRR);const tB=opts[(rnd()*opts.length)|0];if(!tB)continue;
+   let sent=0;for(const r of SV.rivals)if(r.fB===B&&r.alive&&!r.bailed&&r.hp>r.maxHp*0.6&&r.mission!=='raid'){r.mission='raid';r.raidOn=tB;r.raidT=0;r.raidAll=0;sent++;}
+   if(sent||rnd()<0.5){const tP=tB===TRR?TRR.base:tB;const near=Math.hypot(SV.tank.x-B.x,SV.tank.y-B.y)<3000||Math.hypot(SV.tank.x-tP.x,SV.tank.y-tP.y)<3000;if(near){const P={wp:[[tP.x,tP.y]],wpi:0,path:null,alert:5};for(let i=0;i<3;i++){const e=trrMkNpc('crewman',B.fac,B.x+rr(-40,40),B.y+BT*3+rr(0,40),P);e.raidB=tB===TRR?'p':tB.fac;e.at=i===0;e.keep=1;}}}
+   if(tB===TRR){TRR.lastRaidOnYou=SV.t;B.lastRaidOnYou=SV.t;TRR.raidAlert={by:B.name,t:20,fac:B.fac};svSay('⚠ RADIO: THE '+B.name+' ARE COMING TO RAID YOUR BASE!',5);sfx('alarm');}else if(rnd()<0.6)svSay('📻 RADIO: THE '+B.name+' ARE ATTACKING THE '+tB.name,3);}}
  // far-away war: hostile bases chip at each other
  TRR.warT=(TRR.warT||0)-dt;if(TRR.warT<=0){TRR.warT=45;const A=TRR.fbases.filter(B=>B.alive);if(A.length>1&&rnd()<0.5){const a=A[(rnd()*A.length)|0],b=A[(rnd()*A.length)|0];if(a!==b&&Math.hypot(SV.tank.x-b.x,SV.tank.y-b.y)>2600){const p=b.bld.filter(q=>q.hp>0&&q.k!=='found');const q=p[(rnd()*p.length)|0];if(q)trrPieceHurt(q,trrPieceHP(q)*0.3,null);}}}}
 function trrDropLoot(B){const M=SV.map;for(let i=0;i<4;i++){const x=B.x+rr(-60,60),y=B.y+rr(-20,80),k=((x/400)|0)+','+((y/400)|0);(M.XB[k]=M.XB[k]||[]).push({x,y,kind:'crate',mil:true,xid:'d'+(TRR.dropN=(TRR.dropN||0)+1),ang:0});}TRR.stash.metal=TRR.stash.metal||0;}
@@ -6257,7 +6260,7 @@ function trrDefTick(dt){const all=trrAllPieces();for(const p of all){if(p.hp<=0)
    if(own!=='player'){for(const c of SV.crew){if(c.dead||c.inTank)continue;const d=Math.hypot(c.x-x,c.y-y);if(d<bd&&svLos(x,y,c.x,c.y)){bd=d;best=c;}}const t=SV.tank;if(t.alive&&Math.hypot(t.x-x,t.y-y)<bd)best=t;}
    for(const r of SV.rivals||[]){if(!r.alive||r.bailed||!trrHostile(own,r.fac))continue;if(own==='player'&&!r.fac)continue;const d=Math.hypot(r.x-x,r.y-y);if(d<bd){bd=d;best=r;}}
    if(!best)continue;p.aim=Math.atan2(best.y-y,best.x-x);p.flash=0.08;const hit=rnd()<0.55;if(isoVis(x,y,300)){SV.tracers.push({x0:x,y0:y,x1:best.x+(hit?0:rr(-10,10)),y1:best.y+(hit?0:rr(-10,10)),t:0.07,en:own!=='player'?1:0});sfx('mg',x,y,0.15);}
-   if(hit){if(best===SV.tank)svHurtTank(3,0.01,null);else if(best.role)svCrewHurt(best,rr(6,10));else if(best.rival)svRivHurt(best,6,{fac:own,x,y});else trrNpcHurt(best,rr(10,15),{fac:own,x,y});}
+   if(hit){if(best===SV.tank)svHurtTank(3,0.01,null);else if(best.role)svCrewHurt(best,rr(6,10));else if(best.rival)svRivHurt(best,own==='player'?22:12,{fac:own,x,y});else trrNpcHurt(best,rr(10,15),{fac:own,x,y});}
    if(own==='player'){p.shots=(p.shots||0)+1;if(p.shots%25===0)TRR.stash.ammo=Math.max(0,(TRR.stash.ammo||0)-1);}}
   else if(p.k==='spike'||p.k==='mine'){const R=trrPieceRect(p),x=R[0]+60,y=R[1]+60;if(Math.abs(x-SV.tank.x)+Math.abs(y-SV.tank.y)>2400)continue;
    for(const e of SV.inf){if(e.hp<=0||!trrHostile(own,e.fac)||Math.abs(e.x-x)>36||Math.abs(e.y-y)>36)continue;p.seen=1;if(p.k==='spike'){trrNpcHurt(e,26*dt*3,{fac:own,x,y});}else{trrMineBoom(p,x,y);break;}}
@@ -6289,10 +6292,16 @@ TRR_HOOK.apply.push(S=>{TRR._fbS=S.fb;TRR._ftS=S.ftanks;});
 TRR_HOOK.start.push(loaded=>{if(!loaded||!TRR._fbS)return;for(const q of TRR._fbS){const B=trrFBase(q.fac);if(!B)continue;Object.assign(B,{alive:q.alive,lvl:q.lvl,t:q.t,deadT:q.deadT});B.bld=q.bld.map(p=>Object.assign({own:B.fac,id:0,t:0},p));}
  for(const q of TRR._ftS||[]){const B=trrFBase(q.fac);if(!B)continue;const r=trrMkFTank(B,q.type);r.x=q.x;r.y=q.y;r.hp=q.hp;}TRR._fbS=null;TRR.gridDirty=true;trrGridRebuild();});
 
+// raids on YOU: not in your first 12 minutes, at most one every 6 minutes overall and 12 per crew, only once you have a real base with a tool cupboard
+function trrCanRaidYou(B){if(TRR.cfg.raidsOnYou===false)return false;if((TRR.playT||0)<720)return false;if(!TRR.bld.some(p=>p.k==='tc'&&p.hp>0))return false;if(TRR.bld.filter(p=>!TRR_PK[p.k].fixed).length<4)return false;
+ if(TRR.lastRaidOnYou!=null&&SV.t-TRR.lastRaidOnYou<360)return false;if(SV.rivals.some(r=>r.alive&&!r.bailed&&r.raidOn===TRR))return false;if(B.lastRaidOnYou!=null&&SV.t-B.lastRaidOnYou<720)return false;return true;}
+TRR_HOOK.tick.push(dt=>{TRR.playT=(TRR.playT||0)+dt;});
+TRR_HOOK.snap.push(o=>{o.playT=TRR.playT|0;});TRR_HOOK.apply.push(S=>{TRR.playT=S.playT||0;});
+
 
 // ---- trr-70-survivors.js ----
 // ===================== TRR survivors (rescue popup) + base workers with jobs =====================
-const TRR_JOBS={idle:['😴','Resting','Does nothing. Still eats.'],farmer:['🌱','Farmer','Veggie patches grow twice as fast.'],water:['💧','Water carrier','Brings 1 water every minute (more with a rain barrel).'],wood:['🪵','Woodcutter','Brings 1 wood every 40 seconds.'],stone:['🪨','Miner','Brings 1 stone every 50 s, sometimes metal.'],mech:['🔧','Mechanic','Slowly fixes parked tanks and base walls.'],craft:['🛠','Crafter','Crafting goes 50% faster.'],guard:['🛡','Guard','Walks around the base with a rifle and shoots raiders.']};
+const TRR_JOBS={idle:['😴','Resting','Does nothing. Still eats.'],farmer:['🌱','Farmer','Veggie patches grow twice as fast.'],water:['💧','Water carrier','Brings 1 water every minute (more with a rain barrel).'],wood:['🪵','Woodcutter','Brings 1 wood every 30 seconds.'],stone:['🪨','Miner','Brings 1 stone every 50 s, sometimes metal.'],mech:['🔧','Mechanic','Slowly fixes parked tanks and base walls.'],craft:['🛠','Crafter','Crafting goes 50% faster.'],guard:['🛡','Guard','Walks around the base with a rifle and shoots raiders.']};
 function trrWorkerCap(){let b=0;for(const p of TRR.bld)if(p.k==='bed'&&p.hp>0)b++;return 2+b*2;}
 function trrSurvPop(s,origin){const room=SV.crew.some(c=>c.dead&&c.i<4)||SV.crew.length<6,wroom=TRR.workers.length<trrWorkerCap();const nm=SV_NAMES[(rnd()*SV_NAMES.length)|0];
  trrPopup('You found a survivor: '+nm,`<p>${SV_RN[s.role]} · scared but alive. What do you want to do?</p><p style="font-size:12px">Crew: ${SV.crew.filter(c=>!c.dead).length}/6 · Base workers: ${TRR.workers.length}/${trrWorkerCap()} (more sleeping bags = more room)</p>`,
@@ -6306,8 +6315,8 @@ function trrWorkerBody(w){const B=TRR.base,t=SV.tank;if(Math.hypot(t.x-B.x,t.y-B
 function trrWorkerTick(dt){const B=TRR.base,t=SV.tank,near=Math.hypot(t.x-B.x,t.y-B.y)<2600;const farms=TRR.bld.filter(p=>p.k==='farm'&&p.hp>0),wells=TRR.bld.filter(p=>p.k==='well'&&p.hp>0).length;
  for(const w of TRR.workers){w.t+=dt;const body=SV.inf.find(e=>e.wk===w);if(body){w.hp=body.hp;if(body.hp<=0){w.dead=1;svSay('☠ YOUR WORKER '+w.name+' WAS KILLED',3);continue;}const want=w.job==='guard'?'guard':'worker';if(body.kind!==want){body.kind=want;body.K=TRR_NPC[want];body.uni=want==='guard'?'#56603a':'#7a6a4a';}}
   else if(near&&TRR.state!=='dead')trrWorkerBody(w);
-  if(w.starving)continue;const S=TRR.stash,give=(k,n)=>{S[k]=(S[k]||0)+n;};
-  switch(w.job){case 'water':if(w.t>=60/(1+wells*0.5)){w.t=0;give('water',1);}break;case 'wood':if(w.t>=40){w.t=0;give('wood',1);}break;case 'stone':if(w.t>=50){w.t=0;give('stone',1);if(rnd()<0.3)give('metal',1);}break;
+  if(w.starving||w.hurtT)continue;const S=TRR.stash,give=(k,n)=>{S[k]=(S[k]||0)+n;};
+  switch(w.job){case 'water':if(w.t>=60/(1+wells*0.5)){w.t=0;give('water',1);}break;case 'wood':if(w.t>=30){w.t=0;give('wood',1);}break;case 'stone':if(w.t>=50){w.t=0;give('stone',1);if(rnd()<0.3)give('metal',1);}break;
    case 'farmer':for(const p of farms)p.t+=dt/Math.max(1,TRR.workers.filter(q=>q.job==='farmer').length)*Math.min(1,TRR.workers.filter(q=>q.job==='farmer').length);w.t=0;break;
    case 'mech':if(w.t>=10){w.t=0;for(const q of TRR.tanks){const mx=TYPES[q.type].hp;if(q.hp<mx){q.hp=Math.min(mx,q.hp+mx*0.02);break;}}const p=TRR.bld.find(p=>p.hp>0&&p.hp<trrPieceHP(p));if(p)p.hp=Math.min(trrPieceHP(p),p.hp+trrPieceHP(p)*0.05);}break;
    case 'craft':if(TRR.q&&TRR.q.length)TRR.q[0].left-=dt*0.5/Math.max(1,TRR.workers.filter(q=>q.job==='craft').length)*Math.min(2,TRR.workers.filter(q=>q.job==='craft').length);w.t=0;break;default:w.t=0;}}
@@ -6435,6 +6444,56 @@ TRR_HOOK.hud.push(()=>{if(!TRR.cfg.sleep&&!TRR.cfg.sick)return;const L=SV.crew.f
 TRR_HOOK.tick.push(()=>{if(TRR.cfg.br)return;const k='tankRoyalRumble.bestDay',b=+(localStorage.getItem(k)||0);if(TRR.day>b)try{localStorage.setItem(k,String(TRR.day));}catch(_){}});
 
 
+// ---- trr-85-polish.js ----
+// ===================== TRR 2.1.1 polish: night brightness, settings, kill credit, BR without base, build feedback =====================
+// ---- night: moody but playable; player picks how dark (Settings > Graphics > Night brightness) ----
+const TRR_NIGHT={dark:0.82,normal:0.62,bright:0.44};
+function trrNightMul(){return TRR.on?(TRR_NIGHT[settings.trrNight]||TRR_NIGHT.normal):1;}
+function trrNightHoles(hole){const B=TRR.base;if(B&&!TRR.cfg.br)hole(B.x,B.y,280,0.55);for(const F of TRR.fbases||[])if(F.alive)hole(F.x+BT,F.y+BT,240,0.45);for(const p of TRR.bld)if(p.k==='turret'&&p.flash>0){const R=trrPieceRect(p);hole(R[0]+60,R[1]+60,80,0.6);}if(TRR.ad&&TRR.ad.ph===2)hole(TRR.ad.x,TRR.ad.y,120,0.6);}
+// ---- settings: no City Maze section in Rumble; add Night brightness ----
+{const _s=suTankSpec;suTankSpec=function(){const S=_s();if(!TRR.on&&!document.getElementById('trrMenu'))return S;S.cats=S.cats.filter(c=>c.id!=='maze');let g=S.cats.find(c=>c.id==='graphics');if(!g){g={id:'graphics',name:'Graphics',icon:'✨',items:[]};S.cats.push(g);}
+ g.items.push({k:'trrNight',l:'Night brightness',d:'How dark the night gets. Bright = easier to see, Dark = scarier.',t:'opt',o:[['bright','Bright'],['normal','Normal'],['dark','Dark']],th:'shadows',get:()=>settings.trrNight||'normal',set:v=>{settings.trrNight=v;saveSettings();}});return S;};}
+// ---- kill credit: only YOUR shots/turrets/bombs count. Rival-vs-rival kills give you nothing ----
+{const _f=svFloat;svFloat=function(x,y,t,c){if(TRR.noCredit&&typeof t==='string'&&/KILL|\+\d/.test(t))return;return _f(x,y,t,c);};}
+{const _rh=svRivHurt;svRivHurt=function(r,dmg,src){if(!TRR.on)return _rh(r,dmg,src);const byP=!src||src===SV.tank||src.fac==='player'||(src.x!=null&&src.riv==null&&!src.fac&&!src.K&&!src.rival);if(byP)return _rh(r,dmg,src);
+ const k=SV.kills,rk=SV.stats.rivKills||0,tk=TRR.tankKills||0;TRR.noCredit=true;try{_rh(r,dmg,src);}finally{TRR.noCredit=false;}SV.kills=k;SV.stats.rivKills=rk;TRR.tankKills=tk;};}
+{const _d=trrNpcDied;trrNpcDied=function(e,src){if(src&&src!=='p'&&src.fac!=='player'){TRR.noCredit=true;try{_d(e,src);}finally{TRR.noCredit=false;}return;}return _d(e,src);};}
+// ---- battle royale: no home base, no tool cupboard, no stash ----
+TRR_HOOK.start.push(loaded=>{if(!TRR.cfg.br)return;TRR.bld=[];TRR.workers=[];TRR.gridDirty=true;trrGridRebuild();});
+{const _ab=trrAtBase;trrAtBase=function(x,y){if(TRR.cfg.br||!TRR.base)return false;return _ab(x,y);};}
+{const _po=trrPanelOpen;trrPanelOpen=function(id){if(TRR.cfg.br&&(id==='build'||id==='base')){svSay('NO BASE IN BATTLE ROYALE - JUST SURVIVE',2);id='pack';}return _po(id);};}
+TRR_HOOK.tick.push(()=>{if(!TRR.cfg.br)return;for(const id of ['build','base']){const b=document.getElementById('trrTab_'+id);if(b&&b.style.display!=='none')b.style.display='none';}});
+TRR_HOOK.start.push(()=>{if(TRR.cfg.br)return;for(const id of ['build','base']){const b=document.getElementById('trrTab_'+id);if(b)b.style.display='';}});
+// ---- building: never fail invisibly. Red ghost + reason for every blocked spot, prefabs included ----
+function trrCanAfford(c){for(const k in c)if(trrHave(k)<c[k])return false;return true;}
+function trrPrefabCheck(id,gx,gy){const P=TRR_PREFAB[id];if(!P)return 'Unknown';for(const q of P.p){if(q[0]!=='found')continue;const x=gx+q[1],y=gy+q[2];if(!trrFoundAt(x,y)&&!trrTileFree(x,y))return 'Blocked here (trees, rocks, houses or water)';}
+ if(TRR.fbases)for(const B of TRR.fbases)if(B.alive&&Math.hypot(gx*BT+60-B.x,gy*BT+60-B.y)<B.r+160)return 'Too close to '+B.name;
+ for(const q of P.p)if(q[0]!=='found'&&TRR_PK[q[0]]&&TRR_PK[q[0]].edge&&trrPieceAt(q[0],gx+q[1],gy+q[2],q[3]))return 'Overlaps something you built';
+ if(!trrCanAfford(P.c))return 'Need '+trrCostTxt(P.c);return '';}
+function trrPrefabSize(id){const P=TRR_PREFAB[id];let w=1,h=1;for(const q of P.p){if(q[0]!=='found')continue;w=Math.max(w,q[1]+1);h=Math.max(h,q[2]+1);}return[w,h];}
+{const _a=trrBuildAim;trrBuildAim=function(wx,wy){_a(wx,wy);const G=TRR.bghost,M=TRR.bmode;if(!G||!M||M.tool)return;if(M.pre)G.why=trrPrefabCheck(M.pre,G.gx,G.gy);else if(!G.why){const c=trrPieceCost(M.k,M.tier);if(!trrCanAfford(c))G.why='Need '+trrCostTxt(c);}
+ if(G.why&&G.why!==TRR.lastWhy){TRR.lastWhy=G.why;svSay('⛔ BLOCKED: '+G.why.toUpperCase(),2.5);sfx('blip');}else if(!G.why)TRR.lastWhy='';trrBuildBar();};}
+{const _p=trrPlacePrefab;trrPlacePrefab=function(id,gx,gy,free,list){if(!free){const why=trrPrefabCheck(id,gx,gy);if(why){svSay('⛔ BLOCKED: '+why.toUpperCase(),2.5);sfx('blip');return false;}}return _p(id,gx,gy,free,list);};}
+{const _g=trrDrawGhost;trrDrawGhost=function(G,lowG){_g(G,lowG);const [w,h]=G.pre?trrPrefabSize(G.pre):[1,1];if(G.why){isoPlane(1);ctx.fillStyle='rgba(255,40,40,0.35)';ctx.fillRect(G.gx*BT,G.gy*BT,BT*w,BT*h);ctx.strokeStyle='rgba(255,48,48,0.8)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(G.gx*BT+10,G.gy*BT+10);ctx.lineTo(G.gx*BT+BT*w-10,G.gy*BT+BT*h-10);ctx.moveTo(G.gx*BT+BT*w-10,G.gy*BT+10);ctx.lineTo(G.gx*BT+10,G.gy*BT+BT*h-10);ctx.stroke();isoScreen();
+  const p=isoS(G.gx*BT+BT*w/2,G.gy*BT+BT*h/2,80);ctx.font='bold 12px system-ui';ctx.textAlign='center';const tx='BLOCKED',tw=ctx.measureText(tx).width+12;ctx.fillStyle='rgba(120,0,0,0.85)';ctx.fillRect(p[0]-tw/2,p[1]-14,tw,18);ctx.fillStyle='#fff';ctx.fillText(tx,p[0],p[1]);}};}
+
+// at base, hungry/thirsty crew help themselves from the stash (no babysitting while you build)
+TRR_HOOK.tick.push(dt=>{TRR.selfT=(TRR.selfT||0)+dt;if(TRR.selfT<3)return;TRR.selfT=0;if(!trrAtBase())return;const S=TRR.stash;for(const c of SV.crew){if(c.dead)continue;
+ if(c.thirst!=null&&c.thirst<45&&(S.water||0)>0){S.water--;c.thirst=Math.min(100,c.thirst+60);}
+ if(c.hunger!=null&&c.hunger<45&&((S.food||0)>0||(S.meat||0)>0&&false)){S.food--;c.hunger=Math.min(100,c.hunger+50);}}});
+
+// base workers (not guards) never die: they get knocked down, hide and rest for a minute, then go back to work
+{const _h=trrNpcHurt;trrNpcHurt=function(e,d,src){if(e.wk&&e.kind==='worker'&&e.hp-d<=0){e.hp=1;e.flash=0.12;const w=e.wk;if(!w.hurtT){svSay('🩹 '+w.name+' GOT HURT AND IS HIDING - DEFEND YOUR BASE',3);}w.hurtT=60;e.hidden=1;return;}return _h(e,d,src);};}
+TRR_HOOK.tick.push(dt=>{for(const w of TRR.workers||[]){if(!w.hurtT)continue;w.hurtT-=dt;w.t=0;const b=SV.inf.find(e=>e.wk===w);if(w.hurtT<=0){w.hurtT=0;if(b){b.hp=b.maxHp;b.hidden=0;}}}});
+// hidden (hurt) workers can't be targeted
+{const _ft=trrFindTarget;trrFindTarget=function(e){const t=_ft(e);if(t&&t.hidden)return null;return t;};}
+
+// base guards: tougher and patch themselves up between fights
+TRR_HOOK.tick.push(dt=>{for(const e of SV.inf){if(!e.wk||e.hp<=0)continue;if(e.kind==='guard'&&!e._tough){e._tough=1;e.maxHp=140;e.hp=Math.max(e.hp,140);}if(!e.tgt&&e.hp<e.maxHp)e.hp=Math.min(e.maxHp,e.hp+2*dt);}});
+// stronger materials actually matter against raiders: wood takes half, stone a quarter, metal ~15% of raid damage
+{const TM=[1,0.5,0.25,0.15];const _ph=trrPieceHurt;trrPieceHurt=function(p,d,src){if(p.own==='p'&&src!=='player'&&src!=='p'&&!TRR_PK[p.k].fixed)d*=TM[p.tier||0];else if(p.own==='p'&&src!=='player'&&src!=='p')d*=0.5;return _ph(p,d,src);};}
+
+
 // ---- trr-99-boot.js ----
 // ===================== TRR boot: hooks into the Survival engine, pause menu, dark theme for the old overlays =====================
 {const _s=svStart;svStart=function(type){_s(type);if(TRR.on)trrAfterStart(type);};}
@@ -6449,8 +6508,8 @@ TRR_HOOK.tick.push(()=>{if(TRR.cfg.br)return;const k='tankRoyalRumble.bestDay',b
 .btn{background:linear-gradient(#3348a8,#26357e)!important;border:1px solid #4a56a8!important;box-shadow:0 3px 0 #111633!important;border-radius:12px!important;font-family:system-ui,"Segoe UI",sans-serif!important;font-weight:800!important;text-transform:none!important}
 .btn.alt{background:linear-gradient(#2c2f52,#22243f)!important;border-color:#3c4170!important}
 #settings{z-index:70!important}#pause{z-index:45!important}#pauseBtn{z-index:22}`;document.head.appendChild(st);}
-// debug/test handle
-window.TRRT={TRR,snap:()=>trrSnap(),save:()=>trrSave(true),load:n=>trrLoad(n),fresh:(n,c)=>{trrMenuHide();trrFresh(n||0,c||{});return SV.on;},ev:s=>eval(s),inv:()=>{const o={};for(const k of TRR_RK)o[k]=SV[k]||0;return o;}};
+// test-only handle: OFF in normal play. Only exists when the test flag tankRoyalRumble.testHooks=1 is set in storage by the test runner.
+if((()=>{try{return localStorage.getItem('tankRoyalRumble.testHooks')==='1';}catch(_){return false;}})())window.TRRT={TRR,snap:()=>trrSnap(),save:()=>trrSave(true),load:n=>trrLoad(n),fresh:(n,c)=>{trrMenuHide();trrFresh(n||0,c||{});return SV.on;},ev:s=>eval(s),inv:()=>{const o={};for(const k of TRR_RK)o[k]=SV[k]||0;return o;}};
 // boot straight into the TRR menu
 state='title';setTimeout(()=>{trrMenuShow();},0);
 
