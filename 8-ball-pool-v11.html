@@ -227,14 +227,12 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 function hex2rgb(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
 function shadeHex(h,k){const c=hex2rgb(h).map(v=>clamp(Math.round(k<0?v*(1+k):v+(255-v)*k),0,255));return'rgb('+c.join(',')+')';}
 // ---------- settings ----------
-const CFG_DEF={sound:true,sfxVol:80,amb:true,ambVol:45,vib:true,guide:'first',cam:'3d',tilt:34,fillScreen:true,fillMax:1.5,autoZoom:true,orient:'portrait',gfx:'high',autoGfx:true,shadows:true,reflect:true,lefty:false,aimMode:'grab',aimSens:'med',
+const CFG_DEF={sound:true,sfxVol:80,amb:true,ambVol:45,vib:true,guide:'first',cam:'3d',tilt:34,fillScreen:true,fillMax:1.5,autoZoom:true,orient:'portrait',gfx:'high',autoGfx:true,shadows:true,reflect:true,lefty:false,
  talk:true,names:true,spinAssist:true,shotSpeed:'normal',ballStyle:'classic',confirmShot:false,power:'bar',hints:true,music:false,musVol:50,ooh:false,showFps:false,lastNames:['Tough','Jay']};
 const CFG=Object.assign({},CFG_DEF,LS.json('pool.cfg',{}));
 // v1.1 migration: Jay picked the tilted angle as the main view -> switch saved configs to Always 3D once, and undo
 // the auto 'Graphics lowered' steps that the v1 table-layer bug provoked (auto-lower still works if it really lags).
 if((CFG.ver|0)<2){CFG.ver=2;CFG.cam='3d';CFG.tilt=Math.max(CFG.tilt|0,34);CFG.gfx='high';try{localStorage.setItem('pool.cfg',JSON.stringify(CFG));}catch(e){}}
-// v1.2 migration (t265u): grab-and-swing aim becomes the default for everyone, existing saves too.
-if((CFG.ver|0)<3){CFG.ver=3;CFG.aimMode='grab';if(!CFG.aimSens)CFG.aimSens='med';try{localStorage.setItem('pool.cfg',JSON.stringify(CFG));}catch(e){}}
 function saveCfg(){LS.put('pool.cfg',CFG);}
 // ---------- profile: coins, unlocks, equipped, stats ----------
 const PROF_DEF={coins:100,owned:{cue:['house'],cloth:['green'],table:['dive']},eq:{cue:'house',cloth:'green',table:'dive'},
@@ -1452,12 +1450,12 @@ cv.addEventListener('pointerdown',e=>{e.preventDefault();AUD.unlock();if(!MATCH|
  if(GS.moveAny&&M.mode==='practice'){const U=unproj(x,y);let bi=-1,bd=0.06;for(let i=0;i<WD.n;i++){if(!WD.on[i])continue;const d=Math.hypot(WD.x[i]-U.x,WD.y[i]-U.y);if(d<bd){bd=d;bi=i;}}if(bi>=0){P.role='place';P.ball=bi;GS.dragBall=true;return;}}
  // sling mode: drag back from the cue ball
  if(CFG.power==='sling'&&Math.hypot(x-_cs.x,y-_cs.y)<Math.max(40,_cs.r*4)){P.role='sling';return;}
- P.role='aim';P.moved=false;if(CFG.aimMode==='tap')aimAt(x,y);else grabStart(P,x,y);});
+ P.role='aim';P.moved=false;aimAt(x,y);});
 cv.addEventListener('pointermove',e=>{const P=PTR.get(e.pointerId);if(!P)return;e.preventDefault();const x=e.clientX,y=e.clientY,dx=x-P.x,dy=y-P.y;P.x=x;P.y=y;const L=LAYOUT;
  if(P.role==='pinch'&&pinch&&PTR.size>=2){const a=[...PTR.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);GS.uzoom=clamp(pinch.z*d/Math.max(20,pinch.d),1,3.2);
   const cx=(a[0].x+a[1].x)/2,cy=(a[0].y+a[1].y)/2;GS.ucu=pinch.cu+(pinch.cx-cx)/CAM.kz;GS.ucv=pinch.cv+(pinch.cy-cy)/CAM.kz;GS.ucSet=true;return;}
  switch(P.role){
-  case 'aim':if(Math.hypot(x-P.sx,y-P.sy)>4)P.moved=true;if(CFG.aimMode==='tap')aimAt(x,y);else grabMove(P,x,y,dx,dy);break;
+  case 'aim':if(Math.hypot(x-P.sx,y-P.sy)>4)P.moved=true;aimAt(x,y);break;
   case 'wheel':GS.aim+=(x-P.lx)*0.00045*(CFG.lefty?1:1);P.lx=x;if(Math.abs(x-P.sx)>3&&((x/12)|0)!==((P.sx/12)|0)){AUD.tick(0.25);P.sx=x;}break;
   case 'power':{const b=L.pb;const f=clamp((y-b.y-8)/(b.h-16),0,1);GS.pull=f*0.19;GS.power=f;break;}
   case 'place':placeBall(P.ball,x,y);break;
@@ -1478,18 +1476,11 @@ function endPtr(e){const P=PTR.get(e.pointerId);if(!P)return;PTR.delete(e.pointe
   case 'power':if(GS.power>0.025){release();}else{GS.pull=0;GS.power=0;}break;
   case 'sling':if(GS.power>0.04)release();else{GS.pull=0;GS.power=0;}break;
   case 'place':GS.dragBall=false;AUD.tick(0.6);if(P.ball===0)defaultAimIfFar();pathKey='';break;
-  case 'aim':GS.grab=false;if(tap){const now=performance.now();if(now-lastTap<300&&GS.uzoom>1.01){GS.uzoom=1;GS.ucSet=false;}lastTap=now;}break;}}
+  case 'aim':if(tap){const now=performance.now();if(now-lastTap<300&&GS.uzoom>1.01){GS.uzoom=1;GS.ucSet=false;}lastTap=now;}break;}}
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 cv.addEventListener('wheel',e=>{if(!MATCH)return;e.preventDefault();GS.uzoom=clamp(GS.uzoom*(e.deltaY<0?1.1:0.9),1,3.2);},{passive:false});
 function aimAt(x,y){const U=unproj(x,y),dx=U.x-WD.x[0],dy=U.y-WD.y[0];if(dx*dx+dy*dy<(BR*1.5)**2)return;GS.aim=Math.atan2(dy,dx);}
 function defaultAimIfFar(){}
-// grab-and-swing aim: touching the table grabs the cue where it is (no snap); dragging swings it around the cue ball.
-// Uses the finger's angular motion around the cue ball on screen (sideways drag near the ball), scaled by sensitivity.
-const AIM_SENS={low:0.35,med:0.6,high:1};
-function grabStart(P,x,y){cueScreen(_cs);const a=GS.aim,e=0.05;proj(WD.x[0]+Math.cos(a)*0.3,WD.y[0]+Math.sin(a)*0.3,BR);const ax=PJ.x-_cs.x,ay=PJ.y-_cs.y;
- proj(WD.x[0]+Math.cos(a+e)*0.3,WD.y[0]+Math.sin(a+e)*0.3,BR);const bx=PJ.x-_cs.x,by=PJ.y-_cs.y;P.sg=(ax*by-ay*bx)>=0?1:-1;P.cx=_cs.x;P.cy=_cs.y;GS.grab=true;}
-function grabMove(P,x,y,dx,dy){const rx=x-dx-P.cx,ry=y-dy-P.cy,r=Math.hypot(rx,ry);if(r<1)return;
- const t=(rx*dy-ry*dx)/r,R=Math.max(r,Math.min(VW,VH)*0.3);GS.aim+=P.sg*(t/R)*(AIM_SENS[CFG.aimSens]||0.6);}
 function placeBall(i,x,y){const M=MATCH,U=unproj(x,y-(i===0?34:0));let px=clamp(U.x,-(TB.HW-BR),TB.HW-BR),py=clamp(U.y,-(TB.HL-BR),TB.HL-BR);
  if(i===0&&M.bih==='kitchen')py=Math.max(py,TB.headY+0.001);
  if(spotFree(WD,px,py,i)){WD.x[i]=px;WD.y[i]=py;}else{// slide along: try nudging out of the overlap
@@ -1729,8 +1720,6 @@ function applyCfg(k){if(k==='gfx'||k==='orient'||k==='lefty'){resize();}if(k==='
 function poolSpec(){return{game:'pool',sfx:()=>AUD.tick(),cats:[
  {id:'aim',name:'Aim & Controls',icon:'🎯',items:[
   cfgItem('guide','Aim guide length','How much the dotted line shows. Short = only the first ball you hit (fair). Long = where the balls go too.','opt',[['off','Off'],['first','Short'],['obj','Medium'],['long','Long'],['auto','By AI level']],{th:'pguide'}),
-  cfgItem('aimMode','Aiming style','Grab & swing (default) = touch anywhere on the table to grab the cue without moving it, then drag around the cue ball to swing it. Tap to point = the old way: the cue points where you touch.','opt',[['grab','Grab & swing'],['tap','Tap to point']],{th:'paim'}),
-  cfgItem('aimSens','Aim sensitivity','How far the cue swings for each finger move (Grab & swing). Low = finest control.','opt',[['low','Low'],['med','Medium'],['high','High']],{th:'psens'}),
   cfgItem('lefty','Left-handed layout','Puts the power bar on the left side and the spin ball on the right.','bool',null,{th:'plefty'}),
   cfgItem('power','Power control','Bar = pull the side bar down and let go. Slingshot = drag back from the cue ball. Swing = tap to start the meter, tap again to shoot.','opt',[['bar','Side bar'],['sling','Slingshot'],['swing','Swing meter']],{th:'ppower'}),
   cfgItem('spinAssist','Trick assist line','In Practice, a blue line shows where the cue ball curves when you use spin or raise the cue.','bool',null,{th:'passist'}),
@@ -1767,10 +1756,6 @@ function poolSpec(){return{game:'pool',sfx:()=>AUD.tick(),cats:[
  const ball=(g,x,y,r,c)=>{const gr=g.createRadialGradient(x-r*0.4,y-r*0.4,0.5,x,y,r);gr.addColorStop(0,'#fff');gr.addColorStop(0.35,c);gr.addColorStop(1,'#000');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,6.3);g.fill();};
  T.pguide=(g,w,h,v)=>{table(g,w,h);ball(g,10,h-9,3.5,'#fff');ball(g,32,10,3.5,'#e8c020');if(v==='off')return;g.strokeStyle='#fff';g.setLineDash([2,2]);g.beginPath();g.moveTo(10,h-9);g.lineTo(28,13);g.stroke();g.setLineDash([]);g.beginPath();g.arc(28,13,3.5,0,6.3);g.stroke();
   if(v==='obj'||v==='long'||v==='auto'){g.strokeStyle='#ffe08a';g.beginPath();g.moveTo(32,10);g.lineTo(v==='long'?43:37,4);g.stroke();}if(v==='long'){g.strokeStyle='#9cf';g.beginPath();g.moveTo(28,13);g.lineTo(18,8);g.stroke();}};
- T.paim=(g,w,h,v)=>{table(g,w,h);ball(g,w/2-4,h/2+3,3.5,'#fff');g.strokeStyle='#d9a55a';g.lineWidth=2;g.beginPath();g.moveTo(w/2-7,h/2+6);g.lineTo(w/2-19,h/2+14);g.stroke();g.lineWidth=1;g.fillStyle='#ffcf4a';
-  if(v==='tap'){g.beginPath();g.arc(w-10,10,3,0,6.3);g.fill();g.strokeStyle='#fff';g.setLineDash([2,2]);g.beginPath();g.moveTo(w/2-4,h/2+3);g.lineTo(w-10,10);g.stroke();g.setLineDash([]);}
-  else{g.strokeStyle='#ffcf4a';g.beginPath();g.arc(w/2-4,h/2+3,14,2.2,3.4);g.stroke();g.beginPath();g.arc(w/2-18,h/2-1,2.5,0,6.3);g.fill();}};
- T.psens=(g,w,h,v)=>{table(g,w,h);const cx=w/2,cy=h-8,k={low:0.35,med:0.6,high:1}[v]||0.6;ball(g,cx,cy,3.5,'#fff');g.strokeStyle='#ffcf4a';g.lineWidth=2;g.beginPath();g.arc(cx,cy,h-14,-Math.PI/2-k*0.9,-Math.PI/2+k*0.9);g.stroke();g.lineWidth=1;g.strokeStyle='#fff';g.setLineDash([2,2]);for(const s of[-1,1]){const a=-Math.PI/2+s*k*0.9;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(a)*(h-14),cy+Math.sin(a)*(h-14));g.stroke();}g.setLineDash([]);};
  T.plefty=(g,w,h,v)=>{table(g,w,h);g.fillStyle='#ffcf4a';g.fillRect(v?4:w-9,6,5,h-12);g.fillStyle='#fff';g.beginPath();g.arc(v?w-9:9,h-8,4,0,6.3);g.fill();};
  T.ppower=(g,w,h,v)=>{table(g,w,h);ball(g,w/2,h/2,4,'#fff');g.strokeStyle='#ffcf4a';g.lineWidth=2;if(v==='sling'){g.beginPath();g.moveTo(w/2,h/2);g.lineTo(w/2-12,h/2+10);g.stroke();}else if(v==='swing'){g.beginPath();g.arc(w-9,h/2,8,-2.4,-0.6);g.stroke();}else{g.fillStyle='#ffcf4a';g.fillRect(w-9,6,5,(h-12)*0.6);}g.lineWidth=1;};
  T.passist=(g,w,h,v)=>{table(g,w,h);ball(g,9,h-9,3.5,'#fff');if(v){g.strokeStyle='#7fe6ff';g.setLineDash([2,2]);g.beginPath();g.moveTo(9,h-9);g.quadraticCurveTo(14,4,38,10);g.stroke();g.setLineDash([]);}};
