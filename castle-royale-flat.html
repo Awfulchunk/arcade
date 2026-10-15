@@ -6,6 +6,8 @@ html,body{margin:0;height:100%;background:#1c1f2e;overflow:hidden;font-family:sy
 canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
 .ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,22,40,.78);z-index:5}
 .ov.hide{display:none}
+#pbtn{position:fixed;top:calc(env(safe-area-inset-top) + 8px);right:8px;z-index:4;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.7);background:rgba(20,22,40,.55);color:#fff;font:900 16px system-ui;padding:0}
+#pbtn.hide{display:none}
 .card{width:min(92%,380px);max-height:96vh;overflow:auto;background:#f4f1ea;border-radius:22px;padding:20px;color:#232842;box-shadow:0 14px 50px rgba(0,0,0,.5);text-align:center}
 .card h1{margin:0 0 4px;font-size:28px;letter-spacing:1px}
 .card p{margin:6px 0 14px;color:#555b7a;line-height:1.4;font-size:15px}
@@ -41,6 +43,8 @@ canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div class="ov hide" id="deckov"><div class="card"><h1>YOUR DECK</h1><p style="margin:2px 0 4px">Pick 6 cards. Tap a card below to add it, tap a slot to remove it. In a match, hold a card to see what it does.</p>
 <div class="slots" id="slots"></div><div class="row"><button id="dRand">🎲 Random</button><button id="dReset">Default</button></div>
 <div class="pool" id="pool"></div><button class="go" id="dDone">Save deck</button></div></div>
+<button id="pbtn" aria-label="Pause" class="hide">II</button>
+<div class="ov hide" id="pauseov"><div class="card"><h1>PAUSED</h1><button class="go" id="pRes">Resume</button><button class="alt" id="pQuit">Quit to menu</button></div></div>
 <div class="ov hide" id="end"><div class="card"><h1 id="eT">VICTORY</h1><p id="eP"></p><button class="go" id="again">Play again</button><button class="alt" id="deckBtn2">🃏 Change deck</button><button class="alt" id="style2">◄ Choose style</button></div></div>
 <script>
 (function(){'use strict';
@@ -115,7 +119,7 @@ function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function hurt(t,dmg,src){if(t.dead||dmg<=0)return;if(t.kind==='leech'&&t.host)dmg*=0.5;t.hp-=dmg;if(dmg>=1)t.hit=0.12;if(t.hp<=0){t.dead=true;stain(t.x,t.y,COL[t.team].f,!!t.tower||t.r>12);if(t.tower){fx.push({k:'boom',x:t.x,y:t.y,t:0,c:COL[t.team].f,big:true});shake=0.4;beep(120,0.25,'sawtooth');towerDown(t);}else{fx.push({k:t.kind==='dot'?'pop':'boom',x:t.x,y:t.y,t:0,c:COL[t.team].f});if(t.kind!=='dot'&&t.kind!=='twin')beep(200,0.1);}
   if(t.kind==='leech')ents.forEach(u=>{if(u.host===t)u.host=null;});}}
 function towerDown(t){const other=1-t.team;if(t.king){crowns[other]=3;finish(other);}else{crowns[other]++;if(ot)finish(other);}}
-function finish(winner){if(over)return;over=true;const mine=winner===0,draw=winner===-1;
+function finish(winner){if(over)return;over=true;paused=false;$('pbtn').classList.add('hide');const mine=winner===0,draw=winner===-1;
  const eT=document.getElementById('eT'),eP=document.getElementById('eP');eT.textContent=draw?'DRAW':mine?'VICTORY!':'DEFEAT';
  eP.textContent=(draw?'Nobody could break a tower.':mine?'You smashed the red towers.':'The red shapes got you this time.')+'  Crowns: you '+crowns[0]+' – red '+crowns[1];
  setTimeout(()=>{document.getElementById('end').classList.remove('hide');try{if(!draw&&window.__heckle)window.__heckle(mine?'win':'lose',true);}catch(e){}beep(mine?784:196,0.4);},900);
@@ -322,13 +326,16 @@ $('deckBtn').onclick=()=>openDeck('menu');$('deckBtn2').onclick=()=>openDeck('en
 $('dRand').onclick=()=>{myDeck=pick6();deckUI();};$('dReset').onclick=()=>{myDeck=DEF_DECK.slice();deckUI();};
 $('dDone').onclick=()=>{if(myDeck.includes(null)){const rest=KEYS.filter(k=>!myDeck.includes(k));for(let i=0;i<6;i++)if(!myDeck[i])myDeck[i]=rest.shift();}saveDeck();$('deckov').classList.add('hide');miniRow();$(deckBack==='end'?'end':'menu').classList.remove('hide');};
 $('diff').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;diff=+b.dataset.d;[...$('diff').children].forEach(x=>x.classList.toggle('on',x===b));});
-function begin(){myDeck=loadDeck();reset();started=true;$('menu').classList.add('hide');$('end').classList.add('hide');toastMsg('Pick a card, tap your half');}
+let paused=false;function setPause(v){paused=!!v&&started&&!over;$('pauseov').classList.toggle('hide',!paused);$('pbtn').classList.toggle('hide',!started||over);}
+window.__tjPause=()=>setPause(true);
+function begin(){paused=false;$('pauseov').classList.add('hide');$('pbtn').classList.remove('hide');myDeck=loadDeck();reset();started=true;$('menu').classList.add('hide');$('end').classList.add('hide');toastMsg('Pick a card, tap your half');}
 $('start').onclick=()=>{begin();};$('again').onclick=()=>{begin();};
 function back(){try{parent.postMessage({arcade:'back'},'*');}catch(e){}}
 $('style').onclick=back;$('style2').onclick=back;
 reset();miniRow();
-function loop(t){const dt=Math.min(0.05,(t-lastT)/1000||0.016);lastT=t;if(started&&!over)step(dt);if(msg.t>0)msg.t-=dt;draw();requestAnimationFrame(loop);}
+function loop(t){const dt=Math.min(0.05,(t-lastT)/1000||0.016);lastT=t;if(started&&!over&&!paused)step(dt);if(msg.t>0)msg.t-=dt;draw();requestAnimationFrame(loop);}
 requestAnimationFrame(loop);
 window.__flat={begin,spawn:(k,team,x,y)=>spawn(k,team,x,y),play,ents:()=>ents,towers:()=>towers,state:()=>({over,time,crowns,ot,started}),step,deck:()=>deck.slice(),cds:()=>cds,setCd:(k,v)=>{cds[0][k]=v;},CARDS,hpOf:(i)=>towers[i].hp,clearAI:()=>{aiT=1e9;},diff:d=>{diff=d;},geom:()=>({ox,oy,sc,CW,CH,HUD,hud:hudRect()}),setSel:s=>{sel=s;},bubbles:()=>bN,bubStats:()=>({n:bN,hits:bHits,born:bBorn,dmg:BDMG,max:BMAX}),bub:(x,y,team,n)=>{for(let i=0;i<n;i++)bub(x,y,team,0,rnd()*TAU);},time:v=>{time=v;},myDeck:()=>myDeck.slice(),setDeck:d=>{myDeck=d.slice();saveDeck();}};
+document.getElementById('pbtn').addEventListener('click',()=>setPause(true));document.getElementById('pRes').addEventListener('click',()=>setPause(false));document.getElementById('pQuit').addEventListener('click',()=>{setPause(false);over=true;started=false;document.getElementById('pbtn').classList.add('hide');document.getElementById('menu').classList.remove('hide');});
 })();
 </script></body></html>

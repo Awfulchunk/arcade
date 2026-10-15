@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Emoji &amp; Text Maker</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#12142b;color:#f1f3fb;font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
+#app{height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{padding:56px 14px 8px;display:flex;align-items:center;gap:10px}
+h1{margin:0;font-size:20px;font-weight:900;flex:1}
+.tabs{display:flex;gap:6px;padding:0 12px 8px}.tabs button{flex:1;min-height:44px;border-radius:12px;border:1px solid #3a4378;background:#20274a;color:#cfd5f3;font:800 14px system-ui}.tabs button.on{background:#5b6cff;color:#fff;border-color:#8f9bff}
+main{flex:1;overflow:auto;padding:4px 12px 90px;-webkit-overflow-scrolling:touch}
+.card{background:#1b2140;border:1px solid #3a4378;border-radius:16px;padding:12px;margin:0 0 12px}
+.card h2{margin:0 0 6px;font-size:15px;font-weight:900}.card p,.small{margin:0 0 8px;font-size:12.5px;color:#aab2e6;line-height:1.4}
+button.big{width:100%;min-height:50px;border-radius:14px;border:0;background:linear-gradient(180deg,#5b6cff,#4253d6);color:#fff;font:900 15px system-ui}
+button.alt{background:#283063;border:1px solid #3a4378;color:#cfd5f3}button.red{background:#7a2a2a}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cell{position:relative;aspect-ratio:1;border-radius:14px;border:2px solid #3a4378;background:#20274a;display:flex;align-items:center;justify-content:center;padding:6px}
+.cell img,.cell canvas{max-width:100%;max-height:100%;object-fit:contain}.cell.sel{border-color:#d6ff4a}
+.cell b{position:absolute;left:0;right:0;bottom:-1px;font-size:9px;text-align:center;color:#aab2e6;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 3px}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chip{min-height:40px;padding:0 12px;border-radius:12px;border:1px solid #3a4378;background:#20274a;color:#cfd5f3;font:800 13px system-ui}.chip.on{background:#2c3a22;border-color:#d6ff4a;color:#eaffb0}
+input[type=text],textarea{width:100%;border-radius:12px;border:1px solid #3a4378;background:#0f1328;color:#f1f3fb;padding:11px;font:16px system-ui}
+.prev{display:flex;gap:14px;align-items:center;justify-content:center;margin:8px 0}.prev canvas{width:128px;height:128px;image-rendering:pixelated;border-radius:16px;background:repeating-conic-gradient(#232a55 0 25%,#1b2140 0 50%) 0 0/16px 16px}
+.prev .px{display:flex;flex-direction:column;gap:10px;align-items:center}.prev .px canvas{width:32px;height:32px;border-radius:6px;image-rendering:auto}
+input[type=range]{width:100%;height:32px;margin:0}.lkl{display:flex;justify-content:space-between;font-size:11px;color:#aab2e6;margin:0 0 6px}
+.lines .ln{display:flex;gap:8px;align-items:center;background:#20274a;border-radius:12px;padding:8px 10px;margin:6px 0}.ln span{flex:1;word-break:break-word}.ln button{min-width:44px;min-height:40px;border-radius:10px;border:0;background:#283063;color:#fff;font-size:16px}
+.ln img{height:1.5em;width:1.5em;vertical-align:-.35em;object-fit:contain}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translateX(-50%) translateY(20px);background:#20274a;border:1px solid #5b6cff;border-radius:14px;padding:10px 16px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:88vw;text-align:center}#toast.on{opacity:1;transform:translateX(-50%)}
+label.upl{position:relative;display:flex;align-items:center;justify-content:center;min-height:68px;font-size:17px;overflow:hidden;border-radius:16px;cursor:pointer;background:linear-gradient(180deg,#5b6cff,#4253d6);color:#fff;font-weight:900;text-align:center;padding:0 12px}
+label.upl input{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;font-size:200px;cursor:pointer}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:6px 2px 8px;-webkit-overflow-scrolling:touch}.fr{flex:0 0 auto;position:relative;width:58px;height:58px;border-radius:10px;border:2px solid #3a4378;background:repeating-conic-gradient(#232a55 0 25%,#1b2140 0 50%) 0 0/12px 12px;display:flex;align-items:center;justify-content:center}.fr.on{border-color:#d6ff4a;box-shadow:0 0 0 2px rgba(214,255,74,.25)}.fr canvas{max-width:100%;max-height:100%}.fr i{position:absolute;left:2px;top:0;font:800 9px system-ui;color:#fff;text-shadow:0 1px 2px #000;font-style:normal}.fr u{position:absolute;right:2px;bottom:0;font:800 9px system-ui;color:#ffe38a;text-decoration:none;text-shadow:0 1px 2px #000}
+.ctl{display:grid;grid-template-columns:70px 1fr 40px;gap:6px;align-items:center;margin:2px 0}.ctl span{font-size:12px;color:#aab2e6}.ctl b{font-size:12px;text-align:right}
+.hide{display:none!important}
+</style></head><body>
+<div id="app">
+<header><h1>Emoji &amp; Text Maker</h1></header>
+<div class="tabs"><button id="tE" class="on">My emojis</button><button id="tT">My texts</button></div>
+<main>
+<section id="pE">
+ <div class="card"><h2>Make an emoji</h2><p>Pick a picture or a GIF from your phone, or draw one in Paint Studio. It shrinks to emoji size. Slide the look from normal to pixelated to cartoon. GIFs keep all their frames and play as tiny loops in games.</p>
+  <label class="upl" id="upl">&#11014; Upload a picture or GIF<input type="file" id="file" accept="image/*" multiple></label>
+  <div class="row"><button class="big alt hide" id="pickNative">Picture not opening? Use the phone's picker</button><button class="big alt" id="toPaint0">Draw one in Paint Studio</button></div>
+  <div class="small" id="dropnote">Tip: you can also drop a picture on this page, or paste one.</div></div>
+ <div class="card hide" id="ed"><h2>Edit</h2>
+  <div class="prev"><canvas id="pv" width="48" height="48"></canvas><div class="px"><canvas id="p32" width="48" height="48"></canvas><span class="small">in a toast</span></div></div>
+  <div id="fedit"><div class="small"><b>Frames</b> <span id="fcount"></span> &middot; tap one to select it</div><div class="strip" id="strip"></div>
+   <div class="row" id="frow"><button type="button" class="chip" id="fL">&#9664; Move</button><button type="button" class="chip" id="fR">Move &#9654;</button><button type="button" class="chip" id="fDup">Duplicate</button><button type="button" class="chip" id="fDel" style="border-color:#c0504a">Delete</button><button type="button" class="chip" id="fAdd">+ Add picture</button><button type="button" class="chip" id="fRev">Reverse</button><button type="button" class="chip" id="fPing">Ping-pong</button><button type="button" class="chip" id="fHold">Hold x1</button><button type="button" class="chip" id="fPaint">Edit frame in Paint</button></div>
+   <div class="small">Speed: <b id="fpsv">10</b> frames per second</div><input type="range" id="fps" min="2" max="24" value="10" aria-label="Frame speed"></div>
+  <div class="small" style="margin-top:8px"><b>Crop and turn</b> (all frames)</div>
+  <div class="ctl"><span>Left</span><input type="range" id="cl" min="0" max="45" value="0"><b id="clv">0%</b></div><div class="ctl"><span>Right</span><input type="range" id="cr" min="0" max="45" value="0"><b id="crv">0%</b></div><div class="ctl"><span>Top</span><input type="range" id="ct" min="0" max="45" value="0"><b id="ctv">0%</b></div><div class="ctl"><span>Bottom</span><input type="range" id="cb" min="0" max="45" value="0"><b id="cbv">0%</b></div>
+  <div class="row"><button type="button" class="chip" id="rot">Rotate 90&deg;</button><button type="button" class="chip" id="flip">Flip</button><button type="button" class="chip" id="cReset">Reset crop</button></div>
+  <div class="small">Look: <b id="lkv">Normal</b></div><input type="range" id="look" min="0" max="100" value="0" aria-label="Look"><div class="lkl"><span>Normal</span><span>Pixelated</span><span>Cartoon</span></div>
+  <div class="small">Size: <b id="szv">48</b> px</div><input type="range" id="esz" min="32" max="64" step="2" value="48" aria-label="Size">
+  <div id="fxwrap"><div class="small">Animation</div><div class="row" id="fx"></div></div>
+  <div class="small">Shape</div><div class="row" id="shape"></div>
+  <div id="spdwrap"><div class="small">Speed</div><div class="row" id="spd"></div></div>
+  <div class="small">Name</div><input type="text" id="nm" maxlength="16" placeholder="my emoji">
+  <div class="row" style="margin-top:10px"><button class="big" id="save" style="flex:2">Save to my emojis</button><button class="big alt" id="cancel" style="flex:1">Cancel</button></div>
+  <div class="row"><button class="big alt hide" id="replace">Replace the original</button><button class="big alt" id="toPaint">Edit in Paint</button></div>
+  <div class="small" id="edmsg"></div></div>
+ <div class="card"><h2>Saved emojis <span class="small" id="cnt"></span></h2><p>Tap one to try it or delete it. The games use the ones you tick in Settings &gt; My emojis &amp; texts.</p><div class="grid" id="saved"></div>
+  <div class="row hide" id="selrow"><button class="chip" id="tryB">Try in a toast</button><button class="chip" id="editB">Edit in Paint</button><button class="chip" id="insB">Use in a text</button><button class="chip" id="delB" style="border-color:#c0504a">Delete</button></div>
+  <div class="small" id="store"></div></div>
+</section>
+<section id="pT" class="hide">
+ <div class="card"><h2>Write a text</h2><p>Short lines the trash talk can say in games against an AI. Tag a line to use it only when you win, lose, or while idle.</p>
+  <textarea id="tx" rows="2" maxlength="140" placeholder="Nice try champ"></textarea>
+  <div class="small">When</div><div class="row" id="when"></div>
+  <div class="small">Add one of your emojis</div><div class="row" id="emoRow"></div>
+  <button class="big" id="add">Add text</button></div>
+ <div class="card"><h2>My texts <span class="small" id="tcnt"></span></h2><div class="lines" id="lines"></div><button class="big alt" id="rand" style="margin-top:6px">Try a random one</button></div>
+</section>
+</main></div>
+<div id="toast"></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);return true;}catch(e){return false;}}
+function jget(k,d){try{var a=JSON.parse(ls(k)||'null');return a==null?d:a;}catch(e){return d;}}
+var tt=0;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on');},2400);}
+var DEF=['\u{1F602}','\u{1F480}','\u{1F525}','\u{1F921}','\u{1F644}','\u{1F62D}','\u{1F971}','\u{1F440}'];
+var pics=jget('arcade.my.pics',[]),lines=jget('arcade.my.lines',[]),sel=-1;
+function savePics(){var ok=ls('arcade.my.pics',JSON.stringify(pics));if(!ok){toast('Phone storage is full. Delete an emoji first.');}return ok;}
+function saveLines(){ls('arcade.my.lines',JSON.stringify(lines));}
+/* ---- tabs ---- */
+function tab(t){$('tE').classList.toggle('on',t==='E');$('tT').classList.toggle('on',t==='T');$('pE').classList.toggle('hide',t!=='E');$('pT').classList.toggle('hide',t!=='T');if(t==='T')drawText();}
+$('tE').onclick=function(){tab('E');};$('tT').onclick=function(){tab('T');};
+/* ---- animation of saved pics (shared ticker) ---- */
+var anims=[];setInterval(function(){anims.forEach(function(a){if(!a.el.isConnected)return;a.t+=70;if(a.t>=a.ms){a.t=0;a.i=(a.i+1)%a.f.length;a.el.src=a.f[a.i];}});anims=anims.filter(function(a){return a.el.isConnected;});},70);
+function picImg(p){var im=document.createElement('img');im.alt=p.name||'';if(p.frames&&p.frames.length){im.src=p.frames[0];if(p.frames.length>1)anims.push({el:im,f:p.frames,i:0,t:0,ms:Math.max(70,Math.round(1000/(p.fps||10)))});}else im.src=p.src||'';return im;}
+/* ---- saved grid ---- */
+function drawSaved(){var g=$('saved');g.innerHTML='';anims=[];pics.forEach(function(p,i){var c=document.createElement('div');c.className='cell'+(i===sel?' sel':'');c.appendChild(picImg(p));var b=document.createElement('b');b.textContent=p.name||'emoji';c.appendChild(b);c.onclick=function(){sel=(sel===i?-1:i);drawSaved();};g.appendChild(c);});
+  if(!pics.length){var e=document.createElement('div');e.className='small';e.style.gridColumn='1/-1';e.textContent='Nothing yet. Pick a picture above.';g.appendChild(e);}
+  $('cnt').textContent=pics.length?'('+pics.length+')':'';$('selrow').classList.toggle('hide',sel<0);
+  var bytes=(ls('arcade.my.pics')||'').length;$('store').textContent=pics.length?('Using about '+Math.round(bytes/1024)+' KB of phone storage. Up to 30 emojis.'):'';}
+$('tryB').onclick=function(){if(sel<0)return;var p=pics[sel];var d=document.createElement('div');d.id='toast';var t=$('toast');t.textContent='';t.appendChild(document.createTextNode('You play like this '));var im=picImg(p);im.style.cssText='height:1.6em;width:1.6em;vertical-align:-.4em;object-fit:contain';t.appendChild(im);t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on');},3200);};
+$('delB').onclick=function(){if(sel<0)return;var p=pics[sel];if(!confirm('Delete "'+(p.name||'emoji')+'"?'))return;var tok='{my:'+p.id+'}';pics.splice(sel,1);sel=-1;savePics();var e=jget('arcade.my.emo',null);if(e){e=e.filter(function(x){return x!==tok;});ls('arcade.my.emo',JSON.stringify(e));}drawSaved();drawEmoRow();toast('Deleted');};
+$('insB').onclick=function(){if(sel<0)return;tab('T');addTok('{my:'+pics[sel].id+'}');};
+/* ---- picking + editing ---- */
+var cur=null; /* {src:[canvas<=320], name, fps, editId, gif:bool, from} */
+var FX=[['bounce','Bounce'],['pulse','Pulse'],['shake','Shake'],['wobble','Wobble'],['spin','Coin spin'],['pop','Pop'],['none','Still']],SH=[['circle','Circle'],['square','Square'],['orig','Whole picture']],SP=[[6,'Slow'],[10,'Normal'],[14,'Fast']];
+var fx='bounce',shape='circle',spd=10,SZ=48,LK=0,NF=10,cache={};
+function mk(w,h){var c=document.createElement('canvas');c.width=w;c.height=h||w;return c;}
+function chips(box,list,get,set){box.innerHTML='';list.forEach(function(o){var b=document.createElement('button');b.type='button';b.className='chip'+(get()===o[0]?' on':'');b.textContent=o[1];b.onclick=function(){set(o[0]);cache={};chips(box,list,get,set);startPreview();};box.appendChild(b);});}
+var addMode=false;
+$('toPaint0').onclick=function(){gotoTool('paint');};
+function gotoTool(id){try{if(window.parent&&window.parent!==window){window.parent.postMessage({arcade:'tool',id:id},'*');return true;}}catch(e){}toast('Open Paint Studio from the arcade menu.');return false;}
+/* ---- GIF decoder (no browser help needed) ---- */
+function lzw(min,data,npix){var clear=1<<min,eoi=clear+1,next=eoi+1,size=min+1,mask=(1<<size)-1,prefix=new Uint16Array(4096),suffix=new Uint8Array(4096),stack=new Uint8Array(4097),out=new Uint8Array(npix),code,old=-1,first=0,bits=0,datum=0,bi=0,top=0,pi=0,i;
+  for(i=0;i<clear;i++)suffix[i]=i;
+  while(pi<npix){
+    if(top===0){
+      while(bits<size&&bi<data.length){datum|=data[bi++]<<bits;bits+=8;}
+      if(bits<size)break;
+      code=datum&mask;datum>>=size;bits-=size;
+      if(code>next||code===eoi)break;
+      if(code===clear){size=min+1;mask=(1<<size)-1;next=eoi+1;old=-1;continue;}
+      if(old===-1){stack[top++]=suffix[code];old=code;first=code;continue;}
+      var inc=code;if(code===next){stack[top++]=first;code=old;}
+      while(code>clear){stack[top++]=suffix[code];code=prefix[code];}
+      first=suffix[code]&255;stack[top++]=first;
+      if(next<4096){prefix[next]=old;suffix[next]=first;next++;if((next&mask)===0&&next<4096){size++;mask=(1<<size)-1;}}
+      old=inc;
+    }
+    out[pi++]=stack[--top];
+  }
+  return out;}
+function decodeGif(buf,maxFrames,maxSide){
+  var d=new Uint8Array(buf),p=6,i;
+  if(d[0]!==71||d[1]!==73||d[2]!==70)throw new Error('not gif');
+  var GW=d[p]|d[p+1]<<8,GH=d[p+2]|d[p+3]<<8,fl=d[p+4];p+=7;var gct=null;
+  if(fl&128){var n=2<<(fl&7);gct=d.subarray(p,p+n*3);p+=n*3;}
+  var fr=[],gce=null;
+  function skipSub(){while(p<d.length&&d[p]){p+=d[p]+1;}p++;}
+  while(p<d.length){
+    var b=d[p++];
+    if(b===59)break;
+    if(b===33){var lab=d[p++];
+      if(lab===249&&d[p]===4){var pk=d[p+1];gce={disp:(pk>>2)&7,t:pk&1,delay:(d[p+2]|d[p+3]<<8)*10,ti:d[p+4]};p+=6;}else skipSub();
+      if(lab!==249)continue;else continue;}
+    if(b===44){
+      var f={x:d[p]|d[p+1]<<8,y:d[p+2]|d[p+3]<<8,w:d[p+4]|d[p+5]<<8,h:d[p+6]|d[p+7]<<8},ff=d[p+8];p+=9;
+      f.ct=gct;if(ff&128){var m=2<<(ff&7);f.ct=d.subarray(p,p+m*3);p+=m*3;}
+      f.il=!!(ff&64);f.min=d[p++];var chunks=[],tot=0;
+      while(p<d.length&&d[p]){var L=d[p];chunks.push(d.subarray(p+1,p+1+L));tot+=L;p+=L+1;}p++;
+      var data=new Uint8Array(tot),o=0;chunks.forEach(function(c){data.set(c,o);o+=c.length;});f.data=data;
+      f.g=gce||{disp:0,t:0,delay:100,ti:0};gce=null;fr.push(f);
+      if(fr.length>400)break;
+    }else if(b!==0){break;}
+  }
+  if(!fr.length||!GW||!GH)throw new Error('empty gif');
+  var step=Math.max(1,Math.ceil(fr.length/(maxFrames||24))),sc=Math.min(1,(maxSide||320)/Math.max(GW,GH)),ow=Math.max(1,Math.round(GW*sc)),oh=Math.max(1,Math.round(GH*sc));
+  var comp=mk(GW,GH),cg=comp.getContext('2d'),tmp=mk(GW,GH),out=[],delays=0,prev=null,saved=null;
+  fr.forEach(function(f,k){
+    if(prev){if(prev.g.disp===2)cg.clearRect(prev.x,prev.y,prev.w,prev.h);else if(prev.g.disp===3&&saved)cg.putImageData(saved,0,0);}
+    saved=f.g.disp===3?cg.getImageData(0,0,GW,GH):null;
+    var idx=lzw(f.min,f.data,f.w*f.h),ct=f.ct||new Uint8Array(768),im=new ImageData(f.w,f.h),px=im.data,w=f.w,h=f.h,j;
+    var order=null;if(f.il){order=[];var r;for(r=0;r<h;r+=8)order.push(r);for(r=4;r<h;r+=8)order.push(r);for(r=2;r<h;r+=4)order.push(r);for(r=1;r<h;r+=2)order.push(r);}
+    for(var y=0;y<h;y++){var dy=order?order[y]:y;for(var x=0;x<w;x++){var ci=idx[y*w+x],q=(dy*w+x)*4;if(f.g.t&&ci===f.g.ti){px[q+3]=0;}else{px[q]=ct[ci*3];px[q+1]=ct[ci*3+1];px[q+2]=ct[ci*3+2];px[q+3]=255;}}}
+    tmp.width=w;tmp.height=h;tmp.getContext('2d').putImageData(im,0,0);cg.drawImage(tmp,f.x,f.y);
+    delays+=(f.g.delay||100);
+    if(k%step===0){var o=mk(ow,oh),og=o.getContext('2d');og.imageSmoothingQuality='high';og.drawImage(comp,0,0,ow,oh);out.push(o);}
+    prev=f;});
+  var avg=delays/fr.length,fps=Math.max(3,Math.min(20,Math.round(1000/(avg*step))));
+  return {frames:out,fps:fps,w:GW,h:GH,count:fr.length};}
+window.__decodeGif=decodeGif;
+function readBuf(file){return new Promise(function(res,rej){if(file.arrayBuffer){file.arrayBuffer().then(res,rej);return;}var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsArrayBuffer(file);});}
+function imgFromBlob(file){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){res(im);};im.onerror=function(){var r=new FileReader();r.onload=function(){var i2=new Image();i2.onload=function(){res(i2);};i2.onerror=function(){rej(new Error('bad'));};i2.src=r.result;};r.onerror=rej;r.readAsDataURL(file);};im.src=u;});}
+function toSmall(im,max){var w=im.naturalWidth||im.width,h=im.naturalHeight||im.height,s=Math.min(1,(max||320)/Math.max(w,h)),c=mk(Math.max(1,Math.round(w*s)),Math.max(1,Math.round(h*s))),g=c.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(im,0,0,c.width,c.height);return c;}
+function isGifBuf(b){var d=new Uint8Array(b,0,4);return d[0]===71&&d[1]===73&&d[2]===70&&d[3]===56;}
+async function handleFiles(fs,add){
+  fs=[].slice.call(fs||[]).filter(function(f){return f&&(!f.type||/^image\//.test(f.type)||/\.(gif|png|jpe?g|webp|bmp)$/i.test(f.name||''));});
+  if(!fs.length){toast('That is not a picture.');return;}
+  if(!add&&pics.length>=30){toast('30 emojis is the limit. Delete one first.');return;}
+  try{
+    var f0=fs[0],name=(f0.name||'emoji').replace(/\.[^.]+$/,'').slice(0,16)||'emoji',frs=[],fpsG=null,isG=false;
+    for(var i=0;i<Math.min(fs.length,12);i++){var buf=await readBuf(fs[i]);
+      if(isGifBuf(buf)){try{var g=decodeGif(buf,24,320);g.frames.forEach(function(c){frs.push(c);});fpsG=fpsG||g.fps;if(g.frames.length>1)isG=true;}catch(e){frs.push(toSmall(await imgFromBlob(new Blob([buf],{type:'image/gif'}))));toast('Could not read the GIF animation, using its first picture.');}}
+      else frs.push(toSmall(await imgFromBlob(new Blob([buf],{type:(fs[i].type&&fs[i].type!=='image/*')?fs[i].type:'image/png'}))));}
+    if(!frs.length)throw new Error('none');
+    if(add&&cur){normCur();var at=Math.min(cur.src.length,fi+1);frs=frs.slice(0,Math.max(0,60-cur.src.length));frs.forEach(function(c,k){cur.src.splice(at+k,0,c);cur.hold.splice(at+k,0,1);});fi=at;fx='none';cache={};openEd(frs.length+' frame'+(frs.length>1?'s':'')+' added.');return;}
+    cur={src:frs.slice(0,60),name:name,fps:fpsG||10,editId:null,gif:isG||frs.length>1};
+    if(cur.src.length>1)fx='none';fi=0;
+    openEd('');
+  }catch(e){if(!add)cur=null;toast('Could not open that picture.');}}
+$('file').onchange=function(){var fs=[].slice.call($('file').files||[]),add=addMode;addMode=false;handleFiles(fs,add).then(function(){try{$('file').value='';}catch(e){}});};
+document.addEventListener('paste',function(e){var f=[].slice.call((e.clipboardData&&e.clipboardData.files)||[]);if(f.length){e.preventDefault();handleFiles(f,false);}});
+document.addEventListener('dragover',function(e){e.preventDefault();});
+document.addEventListener('drop',function(e){e.preventDefault();var f=e.dataTransfer&&e.dataTransfer.files;if(f&&f.length)handleFiles(f,false);});
+/* native picker (APK backup): the arcade hands the picture back as a message */
+var pendingAdd=false;
+try{if(window.TJApp||(window.parent&&window.parent.TJApp))$('pickNative').classList.remove('hide');}catch(e){}
+$('pickNative').onclick=function(){pendingAdd=false;try{window.parent.postMessage({arcade:'pickimg'},'*');}catch(e){toast('The phone picker is not available.');}};
+window.addEventListener('message',function(e){var o=e.data&&e.data.tjPicked;if(!o||!o.b64)return;try{var bin=atob(o.b64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);var t=/^image\/(gif|png|jpeg|webp|bmp)$/.test(o.mime||'')?o.mime:'';handleFiles([new File([u8],o.name||'picture',{type:t})],pendingAdd);}catch(x){toast('Could not read that picture.');}});
+/* ---- frame editor ---- */
+var fi=0;
+function normCur(){if(!cur)return;if(!cur.hold||cur.hold.length!==cur.src.length){var h=[];for(var i=0;i<cur.src.length;i++)h.push((cur.hold&&cur.hold[i])||1);cur.hold=h;}cur.crop=cur.crop||{l:0,r:0,t:0,b:0};cur.rot=cur.rot||0;cur.flip=!!cur.flip;cur.fps=cur.fps||10;if(fi>=cur.src.length)fi=cur.src.length-1;if(fi<0)fi=0;}
+function drawStrip(){var b=$('strip');b.innerHTML='';cur.src.forEach(function(c,i){var d=document.createElement('div');d.className='fr'+(i===fi?' on':'');var t=mk(52,52),g=t.getContext('2d'),v=srcView(i),s=Math.min(52/v.width,52/v.height);g.drawImage(v,(52-v.width*s)/2,(52-v.height*s)/2,v.width*s,v.height*s);d.appendChild(t);
+  var n=document.createElement('i');n.textContent=String(i+1);d.appendChild(n);if(cur.hold[i]>1){var u=document.createElement('u');u.textContent='x'+cur.hold[i];d.appendChild(u);}d.onclick=function(){fi=i;drawStrip();syncEditor(true);};b.appendChild(d);});}
+function syncEditor(skipStrip){if(!cur)return;normCur();var n=cur.src.length;if(!skipStrip)drawStrip();$('fcount').textContent='('+(fi+1)+' of '+n+')';
+  $('fHold').textContent='Hold x'+cur.hold[fi];$('fDel').style.opacity=n>1?1:.4;$('fL').style.opacity=fi>0?1:.4;$('fR').style.opacity=fi<n-1?1:.4;
+  var multi=n>1;$('fps').classList.toggle('hide',!multi);$('fpsv').parentNode.classList.toggle('hide',!multi);$('fps').value=cur.fps;$('fpsv').textContent=cur.fps;
+  ['l','r','t','b'].forEach(function(k){$('c'+k).value=Math.round(cur.crop[k]*100);$('c'+k+'v').textContent=Math.round(cur.crop[k]*100)+'%';});}
+function edit(){cache={};drawStrip();syncEditor(true);startPreview();}
+function copyC(c){var o=mk(c.width,c.height);o.getContext('2d').drawImage(c,0,0);return o;}
+$('fL').onclick=function(){if(fi<=0)return;var a=cur.src,h=cur.hold,t=a[fi];a[fi]=a[fi-1];a[fi-1]=t;t=h[fi];h[fi]=h[fi-1];h[fi-1]=t;fi--;edit();};
+$('fR').onclick=function(){if(fi>=cur.src.length-1)return;var a=cur.src,h=cur.hold,t=a[fi];a[fi]=a[fi+1];a[fi+1]=t;t=h[fi];h[fi]=h[fi+1];h[fi+1]=t;fi++;edit();};
+$('fDup').onclick=function(){if(cur.src.length>=60){toast('60 frames is the limit.');return;}cur.src.splice(fi+1,0,copyC(cur.src[fi]));cur.hold.splice(fi+1,0,cur.hold[fi]);fi++;if(cur.src.length>1&&fx!=='none')fx='none';edit();};
+$('fDel').onclick=function(){if(cur.src.length<=1){toast('Keep at least one frame.');return;}cur.src.splice(fi,1);cur.hold.splice(fi,1);if(fi>=cur.src.length)fi=cur.src.length-1;edit();};
+$('fAdd').onclick=function(){if(cur.src.length>=60){toast('60 frames is the limit.');return;}addMode=true;pendingAdd=true;$('file').click();};
+$('fRev').onclick=function(){cur.src.reverse();cur.hold.reverse();fi=cur.src.length-1-fi;edit();};
+$('fPing').onclick=function(){var n=cur.src.length;if(n<3){toast('Needs 3 or more frames.');return;}var add=[],ah=[];for(var i=n-2;i>=1;i--){add.push(copyC(cur.src[i]));ah.push(cur.hold[i]);}cur.src=cur.src.concat(add).slice(0,60);cur.hold=cur.hold.concat(ah).slice(0,60);edit();toast('Ping-pong: now plays forward and back.');};
+$('fHold').onclick=function(){cur.hold[fi]=cur.hold[fi]>=4?1:cur.hold[fi]+1;edit();};
+$('fps').oninput=function(){cur.fps=+this.value;$('fpsv').textContent=cur.fps;startPreview();};
+['l','r','t','b'].forEach(function(k){$('c'+k).oninput=function(){cur.crop[k]=(+this.value)/100;$('c'+k+'v').textContent=this.value+'%';liveRedo2();};});
+var lkq2=0;function liveRedo2(){if(lkq2)return;lkq2=requestAnimationFrame(function(){lkq2=0;cache={};drawStrip();startPreview();});}
+$('rot').onclick=function(){cur.rot=((cur.rot||0)+1)%4;edit();};$('flip').onclick=function(){cur.flip=!cur.flip;edit();};
+$('cReset').onclick=function(){cur.crop={l:0,r:0,t:0,b:0};cur.rot=0;cur.flip=false;edit();};
+$('fPaint').onclick=function(){if(!cur)return;normCur();
+  try{localStorage.setItem('arcade.maker.session',JSON.stringify({frames:exportFrames(cur.src),hold:cur.hold,fps:cur.fps,name:cur.name,editId:cur.editId||null,fi:fi,crop:cur.crop,rot:cur.rot,flip:cur.flip,fx:fx,shape:shape,look:LK,size:SZ,gif:cur.gif,ts:Date.now()}));}catch(e){toast('Too big to hold while you paint.');return;}
+  toPaint([exportFrames([cur.src[fi]])[0]],cur.fps,'__f:'+fi,cur.name,true);};
+/* ---- looks ---- */
+function applyLook(c,L){if(L<=0)return c;var S=c.width,pix=L<=50?L/50:Math.max(0,1-(L-50)/25),car=L<=50?0:(L-50)/50,out=c,g;
+  if(pix>0){var bs=1+pix*(S/13),n=Math.max(6,Math.round(S/bs)),t=mk(n);g=t.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(c,0,0,n,n);out=mk(S);g=out.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(t,0,0,S,S);}
+  else{out=mk(S);out.getContext('2d').drawImage(c,0,0);}
+  g=out.getContext('2d');var im=g.getImageData(0,0,S,S),d=im.data,i,lum=null;
+  if(car>0){lum=new Float32Array(S*S);var o=c.getContext('2d').getImageData(0,0,S,S).data;for(i=0;i<S*S;i++)lum[i]=o[i*4]*.3+o[i*4+1]*.59+o[i*4+2]*.11;}
+  var lv=pix>0&&car===0?Math.round(256-pix*244):Math.round(16-car*11);if(lv<2)lv=2;
+  var sat=1+car*.6,k=lv<256?(lv-1)/255:0;
+  for(i=0;i<d.length;i+=4){
+    if(d[i+3]<110){d[i+3]=0;continue;}d[i+3]=255;
+    var r=d[i],gg=d[i+1],b=d[i+2];
+    if(car>0){var l=r*.3+gg*.59+b*.11;r=l+(r-l)*sat;gg=l+(gg-l)*sat;b=l+(b-l)*sat;r=(r-128)*(1+car*.25)+128;gg=(gg-128)*(1+car*.25)+128;b=(b-128)*(1+car*.25)+128;}
+    if(lv<256){r=Math.round(Math.max(0,Math.min(255,r))*k)/k;gg=Math.round(Math.max(0,Math.min(255,gg))*k)/k;b=Math.round(Math.max(0,Math.min(255,b))*k)/k;}
+    d[i]=Math.max(0,Math.min(255,r));d[i+1]=Math.max(0,Math.min(255,gg));d[i+2]=Math.max(0,Math.min(255,b));}
+  if(car>0){var th=70-car*30;for(var y=1;y<S-1;y++)for(var x=1;x<S-1;x++){var p=y*S+x,gx=lum[p+1]-lum[p-1]+(lum[p-S+1]-lum[p-S-1]+lum[p+S+1]-lum[p+S-1])*.5,gy=lum[p+S]-lum[p-S]+(lum[p+S-1]-lum[p-S-1]+lum[p+S+1]-lum[p-S+1])*.5,e=Math.sqrt(gx*gx+gy*gy);
+    if(e>th&&d[p*4+3]){var a=Math.min(1,(e-th)/60+.4)*Math.min(1,car*1.4);d[p*4]=d[p*4]*(1-a)+20*a;d[p*4+1]=d[p*4+1]*(1-a)+16*a;d[p*4+2]=d[p*4+2]*(1-a)+24*a;}}}
+  g.putImageData(im,0,0);return out;}
+/* the picture view for frame index ix: cropped, turned, flipped (all frames share the same crop) */
+function seq(){if(cur.src.length<=1)return [0];var a=[];cur.src.forEach(function(c,i){var h=Math.max(1,Math.min(4,(cur.hold&&cur.hold[i])||1));for(var q=0;q<h;q++)a.push(i);});return a.slice(0,60);}
+function srcView(ix){var key='v'+ix;if(cache[key])return cache[key];var im=cur.src[ix],cr=cur.crop||{l:0,r:0,t:0,b:0},rot=cur.rot||0;
+  var sx=im.width*cr.l,sy=im.height*cr.t,sw=Math.max(2,im.width*(1-cr.l-cr.r)),sh=Math.max(2,im.height*(1-cr.t-cr.b));
+  var w=rot%2?sh:sw,h=rot%2?sw:sh,c=mk(Math.max(1,Math.round(w)),Math.max(1,Math.round(h))),g=c.getContext('2d');g.imageSmoothingQuality='high';
+  g.translate(c.width/2,c.height/2);g.rotate(rot*Math.PI/2);if(cur.flip)g.scale(-1,1);g.drawImage(im,sx,sy,sw,sh,-sw/2,-sh/2,sw,sh);cache[key]=c;return c;}
+/* fitted + clipped + looked image k at size S (no animation transform) */
+function fitted(S,k){var sq=seq(),ix=sq[k%sq.length];var key=S+'|'+ix+'|'+shape+'|'+LK+'|'+(fx==='none');if(cache[key])return cache[key];
+  var im=srcView(ix),pad=fx==='none'?S*.04:S*.12,inner=S-pad*2,c=mk(S),x=c.getContext('2d');x.imageSmoothingQuality='high';
+  var w=im.width,h=im.height,s=shape==='orig'?Math.min(inner/w,inner/h):Math.max(inner/w,inner/h),dw=w*s,dh=h*s;
+  x.save();x.beginPath();if(shape==='circle')x.arc(S/2,S/2,inner/2,0,7);else if(shape==='square')x.rect(pad,pad,inner,inner);else x.rect(0,0,S,S);x.clip();
+  x.drawImage(im,(S-dw)/2,(S-dh)/2,dw,dh);x.restore();
+  if(shape==='circle'&&LK<=60){x.beginPath();x.arc(S/2,S/2,inner/2-S/80,0,7);x.lineWidth=Math.max(1.2,S/40);x.strokeStyle='rgba(255,255,255,.85)';x.stroke();}
+  var o=applyLook(c,LK);cache[key]=o;return o;}
+function frame(S,t,k){var c=mk(S),x=c.getContext('2d'),b=fitted(S,k),sx=1,sy=1,tx=0,ty=0,rot=0,tp=t*Math.PI*2;
+  if(fx==='bounce'){var a=Math.abs(Math.sin(t*Math.PI));ty=-a*S*.14+S*.05;sx=1+(.08*(1-a));sy=1-(.08*(1-a));}
+  else if(fx==='pulse'){var p=1+.1*Math.sin(tp);sx=sy=p;}
+  else if(fx==='shake'){tx=Math.sin(tp*2)*S*.07;rot=Math.sin(tp*2)*.05;}
+  else if(fx==='wobble'){rot=Math.sin(tp)*.28;}
+  else if(fx==='spin'){sx=Math.cos(tp);if(Math.abs(sx)<.08)sx=.08*(sx<0?-1:1);}
+  else if(fx==='pop'){var q=t<.5?t*2:1-(t-.5)*2;sx=sy=.7+.4*Math.sin(q*Math.PI/2);}
+  x.imageSmoothingEnabled=LK<=0;x.translate(S/2+tx,S/2+ty);x.rotate(rot);x.scale(sx,sy);x.translate(-S/2,-S/2);x.drawImage(b,0,0);
+  if(LK>0&&(sx!==1||sy!==1||rot)){var im=x.getImageData(0,0,S,S),d=im.data;for(var i=3;i<d.length;i+=4)d[i]=d[i]>110?255:0;x.putImageData(im,0,0);}
+  return c;}
+var pvT=0;
+function frameCount(){return cur.src.length>1?seq().length:(fx==='none'?1:NF);}
+function fpsNow(){return cur.src.length>1?(cur.fps||10):spd;}
+function startPreview(){clearInterval(pvT);if(!cur)return;var n=frameCount(),i=0,pv=$('pv');pv.width=pv.height=SZ;var small=$('p32');small.width=small.height=SZ;
+  function go(){var c=frame(SZ,n>1?(i%n)/n:0,i);var x=pv.getContext('2d');x.clearRect(0,0,SZ,SZ);x.drawImage(c,0,0);var y=small.getContext('2d');y.clearRect(0,0,SZ,SZ);y.drawImage(c,0,0);i++;}
+  go();if(n>1)pvT=setInterval(go,Math.round(1000/Math.max(1,fpsNow())));}
+var LKN=function(v){return v<8?'Normal':v<35?'Soft pixels':v<65?'Pixelated':v<90?'Comic':'Cartoon';};
+function openEd(msg){$('ed').classList.remove('hide');$('nm').value=cur.name;normCur();
+  var multi=cur.src.length>1;$('edmsg').textContent=msg||(cur.gif?cur.src.length+' GIF frames kept. Use the frame strip to reorder, delete or hold frames. Look, crop and size apply to every frame.':multi?(cur.src.length+' pictures become the frames of one animation.'):'');
+  $('look').value=LK;$('lkv').textContent=LKN(LK);$('esz').value=SZ;$('szv').textContent=SZ;
+  var lockFx=cur.src.length>1;$('fxwrap').style.opacity=lockFx?.4:1;$('fxwrap').style.pointerEvents=lockFx?'none':'auto';
+  $('spdwrap').style.display=(cur.src.length>1)?'none':'';syncEditor();
+  $('replace').classList.toggle('hide',!(cur.editId&&pics.some(function(p){return p.id===cur.editId;})));
+  cache={};chips($('fx'),FX,function(){return fx;},function(v){fx=v;});chips($('shape'),SH,function(){return shape;},function(v){shape=v;});chips($('spd'),SP,function(){return spd;},function(v){spd=v;});
+  startPreview();$('ed').scrollIntoView({behavior:'smooth',block:'start'});}
+var lkq=0;function liveRedo(){if(lkq)return;lkq=requestAnimationFrame(function(){lkq=0;cache={};startPreview();});}
+$('look').oninput=function(){LK=+this.value;$('lkv').textContent=LKN(LK);liveRedo();};
+$('esz').oninput=function(){SZ=+this.value;$('szv').textContent=SZ;liveRedo();};
+$('cancel').onclick=function(){$('ed').classList.add('hide');clearInterval(pvT);cur=null;};
+function toURL(c){var u=LK<=0?c.toDataURL('image/webp',.9):'';if(u.indexOf('image/webp')<0)u=c.toDataURL('image/png');return u;}
+function buildPic(id,name){var p={id:id,name:name},n=frameCount(),fr=[];for(var i=0;i<n;i++)fr.push(toURL(frame(SZ,n>1?i/n:0,i)));
+  if(fr.length===1)p.src=fr[0];else{p.frames=fr;p.fps=Math.round(fpsNow());}return p;}
+function commitSave(replace){if(!cur)return;
+  var name=($('nm').value||'emoji').trim().slice(0,16),p,idx=-1;
+  if(replace){idx=pics.findIndex(function(x){return x.id===cur.editId;});}
+  else if(pics.length>=30){toast('30 emojis is the limit.');return;}
+  try{p=buildPic(replace&&idx>=0?pics[idx].id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36),name);}catch(e){toast('Could not make that emoji.');return;}
+  var old=null;if(replace&&idx>=0){old=pics[idx];pics[idx]=p;}else pics.push(p);
+  if(!savePics()){if(old)pics[idx]=old;else pics.pop();return;}
+  if(!(replace&&idx>=0)){var e=jget('arcade.my.emo',null);e=e||DEF.slice();e.push('{my:'+p.id+'}');ls('arcade.my.emo',JSON.stringify(e));}
+  $('ed').classList.add('hide');clearInterval(pvT);cur=null;drawSaved();drawEmoRow();toast(replace?'Updated.':'Saved. It is on in Settings > My emojis & texts.');}
+$('save').onclick=function(){commitSave(false);};$('replace').onclick=function(){commitSave(true);};
+/* ---- Paint Studio handoff ---- */
+function exportFrames(list){return list.map(function(c){var s=Math.min(1,256/Math.max(c.width,c.height)),o=c;if(s<1){o=mk(Math.round(c.width*s),Math.round(c.height*s));o.getContext('2d').drawImage(c,0,0,o.width,o.height);}return o.toDataURL('image/png');});}
+function toPaint(frs,fps,editId,name,smooth){try{localStorage.setItem('arcade.handoff.paint',JSON.stringify({frames:frs,fps:fps,editId:editId||null,name:name||'',smooth:!!smooth,ts:Date.now()}));}catch(e){toast('Too big to send to Paint.');return;}gotoTool('paint');}
+$('toPaint').onclick=function(){if(!cur)return;toPaint(exportFrames(cur.src),cur.src.length>1?cur.fps:spd,cur.editId,$('nm').value||cur.name,true);};
+$('editB').onclick=async function(){if(sel<0)return;var p=pics[sel],frs=p.frames&&p.frames.length?p.frames:null;
+  if(!frs&&p.src&&/^data:image\/gif/.test(p.src)){try{var b=await (await fetch(p.src)).arrayBuffer();var g=decodeGif(b,24,256);frs=g.frames.map(function(c){return c.toDataURL('image/png');});}catch(e){}}
+  if(!frs)frs=[p.src];toPaint(frs,p.fps||10,p.id,p.name,false);};
+function loadHandoff(){var raw=ls('arcade.handoff.emoji');if(!raw)return;ls('arcade.handoff.emoji',null);var o;try{o=JSON.parse(raw);}catch(e){return;}if(!o||!o.frames||!o.frames.length)return;
+  if(typeof o.editId==='string'&&o.editId.indexOf('__f:')===0){var ss=null;try{ss=JSON.parse(ls('arcade.maker.session')||'null');}catch(e){}ls('arcade.maker.session',null);
+    if(ss&&ss.frames&&ss.frames.length){var at=Math.max(0,Math.min(ss.frames.length-1,+o.editId.slice(4)||0)),all=ss.frames.slice(),out2=[],n2=0;all[at]=o.frames[0];
+      all.forEach(function(u,i){var im=new Image();im.onload=im.onerror=function(){out2[i]=im.width?toSmall(im,320):null;if(++n2===all.length){out2=out2.map(function(c,j){return c||mk(32);});cur={src:out2,name:ss.name||'my art',fps:ss.fps||10,editId:ss.editId||null,gif:out2.length>1,hold:ss.hold,crop:ss.crop,rot:ss.rot,flip:ss.flip};fx=ss.fx||'none';shape=ss.shape||'orig';LK=ss.look||0;SZ=ss.size||48;fi=at;openEd('Frame '+(at+1)+' updated from Paint.');}};im.src=u;});return;}}
+  var out=[],n=0,tot=Math.min(24,o.frames.length);
+  o.frames.slice(0,tot).forEach(function(u,i){var im=new Image();im.onload=im.onerror=function(){out[i]=im.width?toSmall(im,320):null;if(++n===tot){out=out.filter(Boolean);if(!out.length)return;
+    fi=0;cur={src:out,name:(o.name||'my art').slice(0,16),fps:o.fps||10,editId:o.editId||null,gif:out.length>1};fx=out.length>1?'none':'none';shape='orig';
+    openEd(out.length>1?'From Paint Studio: '+out.length+' frames.':'From Paint Studio. Pick a shape and a look.');}};im.src=u;});}
+/* ---- texts ---- */
+var when='any';
+function drawEmoRow(){var r=$('emoRow');r.innerHTML='';DEF.concat(pics.map(function(p){return '{my:'+p.id+'}';})).forEach(function(tok){var b=document.createElement('button');b.type='button';b.className='chip';if(/^\{my:/.test(tok)){var p=pics.filter(function(x){return '{my:'+x.id+'}'===tok;})[0];if(!p)return;var im=picImg(p);im.style.cssText='height:26px;width:26px;object-fit:contain';b.appendChild(im);}else b.textContent=tok;b.onclick=function(){addTok(tok);};r.appendChild(b);});}
+function addTok(t){var a=$('tx');var s=a.selectionStart==null?a.value.length:a.selectionStart,e=a.selectionEnd==null?s:a.selectionEnd;a.value=a.value.slice(0,s)+t+a.value.slice(e);a.focus();}
+function drawWhen(){chips($('when'),[['any','Any time'],['win','When I win'],['lose','When I lose'],['idle','While idle']],function(){return when;},function(v){when=v;});}
+function richInto(el,t){var parts=String(t).split(/\{(my:[A-Za-z0-9_-]+|ahegao|bust|pout)\}/);parts.forEach(function(p,i){if(i%2===0){el.appendChild(document.createTextNode(p));}else if(p.indexOf('my:')===0){var q=pics.filter(function(x){return x.id===p.slice(3);})[0];if(q)el.appendChild(picImg(q));}else{el.appendChild(document.createTextNode('['+p+']'));}});}
+function drawText(){var b=$('lines');b.innerHTML='';anims=anims.filter(function(a){return a.el.isConnected;});lines.forEach(function(t,i){var d=document.createElement('div');d.className='ln';var s=document.createElement('span');richInto(s,t);var x=document.createElement('button');x.textContent='\u2715';x.setAttribute('aria-label','Delete');x.onclick=function(){lines.splice(i,1);saveLines();drawText();};d.appendChild(s);d.appendChild(x);b.appendChild(d);});
+  if(!lines.length){var e=document.createElement('div');e.className='small';e.textContent='No texts yet.';b.appendChild(e);}$('tcnt').textContent=lines.length?'('+lines.length+')':'';}
+$('add').onclick=function(){var v=$('tx').value.replace(/\s+/g,' ').trim();if(!v){toast('Write something first.');return;}if(lines.length>=200){toast('200 texts is the limit.');return;}lines.push((when==='any'?'':when+': ')+v);saveLines();$('tx').value='';drawText();toast('Saved to My texts');};
+$('rand').onclick=function(){if(!lines.length){toast('Add a text first.');return;}var t=lines[Math.floor(Math.random()*lines.length)].replace(/^(win|lose|idle)\s*:\s*/i,'');var el=$('toast');el.textContent='';richInto(el,t);el.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('on');},3000);};
+drawSaved();drawEmoRow();drawWhen();loadHandoff();
+window.__maker={fi:function(){return fi;},ops:{L:function(){$('fL').click();},R:function(){$('fR').click();},dup:function(){$('fDup').click();},del:function(){$('fDel').click();},rev:function(){$('fRev').click();},ping:function(){$('fPing').click();},hold:function(){$('fHold').click();},sel:function(i){fi=i;syncEditor();}},seq:function(){return seq();},pics:function(){return pics;},lines:function(){return lines;},fx:function(v){fx=v;},cur:function(){return cur;},look:function(v){LK=v;$('look').value=v;cache={};startPreview();},size:function(v){SZ=v;$('esz').value=v;cache={};startPreview();},frame:function(S,t,k){return frame(S,t,k);}};
+})();
+</script></body></html>

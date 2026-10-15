@@ -31,6 +31,8 @@ label.upl input{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;
 .strip{display:flex;gap:6px;overflow-x:auto;padding:6px 2px 8px;-webkit-overflow-scrolling:touch}.fr{flex:0 0 auto;position:relative;width:58px;height:58px;border-radius:10px;border:2px solid #3a4378;background:repeating-conic-gradient(#232a55 0 25%,#1b2140 0 50%) 0 0/12px 12px;display:flex;align-items:center;justify-content:center}.fr.on{border-color:#d6ff4a;box-shadow:0 0 0 2px rgba(214,255,74,.25)}.fr canvas{max-width:100%;max-height:100%}.fr i{position:absolute;left:2px;top:0;font:800 9px system-ui;color:#fff;text-shadow:0 1px 2px #000;font-style:normal}.fr u{position:absolute;right:2px;bottom:0;font:800 9px system-ui;color:#ffe38a;text-decoration:none;text-shadow:0 1px 2px #000}
 .ctl{display:grid;grid-template-columns:70px 1fr 40px;gap:6px;align-items:center;margin:2px 0}.ctl span{font-size:12px;color:#aab2e6}.ctl b{font-size:12px;text-align:right}
 .hide{display:none!important}
+.pad{display:grid;grid-template-columns:repeat(4,56px);grid-template-rows:repeat(3,48px);gap:6px;justify-content:center;margin:6px 0}.pb{border:0;border-radius:12px;background:#283063;color:#fff;font:900 20px system-ui;touch-action:manipulation}.pb:active{background:#5b6cff}.pb.mid{background:#20274a;font-size:16px}
+main,.card,body{touch-action:pan-y}input[type=range]{touch-action:pan-y}
 </style></head><body>
 <div id="app">
 <header><h1>Emoji &amp; Text Maker</h1></header>
@@ -48,6 +50,10 @@ label.upl input{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;
    <div class="small">Speed: <b id="fpsv">10</b> frames per second</div><input type="range" id="fps" min="2" max="24" value="10" aria-label="Frame speed"></div>
   <div class="small" style="margin-top:8px"><b>Crop and turn</b> (all frames)</div>
   <div class="ctl"><span>Left</span><input type="range" id="cl" min="0" max="45" value="0"><b id="clv">0%</b></div><div class="ctl"><span>Right</span><input type="range" id="cr" min="0" max="45" value="0"><b id="crv">0%</b></div><div class="ctl"><span>Top</span><input type="range" id="ct" min="0" max="45" value="0"><b id="ctv">0%</b></div><div class="ctl"><span>Bottom</span><input type="range" id="cb" min="0" max="45" value="0"><b id="cbv">0%</b></div>
+  <div class="small" style="margin-top:6px">Move the picture in the frame <span class="small">(zoom in first, then nudge)</span></div>
+  <div class="pad"><span></span><button type="button" class="pb" id="nU" aria-label="Move picture up">&#9650;</button><span></span><button type="button" class="pb" id="zIn" aria-label="Zoom in">+</button>
+   <button type="button" class="pb" id="nL" aria-label="Move picture left">&#9664;</button><button type="button" class="pb mid" id="nC" aria-label="Center picture">&#9678;</button><button type="button" class="pb" id="nR" aria-label="Move picture right">&#9654;</button><button type="button" class="pb" id="zOut" aria-label="Zoom out">&minus;</button>
+   <span></span><button type="button" class="pb" id="nD" aria-label="Move picture down">&#9660;</button><span></span><span></span></div>
   <div class="row"><button type="button" class="chip" id="rot">Rotate 90&deg;</button><button type="button" class="chip" id="flip">Flip</button><button type="button" class="chip" id="cReset">Reset crop</button></div>
   <div class="small">Look: <b id="lkv">Normal</b></div><input type="range" id="look" min="0" max="100" value="0" aria-label="Look"><div class="lkl"><span>Normal</span><span>Pixelated</span><span>Cartoon</span></div>
   <div class="small">Size: <b id="szv">48</b> px</div><input type="range" id="esz" min="32" max="64" step="2" value="48" aria-label="Size">
@@ -215,6 +221,14 @@ $('fps').oninput=function(){cur.fps=+this.value;$('fpsv').textContent=cur.fps;st
 ['l','r','t','b'].forEach(function(k){$('c'+k).oninput=function(){cur.crop[k]=(+this.value)/100;$('c'+k+'v').textContent=this.value+'%';liveRedo2();};});
 var lkq2=0;function liveRedo2(){if(lkq2)return;lkq2=requestAnimationFrame(function(){lkq2=0;cache={};drawStrip();startPreview();});}
 $('rot').onclick=function(){cur.rot=((cur.rot||0)+1)%4;edit();};$('flip').onclick=function(){cur.flip=!cur.flip;edit();};
+function nudge(vx,vy){if(!cur)return;normCur();var c=cur.crop,rot=(cur.rot||0)%4,th=rot*Math.PI/2,ct=Math.round(Math.cos(th)),st=Math.round(Math.sin(th));
+  var wx=-vx,wy=-vy;var sx=wx*ct+wy*st,sy=-wx*st+wy*ct;if(cur.flip)sx=-sx;var d=0.03;
+  var mx=sx*d,my=sy*d;if(mx>0)mx=Math.min(mx,c.r);else mx=-Math.min(-mx,c.l);if(my>0)my=Math.min(my,c.b);else my=-Math.min(-my,c.t);
+  c.l+=mx;c.r-=mx;c.t+=my;c.b-=my;syncEditor(true);liveRedo2();}
+function zoomCrop(dir){if(!cur)return;normCur();var c=cur.crop,s=0.03*dir;['l','r','t','b'].forEach(function(k){c[k]=Math.max(0,Math.min(0.45,c[k]+s));});syncEditor(true);liveRedo2();}
+function holdBtn(id,fn){var el=$(id),t=0,iv=0;function stop(){clearTimeout(t);clearInterval(iv);}el.addEventListener('pointerdown',function(e){e.preventDefault();fn();t=setTimeout(function(){iv=setInterval(fn,90);},350);});['pointerup','pointercancel','pointerleave'].forEach(function(n){el.addEventListener(n,stop);});}
+holdBtn('nU',function(){nudge(0,-1)});holdBtn('nD',function(){nudge(0,1)});holdBtn('nL',function(){nudge(-1,0)});holdBtn('nR',function(){nudge(1,0)});holdBtn('zIn',function(){zoomCrop(1)});holdBtn('zOut',function(){zoomCrop(-1)});
+$('nC').onclick=function(){if(!cur)return;normCur();var c=cur.crop,h=(c.l+c.r)/2,v=(c.t+c.b)/2;c.l=c.r=h;c.t=c.b=v;syncEditor(true);liveRedo2();};
 $('cReset').onclick=function(){cur.crop={l:0,r:0,t:0,b:0};cur.rot=0;cur.flip=false;edit();};
 $('fPaint').onclick=function(){if(!cur)return;normCur();
   try{localStorage.setItem('arcade.maker.session',JSON.stringify({frames:exportFrames(cur.src),hold:cur.hold,fps:cur.fps,name:cur.name,editId:cur.editId||null,fi:fi,crop:cur.crop,rot:cur.rot,flip:cur.flip,fx:fx,shape:shape,look:LK,size:SZ,gif:cur.gif,ts:Date.now()}));}catch(e){toast('Too big to hold while you paint.');return;}
@@ -319,5 +333,17 @@ $('add').onclick=function(){var v=$('tx').value.replace(/\s+/g,' ').trim();if(!v
 $('rand').onclick=function(){if(!lines.length){toast('Add a text first.');return;}var t=lines[Math.floor(Math.random()*lines.length)].replace(/^(win|lose|idle)\s*:\s*/i,'');var el=$('toast');el.textContent='';richInto(el,t);el.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('on');},3000);};
 drawSaved();drawEmoRow();drawWhen();loadHandoff();
 window.__maker={fi:function(){return fi;},ops:{L:function(){$('fL').click();},R:function(){$('fR').click();},dup:function(){$('fDup').click();},del:function(){$('fDel').click();},rev:function(){$('fRev').click();},ping:function(){$('fPing').click();},hold:function(){$('fHold').click();},sel:function(i){fi=i;syncEditor();}},seq:function(){return seq();},pics:function(){return pics;},lines:function(){return lines;},fx:function(v){fx=v;},cur:function(){return cur;},look:function(v){LK=v;$('look').value=v;cache={};startPreview();},size:function(v){SZ=v;$('esz').value=v;cache={};startPreview();},frame:function(S,t,k){return frame(S,t,k);}};
+})();
+
+/* sliders only react when the thumb is touched directly; scrolling past them never moves them */
+(function(){var g=null;
+document.addEventListener('pointerdown',function(e){var t=e.target;if(!t||!t.matches||!t.matches('input[type=range]'))return;var r=t.getBoundingClientRect(),mn=+t.min||0,mx=+t.max||100,f=(t.value-mn)/(mx-mn||1),tx=r.left+14+(r.width-28)*f;g={el:t,start:t.value,x:e.clientX,y:e.clientY,t:Date.now(),on:Math.abs(e.clientX-tx)<=26,cancel:false,mn:mn,mx:mx,r:r};},true);
+document.addEventListener('pointermove',function(e){if(!g)return;if(Math.abs(e.clientY-g.y)>10&&Math.abs(e.clientY-g.y)>Math.abs(e.clientX-g.x)){g.cancel=true;}},true);
+function revert(){if(g&&g.el.value!==g.start){g.el.value=g.start;}}
+['pointercancel'].forEach(function(n){document.addEventListener(n,function(){if(!g)return;revert();g=null;},true);});
+document.addEventListener('pointerup',function(e){if(!g)return;var q=g;g=null;var tap=Math.abs(e.clientX-q.x)<8&&Math.abs(e.clientY-q.y)<8&&Date.now()-q.t<300;
+ if(q.cancel||(!q.on&&!tap)){q.el.value=q.start;return;}
+ if(!q.on&&tap){var f=Math.max(0,Math.min(1,(e.clientX-q.r.left-14)/(q.r.width-28)));var st=+q.el.step||1;var v=Math.round((q.mn+f*(q.mx-q.mn))/st)*st;q.el.value=v;q.el.dispatchEvent(new Event('input',{bubbles:true}));}},true);
+['input','change'].forEach(function(n){document.addEventListener(n,function(e){if(!g||e.target!==g.el)return;if(g.cancel||!g.on){e.stopImmediatePropagation();if(e.target.value!==g.start&&!g.on)e.target.value=g.start;}},true);});
 })();
 </script></body></html>
