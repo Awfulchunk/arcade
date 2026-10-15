@@ -229,9 +229,9 @@ const CFG_DEF={sound:true,vib:true,gore:'some',particles:'full',
  scPack:'mixed',scWords:10,scTimer:true,
  pbSpeed:'normal',pbLength:60,pbCash:1500,pbDouble:true,chLevel:2,ckLevel:2,rcSens:2,scMode:'walls',scSpeed:2};
 const CFG=Object.assign({},CFG_DEF);try{Object.assign(CFG,JSON.parse(LS.get('chill.cfg')||'{}'));}catch(e){}
-try{const ag=LS.get('arcade.gore');if(ag==='off'||ag==='some'||ag==='lots')CFG.gore=ag;}catch(e){}
+try{CFG.gore=(LS.get('arcade.gore')==='off')?'off':'lots';}catch(e){CFG.gore='lots';}
 function saveCfg(){LS.set('chill.cfg',JSON.stringify(CFG));}
-function adultOn(){return LS.get('sws_adult')==='1';}
+function adultOn(){return LS.get('sws_adult')!=='0';}
 function setAdult(v,after){if(!v){LS.set('sws_adult','0');after&&after();return;}
  if(window.__tjGate&&!window.__tjUnlocked()){window.__tjGate(function(){setAdult(v,after);},function(){after&&after();});return;}
  if(LS.get('sws_adult_ok')==='1'){LS.set('sws_adult','1');after&&after();return;}
@@ -281,8 +281,6 @@ $('hubSet').onclick=()=>{sfx('tap');openSettings();};
 function cfgItem(k,l,d,t,o,extra){return Object.assign({k,l,d,t,o,get:()=>CFG[k],set:v=>{CFG[k]=v;saveCfg();}},extra||{});}
 function chillSpec(){const cats=[
   {id:'general',name:'General',icon:'⚙',items:[
-   {k:'adult',l:'Adult Mode (18+)',d:'Adds the rude word packs from Super Word Search to Hangman and Word Scramble.',t:'bool',th:'text',get:()=>adultOn(),set:v=>{setAdult(v,()=>{if(setRefresh)setRefresh();});}},
-   cfgItem('gore','Gore','How messy it gets: Hangman dude and Snake deaths. Off = no blood at all.','opt',[['off','Off'],['some','Some'],['lots','Lots']],{th:'gore'}),
    cfgItem('sound','Sound','Turns all the beeps and boops on or off.','bool',null,{th:'sound'}),
    cfgItem('vib','Vibration','The phone buzzes a little on big moments.','bool',null,{th:'vib'})]},
   {id:'graphics',name:'Graphics',icon:'✨',items:[...SETUI.perfItems(),cfgItem('particles','Particles','Little bits that fly out when things pop. Lite = fewer, faster.','opt',[['full','Full'],['lite','Lite'],['off','Off']],{th:'particles'})]}];
@@ -317,6 +315,7 @@ reg({id:'words',name:'Super Word Search',emoji:'🔎',blurb:'v3 Picture Reveal. 
 const SN=(function(){
  const A=3600,CELL=80,GN=Math.ceil(A/CELL),MAXSEG=520,MAXS=24,NF=2200,NP=360,ND=48,NPU=10;
  const NAMES=['Sir Slurps','Noodle Ned','Big Wiggle','Lil Danger','Hissy Fit','Spaghetti Sam','Wormzilla','Captain Coil','Slinky Pete','Doug the Dong','Mr. Noodles','Twisty Tina','Sneaky Steve','Mamba Mike','Grandpa Slime','Zigzag Zoe','Boa Dude','Pretzel Pat','Lord Length','Tube Steak','Danger Noodle','Kevin','Slippy Sue','The Hose'];
+ const NAMES_AD=['Big Pimpin','Dealer Dan','Lola Lust','Hustler Hal','Candy Cane','Madame Z','Weed Wanda','Sugar Daddy','Eightball','Smooth Sal','Johnny Johnson','Rusty Trombone','Stacks','Pocket Rocket','Silk','Baby Oil','Tramp Stamp','Vinnie Vice','Hooch','Dope Doug','Trixie','Wet Willy','Mistress May','Bad Idea'];
  const TALK_KILL=['get rekt','yum, you taste like fear','thanks for the snack','skill issue','next!','that was too easy','u mad bro?','delicious','go back to tic tac toe','sit down'];
  const TALK_DIE=['lag!!','that was a bug','my cat hit the screen','i let you win','ok whatever','not fair!!','rematch','UGH','my thumb slipped','ow'];
  const TALK_IDLE=['im so long rn','who wants smoke','come at me','im just vibing','nice wiggle','big snake energy','dont cut me off pls','lol','sup','im hungry'];
@@ -501,7 +500,7 @@ const SN=(function(){
  // ---- round flow ----
  function newRound(auto){for(const s of snakes){s.on=false;s.alive=false;}fa.fill(0);fCount=0;pN=0;dN=0;for(const p of pu)p.on=false;feed.length=0;feedT=0;tPlay=0;over=false;
   const team=CFG.snMode==='team';me=snakes[0];spawn(me,true,'YOU',skinNow(),team?0:-1);me.auto=!!auto;camX=me.x;camY=me.y;
-  const nb=clamp(CFG.snBots|0,4,MAXS-1),names=shuffle(NAMES.slice());for(let i=1;i<=nb;i++)spawn(snakes[i],false,names[(i-1)%names.length],pick(SKINS),team?i%2:-1);
+  const nb=clamp(CFG.snBots|0,4,MAXS-1),names=shuffle((adultOn()?NAMES_AD:NAMES).slice());for(let i=1;i<=nb;i++)spawn(snakes[i],false,names[(i-1)%names.length],pick(SKINS),team?i%2:-1);
   for(let i=0;i<900;i++)addFood(rr(20,A-20),rr(20,A-20),rr(0.3,1.1));lbT=0;running=true;paused=false;}
  function skinNow(){const i=+(LS.get('chill.snake.skin')||0),s=SKINS[i]||SKINS[0];return best('snake')>=s.req?s:SKINS[0];}
  function roundOver(){if(over||!me)return;over=true;const L=lenOf(me),nb=setBest('snake',L),rank=lb.indexOf(me);sfx('lose');
@@ -561,6 +560,9 @@ const FX=(function(){const N=260,x=new Float32Array(N),y=new Float32Array(N),vx=
  return{add,step,draw,clear(){n=0;},count:()=>n};})();
 const CONFETTI=['#ffcf4a','#6f7dff','#ff6a8a','#4cd98a','#8a5cff','#fff'];
 function kbRows(){return['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];}
+
+/* 2.6.3 gore: cartoon ink-splat red, only when the universal Gore switch is on */
+function goreFX(x,y,n,sp){if(CFG.gore==='off')return;FX.add(x,y,n,['#b0141e','#d02030','#7a0a14','#ff3a4a'],sp||220,0.8,4,300);}
 
 // ---- 30-hangman.js ----
 // ===================== HANGMAN — gory cartoon dude (respects the Gore setting) =====================
@@ -754,7 +756,7 @@ reg((function(){
   sfx(cnt>1?'pop':'tap');if(left<=0)win();}
  function chord(i){if(!CFG.mnQuick||!open[i]||!num[i])return;let f=0;nb(i,j=>{f+=flag[j];});if(f!==num[i])return;nb(i,j=>{if(!open[j]&&!flag[j])reveal(j);});}
  function toggleFlag(i){if(open[i]||state==='won'||state==='lost')return;flag[i]^=1;flags+=flag[i]?1:-1;sfx('flag');buzz(15);upd();}
- function boom(i){state='lost';boomI=i;boomT=0;tNow=(performance.now()-t0)/1000;for(let j=0;j<mine.length;j++)if(mine[j])open[j]=1;sfx('boom');buzz(250);FX.add(ox+(i%S.c+0.5)*cell,oy+(((i/S.c)|0)+0.5)*cell,60,['#ffcf4a','#ff7a3a','#ff4a4a','#444'],380,0.9,6,300);
+ function boom(i){state='lost';boomI=i;boomT=0;tNow=(performance.now()-t0)/1000;for(let j=0;j<mine.length;j++)if(mine[j])open[j]=1;sfx('boom');buzz(250);goreFX(ox+(i%S.c+0.5)*cell,oy+(((i/S.c)|0)+0.5)*cell,70,420);FX.add(ox+(i%S.c+0.5)*cell,oy+(((i/S.c)|0)+0.5)*cell,60,['#ffcf4a','#ff7a3a','#ff4a4a','#444'],380,0.9,6,300);
   later(()=>{if(state==='lost')talk('lose');popup('<h2>💥 BOOM</h2><p>'+(adultOn()?'You blew it, dumbass. ':'You stepped on a mine ')+'after '+fmtTime(tNow)+'.</p>',[['Try again',setup],['Back to games',gameExit,'alt']]);},1300);upd();}
  function win(){state='won';tNow=(performance.now()-t0)/1000;for(let j=0;j<mine.length;j++)if(mine[j]&&!flag[j]){flag[j]=1;flags++;}const k='mines_'+CFG.mnSize,nb2=setBest(k,Math.round(tNow*10)/10,true);sfx('win');FX.add(W/2,H*0.4,100,CONFETTI,450,1.6,7,500);
   talk('win');later(()=>popup('<h2>🏁 Cleared!</h2><p>'+S.n+' in <b>'+fmtTime(tNow)+'</b>'+(nb2?' ⭐ NEW BEST':' · Best '+fmtTime(best(k)))+'</p>',[['Play again',setup],['Back to games',gameExit,'alt']]),900);upd();}
@@ -1084,7 +1086,7 @@ reg((function(){
  function botMove(){const dep=CFG.chLevel===1?1:CFG.chLevel===3?3:2;const ms=legal(bd,false,castle,ep);if(!ms.length)return null;let best=null,bv=1e9;shuffle(ms);
   for(const m of ms){const r=apply(bd,m,false,castle,ep);let v=search(r.b,true,r.cs,r.ep,dep-1,-1e9,1e9);if(CFG.chLevel===1)v+=rr(-40,40);if(v<bv){bv=v;best=m;}}return best;}
  function doMove(m,w){const r=apply(bd,m,w,castle,ep);const c=bd[m.f];if(r.cap)(w?cap.w:cap.b).push(r.cap);hist.push({bd:bd.slice(),castle:Object.assign({},castle),ep,last,cap:{w:cap.w.slice(),b:cap.b.slice()}});
-  anim={m,c:r.b[m.t],t:0};bd=r.b;castle=r.cs;ep=r.ep;last={f:m.f,t:m.t};turn=w?'b':'w';sfx(r.cap?'pop':'tap');if(r.cap)FX.add(ox+(m.t%8+0.5)*sq,oy+(((m.t/8)|0)+0.5)*sq,10,['#ffcf4a','#fff'],140,0.5,3,300);
+  anim={m,c:r.b[m.t],t:0};bd=r.b;castle=r.cs;ep=r.ep;last={f:m.f,t:m.t};turn=w?'b':'w';sfx(r.cap?'pop':'tap');if(r.cap){FX.add(ox+(m.t%8+0.5)*sq,oy+(((m.t/8)|0)+0.5)*sq,10,['#ffcf4a','#fff'],140,0.5,3,300);goreFX(ox+(m.t%8+0.5)*sq,oy+(((m.t/8)|0)+0.5)*sq,22,230);}
   const nw=turn==='w',lm=legal(bd,nw,castle,ep);
   if(!lm.length){if(inCheck(bd,nw)){state=w?'won':'lost';finish();}else{state='draw';finish();}}else if(inCheck(bd,nw)){sfx('bad');toast('Check!',900);}
   upd();}
@@ -1162,7 +1164,7 @@ reg((function(){
   let v=1e9;for(const m of ms){v=Math.min(v,search(applyM(b,m,false),true,d-1,al,be));be=Math.min(be,v);if(al>=be)break;}return v;}
  function botMove(){const ms=moves(bd,false);if(!ms.length)return null;const d=CFG.ckLevel===1?2:CFG.ckLevel===3?7:5;shuffle(ms);let best=null,bv=1e9;for(const m of ms){let v=search(applyM(bd,m,false),true,d-1,-1e9,1e9);if(CFG.ckLevel===1)v+=rr(-30,30);if(v<bv){bv=v;best=m;}}return best;}
  function doMove(m,r){hist.push({bd:bd.slice(),last});const f=m.path[0],t=m.path[m.path.length-1];anim={f,t,t0:0,c:bd[f]};bd=applyM(bd,m,r);last={f,t};
-  sfx(m.caps.length?'pop':'tap');for(const k of m.caps)FX.add(ox+(k%8+0.5)*sq,oy+(((k/8)|0)+0.5)*sq,10,r?['#ff6a6a','#fff']:['#8a8fb0','#fff'],150,0.5,3,300);
+  sfx(m.caps.length?'pop':'tap');for(const k of m.caps){FX.add(ox+(k%8+0.5)*sq,oy+(((k/8)|0)+0.5)*sq,10,r?['#ff6a6a','#fff']:['#8a8fb0','#fff'],150,0.5,3,300);goreFX(ox+(k%8+0.5)*sq,oy+(((k/8)|0)+0.5)*sq,18,210);}
   turn=r?'b':'r';const nm=moves(bd,turn==='r');if(!nm.length){state=r?'won':'lost';finish();}upd();}
  function finish(){const s=state;later(()=>{if(s==='won'){sfx('win');talk('win');FX.add(W/2,H*0.3,110,CONFETTI,420,1.7,7,500);setBest('checkers',best('checkers')+1);}else{sfx('lose');talk('lose');}
    popup('<h2>'+(s==='won'?'🔴 You win!':'😤 Bot wins')+'</h2><p>Your wins: '+best('checkers')+'</p>',[['New game',newGame],['Back to games',gameExit,'alt']]);},700);}

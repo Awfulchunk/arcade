@@ -505,7 +505,7 @@ function ricoChance(from,to,dist){
 function saveCustom(){try{localStorage.setItem(LS+'custom',JSON.stringify(custom));}catch(e){}}
 let inCustomMatch=false;
 function cfgObj(){return inCustomMatch?custom:settings;}
-function C(k){const o=cfgObj();return o[k]!==undefined?o[k]:SHARED_DEF[k];}
+function C(k){if(k==='gore'){try{return localStorage.getItem('arcade.gore')==='off'?'off':'max';}catch(e){return 'max';}}const o=cfgObj();return o[k]!==undefined?o[k]:SHARED_DEF[k];}
 // run rules for the current match (main modes = defaults)
 const RUN_DEF={speedMul:1,dmgMul:1,reloadMul:1,hpMul:1,botCount:BOT_COUNT,diff:'normal',ffaKills:FFA_KILLS,botRespawn:true,allowed:TYPE_IDS.slice(),botType:'mix',
   smokeZones:true,cars:true,pickups:true,remainsCap:Math.max(1,Math.min(30,(settings.wrecksCap|0)||REMAINS_CAP)),mapSize:'normal',hunterBots:HUNTER_BOTS,waveCap:12};
@@ -2838,7 +2838,7 @@ function sharedSchema(isCustom){return[
   {k:'orient',l:'Orientation lock',t:'opt',o:[['auto','AUTO'],['portrait','PORTRAIT'],['landscape','LANDSCAPE']]}
 ]).concat(isCustom?[{k:'sideNotice',l:'Small "turn sideways" hint at the side (portrait)',t:'bool'}]:[]);}
 function settingsSchema(){return[{note:inCustomMatch?'You are in a Custom Game: changes here go to your Custom Game setup.':''},
-  {sec:'🩸 GAME'},{k:'gore',l:'Gore',t:'opt',o:GORE_OPTS},{k:'sound',l:'Sound',t:'bool',global:true}].concat(v17HudSchema(),sharedSchema(inCustomMatch));}
+  {sec:'🩸 GAME'},{k:'sound',l:'Sound',t:'bool',global:true}].concat(v17HudSchema(),sharedSchema(inCustomMatch));}
 function customSchema(){return[
   {sec:'⚔ RULES'},
   {k:'rules',l:'Game rules',t:'opt',o:[['ffa','FREE-FOR-ALL'],['lts','LAST STANDING'],['wave','WAVES'],['hunter','HUNTER (BOSS)']]},
@@ -2861,7 +2861,6 @@ function customSchema(){return[
   {k:'pickups',l:'Pickups (health / fast reload)',t:'bool'},
   {k:'mzCarEscape',l:'Civilians jump in cars & drive off (ram them)',t:'bool'},
   {sec:'🩸 GORE'},
-  {k:'gore',l:'Gore level',t:'opt',o:GORE_OPTS},
   {k:'remainsCap',l:'Wrecks & bodies kept (oldest fade)',t:'range',min:1,max:20,step:1}
 ].concat(balanceSchema(),scatterSchema(),sharedSchema(true));}
 function scatterSchema(){const nm=k=>k==='td'?'TANK DESTROYER':TYPES_BASE[k].name;const guns=['superlight','light','medium','heavy','td','artillery'];
@@ -7455,7 +7454,7 @@ function trrStOK(i){const c=SV.crew[i];return !!c&&!c.dead&&!(c.moveT>0);}
 // ---------- crew damage + module damage ----------
 function trrCrewDmg(i,d,why){const c=SV.crew[i];if(!c||c.dead)return;const pk=trrPerkOf(i);if(pk==='tough')d*=0.75;else if(pk==='calm')d*=0.9;c.hp-=d;c.hurtT=0.8;if(c.hp>0)return;c.hp=0;c.dead=true;c.kia=true;c.koT=SV.t;c.moveT=0;if(TRR.cut&&TRR.cut.swap&&(TRR.cut.swap.from===i||TRR.cut.swap.to===i))TRR.cut.swap=null;
  const role=['CAPTAIN','GUNNER','MECHANIC','MEDIC'][i];svSay('⚠ '+role+' '+c.name.toUpperCase()+' IS DOWN'+({0:' - RADAR LOST',1:' - SLOWER, WORSE AIM',2:' - NO REPAIRS, SLOWER ENGINE',3:' - NO HEALING'}[i]),4);sfx('crunch',SV.tank.x,SV.tank.y,0.5);
- if(settings.trrSplash&&goreOn())TRR.cut.splash.push({i,t:0});}
+ if(goreOn())TRR.cut.splash.push({i,t:0});}
 {const _h=svHurtTank;svHurtTank=function(d,pc,src){if(!(TRR.rumble&&TRR.on)||!SV.tank.alive||TRR._inHit)return _h(d,pc,src);const t=SV.tank,C=TRR.cut||(trrCutInit(),TRR.cut),hp0=t.hp,fr0=d/t.maxHp;
   TRR._inHit=true;try{_h(d,pc,src);}finally{TRR._inHit=false;}
   const real=hp0-t.hp,fr=real/t.maxHp;if(real<=0.01)return;
@@ -7495,6 +7494,8 @@ function trrCutBust(g,st,c,i,x,y,T,alpha){const dead=c.dead&&!c.vac,vac=c.dead&&
  const bob=dead?0:Math.sin(T*2+i)*0.4+(c.hurtT>0?Math.sin(T*40)*0.7:0),by=(dead?2.5*slump:0)+bob;
  // body
  g.fillStyle=dead?'#555b66':st.col;g.beginPath();g.moveTo(-6.5,4);g.lineTo(-5,-2+by);g.quadraticCurveTo(0,-4+by,5,-2+by);g.lineTo(6.5,4);g.closePath();g.fill();g.fillStyle='rgba(255,255,255,0.18)';g.fillRect(-4,-1+by,8,1);
+ // 2.6.3 cartoon blood: stains on the uniform when hurt, a proper mess when down (needs the universal Gore switch)
+ if(goreOn()&&(dead||(c.hp!=null&&c.hp<35))){g.fillStyle='rgba(176,20,30,0.85)';g.beginPath();g.ellipse(-1.5,1+by,2.6,1.7,0.3,0,TAU);g.fill();g.beginPath();g.ellipse(2.4,2.2+by,1.6,1.1,-0.4,0,TAU);g.fill();if(dead){g.beginPath();g.ellipse(0,5.5,7,1.5,0,0,TAU);g.fill();g.fillStyle='rgba(120,10,20,0.9)';g.fillRect(-0.6,2+by,1.2,3.6);}}
  // head
  g.save();g.translate(dead?1.5*slump:0,-7+by+(dead?2.5*slump:0));g.rotate(dead?0.55*slump:(hurt?Math.sin(T*3)*0.08:0));
  g.fillStyle=dead?'#b9b2a6':'#f0c8a0';g.beginPath();g.arc(0,0,4.2,0,TAU);g.fill();
