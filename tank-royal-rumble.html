@@ -2540,12 +2540,12 @@ function respawn(type){if(!player||G.result)return;show('over',false);show('tsel
 $('setBack').addEventListener('click',()=>{show('settings',false);if(settingsFrom==='pause')show('pause',true);});
 $('pSetBtn').addEventListener('click',()=>openSettings('pause'));
 $('resBtn').addEventListener('click',resumeGame);
-$('quitBtn').addEventListener('click',toTitle);
+$('quitBtn').addEventListener('click',()=>toTitle());
 $('pauseBtn').addEventListener('click',()=>{if(state==='playing')pauseGame();});
 $('respBtn').addEventListener('click',()=>respawn());
 $('chgBtn').addEventListener('click',()=>openTankSelect({respawn:true,custom:G.custom}));
 $('retryBtn').addEventListener('click',()=>startGame(G.mode,{custom:G.custom,type:player?player.type:settings.tank}));
-$('menuBtn').addEventListener('click',toTitle);
+$('menuBtn').addEventListener('click',()=>toTitle());
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pauseGame();});
 function updateSideNote(){const el=$('sideNote');if(!el)return;el.style.display=(C('sideNotice')&&C('orient')==='auto'&&H>W&&(state==='playing'||state==='dead'||state==='paused'))?'block':'none';}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,200));
@@ -3118,7 +3118,7 @@ function svDamagePart(p,v){const P=SV.tank.parts;if(p==='tracks'&&SV.up)v*=1-0.3
 function svHurtTank(dmg,partChance,src){const t=SV.tank;if(!t.alive)return;dmg*=svArmorMul();t.hp=Math.max(0,t.hp-dmg);t.flash=0.08;trauma=Math.min(1,trauma+0.25);
   if(rnd()<partChance){const r=rnd(),p=r<0.5?'tracks':r<0.78?'engine':'turret';svDamagePart(p,20+dmg/t.maxHp*600);}
   if(rnd()<partChance*0.5){const q=['gun','armor','fuel','rack'][(rnd()*4)|0];svDamagePart(q,12+dmg/t.maxHp*400);if(q==='rack'&&t.parts.rack<50)SV.ammo=Math.max(0,SV.ammo-Math.ceil(SV.ammoMax*0.08));}
-  if(t.hp<=0){t.alive=false;svFx(t.x,t.y,40,'#ff8a1a',160,1.2,5);sfx('big');for(const c of SV.crew)if(c.inTank&&!c.dead){c.dead=true;c.hp=0;}svEnd('TANK DESTROYED');}}
+  if(t.hp<=0){t.alive=false;svFx(t.x,t.y,40,'#ff8a1a',160,1.2,5);sfx('big');if(typeof TRR!=='undefined'&&TRR.on){trrTankDown();return;}for(const c of SV.crew)if(c.inTank&&!c.dead){c.dead=true;c.hp=0;}svEnd('TANK DESTROYED');}}
 // shell vs tank goes through the v7 ricochet rules (used by part-2 rival tanks; tested via TMIO.surv.ricoTest)
 function svShellHitsTank(from,to,dist){const ch=ricoChance(from,to.type,dist);if(rnd()<ch){SV.stats.ricos++;return 'rico';}return 'hit';}
 function svCrewHurt(c,d){if(c.dead||c.inTank)return;d*=1-0.2*(c.vest||0);c.hp-=d;c.flash=0.15;svFx(c.x,c.y,3,themeNow()==='cute'?'#ff7ab0':'#8a0000',40,0.4,2);
@@ -3182,7 +3182,7 @@ function svCrewUpdate(c,dt){
   if(c.inTank){c.x=t.x;c.y=t.y;return;}
   if(SV.ctl===c&&svCtlUpdate(c,dt))return;
   const spd=svCrewSpeed(c),near=svNearestInf(c.x,c.y,c.task==='hunt'?600:170,true);
-  const fireAt=e=>{if(c.reload>0)return;c.reload=c.role==='gunner'?1.0:1.3;if(svShoot(c,e,0,svCrewAcc(c),svCrewRange(c)))svInfHurt(e,svCrewDmg(c));};
+  const fireAt=e=>{if(c.reload>0||(TRR.on&&!trrFireOK(c,e)))return;c.reload=c.role==='gunner'?1.0:1.3;if(svShoot(c,e,0,svCrewAcc(c),svCrewRange(c)))svInfHurt(e,svCrewDmg(c));};
   switch(c.task){
     case 'move':case 'idle':if(svWalk(c,dt,spd))c.task='idle';if(near&&!c.searching)fireAt(near);break;
     case 'return':if(Math.hypot(t.x-c.x,t.y-c.y)<(TRR.on?trrHullW(t)+14:t.r+10)){c.inTank=true;c.task='idle';c.path=null;svFloat(t.x,t.y-16,SV_RS[c.role]+' IN','#9dffbf');break;}
@@ -3912,7 +3912,7 @@ function svRenderIso(){
   const bx0=Math.max(0,Math.floor(B[0]/400)),bx1=Math.floor(B[2]/400),by0=Math.max(0,Math.floor(B[1]/400)),by1=Math.floor(B[3]/400);
   for(let by=by0;by<=by1;by++)for(let bx=bx0;bx<=bx1;bx++){const BL=M.BB[bx+','+by];if(BL)for(const b of BL)if(isoVis(b.x,b.y,20))L.push(isoE(svIsoKeyFor(b.x,b.y,hs),svIsoBush,b,P));
     const TL=M.TB[bx+','+by];if(TL)for(const tr of TL)if(isoVis(tr.x,tr.y,tr.r+20))L.push(isoE(svIsoKeyFor(tr.x,tr.y,hs),svIsoTree,tr,P,lowG,sh));}
-  if(t.alive&&isoVis(t.x,t.y,80)){const o=isoE(svIsoKeyFor(t.x,t.y,hs),svIsoTank,t,lowG);o.tank=1;L.push(o);}
+  if((t.alive||(t.wreck&&!t.gone))&&isoVis(t.x,t.y,80)){const o=isoE(svIsoKeyFor(t.x,t.y,hs),svIsoTank,t,lowG);o.tank=1;L.push(o);}
   for(const c of SV.crew){if(c.inTank||!isoVis(c.x,c.y,30))continue;const hx=c.searching&&c.house?c.house:null;const k=hx?(hx._kb+hx._kf)/2:svIsoKeyFor(c.x,c.y,hs);
     {const o=isoE(k,_isoCrewDraw,c,lowG);o.crew=c.role;L.push(o);}}
   for(const e of SV.inf){if(!isoVis(e.x,e.y,30))continue;if(e.hp>0&&!e.seen)continue;L.push(isoE(svIsoKeyFor(e.x,e.y,hs),_isoInfDraw,e,lowG));}
@@ -4561,7 +4561,7 @@ function svBtn(b,col){ctx.fillStyle=b.on?'rgba(255,213,74,0.85)':(col||'rgba(8,1
   if(SV.bmenu){for(const r of svBMenuRects())if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h){const c=SV.bmenu.c;SV.bmenu=null;if(r.k==='cancel')return 'build:cancel';SV.place={kind:r.k,c,x:null,y:null,ok:false,ang:0};return 'build:pick:'+r.k;}SV.bmenu=null;return 'build:close';}
   if(SV.place){for(const b of svPlaceBtns())if(Math.hypot(x-b.x,y-b.y)<=b.r+4){if(b.id==='cancel'){SV.place=null;return 'place:cancel';}if(b.id==='rot'){SV.place.ang=((SV.place.ang||0)+Math.PI/4)%Math.PI;svPlaceAt(SV.place.x,SV.place.y);return 'place:rot';}return svConfirmBuild()?'place:ok':'place:fail';}
     const [wx,wy]=screenToWorldSV(x,y);svPlaceAt(wx,wy);return 'place:ghost';}
-  if(!SV.layout)for(const b of svP3Buttons())if(Math.hypot(x-b.x,y-b.y)<=b.r+4){if(b.id==='lights'){SV.lights=!SV.lights;sfx('blip');svSay(SV.lights?'HEADLIGHTS ON - YOU CAN SEE, BUT THEY CAN SEE YOU':'HEADLIGHTS OFF',2.5);return 'lights';}svSmoke();return 'smoke';}
+  if(!SV.layout)for(const b of svP3Buttons())if(Math.hypot(x-b.x,y-b.y)<=b.r+4){if(b.id==='lights'){SV.lights=!SV.lights;sfx('blip');svSay(SV.lights?'HEADLIGHTS ON - YOU CAN SEE, BUT THEY CAN SEE YOU':'HEADLIGHTS OFF',2.5);return 'lights';}if(b.id==='smoke'||typeof trrBtnTap!=='function'){svSmoke();return 'smoke';}return trrBtnTap(b.id)||'btn';}
   const s=SV.sel;if(s&&s.role&&!SV.ctl&&!SV.layout){const [wx,wy]=screenToWorldSV(x,y);
     for(const v of SV.svv||[])if(!v.done&&v.seen&&Math.hypot(v.x-wx,v.y-wy)<26){svExit(s);s.task='rescue';s.resc=v;s.house=null;svGo(s,v.x,v.y);svSay(s.name+': FREEING THE '+(v.held?'PRISONER':'SURVIVOR'),2);return 'cmd:rescue';}
     for(const r of SV.rivals||[])if((r.wreck||r.bailed)&&!r.stripped&&r.wasSeen&&Math.hypot(r.x-wx,r.y-wy)<r.r+12){svCommand(s,'move',[r.x+Math.cos(r.body+1.57)*(r.r+14),r.y+Math.sin(r.body+1.57)*(r.r+14)]);s.stripT=r;svSay(s.name+': GOING TO STRIP IT (TAKE CONTROL + INTERACT)',2.5);return 'cmd:strip';}}
@@ -5329,11 +5329,11 @@ function trrBoot(type,save){TRR.on=true;TRR.loading=save;startGame('surv',{type}
 function trrAfterStart(type){const S=TRR.loading,t=SV.tank;
  for(const k of TRR_RK)if(SV[k]===undefined)SV[k]=0;SV.stone=0;SV.hq=0;SV.water=2;SV.chem=0;SV.cloth=0;SV.wood=0;
  for(const c of SV.crew){c.thirst=100;}
- if(!S){TRR.base={x:t.x,y:t.y,r:440,name:'HOME'};SV.food=1;SV.med=1;SV.parts=0;SV.metal=0;SV.ammo=Math.round(SV.ammoMax*0.6);SV.gas=70;
+ if(!S){TRR.base={x:t.x,y:t.y,r:170,name:'TANK',tank:true};SV.food=1;SV.med=1;SV.parts=0;SV.metal=0;SV.ammo=Math.round(SV.ammoMax*0.6);SV.gas=70;
   t.hp=t.maxHp*0.7;for(const p in t.parts)t.parts[p]=60+((Math.random()*30)|0);}
  else trrApply(S);
  if(typeof trrHooksStart==='function')trrHooksStart(!!S);
- SV.msg=S?'WELCOME BACK - DAY '+TRR.day:'YOUR JUNK TANK + 4 CREW. HOME BASE IS HERE. GO SCAVENGE.';SV.msgT=6;TRR.autoT=45;}
+ SV.msg=TRR.cfg.rumble?'🏆 TANK RUMBLE: '+(typeof trrRumbleN==='function'?trrRumbleN():20)+' TANKS. STAY IN THE ZONE. LAST TANK WINS.':S?'WELCOME BACK - DAY '+TRR.day:'YOUR JUNK TANK + 4 CREW. THE TANK IS HOME. SCAVENGE, THEN BUILD A BASE (TOOL CUPBOARD).';SV.msgT=6;TRR.autoT=45;}
 function trrSnap(){const t=SV.tank,o={v:TRR.ver,at:Date.now(),made:TRR.made,seed:TRR.seed,cfg:TRR.cfg,day:TRR.day,tod:SV.tod,svt:SV.t,kills:(TRR.kills||0)+(SV.kills||0),deaths:TRR.deaths||0,
   tank:{type:t.type,x:t.x,y:t.y,body:t.body,hp:t.hp,parts:t.parts,alive:t.alive},up:SV.up,inv:{},stash:TRR.stash,base:TRR.base,
   crew:SV.crew.map(c=>({role:c.role,name:c.name,hp:c.hp,hunger:c.hunger,thirst:c.thirst,dead:c.dead,rifle:c.rifle,vest:c.vest,inTank:c.inTank,x:c.x,y:c.y,wpn:c.wpn,job:c.job,extra:c.extra})),
@@ -5355,7 +5355,7 @@ function trrNewCrew(role,name){const t=SV.tank;return{role,name,i:SV.crew.length
 function trrSlotKey(n){return TRR_LS+'slot'+n;}
 function trrSave(silent){if(!TRR.on||!SV.on||SV.over)return false;try{const o=trrSnap();localStorage.setItem(trrSlotKey(TRR.slot),JSON.stringify(o));localStorage.setItem(TRR_LS+'last',String(TRR.slot));TRR.saveT=Date.now();if(!silent)svSay('GAME SAVED (SLOT '+(TRR.slot+1)+')',2);return true;}catch(e){if(!silent)svSay('SAVE FAILED: '+e.message,3);return false;}}
 function trrReadSlot(n){try{return JSON.parse(localStorage.getItem(trrSlotKey(n))||'null');}catch(e){return null;}}
-function trrLoad(n){const S=trrReadSlot(n);if(!S)return false;TRR.slot=n;TRR.cfg=S.cfg||{};TRR.seed=S.seed||1234;trrBoot((S.tank&&S.tank.alive!==false&&TYPES[S.tank.type])?S.tank.type:'junker',S);return true;}
+function trrLoad(n){const S=trrReadSlot(n);if(!S)return false;TRR.slot=n;TRR.cfg=S.cfg||{};TRR.seed=S.seed||1234;trrBoot((S.tank&&TYPES[S.tank.type])?S.tank.type:'junker',S);return true;}
 function trrTick(dt){if(!TRR.on||!SV.on||SV.over)return;TRR.autoT-=dt;if(TRR.autoT<=0){TRR.autoT=60;trrSave(true);}
  // day counter
  if(TRR._lastTod!=null&&SV.tod<TRR._lastTod-0.5)TRR.day++;TRR._lastTod=SV.tod;}
@@ -5462,7 +5462,7 @@ function trrMenuShow(){const B=$('trrMenuBox');TRR.on=false;let h=`<div class="t
  B.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{trrConfirm('Delete slot '+(+b.dataset.del+1)+'?','This save is gone for good.',()=>{localStorage.removeItem(trrSlotKey(+b.dataset.del));trrMenuShow();});});
  on('trrCustBtn',()=>{sfx('select');trrCustomShow();});
  on('trrSetBtn',()=>{sfx('select');trrMenuHide();TRR.menuAfterSet=1;openSettings('title');});
- on('trrHelpBtn',()=>{trrPopup('How to play',`<p>Tap your tank, then tap the ground to drive. Tap a crewman to send him out on foot. Crew can chop trees 🪵, mine rocks 🪨, loot houses and barrels, drink at rivers 💧 and eat 🍖.</p><p>Bring loot home to your base and put it in the stash (🏠). Craft at the workbench (🎒), build walls and rooms (🔨), and fix tanks in the garage (🔧).</p><p>Watch hunger, thirst and gas. If you die you lose what you carry, but your base, stash and parked tanks stay.</p><p>Other crews, bandits, zombies, wild animals and the army all fight each other too. Raid them - and protect your own base.</p>`,[['OK',null]]);});
+ on('trrHelpBtn',()=>{trrPopup('How to play',`<p>Tap your tank, then tap the ground to drive. Tap a crewman to send him out on foot. Crew can chop trees 🪵, mine rocks 🪨, loot houses and barrels, drink at rivers 💧 and eat 🍖.</p><p>Bring loot home to your base and put it in the stash (🏠). Craft at the workbench (🎒), build walls and rooms (🔨), and fix tanks in the garage (🔧).</p><p>Watch hunger, thirst and gas. If you die you lose what you carry, but your base, stash and parked tanks stay.</p><p>Other crews, bandits, zombies, wild animals and the army all fight each other too. Raid them - and protect your own base.</p><p><b>Your tank is your home.</b> The stash is the tank's trunk until you build a Tool Cupboard. If the tank is wrecked, douse the fire, fix the broken parts and it runs again - or walk to an abandoned tank and take it. Crews can steal yours too if you leave it alone.</p><p><b>Day and night.</b> At dusk a warning shows. At night zombie hordes, wolves, sappers that blow open walls, and hunting tank crews come in waves. Get inside a CLOSED room (walls + door + roof) to shelter: sheltered crew heal and the room shows SAFE. Spikes, landmines and caltrops wear out. A generator makes scrap overnight if you feed it fuel. At dawn you get a reward crate.</p><p><b>Order bar.</b> BUILD, USE and STRIKE do the right thing for whatever the crewman is standing next to. Fire modes: free fire, hold fire, return fire.</p><p><b>Right-hand buttons.</b> Ammo type (HE blast, AP pierce, smoke shells), TURBO (6 s fast, 25 s rest), PATCH KIT (fixes armor and parts) and MED KIT.</p><p><b>🏆 TANK RUMBLE.</b> 20 tanks (or 12 in Settings), 15 minutes, a shrinking zone. Your crew stay inside. Drive over crates for ammo, kits and repairs. Tap the cutaway to fix modules, use med kits and drag crew between seats. If a crewman goes down his job stops: no gunner = slow reload and wild aim, no mechanic = no repairs, no medic = no healing, no captain = no radar. Win and place high to unlock tanks, skins and crew perks.</p>`,[['OK',null]]);});
  trrMenuBgStart();}
 function trrMenuHide(){$('trrMenu').classList.remove('show');trrMenuBgT=0;}
 function trrConfirm(t,msg,yes){trrPopup(t,'<p>'+msg+'</p>',[['Yes',yes],['No',null]]);}
@@ -5766,7 +5766,9 @@ TRR_HOOK.apply.push(S=>{TRR.bp=new Set(S.bp||[]);TRR.q=S.q||[];TRR.tools=S.tools
 const TRR_ICC=new Map();
 function trrIcon(k,s){s=s||40;const key=k+'|'+s;let c=TRR_ICC.get(key);if(c)return c;c=document.createElement('canvas');c.width=c.height=s*2;const g=c.getContext('2d');g.scale(s/20,s/20);g.lineJoin='round';g.lineCap='round';
  const ol=()=>{g.lineWidth=1.4;g.strokeStyle='#0c0e1c';g.stroke();},R=(x,y,w,h,col)=>{g.beginPath();g.rect(x,y,w,h);g.fillStyle=col;g.fill();ol();},Ci=(x,y,r,col)=>{g.beginPath();g.arc(x,y,r,0,TAU);g.fillStyle=col;g.fill();ol();};
- switch(k){case 'med':R(10,12,20,16,'#f0f0f0');g.fillStyle='#d03030';g.fillRect(18,14,4,12);g.fillRect(14,18,12,4);break;
+ switch(k){case 'p_gen':R(4,12,26,16,'#6a7058');R(6,14,8,12,'#3a3e34');R(22,15,5,3,'#3ad06a');R(8,8,3,4,'#8a8a8a');break;
+  case 'p_caltrop':case 'caltrop':for(let i=0;i<4;i++){g.beginPath();g.moveTo(8+i*7,26-(i%2)*6);g.lineTo(12+i*7,14-(i%2)*6);g.lineTo(16+i*7,26-(i%2)*6);g.strokeStyle='#b8bcc4';g.lineWidth=2;g.stroke();}break;
+  case 'med':R(10,12,20,16,'#f0f0f0');g.fillStyle='#d03030';g.fillRect(18,14,4,12);g.fillRect(14,18,12,4);break;
   case 'axe':g.save();g.translate(20,20);g.rotate(-0.6);R(-2,-14,4,28,'#8a5a30');g.beginPath();g.moveTo(2,-14);g.lineTo(12,-12);g.quadraticCurveTo(14,-6,12,-2);g.lineTo(2,-4);g.closePath();g.fillStyle='#b8bcc4';g.fill();ol();g.restore();break;
   case 'pick':g.save();g.translate(20,20);g.rotate(0.5);R(-2,-12,4,26,'#8a5a30');g.beginPath();g.moveTo(-14,-10);g.quadraticCurveTo(0,-18,14,-10);g.lineTo(12,-8);g.quadraticCurveTo(0,-13,-12,-8);g.closePath();g.fillStyle='#9aa0a8';g.fill();ol();g.restore();break;
   case 'spear':g.save();g.translate(20,20);g.rotate(-0.8);R(-1.5,-6,3,22,'#9a6a38');g.beginPath();g.moveTo(0,-16);g.lineTo(4,-6);g.lineTo(-4,-6);g.closePath();g.fillStyle='#c8c0b0';g.fill();ol();g.restore();break;
@@ -5804,6 +5806,7 @@ const TRR_PK={found:{n:'Foundation',d:'The floor. Walls, doors and roofs go on t
  spike:{n:'Spike trap',d:'Hurts people and animals that walk on it.',hpm:1,edge:0,mat:[{}],fixed:1,hp:150,item:'spike'},
  mine:{n:'Landmine',d:'Blows up whoever drives or walks on it (not your own crew).',hpm:1,edge:0,mat:[{}],fixed:1,hp:60,item:'mine'},
  farm:{n:'Veggie patch',d:'Grows 1 food every 2 minutes.',hpm:1,edge:0,mat:[{wood:20,water:4}],fixed:1,hp:200},
+ gen:{n:'Scrap generator',d:'Burns fuel overnight and turns it into scrap. Loud: zombies hear it. Fuel it at dusk, collect at dawn.',hpm:1,edge:0,mat:[{metal:25,parts:2}],fixed:1,hp:500},
  well:{n:'Rain barrel',d:'Collects 1 water every 90 seconds (more when it rains).',hpm:1,edge:0,mat:[{wood:16,metal:6}],fixed:1,hp:200}};
 const TRR_PREFAB={
  shack:{n:'Wood shack',d:'A small room with a door and a roof, ready at once.',tier:1,c:{wood:220},p:[['found',0,0],['wall',0,0,'n'],['wall',0,0,'w'],['wall',1,0,'w'],['door',0,1,'n'],['roof',0,0]]},
@@ -5833,7 +5836,7 @@ function trrPlaceCheck(k,gx,gy,side,tier){const K=TRR_PK[k];if(!K)return 'Unknow
  if(TRR.fbases)for(const B of TRR.fbases)if(B.alive&&Math.hypot(gx*BT+60-B.x,gy*BT+60-B.y)<B.r+120)return 'Too close to '+B.name;
  if(k==='found'){if(trrFoundAt(gx,gy))return 'Already built';if(!trrTileFree(gx,gy))return 'Blocked here';return '';}
  if(K.edge){const a=trrFoundAt(gx,gy),b=side==='n'?trrFoundAt(gx,gy-1):trrFoundAt(gx-1,gy);if(!a&&!b)return 'Needs a foundation next to it';if(trrPieceAt(k,gx,gy,side))return 'Already a wall there';return '';}
- if(!trrFoundAt(gx,gy)&&k!=='spike'&&k!=='mine'&&k!=='farm'&&k!=='well'&&k!=='bed'&&k!=='tc'&&k!=='turret')return 'Build a foundation first';
+ if(!trrFoundAt(gx,gy)&&k!=='spike'&&k!=='mine'&&k!=='caltrop'&&k!=='farm'&&k!=='well'&&k!=='bed'&&k!=='tc'&&k!=='turret')return 'Build a foundation first';
  if(!trrFoundAt(gx,gy)&&!trrTileFree(gx,gy))return 'Blocked here';
  if(k==='roof'){let w=0;for(const p of TRR.bld)if(TRR_PK[p.k].edge&&p.hp>0&&((p.gx===gx&&p.gy===gy)||(p.side==='n'&&p.gx===gx&&p.gy===gy+1)||(p.side==='w'&&p.gx===gx+1&&p.gy===gy)))w++;if(w<2)return 'Needs 2 walls first';}
  if(trrPieceAt(k,gx,gy,null))return 'Something is already there';
@@ -5886,9 +5889,9 @@ TRR_HOOK.tick.push(trrBldTick);
 TRR_HOOK.start.push(loaded=>{trrGridInit();if(!loaded){TRR.bld=[];TRR.pid=0;const B=TRR.base,gx=Math.round(B.x/BT),gy=Math.round(B.y/BT)-2;
   // starter camp: tool cupboard + sleeping bag on the grass next to where you start
   let sx=gx,sy=gy;for(let r=0;r<6;r++){let ok=false;for(let dx=-r;dx<=r&&!ok;dx++)for(let dy=-r;dy<=r&&!ok;dy++)if(trrTileFree(gx+dx,gy+dy)&&trrTileFree(gx+dx+1,gy+dy)){sx=gx+dx;sy=gy+dy;ok=true;}if(ok)break;}
-  trrPlace('tc',sx,sy,null,0,true);trrPlace('bed',sx+1,sy,null,0,true);}
+  /* 2.5.0: no starter camp - the tank is home until you build a Tool Cupboard */}
  trrGridRebuild();});
-TRR_HOOK.snap.push(o=>{o.bld=TRR.bld.map(p=>({k:p.k,gx:p.gx,gy:p.gy,side:p.side,tier:p.tier,hp:Math.round(p.hp),lv:p.lv,t:p.t|0}));o.pid=TRR.pid;});
+TRR_HOOK.snap.push(o=>{o.bld=TRR.bld.map(p=>({k:p.k,gx:p.gx,gy:p.gy,side:p.side,tier:p.tier,hp:Math.round(p.hp),lv:p.lv,t:p.t|0,dur:p.dur,fuel:p.fuel,out:p.out}));o.pid=TRR.pid;});
 TRR_HOOK.apply.push(S=>{TRR.bld=(S.bld||[]).map(q=>Object.assign({own:'p',id:0},q));TRR.bld.forEach((p,i)=>p.id=i+1);TRR.pid=TRR.bld.length;});
 // respawn at your sleeping bag
 function trrBedSpot(){for(const p of TRR.bld)if(p.k==='bed'&&p.hp>0)return{x:p.gx*BT+60,y:p.gy*BT+60+40};return TRR.base;}
@@ -5915,11 +5918,14 @@ function trrDrawPiece(p,lowG){const K=TRR_PK[p.k],T=TRR_TIER[p.tier]||TRR_TIER[1
    isoBox(R[0]+52,R[1]+52,16,16,22,32,'#4a4e48','#62665e');if(p.flash>0){ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(e[0],e[1],3*IP.z,0,TAU);ctx.fill();}break;}
   case 'spike':if(p.own!=='p'&&!p.seen)break;isoPlane(1);ctx.fillStyle='#6a4a2a';ctx.fillRect(R[0]+30,R[1]+30,60,60);ctx.fillStyle='#c8a070';for(let i=0;i<5;i++)for(let j=0;j<5;j++)ctx.fillRect(R[0]+34+i*12,R[1]+34+j*12,3,3);isoScreen();break;
   case 'mine':if(p.own!=='p'&&!p.seen)break;{const q=isoS(R[0]+60,R[1]+60,1);ctx.fillStyle='#4a5040';ctx.beginPath();ctx.ellipse(q[0],q[1],7*IP.z,3.5*IP.z,0,0,TAU);ctx.fill();ctx.fillStyle='#d03030';ctx.fillRect(q[0]-1,q[1]-2,2,2);break;}
+  case 'caltrop':if(p.own!=='p'&&!p.seen)break;{const q=isoS(R[0]+60,R[1]+60,1),u=IP.z;ctx.strokeStyle='#8a8f96';ctx.lineWidth=Math.max(1.5,2*u);for(let i=0;i<6;i++){const ox=((i*37)%60-30)*0.6*u,oy=((i*53)%40-20)*0.4*u;ctx.beginPath();ctx.moveTo(q[0]+ox-4*u,q[1]+oy);ctx.lineTo(q[0]+ox+4*u,q[1]+oy);ctx.moveTo(q[0]+ox,q[1]+oy-4*u);ctx.lineTo(q[0]+ox,q[1]+oy+2*u);ctx.stroke();}break;}
+  case 'gen':{isoBox(R[0]+36,R[1]+40,48,34,TRR_FH,34,'#5a5e4a','#707660');isoBox(R[0]+40,R[1]+44,16,26,34,44,'#3a3e34','#4a4e44');const run=p.run>0;isoBox(R[0]+62,R[1]+46,14,8,34,38,run?'#3ad06a':'#a03a2a');
+   if(!lowG){const q=isoS(R[0]+60,R[1]+60,56);ctx.font='bold 8px system-ui';ctx.textAlign='center';ctx.fillStyle=run?'#9dffbf':'#ffb090';ctx.fillText('GEN '+Math.round(p.fuel||0)+'⛽'+((p.out&&p.out.metal)?' · '+p.out.metal+'🔩':''),q[0],q[1]);}break;}
   case 'farm':isoPlane(1);ctx.fillStyle='#5a3a20';ctx.fillRect(R[0]+12,R[1]+12,96,96);ctx.fillStyle='#5aa040';for(let i=0;i<4;i++)for(let j=0;j<4;j++){const s=4+Math.min(1,p.t/120)*6;ctx.beginPath();ctx.arc(R[0]+24+i*24,R[1]+24+j*24,s,0,TAU);ctx.fill();}isoScreen();break;
   case 'well':{const pts=p._pts||(p._pts=TRR_OCT.map(q=>[R[0]+60+q[0]*16,R[1]+60+q[1]*16]));isoExtrude(pts,0,26,'#6a4a2a','#3a6a9a');break;}}
  if(p.own==='p'&&p.hp<trrPieceHP(p)*0.999&&!lowG&&(p.hitT>0||TRR.bmode)){const c=isoS(R[0]+R[2]/2,R[1]+R[3]/2,62);ctx.fillStyle='#000';ctx.fillRect(c[0]-12,c[1],24,3);ctx.fillStyle=p.hp/trrPieceHP(p)>0.5?'#5fd38a':'#ff6a4a';ctx.fillRect(c[0]-12,c[1],24*p.hp/trrPieceHP(p),3);}}
 function trrRoofFade(p){const R=trrPieceRect(p);let f=1;const inR=(x,y)=>x>R[0]-30&&x<R[0]+R[2]+30&&y>R[1]-30&&y<R[1]+R[3]+30;for(const c of SV.crew)if(!c.dead&&!c.inTank&&inR(c.x,c.y)){f=0.12;break;}if(f===1&&SV.tank.alive&&inR(SV.tank.x,SV.tank.y))f=0.12;if(f===1&&TRR.bmode)f=0.35;p.fade=p.fade==null?f:p.fade+(f-p.fade)*0.2;}
-function trrPieceKey(p){const R=trrPieceRect(p);if(p.k==='found'||p.k==='spike'||p.k==='mine'||p.k==='farm')return isoKey(R[0],R[1])-40;if(p.k==='roof')return isoKey(R[0]+R[2],R[1]+R[3])+30;return isoKey(R[0]+R[2],R[1]+R[3]);}
+function trrPieceKey(p){const R=trrPieceRect(p);if(p.k==='found'||p.k==='spike'||p.k==='mine'||p.k==='caltrop'||p.k==='farm')return isoKey(R[0],R[1])-40;if(p.k==='roof')return isoKey(R[0]+R[2],R[1]+R[3])+30;return isoKey(R[0]+R[2],R[1]+R[3]);}
 function trrDrawList(L,list,lowG){for(const p of list){if(p.hp<=0||p.k==='found')continue;const R=trrPieceRect(p);if(!isoVis(R[0]+R[2]/2,R[1]+R[3]/2,BT))continue;if(p.k==='roof')trrRoofFade(p);L.push(isoE(trrPieceKey(p),trrDrawPiece,p,lowG));}}
 {const _x=svIsoExtra;svIsoExtra=function(L,hs,lowG){_x(L,hs,lowG);if(!TRR.on||!TRR.bld)return;trrDrawList(L,TRR.bld,lowG);if(TRR.fbases)for(const B of TRR.fbases)trrDrawList(L,B.bld,lowG);
  const G=TRR.bghost;if(TRR.bmode&&G)L.push(isoE(1e9,trrDrawGhost,G,lowG));
@@ -6025,23 +6031,23 @@ function trrPanelRender(){if(!TRR.tab)return;const id=TRR.tab,bd=$('trrPanBd'),t
    for(const r of L){const kn=trrKnows(r),why=trrCanCraft(r);h+=`<div class="trrItem">${trrIconHTML(r.ic)}<div class="tx"><b>${kn?r.n:'📜 '+r.n}</b><i>${r.d}</i><em>${kn?trrCostTxt(r.c)+' · '+r.s+'s':'Find this blueprint in loot'}${r.up?' · now '+(SV.up[r.up]||0)+'/'+r.max:''}</em></div><button data-craft="${r.id}" ${why?'disabled':''} title="${why}">${why&&why!=='Not enough'?why.replace('Needs ','').replace('Go to your base','base'):'MAKE'}</button></div>`;}}}
  else if(id==='build'){h+=`<div class="trrSub" style="text-align:left;margin:2px">Pick something, then tap the ground near your tank or crew to aim. Walls snap to the closest edge of a foundation.</div>`;
   h+=`<div class="trrH">TOOLS</div><div class="trrItem"><div class="tx"><b>Change your base</b><i>Upgrade twig → wood → stone → metal, repair, or remove (get half back).</i></div><button data-tool="upgrade">⬆</button><button data-tool="repair">🔧</button><button data-tool="remove">🗑</button></div>`;
-  h+=`<div class="trrH">PIECES</div>`;for(const k of ['found','wall','door','gdoor','roof','tc','bench','bed','box','farm','well','turret','spike','mine']){const K=TRR_PK[k];const extra=K.item?` · you have ${TRR.items[K.item]||0}`:K.bp?(TRR.bp.has('turretbp')?'':' · needs blueprint'):'';
+  h+=`<div class="trrH">PIECES</div>`;for(const k of ['found','wall','door','gdoor','roof','tc','bench','bed','box','farm','well','turret','spike','caltrop','mine','gen']){const K=TRR_PK[k];const extra=K.item?` · you have ${TRR.items[K.item]||0}`:K.bp?(TRR.bp.has('turretbp')?'':' · needs blueprint'):'';
    h+=`<div class="trrItem">${trrIconHTML('p_'+k)}<div class="tx"><b>${K.n}</b><i>${K.d}</i><em>${K.fixed?trrCostTxt(K.mat[0])||'free':'Twig '+trrCostTxt(K.mat[0])+' → Metal '+trrCostTxt(K.mat[3])}${extra}</em></div><button data-piece="${k}">BUILD</button></div>`;}
   h+=`<div class="trrH">READY-MADE BUILDINGS</div>`;for(const k in TRR_PREFAB){const P=TRR_PREFAB[k];h+=`<div class="trrItem">${trrIconHTML('f_'+k)}<div class="tx"><b>${P.n}</b><i>${P.d}</i><em>${trrCostTxt(P.c)}</em></div><button data-pre="${k}">PLACE</button></div>`;}
   const bench=TRR.bld.find(p=>p.k==='bench'&&p.hp>0);if(bench&&(bench.lv||1)<3){const c=TRR_BENCH[(bench.lv||1)+1].c;h+=`<div class="trrH">WORKBENCH</div><div class="trrItem">${trrIconHTML('bench')}<div class="tx"><b>Upgrade to tier ${(bench.lv||1)+1}</b><em>${trrCostTxt(c)}</em></div><button data-bench="1" ${at?'':'disabled'}>⬆</button></div>`;}}
  else if(id==='base'){const B=TRR.base,dist=Math.round(Math.hypot(SV.tank.x-B.x,SV.tank.y-B.y)/10);
-  h+=`<div class="trrSub" style="text-align:left;margin:2px">${at?'You are at your base.':'Base is '+dist+' m away (follow the 🏠 arrow).'} Upkeep: ${trrUpkeepTxt()}</div>`;
+  h+=B.tank?`<div class="trrSub" style="text-align:left;margin:2px">${SV.tank.gone?'Your tank was stolen - the trunk went with it.':at?'Your TANK is home. The trunk is in it.':'Your tank is '+dist+' m away.'} Build a 🛠 Tool Cupboard to claim a real base.</div>`:`<div class="trrSub" style="text-align:left;margin:2px">${at?'You are at your base.':'Base is '+dist+' m away (follow the 🏠 arrow).'} Upkeep: ${trrUpkeepTxt()}</div>`;
   if(at)h+=`<button class="trrBtn" data-dep="1">⬇ Put everything in the stash</button><button class="trrBtn alt" data-trip="1">🎒 Pack for a trip (food, water, meds, shells)</button>`;
-  h+=`<div class="trrH">STASH (safe when you die)</div><div class="trrInv">${TRR_RES.filter(r=>r[0]!=='gas').map(r=>trrResCell(r[0],TRR.stash[r[0]]||0,at&&(TRR.stash[r[0]]||0)>0?`<button data-take="${r[0]}" style="margin-top:3px;width:100%;background:#2b3a92;border:1px solid #4a56a8;color:#fff;border-radius:6px;font-size:11px;padding:3px">TAKE 10</button>`:'')).join('')}</div>`;
+  h+=`<div class="trrH">${B.tank?'TANK TRUNK (stays with the tank)':'STASH (safe when you die)'}</div><div class="trrInv">${TRR_RES.filter(r=>r[0]!=='gas').map(r=>trrResCell(r[0],TRR.stash[r[0]]||0,at&&(TRR.stash[r[0]]||0)>0?`<button data-take="${r[0]}" style="margin-top:3px;width:100%;background:#2b3a92;border:1px solid #4a56a8;color:#fff;border-radius:6px;font-size:11px;padding:3px">TAKE 10</button>`:'')).join('')}</div>`;
   if(at&&(TRR.stash.gas||0)>0)h+=`<button class="trrBtn alt" data-fuel="1">⛽ Refuel from stash (${TRR.stash.gas})</button>`;
   if(typeof trrBaseJobsHTML==='function')h+=trrBaseJobsHTML();}
- else if(id==='garage'){h+=`<canvas id="trrDiag" width="380" height="210" style="width:100%;border-radius:10px"></canvas>`;const c=trrRepairCost();
+ else if(id==='garage'){h+=trrGarageWreckHTML();h+=`<canvas id="trrDiag" width="380" height="210" style="width:100%;border-radius:10px"></canvas>`;const c=trrRepairCost();
   h+=`<div class="trrItem"><div class="tx"><b>Full repair</b><i>Fix every part and the hull. Only at base.</i><em>${trrCostTxt(c)}</em></div><button data-rep="1" ${at?'':'disabled'}>🔧</button></div>`;
   h+=`<div class="trrItem"><div class="tx"><b>Fuel → engine (overdrive)</b><i>35% faster, but burns gas fast and slowly cooks the engine.</i></div><button data-od="1">${TRR.od?'ON':'OFF'}</button></div>`;
   h+=`<div class="trrH">PARKED TANKS (${TRR.tanks.length}/${trrParkCap()})</div>`;if(!TRR.tanks.length)h+=`<div class="trrSub" style="text-align:left">No spare tanks yet. Craft a tank kit at workbench 3, or capture one.</div>`;
   TRR.tanks.forEach((q,i)=>{h+=`<div class="trrItem">${trrIconHTML('tank')}<div class="tx"><b>${TYPES[q.type].name}</b><i>HP ${Math.round(q.hp)}/${TYPES[q.type].hp}</i></div><button data-swap="${i}" ${at?'':'disabled'}>DRIVE</button></div>`;});
   const kits=['light','medium','heavy','flame'].filter(k=>TRR.items['kit_'+k]>0);if(kits.length){h+=`<div class="trrH">TANK KITS</div>`;for(const k of kits)h+=`<div class="trrItem">${trrIconHTML('tank')}<div class="tx"><b>${TYPES[k].name} kit × ${TRR.items['kit_'+k]}</b><i>Put it together into a new tank.</i></div><button data-kit="${k}" ${at?'':'disabled'}>BUILD</button></div>`;}
-  h+=`<div class="trrH">PAINT</div><div class="trrInv">${Object.keys(TRR_PAINT).map(k=>`<div data-paint="${k}" style="cursor:pointer;${(TRR.paint||'none')===k?'outline:2px solid #ffd54a':''}"><small>${k.toUpperCase()}</small><b style="display:block;height:12px;border-radius:4px;background:${TRR_PAINT[k]?TRR_PAINT[k].base:'repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)'}"></b></div>`).join('')}</div>`;}
+  h+=`<div class="trrH">PAINT</div><div class="trrInv">${trrPaintKeys().map(k=>`<div data-paint="${k}" style="cursor:pointer;${(TRR.paint||'none')===k?'outline:2px solid #ffd54a':''}"><small>${k.toUpperCase()}</small><b style="display:block;height:12px;border-radius:4px;background:${TRR_PAINT[k]?TRR_PAINT[k].base:'repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)'}"></b></div>`).join('')}</div>`;}
  bd.innerHTML=h;trrPaintIcons(bd);if(id==='garage')trrDrawDiagram($('trrDiag'));
  const each=(sel,f)=>bd.querySelectorAll(sel).forEach(b=>b.onclick=()=>{f(b);trrPanelRender();});
  each('[data-eat]',b=>svEat(SV.crew[+b.dataset.eat],true));each('[data-drink]',b=>trrDrink(SV.crew[+b.dataset.drink]));each('[data-med]',b=>{const c=SV.crew[+b.dataset.med];if(SV.med>0){SV.med--;c.hp=100;sfx('pick');}});
@@ -6051,7 +6057,7 @@ function trrPanelRender(){if(!TRR.tab)return;const id=TRR.tab,bd=$('trrPanBd'),t
  each('[data-rep]',()=>trrFullRepair());each('[data-od]',()=>{TRR.od=!TRR.od;svSay(TRR.od?'⛽ OVERDRIVE ON - FAST BUT HOT':'OVERDRIVE OFF',2);});each('[data-swap]',b=>trrSwapTank(+b.dataset.swap));each('[data-kit]',b=>trrBuildKit(b.dataset.kit));
  each('[data-paint]',b=>{TRR.paint=b.dataset.paint==='none'?null:b.dataset.paint;});
  if(typeof trrPanelExtraBind==='function')trrPanelExtraBind(bd,each);}
-function trrItemName(k){return({spike:'🪤 SPIKE TRAPS',mine:'💣 LANDMINES',satchel:'🧨 SATCHELS',c4:'🧨 C4',kit_light:'🛠 LIGHT KIT',kit_medium:'🛠 MEDIUM KIT',kit_heavy:'🛠 HEAVY KIT',kit_flame:'🛠 FLAME KIT'})[k]||k.toUpperCase();}
+function trrItemName(k){return({spike:'🪤 SPIKE TRAPS',mine:'💣 LANDMINES',satchel:'🧨 SATCHELS',c4:'🧨 C4',kit_light:'🛠 LIGHT KIT',kit_medium:'🛠 MEDIUM KIT',kit_heavy:'🛠 HEAVY KIT',kit_flame:'🛠 FLAME KIT',caltrop:'📌 CALTROPS'})[k]||k.toUpperCase();}
 function trrUpkeepTxt(){const c=trrUpkeepCost();if(!Object.keys(c).length)return trrTC()?'nothing to pay':'no tool cupboard!';return trrCostTxt(c)+' / min'+(TRR.upkeepOK===false?' ⚠ NOT PAID':'');}
 function trrStashCap(){let b=0;for(const p of TRR.bld)if(p.k==='box'&&p.hp>0)b++;return 500+300*b;}
 function trrDeposit(){if(!trrAtBase())return;let n=0;const cap=trrStashCap();for(const k of TRR_RK){if(k==='gas'||k==='ammo')continue;const v=SV[k]||0,room=Math.max(0,cap-(TRR.stash[k]||0)),m=Math.min(v,room);if(m>0){TRR.stash[k]=(TRR.stash[k]||0)+m;SV[k]-=m;n+=m;}}
@@ -6069,7 +6075,7 @@ setInterval(trrTabsSync,300);
 {const _h=svHUD;svHUD=function(){_h();if(!TRR.on)return;const g=ctxMain;g.save();g.setTransform(DPR,0,0,DPR,0,0);
  // (v1.1: resources/day/thirst moved into the top strip, see trr-90-hud.js)
  // arrow to base when it's off screen
- const B=TRR.base;if(B&&!TRR.cfg.br){svIsoSetup();const p=isoS(B.x,B.y,0);if(p[0]<20||p[0]>W-20||p[1]<70||p[1]>H-150){const cx=W/2,cy=H/2,a=Math.atan2(p[1]-cy,p[0]-cx),r=Math.min(W,H)*0.42,ax=clamp(cx+Math.cos(a)*r,30,W-30),ay=clamp(cy+Math.sin(a)*r,80,H-170);
+ const B=TRR.base;if(B&&!TRR.cfg.br&&!(B.tank&&SV.tank.alive)){svIsoSetup();const p=isoS(B.x,B.y,0);if(p[0]<20||p[0]>W-20||p[1]<70||p[1]>H-150){const cx=W/2,cy=H/2,a=Math.atan2(p[1]-cy,p[0]-cx),r=Math.min(W,H)*0.42,ax=clamp(cx+Math.cos(a)*r,30,W-30),ay=clamp(cy+Math.sin(a)*r,80,H-170);
    g.translate(ax,ay);g.fillStyle='rgba(255,213,74,0.85)';g.font='15px sans-serif';g.textAlign='center';g.fillText('🏠',0,-14);g.rotate(a);g.beginPath();g.moveTo(10,0);g.lineTo(-6,-7);g.lineTo(-6,7);g.closePath();g.fill();}}
  g.restore();for(const f of TRR_HOOK.hud)f();};}
 
@@ -6196,8 +6202,7 @@ function trrGenFBases(){TRR.fbases=[];const n=trrRivalN();if(!n)return;const R=m
  for(let i=0;i<n;i++){let gx=0,gy=0,ok=false;for(let k=0;k<400&&!ok;k++){const x=1200+R()*(SVW-2400),y=1200+R()*(SVH-2400);if(Math.hypot(x-sp.x,y-sp.y)<4200)continue;if(trrInTown(x,y)||trrInZone(x,y))continue;
    let far=true;for(const B of TRR.fbases)if(Math.hypot(B.x-x,B.y-y)<4500)far=false;if(!far)continue;gx=Math.floor(x/BT);gy=Math.floor(y/BT);ok=true;for(let a=-1;a<4&&ok;a++)for(let b=-1;b<4&&ok;b++)if(!trrTileFree(gx+a,gy+b))ok=false;}
   if(!ok)continue;const fac=TRR_RNAMES[i],B={fac,name:TRR_FAC[fac].n,x:gx*BT+BT,y:gy*BT+BT,r:420,gx,gy,bld:[],own:fac,alive:true,lvl:1,t:0,tankT:0,raidT:200+R()*300,deadT:0};
-  trrPlacePrefab('bunker',gx,gy,true,B);trrPlacePrefab('garage',gx+1,gy,true,B);trrPlace('tc',gx,gy,null,0,true,B);trrPlace('box',gx,gy+1,null,0,true,B);trrPlace('turret',gx+3,gy+2,null,0,true,B);
-  for(const p of B.bld)if(!TRR_PK[p.k].fixed){p.tier=1;p.hp=trrPieceHP(p);}TRR.fbases.push(B);}}
+  B.bSeed=R()*240;B.camp=false;B.stepN=0;B.bT=0;for(const _ in []);TRR.fbases.push(B);}}
 function trrFBase(fac){return TRR.fbases&&TRR.fbases.find(B=>B.fac===fac);}
 // rival tanks
 function trrMkFTank(B,type){const r=svMkRival(B.x+rr(-60,60),B.y+BT*3+20);const T=TYPES[type];Object.assign(r,{T,type,r:T.r*SV_TS*TRR_TK,maxHp:T.hp*(0.8+0.1*B.lvl),fac:B.fac,fB:B,fcol:TRR_FAC[B.fac].tank,name:B.name,state:'home',gas:100,mission:'home'});r.hp=r.maxHp;r.reloadMax=T.reload;r.id=SV.rivals.length;SV.rivals.push(r);B.tankN=(B.tankN||0)+1;return r;}
@@ -6254,21 +6259,21 @@ function trrRivOffscreen(r,dt){if(r.mission==='raid'&&r.raidOn){const tB=r.raidO
 // ---- faction bases over time: level up, rebuild tanks, send raids, fall when their TC is destroyed ----
 function trrRaidProt(){if(TRR.cfg.raidProt===false)return false;const B=TRR.base,t=SV.tank;return Math.hypot(t.x-B.x,t.y-B.y)>1800;}
 function trrFBTick(dt){if(!TRR.fbases)return;for(const B of TRR.fbases){B.t+=dt;
-  const tc=B.bld.find(p=>p.k==='tc'&&p.hp>0);if(B.alive&&!tc){B.alive=false;B.deadT=480;svSay('🏴 THE '+B.name+' BASE HAS FALLEN!',4);sfx('big',B.x,B.y,0.5);trrDropLoot(B);}
+  trrAIBuild(B,dt);const tc=B.bld.find(p=>p.k==='tc'&&p.hp>0);if(B.alive&&B.camp&&!tc){B.alive=false;B.deadT=480;svSay('🏴 THE '+B.name+' BASE HAS FALLEN!',4);sfx('big',B.x,B.y,0.5);trrDropLoot(B);}
   if(!B.alive){B.deadT-=dt;if(B.deadT<=0){B.alive=true;B.lvl=Math.max(1,B.lvl-1);trrPlace('tc',B.gx,B.gy,null,0,true,B);if(!B.bld.find(p=>p.k==='box'))trrPlace('box',B.gx,B.gy+1,null,0,true,B);svSay('📻 RADIO: THE '+B.name+' ARE REBUILDING',3);}continue;}
   // level up every ~7 minutes: stronger walls, better tanks, more turrets
   if(B.t>900*B.lvl&&B.lvl<4){B.lvl++;for(const p of B.bld)if(!TRR_PK[p.k].fixed&&p.tier<Math.min(3,B.lvl)){p.tier=Math.min(3,B.lvl);p.hp=trrPieceHP(p);}if(B.lvl===3)trrPlace('turret',B.gx-1,B.gy+2,null,0,true,B);svSay('📻 RADIO: THE '+B.name+' UPGRADED THEIR BASE AND TANKS (LVL '+B.lvl+')',3.5);}
   for(const p of B.bld)if(p.hp>0&&p.hp<trrPieceHP(p))p.hp=Math.min(trrPieceHP(p),p.hp+trrPieceHP(p)*0.004*dt);
   B.tankT-=dt;const want=B.lvl>=3?2:1;if(trrFBTanks(B)<want&&B.tankT<=0){B.tankT=200;trrMkFTank(B,trrFTankType(B));}
-  // guards at home (only spawned while you're near)
-  const t=SV.tank;if(Math.hypot(t.x-B.x,t.y-B.y)<2200){B.gT=(B.gT||0)-dt;if(B.gT<=0){B.gT=30;let n=0;for(const e of SV.inf)if(e.hp>0&&e.homeB===B)n++;if(n<3+B.lvl){const P={wp:[[B.x-100,B.y+BT*3],[B.x+300,B.y+BT*3],[B.x+300,B.y-60],[B.x-100,B.y-60]],wpi:0,path:null,alert:0};for(let i=0;i<2;i++){const e=trrMkNpc('crewman',B.fac,B.x+rr(-40,40),B.y+BT*3+rr(0,40),P);e.homeB=B;e.keep=1;}}}}
+  // guards at home (only once the camp exists and you're near)
+  const t=SV.tank;if(B.camp&&Math.hypot(t.x-B.x,t.y-B.y)<2200){B.gT=(B.gT||0)-dt;if(B.gT<=0){B.gT=30;let n=0;for(const e of SV.inf)if(e.hp>0&&e.homeB===B)n++;if(n<3+B.lvl){const P={wp:[[B.x-100,B.y+BT*3],[B.x+300,B.y+BT*3],[B.x+300,B.y-60],[B.x-100,B.y-60]],wpi:0,path:null,alert:0};for(let i=0;i<2;i++){const e=trrMkNpc('crewman',B.fac,B.x+rr(-40,40),B.y+BT*3+rr(0,40),P);e.homeB=B;e.keep=1;}}}}
   // raids: pick a target (another crew or you)
-  B.raidT-=dt;if(B.raidT<=0){B.raidT=240+rnd()*240;const opts=TRR.fbases.filter(o=>o!==B&&o.alive);if(trrCanRaidYou(B))opts.push(TRR);const tB=opts[(rnd()*opts.length)|0];if(!tB)continue;
+  B.raidT-=dt;if(B.raidT<=0&&!B.camp)B.raidT=60;if(B.raidT<=0){B.raidT=240+rnd()*240;const opts=TRR.fbases.filter(o=>o!==B&&o.alive&&o.camp);if(trrCanRaidYou(B))opts.push(TRR);const tB=opts[(rnd()*opts.length)|0];if(!tB)continue;
    let sent=0;for(const r of SV.rivals)if(r.fB===B&&r.alive&&!r.bailed&&r.hp>r.maxHp*0.6&&r.mission!=='raid'){r.mission='raid';r.raidOn=tB;r.raidT=0;r.raidAll=0;sent++;}
    if(sent||rnd()<0.5){const tP=tB===TRR?TRR.base:tB;const near=Math.hypot(SV.tank.x-B.x,SV.tank.y-B.y)<3000||Math.hypot(SV.tank.x-tP.x,SV.tank.y-tP.y)<3000;if(near){const P={wp:[[tP.x,tP.y]],wpi:0,path:null,alert:5};for(let i=0;i<3;i++){const e=trrMkNpc('crewman',B.fac,B.x+rr(-40,40),B.y+BT*3+rr(0,40),P);e.raidB=tB===TRR?'p':tB.fac;e.at=i===0;e.keep=1;}}}
    if(tB===TRR){TRR.lastRaidOnYou=SV.t;B.lastRaidOnYou=SV.t;TRR.raidAlert={by:B.name,t:20,fac:B.fac};svSay('⚠ RADIO: THE '+B.name+' ARE COMING TO RAID YOUR BASE!',5);sfx('alarm');}else if(rnd()<0.6)svSay('📻 RADIO: THE '+B.name+' ARE ATTACKING THE '+tB.name,3);}}
  // far-away war: hostile bases chip at each other
- TRR.warT=(TRR.warT||0)-dt;if(TRR.warT<=0){TRR.warT=45;const A=TRR.fbases.filter(B=>B.alive);if(A.length>1&&rnd()<0.5){const a=A[(rnd()*A.length)|0],b=A[(rnd()*A.length)|0];if(a!==b&&Math.hypot(SV.tank.x-b.x,SV.tank.y-b.y)>2600){const p=b.bld.filter(q=>q.hp>0&&q.k!=='found');const q=p[(rnd()*p.length)|0];if(q)trrPieceHurt(q,trrPieceHP(q)*0.3,null);}}}}
+ TRR.warT=(TRR.warT||0)-dt;if(TRR.warT<=0){TRR.warT=45;const A=TRR.fbases.filter(B=>B.alive&&B.camp);if(A.length>1&&rnd()<0.5){const a=A[(rnd()*A.length)|0],b=A[(rnd()*A.length)|0];if(a!==b&&Math.hypot(SV.tank.x-b.x,SV.tank.y-b.y)>2600){const p=b.bld.filter(q=>q.hp>0&&q.k!=='found');const q=p[(rnd()*p.length)|0];if(q)trrPieceHurt(q,trrPieceHP(q)*0.3,null);}}}}
 function trrDropLoot(B){const M=SV.map;for(let i=0;i<4;i++){const x=B.x+rr(-60,60),y=B.y+rr(-20,80),k=((x/400)|0)+','+((y/400)|0);(M.XB[k]=M.XB[k]||[]).push({x,y,kind:'crate',mil:true,xid:'d'+(TRR.dropN=(TRR.dropN||0)+1),ang:0});}TRR.stash.metal=TRR.stash.metal||0;}
 function trrOnPieceDead(p,src){if(p.k==='box'&&p.own!=='p'){const B=trrFBase(p.own);if(B){trrDropLoot(B);svSay('📦 THEIR STORAGE BOX BURST OPEN - GRAB THE LOOT!',3.5);}}}
 // ---- defenses: turrets, spike traps, landmines ----
@@ -6282,7 +6287,7 @@ function trrDefTick(dt){const all=trrAllPieces();for(const p of all){if(p.hp<=0)
    if(hit){if(best===SV.tank)svHurtTank(3,0.01,null);else if(best.role)svCrewHurt(best,rr(6,10));else if(best.rival)svRivHurt(best,own==='player'?22:12,{fac:own,x,y});else trrNpcHurt(best,rr(10,15),{fac:own,x,y});}
    if(own==='player'){p.shots=(p.shots||0)+1;if(p.shots%25===0)TRR.stash.ammo=Math.max(0,(TRR.stash.ammo||0)-1);}}
   else if(p.k==='spike'||p.k==='mine'){const R=trrPieceRect(p),x=R[0]+60,y=R[1]+60;if(Math.abs(x-SV.tank.x)+Math.abs(y-SV.tank.y)>2400)continue;
-   for(const e of SV.inf){if(e.hp<=0||!trrHostile(own,e.fac)||Math.abs(e.x-x)>36||Math.abs(e.y-y)>36)continue;p.seen=1;if(p.k==='spike'){trrNpcHurt(e,26*dt*3,{fac:own,x,y});}else{trrMineBoom(p,x,y);break;}}
+   for(const e of SV.inf){if(e.hp<=0||!trrHostile(own,e.fac)||Math.abs(e.x-x)>36||Math.abs(e.y-y)>36)continue;p.seen=1;if(p.k==='spike'){trrNpcHurt(e,26*dt*3,{fac:own,x,y});if(typeof trrTrapWear==='function'&&own==='player')trrTrapWear(p,dt);}else{trrMineBoom(p,x,y);break;}}
    if(p.k==='mine'&&p.hp>0)for(const r of SV.rivals||[]){if(!r.alive||!trrHostile(own,r.fac)||Math.abs(r.x-x)>40||Math.abs(r.y-y)>40)continue;svRivHurt(r,900,{fac:own,x,y});r.parts.tracks=0;trrMineBoom(p,x,y);break;}
    if(own!=='player'&&p.hp>0){const t=SV.tank;if(t.alive&&Math.abs(t.x-x)<40&&Math.abs(t.y-y)<40&&p.k==='mine'){svHurtTank(t.maxHp*0.25,1,null);svDamagePart('tracks',100);trrMineBoom(p,x,y);}for(const c of SV.crew)if(!c.dead&&!c.inTank&&Math.abs(c.x-x)<34&&Math.abs(c.y-y)<34){p.seen=1;if(p.k==='spike')svCrewHurt(c,20*dt);else{svCrewHurt(c,80);trrMineBoom(p,x,y);}}}}}}
 function trrMineBoom(p,x,y){p.hp=0;svFx(x,y,24,'#ffb02e',160,0.8,5);sfx('big',x,y,0.8);trrCleanDead();}
@@ -6306,7 +6311,7 @@ TRR_HOOK.start.push(loaded=>{SV.rivals=[];trrGenFBases();if(!loaded)for(const B 
 function trrRivAll(dt){for(const r of SV.rivals)trrRivUpdate(r,dt);for(const s of SV.smokes)s.t-=dt;SV.smokes=SV.smokes.filter(s=>s.t>0);svBuildTick(dt);svSurvTick(dt);if(SV.rivals.length>14)SV.rivals=SV.rivals.filter(r=>r.alive||!r.stripped||svVisible(r.x,r.y));}
 TRR_HOOK.tick.push(dt=>{trrFBTick(dt);trrDefTick(dt);trrBombTick(dt);trrRaidWatch(dt);});
 TRR_HOOK.snap.push(o=>{o.fb=(TRR.fbases||[]).map(B=>({fac:B.fac,alive:B.alive,lvl:B.lvl,t:B.t|0,deadT:B.deadT|0,bld:B.bld.map(p=>({k:p.k,gx:p.gx,gy:p.gy,side:p.side,tier:p.tier,hp:Math.round(p.hp),lv:p.lv}))}));
- o.ftanks=SV.rivals.filter(r=>r.alive&&!r.bailed&&r.fB).map(r=>({fac:r.fac,type:r.type,x:r.x|0,y:r.y|0,hp:r.hp|0}));});
+ o.ftanks=SV.rivals.filter(r=>r.alive&&!r.bailed&&r.fB&&!r.stolen).map(r=>({fac:r.fac,type:r.type,x:r.x|0,y:r.y|0,hp:r.hp|0}));});
 TRR_HOOK.apply.push(S=>{TRR._fbS=S.fb;TRR._ftS=S.ftanks;});
 TRR_HOOK.start.push(loaded=>{if(!loaded||!TRR._fbS)return;for(const q of TRR._fbS){const B=trrFBase(q.fac);if(!B)continue;Object.assign(B,{alive:q.alive,lvl:q.lvl,t:q.t,deadT:q.deadT});B.bld=q.bld.map(p=>Object.assign({own:B.fac,id:0,t:0},p));}
  for(const q of TRR._ftS||[]){const B=trrFBase(q.fac);if(!B)continue;const r=trrMkFTank(B,q.type);r.x=q.x;r.y=q.y;r.hp=q.hp;}TRR._fbS=null;TRR.gridDirty=true;trrGridRebuild();});
@@ -6359,8 +6364,8 @@ TRR_HOOK.tick.push(dt=>{TRR.svvT=(TRR.svvT||180)-dt;if(TRR.svvT>0)return;TRR.svv
 // Every option has a plain-English line. Categories are collapsible and sorted A-Z, like the arcade Settings.
 const TRR_CUST=[
  ['Building',[['fastCraft','Fast crafting',[[false,'Off'],[true,'3× faster']],'Things you craft are ready much sooner.'],['freeTurrets','Free turret ammo',[[false,'Off'],[true,'On']],'Your turrets shoot without using shells from the stash.'],['wreckHouses','Smashable houses',[[false,'Off'],[true,'On']],'Tank shells can knock houses down into rubble.']]],
- ['Enemies',[['animals','Wild animals',[['on','On'],['off','Off']],'Wolves, bears and deer in the forests.'],['bandits','Bandits',[['normal','Normal'],['lots','Lots'],['off','Off']],'Gangs on foot who ambush you while you loot.'],['rivalsN','Rival tank crews',[[3,'3'],[0,'None'],[1,'1'],[2,'2'],[4,'4']],'Other tank crews with their own bases. They upgrade and raid.'],['zombies','Zombies',[['normal','Normal'],['lots','Lots'],['off','Off']],'Slow walkers by day, big hordes at night.']]],
- ['Game mode',[['br','Battle royale',[[false,'Off'],[true,'On']],'20 tanks, a shrinking safe circle, last tank alive wins. No respawn.']]],
+ ['Enemies',[['nightWave','Night attack',[['normal','Normal'],['light','Light'],['brutal','Brutal'],['off','Off']],'Zombie hordes, wolves, sappers and hunting tank crews come every night.'],['animals','Wild animals',[['on','On'],['off','Off']],'Wolves, bears and deer in the forests.'],['bandits','Bandits',[['normal','Normal'],['lots','Lots'],['off','Off']],'Gangs on foot who ambush you while you loot.'],['rivalsN','Rival tank crews',[[3,'3'],[0,'None'],[1,'1'],[2,'2'],[4,'4']],'Other tank crews with their own bases. They upgrade and raid.'],['zombies','Zombies',[['normal','Normal'],['lots','Lots'],['off','Off']],'Slow walkers by day, big hordes at night.']]],
+
  ['Look',[['cutout','Paper cutout people',[[false,'Off'],[true,'On']],'Little people look like flat paper cutouts, like a cartoon show.']]],
  ['Old Survival rules',[['svAssault','Storm buildings',[[false,'Off'],[true,'On']],'Crew can burst into enemy-held houses.'],['svExtract','Extraction',[[false,'Off'],[true,'On']],'Grab the loot and reach the exit zone to bank it.'],['svGhillie','Ghillie suits',[[false,'Off'],[true,'On']],'Camo suits that make crew very hard to spot.'],['svGrab','Grab enemies',[[false,'Off'],[true,'On']],'Sneak up and grab enemy soldiers.'],['svHostages','Hostages',[[false,'Off'],[true,'On']],'Enemies can hold survivors hostage; tie up and trade prisoners.'],['svInterrog','Interrogate',[[false,'Off'],[true,'On']],'Make prisoners tell you where loot is hidden.'],['svJam','Radio jamming',[[false,'Off'],[true,'On']],'Jam enemy radios so they cannot call for help.'],['svSabotage','Sabotage',[[false,'Off'],[true,'On']],'Sneak up and wreck enemy tanks quietly.'],['svSnipers','Snipers',[[false,'Off'],[true,'On']],'Enemy snipers hide on roofs and in towers.']]],
  ['Raids',[['raidProt','Raid protection',[[true,'On'],[false,'Off']],'When you are far from home, raiders barely hurt your base. Nobody raids while the app is closed.'],['raidsOnYou','Raids on your base',[[true,'On'],[false,'Off']],'Rival crews come to break into your base.']]],
@@ -6452,7 +6457,7 @@ function trrBRTick(dt){const Z=TRR.brz;if(!Z)return;Z.t+=dt;const k=clamp(Z.t/Z.
  Z.alive=n;if(t.alive&&n===1&&!Z.won){Z.won=1;trrPopup('🏆 WINNER!','<p>You are the last tank standing!</p>',[['Back to menu',()=>{localStorage.removeItem(trrSlotKey(TRR.slot));TRR.on=false;toTitle();}]]);}}
 {const _x=svIsoExtra;svIsoExtra=function(L,hs,lowG){_x(L,hs,lowG);if(TRR.brz)L.push(isoE(1e8+3,trrDrawBRZ,TRR.brz));};}
 function trrDrawBRZ(Z){ctx.strokeStyle='rgba(80,160,255,0.85)';ctx.lineWidth=4;ctx.beginPath();for(let i=0;i<=64;i++){const a=i/64*TAU,p=isoS(Z.x+Math.cos(a)*Z.r,Z.y+Math.sin(a)*Z.r,0);if(i)ctx.lineTo(p[0],p[1]);else ctx.moveTo(p[0],p[1]);}ctx.stroke();}
-TRR_HOOK.hud.push(()=>{const Z=TRR.brz;if(!Z)return;const g=ctxMain;g.save();g.setTransform(DPR,0,0,DPR,0,0);g.fillStyle='rgba(20,24,60,0.8)';g.fillRect(W/2-70,trrStripBottom()+36,140,22);g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('🏆 '+Z.alive+' TANKS LEFT',W/2,trrStripBottom()+47);g.restore();});
+TRR_HOOK.hud.push(()=>{const Z=TRR.brz;if(!Z||Z.rumble)return;const g=ctxMain;g.save();g.setTransform(DPR,0,0,DPR,0,0);g.fillStyle='rgba(20,24,60,0.8)';g.fillRect(W/2-70,trrStripBottom()+36,140,22);g.fillStyle='#fff';g.font='bold 12px system-ui';g.textAlign='center';g.textBaseline='middle';g.fillText('🏆 '+Z.alive+' TANKS LEFT',W/2,trrStripBottom()+47);g.restore();});
 function trrHostileBR(a,b){return true;}
 // in BR you die for real
 {const _r=trrRespawn;trrRespawn=function(){if(TRR.cfg.br){localStorage.removeItem(trrSlotKey(TRR.slot));$('trrDeath').classList.remove('show');TRR.on=false;trrPopup('Knocked out','<p>You finished with '+((TRR.brz&&TRR.brz.alive)||'?')+' tanks left. Better luck next round!</p>',[['Back to menu',()=>{toTitle();}]]);return;}return _r.apply(this,arguments);};}
@@ -6468,7 +6473,7 @@ TRR_HOOK.tick.push(()=>{if(TRR.cfg.br)return;const k='tankRoyalRumble.bestDay',b
 // ---- night: moody but playable; player picks how dark (Settings > Graphics > Night brightness) ----
 const TRR_NIGHT={dark:0.82,normal:0.62,bright:0.44};
 function trrNightMul(){return TRR.on?(TRR_NIGHT[settings.trrNight]||TRR_NIGHT.normal):1;}
-function trrNightHoles(hole){const B=TRR.base;if(B&&!TRR.cfg.br)hole(B.x,B.y,280,0.55);for(const F of TRR.fbases||[])if(F.alive)hole(F.x+BT,F.y+BT,240,0.45);for(const p of TRR.bld)if(p.k==='turret'&&p.flash>0){const R=trrPieceRect(p);hole(R[0]+60,R[1]+60,80,0.6);}if(TRR.ad&&TRR.ad.ph===2)hole(TRR.ad.x,TRR.ad.y,120,0.6);}
+function trrNightHoles(hole){const B=TRR.base;if(B&&!TRR.cfg.br&&!B.tank)hole(B.x,B.y,280,0.55);for(const F of TRR.fbases||[])if(F.alive&&F.camp)hole(F.x+BT,F.y+BT,240,0.45);for(const p of TRR.bld)if(p.k==='turret'&&p.flash>0){const R=trrPieceRect(p);hole(R[0]+60,R[1]+60,80,0.6);}if(TRR.ad&&TRR.ad.ph===2)hole(TRR.ad.x,TRR.ad.y,120,0.6);}
 // ---- settings: no City Maze section in Rumble; add Night brightness ----
 {const _s=suTankSpec;suTankSpec=function(){const S=_s();if(!TRR.on&&!document.getElementById('trrMenu'))return S;S.cats=S.cats.filter(c=>c.id!=='maze');let g=S.cats.find(c=>c.id==='graphics');if(!g){g={id:'graphics',name:'Graphics',icon:'✨',items:[]};S.cats.push(g);}
  g.items.push({k:'trrNight',l:'Night brightness',d:'How dark the night gets. Bright = easier to see, Dark = scarier.',t:'opt',o:[['bright','Bright'],['normal','Normal'],['dark','Dark']],th:'shadows',get:()=>settings.trrNight||'normal',set:v=>{settings.trrNight=v;saveSettings();}});return S;};}
@@ -6546,9 +6551,9 @@ function trrMinPart(){const P=SV.tank.parts;let m=100;for(const k of SV_PARTS)if
 function trrDrawStrip(g){const x0=safe.l+6,y0=safe.t+6,x1=W-safe.r-8-34-8,t=SV.tank,F=TRR_UF;
  let crewTh=0,crewHu=0,n=0;for(const c of SV.crew)if(!c.dead){crewTh+=c.thirst==null?100:c.thirst;crewHu+=c.hunger==null?100:c.hunger;n++;}crewTh=n?crewTh/n:100;crewHu=n?crewHu/n:100;
  const blink=(performance.now()/400|0)%2===0,items=[];
- for(const [k,ic] of [['wood','🪵'],['stone','🪨'],['metal','🔩'],['parts','⚙'],['chem','🧨'],['water','💧'],['food','🍖'],['med','✚']]){let col='#e8ecff';if(k==='water'&&crewTh<30)col=blink?'#ff6a4a':'#e8ecff';if(k==='food'&&crewHu<30)col=blink?'#ff6a4a':'#e8ecff';items.push([ic,SV[k]|0,col]);}
+ for(const [k,ic] of (TRR.rumble?[['apN','🎯'],['smkN','☁'],['patch','🩹'],['med','✚']]:[['wood','🪵'],['stone','🪨'],['metal','🔩'],['parts','⚙'],['chem','🧨'],['water','💧'],['food','🍖'],['med','✚'],['patch','🩹']])){let col='#e8ecff';if(k==='water'&&crewTh<30)col=blink?'#ff6a4a':'#e8ecff';if(k==='food'&&crewHu<30)col=blink?'#ff6a4a':'#e8ecff';items.push([ic,SV[k]|0,col]);}
  const hr=SV.tod!=null?Math.floor(SV.tod*24):12,mn=SV.tod!=null?Math.floor((SV.tod*24-hr)*60):0,night=typeof svDark==='function'&&svDark()>0.5;
- const dayTxt=(night?'☾':'☀')+' D'+TRR.day+' '+String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0')+(TRR.wx&&TRR.wx.k!=='clear'?' '+trrWxName(true).split(' ')[0]:'');
+ const dayTxt=TRR.rumble?'RUMBLE':(typeof trrPhaseIcon==='function'&&!TRR.cfg.br&&!TRR.rumble?trrPhaseIcon():(night?'☾':'☀'))+' D'+TRR.day+' '+String(hr).padStart(2,'0')+':'+String(mn).padStart(2,'0')+(TRR.wx&&TRR.wx.k!=='clear'?' '+trrWxName(true).split(' ')[0]:'');
  const ammo=[t.T.flame?'🔥':'💥',Math.ceil(SV.ammo),SV.ammo<4?'#ff6a4a':'#fff'];
  g.font='700 11px '+F;const wOf=it=>g.measureText(String(it[1])).width+18,iw=items.map(wOf),aw=wOf(ammo),dw=g.measureText(dayTxt).width+8,res=iw.reduce((a,b)=>a+b,0);
  const head=32+56,two=head+aw+res+dw+6>x1-x0;_trrStripH=two?50:34;const w=two?Math.min(x1-x0,Math.max(head+aw+dw+10,32+res+8)):head+aw+res+dw+6;
@@ -6585,7 +6590,7 @@ function trrDrawActBar(g){const R=svRingButtons();if(!R.length)return;const c=SV
  for(const b of R){const x=b.x-b.w/2,y=b.y-b.h/2;g.fillStyle='rgba(16,20,46,0.9)';trrRR(g,x,y,b.w,b.h,9);g.fill();
   if(fix){const m=/(\d+)%\s*$/.exec(b.label),pct=m?+m[1]:100,nm=b.label.replace(/\s*\d+%\s*$/,'');g.strokeStyle=svPartCol(pct);g.lineWidth=2;g.stroke();g.fillStyle='#0a0d1e';g.fillRect(x+5,y+b.h-8,b.w-10,4);g.fillStyle=svPartCol(pct);g.fillRect(x+5,y+b.h-8,(b.w-10)*pct/100,4);
    g.font='800 14px '+TRR_UF;g.fillStyle=svPartCol(pct);g.fillText(pct+'%',b.x,y+19);let fs=8;g.font='800 '+fs+'px '+TRR_UF;while(fs>6&&g.measureText(nm).width>b.w-6){fs--;g.font='800 '+fs+'px '+TRR_UF;}g.fillStyle='#e8ecff';g.fillText(nm,b.x,y+31);}
-  else{g.strokeStyle='#ffd54a';g.lineWidth=1.5;g.stroke();g.font='16px sans-serif';g.fillStyle='#fff';g.fillText(b.icon,b.x,y+21);let fs=8;g.font='800 '+fs+'px '+TRR_UF;while(fs>6&&g.measureText(b.label).width>b.w-4){fs--;g.font='800 '+fs+'px '+TRR_UF;}g.fillStyle='#ffe066';g.fillText(b.label,b.x,y+b.h-7);}}}
+  else{const ctxK=b.cmd&&b.cmd.startsWith('trr:ctx')?b.cmd.slice(7):null,ctxOn=ctxK&&typeof trrCtxAvail==='function'&&trrCtxAvail(c,ctxK),fmOn=ctxOn||(b.cmd&&b.cmd.startsWith('trr:fm')&&b.cmd==='trr:fm'+(c.fm|0));if(fmOn){g.fillStyle='rgba(255,213,74,0.28)';g.fill();}g.strokeStyle=fmOn?'#fff2a0':'#ffd54a';g.lineWidth=fmOn?2.5:1.5;g.stroke();g.font='16px sans-serif';g.fillStyle='#fff';g.fillText(b.icon,b.x,y+21);let fs=8;g.font='800 '+fs+'px '+TRR_UF;while(fs>6&&g.measureText(b.label).width>b.w-4){fs--;g.font='800 '+fs+'px '+TRR_UF;}g.fillStyle='#ffe066';g.fillText(b.label,b.x,y+b.h-7);}}}
 // ---------- messages: one toast above the bottom group; the old hint line only if turned on in Settings ----------
 function trrHintsOn(){return !!settings.trrHints;}
 function trrDrawToast(g){const t=SV.tank,M=trrMiniGeom(),base=Math.min(trrLay().gt,trrActTop())-8,maxW=Math.max(170,W-2*(M.ms+26));
@@ -6833,6 +6838,762 @@ function trrOnFloor(x,y){return !!(TRR.fset&&TRR.fset.size&&TRR.fset.has(Math.fl
  for(const L of [M.TB,M.BB,M.RB]){if(!L||!L[k])continue;L[k]=L[k].filter(o=>!trrOnFloor(o.x,o.y));if(!L[k].length)delete L[k];}return r;};}
 
 
+// ---- trr-93-p2.js ----
+// ===================== TRR 2.5.0 patch 2: fire modes, tank = home, wrecks + part-by-part repair, tank stealing, AI crews build from scratch =====================
+// ---------- 1. soldier fire modes (per soldier, saved) ----------
+const TRR_FM=[['WILL','🔥','FIRE AT WILL'],['RETURN','↩','RETURN FIRE ONLY'],['HOLD','✋','HOLD FIRE']];
+function trrFireOK(c,e){const m=c.fm|0;if(m===0)return true;if(c.task==='hunt')return true;if(m===2)return false;return (c.rfT||0)>0;}
+{const _h=svCrewHurt;svCrewHurt=function(c,d){if(TRR.on&&!c.inTank&&!c.dead)for(const k of SV.crew)k.rfT=8;return _h(c,d);};}
+{const _h=svHurtTank;svHurtTank=function(d,p,s){if(TRR.on)for(const k of SV.crew)k.rfT=8;return _h(d,p,s);};}
+TRR_HOOK.tick.push(dt=>{for(const c of SV.crew)if(c.rfT>0)c.rfT-=dt;});
+{const _re=svRingExtra;svRingExtra=function(c,list){_re(c,list);if(!TRR.on||!c.role)return;const i=list.findIndex(b=>b[0]==='trr:close'),add=[];for(let k=0;k<3;k++)add.push(['trr:fm'+k,TRR_FM[k][0],TRR_FM[k][1]]);
+ if(!SV.tank.alive&&!c.inTank){if(SV.tank.wreck&&Math.hypot(SV.tank.x-c.x,SV.tank.y-c.y)<SV.tank.r+90){if(SV.tank.fire>0)add.push(['trr:douse','DOUSE','🧯']);else add.push(['trr:fixw','FIX WRECK','🔧']);}}
+ const tk=trrTakeCand(c);if(tk)add.push(['trr:take','TAKE TANK','🔑']);
+ list.splice(i<0?list.length:i,0,...add);};}
+{const _cm=svCommand;svCommand=function(c,cmd,arg){if(TRR.on&&c&&c.inside&&!(typeof cmd==='string'&&cmd.startsWith('trr:fm'))&&cmd!=='trr:close'){c.x=c.inside.door.x;c.y=c.inside.door.y;c.inside=null;c.nsU=SV.t+30;}
+ if(typeof cmd==='string'&&cmd.startsWith('trr:')){
+  if(cmd.startsWith('trr:fm')){c.fm=+cmd.slice(6)||0;svSay(c.name+': '+TRR_FM[c.fm][2],2.2);sfx('select');return false;}
+  if(cmd==='trr:douse'){trrDouse(c);return false;}
+  if(cmd==='trr:fixw'){trrPanelOpen('garage');return false;}
+  if(cmd==='trr:take'){trrTakeStart(c);return false;}}
+ return _cm(c,cmd,arg);};}
+TRR_HOOK.snap.push(o=>{o.crew.forEach((q,i)=>{const c=SV.crew[i];if(c)q.fm=c.fm|0;});});
+TRR_HOOK.apply.push(S=>{S.crew.forEach((q,i)=>{const c=SV.crew[i];if(c)c.fm=q.fm|0;});});
+
+// ---------- 2. the tank IS home: respawn, storage, base tab all follow the tank until you claim a base with a Tool Cupboard ----------
+function trrHomeSync(){const B=TRR.base;if(!B||TRR.cfg.br)return;const tc=trrTC();
+ if(tc){B.x=tc.gx*BT+60;B.y=tc.gy*BT+60;B.r=440;B.name='BASE';B.tank=false;}
+ else{const t=SV.tank;B.tank=true;B.r=170;B.name='TANK';B.x=t.x;B.y=t.y;}}
+TRR_HOOK.tick.unshift(trrHomeSync);
+function trrTrunkMode(){return !trrTC()&&!TRR.cfg.br;}
+{const _d=trrDrawBaseRing;trrDrawBaseRing=function(B){if(B&&B.tank)return;return _d(B);};}
+// the tank is the bed too: no sleeping bag needed to respawn
+{const _b=trrBedSpot;trrBedSpot=function(){const r=_b();if(r&&r.tank){const t=SV.tank;return{x:t.x,y:t.y+t.r+16};}return r;};}
+
+// ---------- 3. tank down = burnt wreck, crew survive on foot ----------
+function trrTankDown(why){const t=SV.tank;if(TRR.cfg.br||TRR.rumble){for(const c of SV.crew)if(c.inTank&&!c.dead){c.dead=true;c.hp=0;}t.alive=false;t.wreck=true;svEnd('TANK DESTROYED');return;}t.alive=false;t.wreck=true;t.fire=100;t.spd=0;t.hp=0;t.path=null;svFx(t.x,t.y,44,'#ff8a1a',180,1.3,5);sfx('big');trauma=1;
+ let n=0;for(const c of SV.crew){if(c.dead)continue;if(c.inTank){svExit(c);c.hp=Math.max(8,c.hp-rr(18,42));c.flash=0.4;c.task='idle';n++;}}
+ SV.ammo=Math.floor(SV.ammo*0.25);SV.noAmmoT=0;
+ if(n===0&&SV.crew.every(c=>c.dead)){svEnd('WHOLE CREW LOST');return;}
+ TRR.wreckAt=SV.t;SV.sel=SV.crew.find(c=>!c.dead&&!c.inTank)||null;SV.ring=null;SV.follow=true;
+ svSay('💥 TANK DESTROYED - '+n+' CREW GOT OUT. FIND SHELTER, PUT OUT THE FIRE, THEN REPAIR IT OR TAKE ANOTHER TANK',7);TRR.shelterAuto=true;}
+// replace the vanilla "tank destroyed = game over" in TRR (rep.py hooks svHurtTank to call this)
+TRR_HOOK.tick.push(dt=>{const t=SV.tank;if(t.wreck&&!t.alive&&!t.gone){if(t.fire>0){t.fire=Math.max(0,t.fire-dt*0.6);if(rnd()<dt*14)SV.fx.push({x:t.x+rr(-t.r*0.5,t.r*0.5),y:t.y+rr(-t.r*0.5,t.r*0.5),vx:rr(-5,5),vy:rr(-34,-16),t:0.5,m:0.5,col:rnd()<0.5?'#ff7a1a':'#ffd23a',size:3.2});
+   if(rnd()<dt*8)SV.fx.push({x:t.x+rr(-6,6),y:t.y+rr(-6,6),vx:rr(-6,6),vy:rr(-24,-10),t:2.4,m:2.4,col:'#1c1c1c',size:5,sm:1});
+   if(t.fire<=0)svSay('🧯 THE FIRE BURNED OUT - THE WRECK CAN BE REPAIRED',4);}
+  else if(rnd()<dt*1.4)SV.fx.push({x:t.x+rr(-6,6),y:t.y+rr(-6,6),vx:rr(-3,3),vy:rr(-14,-6),t:2.2,m:2.2,col:'#2a2a2a',size:3.5,sm:1});}
+ // crew keep fighting on foot; the camera follows a crewman while there is no tank to follow
+});
+{const _cam=svCamera;svCamera=function(dt){if(TRR.on&&!SV.tank.alive&&!SV.ctl){const s=SV.sel;if(!s||!s.role||s.dead||s.inTank){SV.sel=SV.crew.find(c=>!c.dead&&!c.inTank)||null;}SV.follow=!!SV.sel;}return _cam(dt);};}
+{const _c=svTankCols;svTankCols=function(t){if(t===SV.tank&&t.wreck)return{base:'#3a3632',lite:'#4a4540',dark:'#1e1b18'};return _c(t);};}
+{const _d=svIsoTank;svIsoTank=function(o,lowG){if(o===SV.tank&&o.gone)return;return _d(o,lowG);};}
+{const _d=drawTank;drawTank=function(o){if(o===SV.tank&&o.gone)return;return _d(o);};}
+{const _l=trrAlive;trrAlive=function(o){if(o===SV.tank&&o.gone)return false;return _l(o);};}
+function trrDouse(c){const t=SV.tank;if(!(t.fire>0))return false;if(SV.water<1&&!trrHave('water')){svSay('NEED 1 WATER TO PUT OUT THE FIRE (OR WAIT IT OUT)',3);return false;}
+ if(c.inTank)svExit(c);c.path=null;c.task='idle';c.shH=null;const a=svStartAct(c,'douse',3,t,()=>{if(SV.water>=1)SV.water--;else if(!trrPay({water:1})){svSay('OUT OF WATER',2);return;}t.fire=0;svFx(t.x,t.y,20,'#cfd8dc',120,0.8,4);sfx('pick');svSay('🧯 FIRE OUT',3);});
+ const ang=Math.atan2(c.y-t.y,c.x-t.x);c.x=t.x+Math.cos(ang)*(t.r+14);c.y=t.y+Math.sin(ang)*(t.r+14);a.x=c.x;a.y=c.y;svSay(c.name+': PUTTING OUT THE FIRE...',2.5);return true;}
+// wreck repair: hull first, then parts; each step needs TANK PARTS (or 4 scrap each) and a crewman standing next to it
+const TRR_WPART=[['hull','HULL',3,'Weld the hull back together (3 parts)'],['tracks','TRACKS',2,''],['engine','ENGINE',2,''],['gun','GUN',2,''],['turret','TURRET RING',1,''],['armor','ARMOR',1,''],['fuel','FUEL TANK',1,''],['rack','AMMO RACK',1,'']];
+function trrWreckNeed(k){const t=SV.tank;if(k==='hull')return t.hp>=t.maxHp*0.5?0:1;return Math.max(0,100-(t.parts[k]||0))>=35?1:Math.max(0,100-(t.parts[k]||0))>0?0.5:0;}
+function trrWreckCost(k){const e=TRR_WPART.find(q=>q[0]===k);return {parts:e[2]*(k==='hull'?1:trrWreckNeed(k)>=1?1:0.5)};}
+function trrWreckWorker(){const t=SV.tank;let best=null;for(const c of SV.crew)if(!c.dead&&!c.inTank&&Math.hypot(c.x-t.x,c.y-t.y)<t.r+110&&(!best||c.role==='mechanic'))best=c;return best;}
+function trrWreckPayParts(n){n=Math.ceil(n);const hp=Math.min(n,trrHave('parts')),m=n-hp;if(trrHave('metal')<m*4)return false;const c={};if(hp)c.parts=hp;if(m)c.metal=m*4;return trrPay(c);}
+function trrWreckFix(k){const t=SV.tank;if(!t.wreck||t.alive||t.gone)return;if(t.fire>0){svSay('PUT OUT THE FIRE FIRST (🧯 DOUSE)',3);return;}const w=trrWreckWorker();if(!w){svSay('STAND A CREWMAN NEXT TO THE WRECK',3);return;}
+ if(TRR.fixJob){svSay('ALREADY WORKING ON ONE PART',2);return;}const n=Math.ceil(trrWreckCost(k).parts);if(!trrWreckPayParts(n)){svSay('NEED '+n+' TANK PARTS (OR '+n*4+' SCRAP)',3);return;}
+ TRR.fixJob={k,t:0,dur:(k==='hull'?10:6)/(w.role==='mechanic'?1.6:1)};svSay('🔧 '+w.name+' IS WORKING ON THE '+(TRR_WPART.find(q=>q[0]===k)[1])+'...',3);sfx('select');}
+function trrWreckTick(dt){const J=TRR.fixJob,t=SV.tank;if(!J){for(const c of SV.crew)if(c._wr){c._wr=0;c.repairing=false;}return;}if(!t.wreck||t.alive){TRR.fixJob=null;return;}const w=trrWreckWorker();if(!w){J.t=Math.max(0,J.t-dt);if(J.t<=0){TRR.fixJob=null;svSay('REPAIR STOPPED - NOBODY NEXT TO THE WRECK',3);}return;}
+ J.t+=dt;w.repairing=true;w._wr=1;w.repPart=J.k==='hull'?'HULL':J.k;w.ang=Math.atan2(t.y-w.y,t.x-w.x);w.leg+=dt*6;if(rnd()<dt*9)svFx(t.x+rr(-8,8),t.y+rr(-8,8),1,'#ffe066',50,0.25,2);
+ if(J.t>=J.dur){TRR.fixJob=null;w.repairing=false;if(J.k==='hull'){t.hp=Math.max(t.hp,t.maxHp*0.5);}else t.parts[J.k]=100;sfx('pick');svFloat(t.x,t.y-24,'FIXED','#7CFC00');
+  if(trrWreckReady()){trrTankRevive();}else svSay('FIXED. KEEP GOING: NEED HULL + TRACKS + ENGINE + GUN',3);}}
+function trrWreckReady(){const t=SV.tank;return t.hp>=t.maxHp*0.5&&t.parts.tracks>=35&&t.parts.engine>=35&&t.parts.gun>=35;}
+function trrTankRevive(){const t=SV.tank;t.alive=true;t.wreck=false;t.fire=0;t.spd=0;t.reload=1;svSay('🔧 TANK IS RUNNING AGAIN! GET THE CREW IN',5);sfx('big');for(const c of SV.crew)if(!c.dead&&!c.inTank){c.task='return';svGo(c,t.x,t.y);}SV.sel=t;}
+// ---- garage panel: wreck section (repair list) ----
+function trrGarageWreckHTML(){const t=SV.tank;if(t.gone)return `<div class="trrH" style="color:#ff8a6a">YOUR TANK WAS STOLEN</div><div class="trrSub" style="text-align:left">Find it, kill the crew and take it back, or steal another one. Walk a crewman next to an abandoned tank and choose 🔑 TAKE TANK.</div>`;
+ if(!t.wreck||t.alive)return '';let h=`<div class="trrH" style="color:#ff8a6a">🔥 YOUR TANK IS A WRECK</div>`;
+ if(t.fire>0)h+=`<div class="trrItem"><div class="tx"><b>Put out the fire first</b><i>Stand a crewman next to it. Costs 1 💧.</i></div><button data-douse="1">🧯</button></div>`;
+ else{const w=trrWreckWorker();h+=`<div class="trrSub" style="text-align:left;margin:2px">${w?'👷 '+w.name+' is at the wreck.':'⚠ Walk a crewman to the wreck to work on it.'} Needs hull ≥ 50% and tracks, engine, gun ≥ 35% to run. Parts: you have ${trrHave('parts')} (4 scrap = 1 part).</div>`;
+  for(const [k,nm,cost,d] of TRR_WPART){const v=k==='hull'?Math.round(t.hp/t.maxHp*100):Math.round(t.parts[k]||0),ok=(k==='hull'?v>=50:v>=100);const n=Math.ceil(trrWreckCost(k).parts);
+   h+=`<div class="trrItem"><div class="tx"><b>${nm} ${v}%</b>${trrBar(v,v>=70?'#4ac070':v>=35?'#e8b040':'#e04a3a')}<em>${ok?'good':n+' 🔧'+(d?' · '+d:'')}</em></div><button data-wfix="${k}" ${ok?'disabled':''}>🔧</button></div>`;}}
+ if(TRR.fixJob){const J=TRR.fixJob;h+=`<div class="trrSub" style="text-align:left">Working... ${Math.ceil(J.dur-J.t)}s</div>${trrBar(100*J.t/J.dur,'#ffd54a')}`;}
+ return h;}
+function trrWreckBind(bd,each){each('[data-douse]',()=>{const c=trrWreckWorker();if(c)trrDouse(c);else svSay('STAND A CREWMAN NEXT TO THE WRECK',3);});each('[data-wfix]',b=>trrWreckFix(b.dataset.wfix));}
+TRR_HOOK.tick.push(trrWreckTick);
+
+// ---------- 4. taking tanks (player and AI): unattended / abandoned / bailed-out tanks can be stolen ----------
+function trrTakeCand(c){if(!TRR.on||c.dead||c.inTank||c.searching)return null;for(const r of SV.rivals||[]){if(!r.alive||r.wreck||r.stripped||r.trapped)continue;if(!(r.bailed||r.captured||r.abandoned))continue;if(Math.hypot(r.x-c.x,r.y-c.y)<r.r+46)return r;}return null;}
+function trrTakeStart(c){const r=trrTakeCand(c);if(!r){svSay('WALK NEXT TO AN ABANDONED TANK FIRST',3);return false;}
+ svSay(c.name+': BREAKING INTO THE '+(r.T?r.T.name:'TANK')+'...',3);svStartAct(c,'steal',3.2,r,()=>trrTakeTank(r,c));return true;}
+// swap what we drive with the abandoned tank (the old one stays where it was: unattended, wreck, or gone)
+function trrTakeTank(r,c){const t=SV.tank,wasW=!!t.wreck,wasGone=!!t.gone,wasAlive=t.alive;
+ const keep=['x','y','body','turret','T','type','r','hp','maxHp','parts','reloadMax'],old={};for(const k of keep)old[k]=t[k];
+ for(const k of keep)t[k]=k==='parts'?Object.assign({},r.parts):r[k];t.parts.tracks=Math.max(t.parts.tracks,25);t.parts.engine=Math.max(t.parts.engine,25);t.hp=Math.max(t.hp,t.maxHp*0.35);t.reloadMax=t.T.reload||1;t.alive=true;t.wreck=false;t.gone=false;t.fire=0;t.path=null;t.spd=0;t.reload=1;
+ const trunk=r.trunk;r.trunk=null;
+ if(wasGone){const i=SV.rivals.indexOf(r);if(i>=0)SV.rivals.splice(i,1);SV.rivals.forEach((q,j)=>q.id=j);}
+ else{for(const k of keep)r[k]=k==='parts'?Object.assign({},old.parts):old[k];r.captured=false;r.bailed=true;r.abandoned=true;r.stripped=false;r.fac=null;r.fB=null;r.fcol=null;r.name='OLD TANK';r.crewN=0;r.hatch=1;r.path=null;r.spd=0;r.wasSeen=1;
+  if(wasW){r.alive=false;r.wreck=true;r.hp=0;r.ownWreck=true;}else if(wasAlive){r.alive=true;r.wreck=false;r.hp=Math.max(old.hp,1);}
+  if(trrTrunkMode()){r.trunk=Object.assign({},TRR.stash);TRR.stash=trrInvZero();}}
+ if(trunk&&trrTrunkMode())for(const k in trunk)TRR.stash[k]=(TRR.stash[k]||0)+trunk[k];
+ SV.ring=null;SV.sel=t;SV.follow=false;for(const q of SV.crew)if(!q.dead&&!q.inTank){if(Math.hypot(q.x-t.x,q.y-t.y)<140){q.inTank=true;q.task='idle';q.path=null;}else{q.task='return';svGo(q,t.x,t.y);}}
+ TRR.tankKills=TRR.tankKills||0;SV.stats.tanksTaken=(SV.stats.tanksTaken||0)+1;sfx('pick');svSay('🔑 YOU TOOK THE '+t.T.name+'! CREW, GET IN'+(trunk?' (TRUNK LOOT TRANSFERRED)':''),5);}
+// AI: unattended tanks get taken by any crew on foot; bailed-out owners climb back in after things calm down
+const TRR_STEALERS={crewman:1,soldier:1,bandit:1};
+function trrAISteal(dt){TRR.stealT=(TRR.stealT||0)-dt;if(TRR.stealT>0)return;TRR.stealT=1.5;const pt=SV.tank;
+ for(const r of SV.rivals||[]){if(!r.alive||r.wreck||r.stripped||!r.bailed)continue;r.abT=(r.abT||0)+1.5;
+  let best=null,bd=380;for(const e of SV.inf){if(e.hp<=0||!TRR_STEALERS[e.kind]||e.raidB||!e.fac||e.fac==='player')continue;if(e.P&&e.P.lead&&0)continue;const d=Math.hypot(e.x-r.x,e.y-r.y);if(d<bd&&(r.abT>28||e.fac!==r.fac&&d<260)){bd=d;best=e;}}
+  if(!best)continue;best.stealTank=r;if(bd<r.r+22){const crew=[best];for(const o of SV.inf)if(o!==best&&o.hp>0&&o.fac===best.fac&&TRR_STEALERS[o.kind]&&Math.hypot(o.x-r.x,o.y-r.y)<200&&crew.length<3)crew.push(o);
+   const fac=best.fac,B=typeof trrFBase==='function'?trrFBase(fac):null;r.bailed=false;r.abandoned=false;r.captured=false;r.hatch=0;r.fac=fac;r.fB=B||null;r.fcol=(TRR_FAC[fac]||{}).tank||null;r.name=(TRR_FAC[fac]||{n:'RIVAL'}).n;r.crewN=crew.length;r.mission='patrol';r.state='roam';r.hp=Math.max(r.hp,r.maxHp*0.4);r.parts.tracks=Math.max(r.parts.tracks,40);r.parts.engine=Math.max(r.parts.engine,40);r.abT=0;r.tgt=null;r.path=null;
+   SV.inf=SV.inf.filter(o=>crew.indexOf(o)<0);if(r.seen||svVisible(r.x,r.y))svSay('📻 '+r.name+' CREW CLIMBED INTO A '+(r.T?r.T.name:'TANK')+' AND DROVE OFF',3.5);if(r.trunk&&0)r.trunk=null;}}
+ // your own tank left alone gets taken
+ if(pt.alive&&!pt.gone&&!SV.ctl){const near=SV.crew.some(c=>!c.dead&&(c.inTank||Math.hypot(c.x-pt.x,c.y-pt.y)<190));if(near)TRR.unatt=0;else TRR.unatt=(TRR.unatt||0)+1.5;
+  if(TRR.unatt>25){let best=null,bd=700;for(const e of SV.inf){if(e.hp<=0||!TRR_STEALERS[e.kind]||!e.fac||e.fac==='player'||e.raidB||!trrHostile(e.fac,'player'))continue;const d=Math.hypot(e.x-pt.x,e.y-pt.y);if(d<bd){bd=d;best=e;}}if(best){best.stealT=1;if(!TRR.stealWarn||SV.t-TRR.stealWarn>30){TRR.stealWarn=SV.t;svSay('🚨 SOMEONE IS GOING FOR YOUR UNATTENDED TANK!',4);sfx('alarm');}}}}
+ else TRR.unatt=0;}
+TRR_HOOK.tick.push(trrAISteal);
+// thieves + would-be tank takers walk to their target
+{const _ns=trrNpcStep;trrNpcStep=function(e,dt){if(TRR.on&&e.hp>0){const pt=SV.tank;
+  if(e.stealT&&pt.alive&&!pt.gone){const d=Math.hypot(pt.x-e.x,pt.y-e.y);if(d>pt.r+14){trrFollow(e,pt.x,pt.y,34,dt);e.reload-=dt;e.flash=Math.max(0,(e.flash||0)-dt);return;}trrStealPlayerTank(e);return;}
+  else if(e.stealT)e.stealT=0;
+  if(e.stealTank){const r=e.stealTank;if(!r.alive||!r.bailed){e.stealTank=null;}else{const d=Math.hypot(r.x-e.x,r.y-e.y);if(d>r.r+10&&!e.tgt){trrFollow(e,r.x,r.y,30,dt);return;}}}}
+ return _ns(e,dt);};}
+function trrStealPlayerTank(e){const t=SV.tank;if(!t.alive||t.gone)return;const fac=e.fac,B=typeof trrFBase==='function'?trrFBase(fac):null,T=t.T;
+ const r=svMkRival(t.x,t.y);Object.assign(r,{T,type:t.type,r:t.r,maxHp:t.maxHp,hp:Math.max(t.hp,t.maxHp*0.4),parts:Object.assign({},t.parts),body:t.body,turret:t.turret,rival:true,isPlayer:false,fac,fB:B||null,fcol:(TRR_FAC[fac]||{}).tank||null,name:(TRR_FAC[fac]||{n:'RIVAL'}).n,state:'roam',mission:'patrol',gas:SV.gas,crewN:3,bailed:false,wreck:false,alive:true,stolen:1});
+ r.reloadMax=T.reload;r.id=SV.rivals.length;if(trrTrunkMode()){r.trunk=Object.assign({},TRR.stash);TRR.stash=trrInvZero();}SV.rivals.push(r);
+ const crew=[e];for(const o of SV.inf)if(o!==e&&o.hp>0&&o.fac===fac&&TRR_STEALERS[o.kind]&&Math.hypot(o.x-t.x,o.y-t.y)<260&&crew.length<3)crew.push(o);SV.inf=SV.inf.filter(o=>crew.indexOf(o)<0);
+ t.alive=false;t.gone=true;t.wreck=false;t.hp=0;t.fire=0;TRR.unatt=0;for(const c of SV.crew)if(c.inTank){svExit(c);}SV.sel=SV.crew.find(c=>!c.dead&&!c.inTank)||null;SV.follow=true;
+ TRR.stolenN=(TRR.stolenN||0)+1;svSay('🚨 THE '+(TRR_FAC[fac]||{n:'RAIDERS'}).n+' STOLE YOUR TANK! GET IT BACK (KILL THEM, THEN 🔑 TAKE IT)',7);sfx('alarm');}
+// the thieves' tank is a normal rival: kill the crew -> it becomes a wreck (repair) or it bails (take it)
+// ---- AI wrecks: surviving crew on foot repair them; wrecks of dead crews stay burnt ----
+function trrAIWreckTick(dt){TRR.awT=(TRR.awT||0)-dt;if(TRR.awT>0)return;TRR.awT=2;
+ for(const r of SV.rivals||[]){if(!r.wreck||r.alive||r.stripped||r.ownWreck||r.fac==null)continue;
+  const crew=SV.inf.filter(e=>e.hp>0&&e.fac===r.fac&&e.kind==='crewman'&&Math.hypot(e.x-r.x,e.y-r.y)<220);if(!crew.length){r.fixT=Math.max(0,(r.fixT||0)-2);continue;}
+  r.fixT=(r.fixT||0)+2*Math.min(2,crew.length);if(r.fixT>(r.fixNeed||(r.fixNeed=160+rnd()*80))){r.alive=true;r.wreck=false;r.bailed=false;r.hatch=0;r.hp=r.maxHp*0.4;r.parts.tracks=Math.max(r.parts.tracks,40);r.parts.engine=Math.max(r.parts.engine,40);r.fixT=0;r.fixNeed=0;r.crewN=crew.length;r.mission='patrol';r.state='roam';r.tgt=null;
+   SV.inf=SV.inf.filter(o=>crew.indexOf(o)<0);if(svVisible(r.x,r.y))svSay('📻 THE '+(r.name||'RIVAL')+' CREW REPAIRED THEIR WRECK!',3.5);}}}
+TRR_HOOK.tick.push(trrAIWreckTick);
+// bailed AI crew whose own tank still runs go back to it when it is quiet (old Survival behaviour kept: they wander for a bit first)
+
+// ---------- 5. crews shelter in pre-built buildings after the tank is gone ----------
+function trrNearestHouse(x,y,maxD){let best=null,bd=maxD||1800;for(const h of SV.map.houses){if(h.breached||h.hostile)continue;const d=Math.hypot(h.door.x-x,h.door.y-y);if(d<bd&&(!h.occ||h.occ<4)){bd=d;best=h;}}return best;}
+function trrThreatNear(x,y){for(const e of SV.inf){if(e.hp<=0||e.asleep||!e.fac||e.fac==='player'||e.kind==='deer')continue;if(Math.abs(e.x-x)>520||Math.abs(e.y-y)>520)continue;if(e.K&&e.K.animal&&e.kind!=='wolf'&&e.kind!=='bear')continue;if(Math.hypot(e.x-x,e.y-y)<520&&trrHostile(e.fac,'player'))return true;}
+ for(const r of SV.rivals||[]){if(!r.alive||r.bailed||!r.fac||r.peace)continue;if(Math.hypot(r.x-x,r.y-y)<760&&trrHostile(r.fac,'player'))return true;}return false;}
+TRR_HOOK.tick.push(dt=>{TRR.shT=(TRR.shT||0)-dt;if(TRR.shT>0)return;TRR.shT=1.2;
+ const noTank=!SV.tank.alive,night=svIsNight();if(!noTank&&!night)return;
+ for(const h of SV.map.houses)h.occ=0;for(const c of SV.crew)if(!c.dead&&c.inside)c.inside.occ=(c.inside.occ||0)+1;
+ for(const c of SV.crew){if(c.dead||c.inTank||c.searching||c.task==='trrG'||SV.ctl===c||c.task==='hunt'||c.task==='scavenge'||c.task==='repair'||c.task==='steal')continue;
+  if(c.inside){// leave again when it is safe: daytime, healthy, nobody about
+   if(!night&&c.hp>=70&&SV.t-(c.shelterIn||0)>20&&!trrThreatNear(c.x,c.y)){c.x=c.inside.door.x;c.y=c.inside.door.y;c.inside=null;c.nsU=SV.t+30;}continue;}
+  if(SV.acts&&SV.acts.some(a=>a.c===c))continue;if((c.nsU||0)>SV.t)continue;
+  if(c.task!=='idle'&&c.task!=='guard'&&c.task!=='shelter')continue;
+  if((TRR.fixJob||SV.tank.wreck||SV.tank.fire>0)&&c.hp>=50&&Math.hypot(SV.tank.x-c.x,SV.tank.y-c.y)<SV.tank.r+130&&!night)continue;
+  const need=night||c.hp<50||trrThreatNear(c.x,c.y);if(!need){if(c.task==='shelter')c.task='idle';continue;}
+  if(typeof trrRooms==='function'&&TRR.bld.length&&!c.safe){let bt=null,bd=800;for(const r of trrRooms().rooms){if(r.leak)continue;for(const [tx,ty] of r.tiles){const d=Math.hypot(tx*BT+60-c.x,ty*BT+60-c.y);if(d<bd){bd=d;bt=[tx*BT+60,ty*BT+60];}}}
+   if(bt){c.task='shelter';if(!c.path||!c.path.length||(c.retarget=(c.retarget||0)-1.2)<0){c.retarget=3;svGo(c,bt[0],bt[1]);}continue;}}
+  if(c.safe){c.task='idle';continue;}
+  const h=c.shH&&!c.shH.breached?c.shH:trrNearestHouse(c.x,c.y);if(!h){continue;}c.shH=h;
+  if(Math.hypot(h.door.x-c.x,h.door.y-c.y)<14){c.inside=h;c.x=h.x+h.w/2+rr(-12,12);c.y=h.y+h.h/2+rr(-12,12);c.path=null;c.task='idle';c.shelterIn=SV.t;if(!TRR.shTold){TRR.shTold=1;svSay(c.name+' TOOK COVER IN A BUILDING - TAP HIM TO COME OUT',3);}}
+  else{c.task='shelter';if(!c.path||!c.path.length||(c.retarget=(c.retarget||0)-1.2)<0){c.retarget=3;svGo(c,h.door.x,h.door.y);}}}});
+// the 'shelter' task is a plain walk: reuse 'move' semantics
+{const _cu=svCrewUpdate;svCrewUpdate=function(c,dt){if(TRR.on&&c.task==='shelter'&&!c.dead&&!c.inTank&&SV.ctl!==c){c.flash=Math.max(0,c.flash-dt);c.reload=Math.max(0,c.reload-dt);svHungerTick(c,dt);const spd=svCrewSpeed(c);if(svWalk(c,dt,spd)){c.task='idle';}const near=svNearestInf(c.x,c.y,170,true);if(near&&c.reload<=0&&trrFireOK(c,near)){c.reload=1.2;if(svShoot(c,near,0,svCrewAcc(c),svCrewRange(c)))svInfHurt(near,svCrewDmg(c));}return;}return _cu(c,dt);};}
+{const _t=TRR_TASKN;_t.shelter='SHELTER';}
+
+// ---------- 6. AI crews start tank-only and build their camp over time ----------
+const TRR_AISTEPS=[['tc',0],['box',0],['bunker',1],['garage',1],['turret',0]];
+function trrAIBuild(B,dt){if(B.camp===undefined)B.camp=false;B.bT=(B.bT||0)+dt;B.stepN=B.stepN||0;
+ const wait=B.stepN===0?(420+(B.bSeed||0)):150;if(B.stepN>=TRR_AISTEPS.length||B.bT<wait)return;if(trrFBTanks(B)<1)return;B.bT=0;
+ const gx=B.gx,gy=B.gy,s=TRR_AISTEPS[B.stepN];
+ if(s[0]==='tc'){B.camp=true;trrPlace('tc',gx,gy,null,0,true,B);svSay('📻 RADIO: THE '+B.name+' ARE SETTING UP A CAMP',3.5);}
+ else if(s[0]==='box')trrPlace('box',gx,gy+1,null,0,true,B);
+ else if(s[0]==='bunker')trrPlacePrefab('bunker',gx,gy,true,B);
+ else if(s[0]==='garage')trrPlacePrefab('garage',gx+1,gy,true,B);
+ else if(s[0]==='turret')trrPlace('turret',gx+3,gy+2,null,0,true,B);
+ for(const p of B.bld)if(!TRR_PK[p.k].fixed&&!p.tier){p.tier=1;p.hp=trrPieceHP(p);}B.stepN++;TRR.gridDirty=true;}
+
+// ---------- 7. persistence: wreck/stolen state, new life rules ----------
+TRR_HOOK.snap.push(o=>{const t=SV.tank;o.tank.wreck=!!t.wreck;o.tank.gone=!!t.gone;o.tank.fire=t.fire||0;o.tank.alive=t.alive;
+ o.lost=(SV.rivals||[]).filter(r=>r.stolen&&r.alive&&r.fac).map(r=>({type:r.type,hp:r.hp,parts:r.parts,fac:r.fac,x:r.x,y:r.y,trunk:r.trunk||null})).slice(0,6);
+ o.fbs=(TRR.fbases||[]).map(B=>({fac:B.fac,camp:!!B.camp,stepN:B.stepN|0,bT:B.bT|0}));o.stolenN=TRR.stolenN|0;});
+TRR_HOOK.apply.push(S=>{const t=SV.tank,q=S.tank||{};if(q.gone){t.alive=false;t.gone=true;t.wreck=false;t.hp=0;}else if(q.wreck||q.alive===false){t.alive=false;t.wreck=true;t.fire=q.fire||0;t.hp=0;}else{t.alive=true;t.wreck=false;t.gone=false;}
+ TRR.lostSave=S.lost||[];TRR.fbSave=S.fbs||[];TRR.stolenN=S.stolenN|0;});
+TRR_HOOK.start.push(loaded=>{const t=SV.tank;if(!loaded){t.wreck=false;t.gone=false;t.fire=0;}TRR.fixJob=null;TRR.unatt=0;TRR.shelterAuto=!t.alive;TRR.shelterNight=false;
+ // restore stolen tanks as thieves' rivals again, and base progress for AI crews
+ if(loaded&&TRR.lostSave)for(const L of TRR.lostSave){const B=trrFBase(L.fac);const r=svMkRival(L.x,L.y);const T=TYPES[L.type];if(!T)continue;Object.assign(r,{T,type:L.type,r:T.r*SV_TS*TRR_TK,maxHp:T.hp,hp:L.hp,parts:L.parts,fac:L.fac,fB:B||null,fcol:(TRR_FAC[L.fac]||{}).tank||null,name:(TRR_FAC[L.fac]||{n:'RIVAL'}).n,mission:'patrol',gas:80,crewN:3,stolen:1,trunk:L.trunk});r.reloadMax=T.reload;r.id=SV.rivals.length;SV.rivals.push(r);}
+ if(loaded)for(const B of TRR.fbases||[]){const f=(TRR.fbSave||[]).find(q=>q.fac===B.fac);if(f){B.camp=f.camp;B.stepN=f.stepN;B.bT=f.bT;}else{B.camp=B.bld.some(p=>p.k==='tc');B.stepN=B.camp?TRR_AISTEPS.length:0;B.bT=0;}}});
+// whole crew dead: a fresh crew wakes up at what is left of home (the tank or its wreck); no new tank is ever handed out
+function trrLifeReset(S){const t=SV.tank;for(const k of TRR_RK)S.inv[k]=0;S.inv.gas=Math.max(S.inv.gas||0,25);S.inv.ammo=Math.max(S.inv.ammo||0,8);
+ const gone=!!t.gone;let x=t.x,y=t.y;
+ if(gone||!S.tank){S.tank={type:'junker',x,y,body:-Math.PI/2,hp:0,parts:{tracks:15,engine:10,turret:40,gun:20,armor:30,fuel:30,rack:40},alive:false,wreck:true,gone:false,fire:0};}
+ else if(S.tank.alive===false)S.tank.fire=0;
+ const up=S.tank.alive!==false;S.crew=S.crew.map(c=>Object.assign(c,{dead:false,hp:Math.max(40,Math.min(c.hp||0,70)),inTank:up,hunger:Math.max(60,c.hunger||0),thirst:Math.max(60,c.thirst||0),x:x+rr(-30,30),y:y+rr(30,60)}));
+ return S;}
+{const _r=trrRespawn;trrRespawn=function(){if(TRR.cfg.br)return _r();const S=trrLifeReset(trrSnap());let type=S.tank.type;$('trrDeath').classList.remove('show');TRR.on=true;trrBoot(TYPES[type]?type:'junker',S);
+ svSay(S.tank.alive===false?'A NEW CREW FOUND YOUR WRECK. FIX IT UP (🔧 GARAGE) OR STEAL A TANK. EVERYTHING YOU CARRIED IS GONE.':'YOUR NEW CREW CAME BACK TO THE TANK. EVERYTHING YOU CARRIED IS GONE.',6);trrSave(true);};}
+trrSaveDeadAsRespawn=function(){try{if(TRR.cfg.br)return;const S=trrLifeReset(trrSnap());localStorage.setItem(trrSlotKey(TRR.slot),JSON.stringify(S));}catch(e){}};
+{const _b=trrPanelExtraBind;trrPanelExtraBind=function(bd,each){_b(bd,each);trrWreckBind(bd,each);};}
+// back to the arcade from TRR's own menu (only inside the arcade app)
+{const _m=trrMenuShow;trrMenuShow=function(){_m();const B=$('trrMenuBox');if(B&&!$('trrArcBtn')){const ab=SETUI.arcadeButton('trrBtn alt','◄ Back to Arcade');if(ab){ab.id='trrArcBtn';B.appendChild(ab);}}};}
+// timed crew actions (loot, mine, chop, steal, douse) need their clock: TRR replaced the rivals hook that used to run it
+TRR_HOOK.tick.push(dt=>{if(SV.acts&&SV.acts.length)svActTick(dt);});
+{const _f=trrFullRepair;trrFullRepair=function(){if(SV.tank.wreck||SV.tank.gone){svSay('A WRECK HAS TO BE REPAIRED PART BY PART (SEE THE LIST ABOVE)',3.5);return false;}return _f();};}
+
+
+// ---- trr-94-night.js ----
+// ===================== TRR 2.5.0 Fallow steals: day / dusk / night / dawn pressure cycle, night waves, shelter flood fill, traps that wear out, generator, crate one-liners, context buttons =====================
+TRR_FAC.raider={n:'NIGHT RAIDERS',uni:'#5a3a6a',helm:'#2a1a34',tank:{base:'#3a2f4a',lite:'#6a5a8a',dark:'#1a1424'}};
+TRR_NPC.sapper={hp:34,spd:44,rng:0,dmg:[0,0],rel:9,see:420,human:1,sapper:1};
+TRR_FAC.sappers={n:'SAPPERS',uni:'#8a5a1a',helm:'#3a2a10'};
+// ---------- 1. phases ----------
+function trrPhase(){if(TRR.cfg.br||TRR.rumble)return 'day';const t=SV.tod==null?0.5:SV.tod;if(t>=0.70&&t<0.77)return 'dusk';if(t>=0.77||t<0.215)return 'night';if(t<0.255)return 'dawn';return 'day';}
+function trrPhaseIcon(){return {day:'☀',dusk:'🌇',night:'☾',dawn:'🌅'}[trrPhase()];}
+function trrNightOn(){return TRR.on&&!TRR.cfg.br&&!TRR.rumble&&TRR.cfg.nightWave!=='off';}
+const TRR_WAVEMUL={off:0,light:0.6,normal:1,brutal:1.6};
+function trrAnchor(){const t=SV.tank;if(t.alive)return{x:t.x,y:t.y};const c=SV.crew.find(c=>!c.dead);return c?{x:c.inside?c.inside.x+c.inside.w/2:c.x,y:c.inside?c.inside.y+c.inside.h/2:c.y}:{x:t.x,y:t.y};}
+function trrWaveSpot(dmin,dmax,anchor){const a0=anchor||trrAnchor();for(let k=0;k<60;k++){const a=rnd()*TAU,d=dmin+rnd()*(dmax-dmin),x=a0.x+Math.cos(a)*d,y=a0.y+Math.sin(a)*d;if(x<120||y<120||x>SVW-120||y>SVH-120||!svFree(x,y,10)||svTerr[((y/SVG)|0)*SGX+((x/SVG)|0)]>=2)continue;if(svVisible(x,y)&&k<45)continue;return[x,y];}return null;}
+function trrWaveBudget(){const n=TRR.nightN||1;return (TRR_WAVEMUL[TRR.cfg.nightWave||'normal']||1)*(8+n*3);}
+function trrWave(stage){const n=TRR.nightN||1,B=trrWaveBudget(),share=[0.45,0.4,0.5][stage]||0.4;let bud=B*share;const a=trrAnchor();let msg=[];
+ const march=(e)=>{e.horde=1;e.keep=1;};
+ // zombie horde
+ let zn=Math.min(22,Math.round(bud*1.3));if(zn>0){const s=trrWaveSpot(650,1000);if(s){for(let i=0;i<zn;i++)march(trrMkNpc('zombie','zombie',s[0]+rr(-60,60),s[1]+rr(-60,60)));msg.push(zn+' ZOMBIES');}bud-=zn*0.55;}
+ // wild animals
+ if(n>=2&&bud>=2){const w=Math.min(6,Math.floor(bud/2.2));const s=trrWaveSpot(700,1100);if(s&&w>0){for(let i=0;i<w;i++)march(trrMkNpc('wolf','wild',s[0]+rr(-40,40),s[1]+rr(-40,40)));msg.push(w+' WOLVES');}bud-=w*2;sfx('howl');}
+ if(n>=5&&stage===2&&bud>=4){const s=trrWaveSpot(700,1100);if(s){march(trrMkNpc('bear','wild',s[0],s[1]));msg.push('A BEAR');bud-=6;}}
+ // sappers
+ if(n>=2&&stage>=1){const sn=Math.min(6,1+Math.floor(n/2)+(stage===2?1:0));const s=trrWaveSpot(750,1100);if(s){for(let i=0;i<sn;i++){const e=trrMkNpc('sapper','sappers',s[0]+rr(-40,40),s[1]+rr(-40,40));e.at=true;e.keep=1;e.sapper=1;e.fuse=0;}msg.push(sn+' SAPPERS');}}
+ // hunting AI crews
+ if(n>=3&&stage>=1&&(stage===1||n>=6)){const hn=Math.min(3,1+Math.floor((n-3)/4)+(stage===2&&n>=8?1:0));for(let i=0;i<hn;i++){const s=trrWaveSpot(1100,1500);if(!s)continue;trrMkHunter(s);}if(hn)msg.push(hn+' HUNTER TANK'+(hn>1?'S':''));}
+ if(msg.length){svSay('🌑 NIGHT '+n+': '+msg.join(' + ')+' ARE COMING FOR YOU',6);sfx('alarm');TRR.waveBanner={t:6,txt:'NIGHT '+n+' · WAVE '+(stage+1)+'/3',sub:msg.join(' · ')};}
+ TRR.waveKills0=TRR.kills||0;}
+function trrMkHunter(s){const n=TRR.nightN||1,B={x:s[0],y:s[1]-BT*3-20,fac:'raider',name:'NIGHT RAIDERS',lvl:Math.max(1,Math.min(4,1+Math.floor(n/3))),gx:0,gy:0,bld:[]};const r=trrMkFTank(B,trrFTankType(B));r.x=s[0];r.y=s[1];r.fB=null;r.hunter=1;r.mission='raid';r.raidOn={x:trrAnchor().x,y:trrAnchor().y,fac:'p',hunt:1,name:'YOU'};r.raidT=0;r.raidAll=0;r.state='hunt';r.keepHunt=1;TRR.hunters=TRR.hunters||[];TRR.hunters.push(r);return r;}
+function trrHunterTick(dt){const a=trrAnchor();for(const r of SV.rivals){if(!r.hunter||!r.alive||r.bailed)continue;if(r.raidOn&&r.raidOn.hunt){r.raidOn.x=a.x;r.raidOn.y=a.y;if(r.mission!=='raid'&&trrPhase()!=='day'&&trrPhase()!=='dawn')r.mission='raid';r.raidAll=Math.min(r.raidAll||0,600);r.raidT=Math.min(r.raidT||0,100);}
+  if(trrPhase()==='day'&&r.mission==='raid'){r.mission='patrol';r.raidOn=null;r.hunter=0;r.fac='raider';}}}
+// scheduler
+function trrNightTick(dt){if(!trrNightOn()){TRR.nw=null;return;}const ph=trrPhase(),t=SV.tod;let nw=TRR.nw;if(!nw)nw=TRR.nw={stage:-1,ph:ph,n:TRR.nightN||0};
+ // dusk warning
+ if(ph==='dusk'&&nw.ph!=='dusk'){svSay('🌇 DUSK - GET UNDER COVER! CLOSE YOUR DOORS, PARK THE TANK, REFUEL THE GENERATOR',6);sfx('alarm');TRR.waveBanner={t:6,txt:'DUSK',sub:'Night '+((TRR.nightN||0)+1)+' is coming. Find a closed room.'};}
+ if(ph==='night'&&nw.stage<0){TRR.nightN=(TRR.nightN||0)+1;nw.n=TRR.nightN;nw.stage=0;nw.kills0=SV.kills;nw.hurt=0;trrWave(0);}
+ if(ph==='night'&&nw.stage===0&&(t>=0.9||t<0.215&&t<0.5&&t>=0))if(t>=0.9||t<0.2){nw.stage=1;trrWave(1);}
+ if(ph==='night'&&nw.stage===1&&t<0.12){nw.stage=2;trrWave(2);}
+ if(ph==='dawn'&&nw.stage>=0){const alive=SV.crew.some(c=>!c.dead);nw.stage=-1;if(alive){TRR.nightsSurvived=(TRR.nightsSurvived|0)+1;trrDawnReward();}
+  for(const h of SV.map.houses)h.breached=false;for(const e of SV.inf)if(e.horde&&e.hp>0&&e.kind==='zombie'&&rnd()<0.6){e.hp=0;e.deadT=0.5;}for(const r of SV.rivals)if(r.hunter&&r.alive){r.hunter=0;r.mission='patrol';r.raidOn=null;}}
+ nw.ph=ph;if(TRR.waveBanner)TRR.waveBanner.t-=dt;}
+function trrDawnReward(){const n=TRR.nightN||1,a=trrAnchor();const g={metal:3+n,gas:3+Math.floor(n/2),chem:n>=3?2:0,ammo:2+Math.floor(n/2)};if(n>=2)g.cloth=2;
+ for(let i=0;i<2;i++){const x=a.x+rr(-90,90),y=a.y+rr(70,150),k=((x/400)|0)+','+((y/400)|0);(SV.map.XB[k]=SV.map.XB[k]||[]).push({x,y,kind:'crate',mil:n>=4,xid:'n'+(TRR.dropN=(TRR.dropN||0)+1),ang:0});}
+ TRR.waveBanner={t:7,txt:'SURVIVED NIGHT '+n,sub:'Dawn crates dropped near you. Collect them.'};svSay('🌅 YOU SURVIVED NIGHT '+n+'! DAWN CRATES LANDED NEAR YOU',6);sfx('select');if(typeof trrProgNight==='function')trrProgNight(n);}
+TRR_HOOK.tick.push(trrNightTick);TRR_HOOK.tick.push(trrHunterTick);
+TRR_HOOK.start.push(loaded=>{TRR.nw=null;TRR.waveBanner=null;if(!loaded){TRR.nightN=0;TRR.nightsSurvived=0;}});
+TRR_HOOK.snap.push(o=>{o.nightN=TRR.nightN|0;o.nightsSurvived=TRR.nightsSurvived|0;});TRR_HOOK.apply.push(S=>{TRR.nightN=S.nightN|0;TRR.nightsSurvived=S.nightsSurvived|0;});
+// ---------- 2. night creatures: hordes march on you, sappers go for walls/doors/houses ----------
+{const _ns=trrNpcStep;trrNpcStep=function(e,dt){if(!TRR.on||e.hp<=0)return _ns(e,dt);
+  if(e.sapper)return trrSapperStep(e,dt);
+  if(e.horde&&!(e.tgt&&trrAlive(e.tgt))){e.reload-=dt;e.flash=Math.max(0,(e.flash||0)-dt);e.tT-=dt;if(e.tT<=0){e.tT=0.45+rnd()*0.3;e.tgt=trrFindTarget(e);}
+   if(!(e.tgt&&trrAlive(e.tgt))){const a=trrAnchor();if(!e.path&&(e.pT=(e.pT||0)-dt)<=0){e.pT=3;e.path=svPath(e.x,e.y,a.x,a.y);}const sp=e.K.spd*(e.kind==='zombie'?1.35:1);trrFollow(e,a.x,a.y,sp,dt);
+    if(e.kind==='zombie'&&rnd()<dt*0.12)sfx('groan',e.x,e.y,0.22);
+    // chew on player walls that stand between the horde and the crew
+    const p=trrNearPiece(e.x,e.y,'p',46);if(p&&p.k!=='found'&&p.k!=='roof'&&(e.chewT=(e.chewT||0)-dt)<=0){e.chewT=0.8;trrPieceHurt(p,e.kind==='bear'?60:e.kind==='wolf'?10:14,e);}return;}}
+  return _ns(e,dt);};}
+function trrSapperTarget(e){let best=null,bd=1900;const a=trrAnchor();
+ // sheltered crew in a house? blow the door
+ for(const c of SV.crew){if(c.dead||!c.inside)continue;const h=c.inside;if(h.breached)continue;const d=Math.hypot(h.door.x-e.x,h.door.y-e.y);if(d<bd){bd=d;best={kind:'house',h,x:h.door.x,y:h.door.y};}}
+ for(const p of TRR.bld){if(p.hp<=0||!(p.k==='wall'||p.k==='door'||p.k==='gdoor'))continue;const R=trrPieceRect(p),cx=R[0]+R[2]/2,cy=R[1]+R[3]/2;if(Math.hypot(cx-a.x,cy-a.y)>700)continue;const d=Math.hypot(cx-e.x,cy-e.y);if(d<bd-200){bd=d+200;best={kind:'piece',p,x:cx,y:cy};}}
+ if(!best){const t=SV.tank;if(t.alive){best={kind:'tank',x:t.x,y:t.y};}else{const c=SV.crew.find(c=>!c.dead&&!c.inside);if(c)best={kind:'crew',x:c.x,y:c.y};}}
+ return best;}
+function trrSapperStep(e,dt){e.flash=Math.max(0,(e.flash||0)-dt);e.leg+=dt*6;
+ if(e.fuse>0){e.fuse-=dt;e.flash=(Math.floor(e.fuse*8)%2)?0.1:0;if(rnd()<dt*14)SV.fx.push({x:e.x,y:e.y-8,vx:rr(-10,10),vy:-24,t:0.3,m:0.3,col:'#ffd040',size:2});if(e.fuse<=0)trrSapperBlow(e);return;}
+ e.tT-=dt;if(e.tT<=0||!e.sTgt){e.tT=1.0;e.sTgt=trrSapperTarget(e);}const T=e.sTgt;if(!T){return;}
+ // run from rifle fire? no - they are fast and crazy: they just run in
+ const d=Math.hypot(T.x-e.x,T.y-e.y);if(d>(T.kind==='tank'?SV.tank.r+10:34)){if(!e.path&&(e.pT=(e.pT||0)-dt)<=0){e.pT=2.5;e.path=svPath(e.x,e.y,T.x,T.y);}trrFollow(e,T.x,T.y,e.K.spd,dt);e.ang=Math.atan2(T.y-e.y,T.x-e.x);}
+ else{e.fuse=2.2;e.path=null;sfx('blip',e.x,e.y,0.6);svSay('💣 A SAPPER IS PLANTING A CHARGE!',2.5);}}
+function trrSapperBlow(e){const T=e.sTgt||{},x=e.x,y=e.y;e.hp=0;e.deadT=0.2;svFx(x,y,34,'#ffb02e',170,0.9,5);sfx('boom',x,y,0.9);trauma=Math.min(1,trauma+0.45);
+ trrBlast(x,y,105,950,e);if(T.kind==='house'&&T.h){T.h.breached=true;svSay('🏚 THE DOOR WAS BLOWN OPEN!',3.5);for(const c of SV.crew)if(c.inside===T.h){c.x=T.h.door.x+rr(-10,10);c.y=T.h.door.y+rr(8,22);c.inside=null;c.nsU=SV.t+30;svCrewHurt(c,30);}}
+ for(const c of SV.crew)if(!c.dead&&!c.inTank&&!c.inside&&Math.hypot(c.x-x,c.y-y)<85)svCrewHurt(c,40);const t=SV.tank;if(t.alive&&Math.hypot(t.x-x,t.y-y)<t.r+60)svHurtTank(t.maxHp*0.08,0.5,e);}
+// ---------- 3. shelter = enclosed room (flood fill over the foundation grid); pre-built houses count unless breached ----------
+function trrRooms(){const key=(TRR.bld.length)+':'+(TRR.bld.reduce((a,p)=>a+(p.hp>0?1:0)+(p.open?7:0),0));if(TRR._roomKey===key&&TRR._rooms&&performance.now()-(TRR._roomT||0)<400)return TRR._rooms;
+ const F=new Map(),E=new Map();for(const p of TRR.bld){if(p.hp<=0)continue;if(p.k==='found')F.set(p.gx+','+p.gy,p);else if(p.k==='wall'||p.k==='door'||p.k==='gdoor')E.set(p.side+p.gx+','+p.gy,p);}
+ const t=SV.tank,tankBlocks=p=>{if(!t.alive)return false;const R=trrPieceRect(p);return Math.hypot(R[0]+R[2]/2-t.x,R[1]+R[3]/2-t.y)<t.r+70;};
+ const blocked=(ax,ay,bx,by)=>{let p;if(bx===ax)p=by<ay?E.get('n'+ax+','+ay):E.get('n'+bx+','+by);else p=bx<ax?E.get('w'+ax+','+ay):E.get('w'+bx+','+by);if(!p)return false;if(p.k==='wall')return true;return !p.open||(p.k==='gdoor'&&tankBlocks(p));};
+ const seen=new Set(),rooms=[],tileRoom=new Map();
+ for(const [k,p0] of F){if(seen.has(k))continue;const room={tiles:[],leak:false};const st=[[p0.gx,p0.gy]];seen.add(k);
+  while(st.length){const [x,y]=st.pop();room.tiles.push([x,y]);tileRoom.set(x+','+y,room);for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(blocked(x,y,nx,ny))continue;const nk=nx+','+ny;if(!F.has(nk)){room.leak=true;continue;}if(!seen.has(nk)){seen.add(nk);st.push([nx,ny]);}}}
+  rooms.push(room);}
+ TRR._rooms={rooms,tileRoom};TRR._roomKey=key;TRR._roomT=performance.now();return TRR._rooms;}
+function trrSheltered(c){if(c.dead)return false;if(c.inTank)return !!TRR.cfg&&false;if(c.inside)return !c.inside.breached;const R=trrRooms(),room=R.tileRoom.get(Math.floor(c.x/BT)+','+Math.floor(c.y/BT));return !!room&&!room.leak;}
+function trrShelterTick(dt){if(!TRR.on)return;for(const c of SV.crew){const s=trrSheltered(c);c.safe=s;if(s&&!c.dead){const n=trrPhase()==='night'||trrPhase()==='dusk';if(c.hp<100&&n)c.hp=Math.min(100,c.hp+dt*1.1);c.hunger=Math.min(100,(c.hunger||0)+dt*0.012);c.thirst=Math.min(100,(c.thirst||0)+dt*0.012);}}}
+TRR_HOOK.tick.push(trrShelterTick);
+// room overlay (iso): green SAFE / red OPEN while you stand in it, and at dusk/night
+{const _x=svIsoExtra;svIsoExtra=function(L,hs,lowG){_x(L,hs,lowG);if(!TRR.on||!TRR.bld||!TRR.bld.length)return;const ph=trrPhase();if(ph==='day'&&!TRR.bmode&&!TRR.showRooms)return;const R=trrRooms();const mine=new Set();for(const c of SV.crew){if(c.dead||c.inside)continue;const r=R.tileRoom.get(Math.floor(c.x/BT)+','+Math.floor(c.y/BT));if(r)mine.add(r);}const t=SV.tank;if(t.alive){const r=R.tileRoom.get(Math.floor(t.x/BT)+','+Math.floor(t.y/BT));if(r)mine.add(r);}
+  for(const r of (ph==='day'?mine:R.rooms)){if(!r.tiles.length||!isoVis(r.tiles[0][0]*BT,r.tiles[0][1]*BT,500))continue;L.push(isoE(1e8+1,trrDrawRoom,r));}};}
+function trrDrawRoom(r){const ok=!r.leak;isoPlane(0);ctx.fillStyle=ok?'rgba(80,220,120,0.13)':'rgba(255,90,70,0.10)';ctx.strokeStyle=ok?'rgba(120,255,160,0.55)':'rgba(255,110,90,0.5)';ctx.lineWidth=3;for(const [x,y] of r.tiles){ctx.fillRect(x*BT+4,y*BT+4,BT-8,BT-8);ctx.strokeRect(x*BT+4,y*BT+4,BT-8,BT-8);}
+ isoScreen();const [x,y]=r.tiles[0],p=isoS(x*BT+BT/2,y*BT+BT/2,30);ctx.font='800 10px system-ui';ctx.textAlign='center';ctx.fillStyle=ok?'#9dffbf':'#ff9a8a';ctx.fillText(ok?'🏠 SAFE':'⚠ OPEN',p[0],p[1]);}
+// ---------- 4. traps wear out: spikes + mines + new caltrops ----------
+TRR_PK.caltrop={n:'Caltrops',d:'Shreds tracks and slows anyone crossing. Wears out after a few hits.',hpm:1,edge:0,mat:[{}],fixed:1,hp:80,item:'caltrop'};
+TRR_REC.push({id:'caltrop',n:'Caltrops x3',d:'Sharp scrap that flattens tracks and slows people. Wears out.',t:1,c:{metal:6},s:8,item:['caltrop',3],ic:'spike'});
+const TRR_TRAPDUR={spike:36,mine:100,caltrop:8};
+function trrTrapWear(p,n){if(p.dur==null)p.dur=TRR_TRAPDUR[p.k];p.dur-=n;if(p.dur<=0&&p.hp>0){p.hp=0;const R=trrPieceRect(p);svFx(R[0]+60,R[1]+60,6,'#8a7a6a',50,0.5,2);trrCleanDead();}}
+TRR_HOOK.tick.push(dt=>{TRR.trapT=(TRR.trapT||0)-dt;if(TRR.trapT>0)return;const d=0.5;TRR.trapT=d;const rain=TRR.wx&&(TRR.wx.k==='rain'||TRR.wx.k==='storm');
+ for(const p of TRR.bld)if(p.hp>0&&p.k==='mine'||p.hp>0&&p.k==='spike'){if(p.dur==null)p.dur=TRR_TRAPDUR[p.k];p.dur-=d*(rain?0.12:0.04);if(p.dur<=0){p.hp=0;trrCleanDead();}}
+ for(const p of TRR.bld){if(p.hp<=0||p.k!=='caltrop')continue;const R=trrPieceRect(p),x=R[0]+60,y=R[1]+60;if(Math.abs(x-SV.tank.x)+Math.abs(y-SV.tank.y)>2400)continue;let hit=0;
+  for(const e of SV.inf){if(e.hp<=0||Math.abs(e.x-x)>46||Math.abs(e.y-y)>46)continue;if(e.fac==='player')continue;e.slowT=2.5;if(rnd()<d*1.2){trrNpcHurt(e,6,{fac:'player'});hit++;}}
+  for(const r of SV.rivals){if(!r.alive||Math.abs(r.x-x)>50||Math.abs(r.y-y)>50)continue;if(!r.cal||SV.t-r.cal>3){r.cal=SV.t;r.parts.tracks=Math.max(0,r.parts.tracks-30);hit+=2;svFloat(r.x,r.y-18,'FLAT TRACKS','#ffb02e');sfx('crash',r.x,r.y,0.4);}}
+  if(p.own!=='p'){}if(hit)trrTrapWear(p,hit);}});
+// slowed infantry
+{const _mv=trrMoveTo;trrMoveTo=function(e,x,y,spd,dt){if(e.slowT>0){e.slowT-=dt;spd*=0.4;}return _mv(e,x,y,spd,dt);};}
+// ---------- 5. overnight scrap generator ----------
+function trrGenHour(){return Math.max(8,svDayLen()/24);}
+TRR_HOOK.tick.push(dt=>{const night=trrPhase()==='night'||trrPhase()==='dusk';for(const p of TRR.bld){if(p.k!=='gen'||p.hp<=0)continue;p.fuel=p.fuel||0;p.out=p.out||{metal:0,gas:0};p.run=0;
+  if(night&&p.fuel>=2){p.run=1;p.acc=(p.acc||0)+dt;const R=trrPieceRect(p),x=R[0]+60,y=R[1]+60;if(p.acc>=trrGenHour()){p.acc=0;p.fuel-=2;p.out.metal+=4;p.out.gas+=1;if(isoVis(x,y,300))svFloat(x,y-30,'+4 SCRAP','#ffd54a');}
+   p.noiseT=(p.noiseT||0)-dt;if(p.noiseT<=0){p.noiseT=4;SV.noise={x,y,t:SV.t,r:520};}if(rnd()<dt*5)SV.fx.push({x:x+rr(-6,6),y:y-6,vx:rr(-3,3),vy:-16,t:1.2,m:1.2,col:'#3a3a3a',size:3,sm:1});}}});
+function trrGenNear(c){for(const p of TRR.bld){if(p.k!=='gen'||p.hp<=0)continue;const R=trrPieceRect(p);if(Math.hypot(R[0]+60-c.x,R[1]+60-c.y)<90)return p;}return null;}
+function trrGenUse(c,p){let did=false;p.out=p.out||{metal:0,gas:0};if(p.out.metal>0||p.out.gas>0){trrGive({metal:p.out.metal,gas:p.out.gas},c.x,c.y-12);svSay('⚙ COLLECTED '+p.out.metal+' SCRAP + '+p.out.gas+' FUEL FROM THE GENERATOR',3);p.out={metal:0,gas:0};did=true;}
+ const room=Math.max(0,20-(p.fuel||0));if(room>=4){let have=Math.floor(SV.gas>30?SV.gas-30:0);if(trrAtBase())have+=Math.floor(TRR.stash.gas||0);const n=Math.min(room,have,10);if(n>0){let m=n;const f=Math.min(m,Math.max(0,Math.floor(SV.gas-30)));SV.gas-=f;m-=f;if(m>0)TRR.stash.gas-=m;p.fuel=(p.fuel||0)+n;svSay('⛽ FUELLED THE GENERATOR (+'+n+')',2.5);did=true;}else if(!did)svSay('NO SPARE FUEL (KEEP 30 IN THE TANK)',3);}
+ else if(!did)svSay('GENERATOR IS FULL',2);sfx('pick');return did;}
+// ---------- 6. crate searching with one-liners ----------
+const TRR_LINES={crate:['Somebody left in a hurry.','Smells like old gun oil.','A sealed lid. Sealed for a reason.','The label says FRAGILE. It lied.','Nails, bolts, and one very sad sock.','Whoever packed this knew what they were doing.','Dust, dust, and then a surprise.','Crowbar not required. Luck was.','This crate has been waiting for you.','Stamped property of nobody now.','Under the straw: something useful.','Heavier than it looks.','Someone already looked here. Not hard enough.','Mil-spec packing. Fancy.','The padlock was already rusted off.'],
+ mil:['Army surplus. Finders keepers.','Stamped TOP SECRET. Mostly empty cans.','Military grade and slightly damp.','They packed this to last the war.','Standard issue, nonstandard luck.','Somebody salvaged this and never came back.'],
+ barrel:['Rusty barrel. Rusty rewards.','Sloshing around in there.','Smells like diesel and regret.','Scrap metal soup.','One kick and the lid popped.','Barrel was half full of bolts.'],
+ oil:['Oil drum! Hold your breath.','Black gold, barely.','That is a lot of fuel in a small can.','Do not light a match near this.'],
+ night:['Searching in the dark. Brave.','Something moved nearby. Keep looking.','Quiet. Too quiet.','Fast hands, nervous heart.']};
+{const _o=trrOpenX;trrOpenX=function(o,by){_o(o,by);const night=trrPhase()==='night'&&rnd()<0.35,pool=night?TRR_LINES.night:o.kind==='crate'?(o.mil?TRR_LINES.mil:TRR_LINES.crate):o.kind==='oil'?TRR_LINES.oil:TRR_LINES.barrel;
+  const L=pool[(rnd()*pool.length)|0];TRR.crateLine={t:3.2,txt:L};svSay('“'+L+'”',3);TRR.found=(TRR.found|0)+1;};}
+// ---------- 7. context buttons: BUILD / USE / STRIKE live on the crew order bar ----------
+function trrCtxUse(c){ // nearest thing to use, in priority order
+ const g=trrGenNear(c);if(g)return{k:'gen',label:'GENERATOR',p:g};
+ const x=trrNearX(c.x,c.y,36);if(x)return{k:'x',label:x.kind==='crate'?'CRATE':'BARREL',o:x};
+ const tk=trrTakeCand(c);if(tk)return{k:'take',label:'TAKE TANK'};
+ const t=SV.tank;if(t.wreck&&!t.alive&&Math.hypot(t.x-c.x,t.y-c.y)<t.r+90)return{k:'wreck',label:t.fire>0?'DOUSE':'FIX WRECK'};
+ if(t.alive&&Math.hypot(t.x-c.x,t.y-c.y)<t.r+30)return{k:'enter',label:'GET IN'};
+ if(trrNearWater(c.x,c.y,60)&&c.thirst<95)return{k:'drink',label:'DRINK'};
+ let h=null,hd=34;for(const o of SV.map.houses){const d=Math.hypot(o.door.x-c.x,o.door.y-c.y);if(d<hd){hd=d;h=o;}}if(h&&!h.breached)return{k:'house',label:h.empty?'ENTER':'SEARCH',h};
+ for(const p of TRR.bld){if(p.hp<=0)continue;if(p.k==='bench'||p.k==='box'||p.k==='tc'||p.k==='bed'){const R=trrPieceRect(p);if(Math.hypot(R[0]+60-c.x,R[1]+60-c.y)<80)return{k:'piece',label:p.k==='bench'?'CRAFT':p.k==='box'?'STASH':p.k==='bed'?'REST':'BASE',p};}}
+ return null;}
+function trrCtxStrike(c){let best=null,bd=230;for(const e of SV.inf){if(e.hp<=0||e.asleep||!e.fac||e.fac==='player'||e.kind==='deer')continue;const d=Math.hypot(e.x-c.x,e.y-c.y);if(d<bd){bd=d;best=e;}}if(best)return{k:'foe',label:'ATTACK',e:best};
+ const tr=trrNearTree(c.x,c.y,60);if(tr)return{k:'chop',label:'CHOP',o:tr};const rk=trrNearRock(c.x,c.y,70);if(rk)return{k:'mine',label:'MINE',o:rk};
+ const d=trrNearX(c.x,c.y,60);if(d&&d.kind!=='crate')return{k:'smash',label:'SMASH',o:d};return null;}
+function trrCtxBuild(c){let best=null,bd=130;for(const p of TRR.bld){if(p.hp<=0)continue;const R=trrPieceRect(p),d=Math.hypot(R[0]+R[2]/2-c.x,R[1]+R[3]/2-c.y);if(d<bd&&p.hp<trrPieceHP(p)*0.95&&!TRR_PK[p.k].fixed){bd=d;best=p;}}if(best)return{k:'repair',label:'REPAIR',p:best};return{k:'menu',label:'BUILD'};}
+function trrCtxDo(c,kind){if(c.inTank){svSay('GET A CREWMAN OUT OF THE TANK FIRST',2.5);return;}
+ if(kind==='U'){const u=trrCtxUse(c);if(!u){svSay('NOTHING TO USE HERE',2);return;}
+  if(u.k==='gen')trrGenUse(c,u.p);else if(u.k==='x'){svStartAct(c,'loot',1.6,u.o,()=>trrOpenX(u.o,'crew'));svSay(c.name+': SEARCHING...',1.6);}
+  else if(u.k==='take')trrTakeStart(c);else if(u.k==='wreck'){if(SV.tank.fire>0)trrDouse(c);else trrPanelOpen('garage');}
+  else if(u.k==='enter'){c.inTank=true;c.task='idle';c.path=null;svFloat(SV.tank.x,SV.tank.y-16,SV_RS[c.role]+' IN','#9dffbf');sfx('select');}
+  else if(u.k==='drink')trrDrink(c);else if(u.k==='house'){if(u.h.empty){c.inside=u.h;c.x=u.h.x+u.h.w/2;c.y=u.h.y+u.h.h/2;c.shelterIn=SV.t;svSay(c.name+' WENT INSIDE',2);}else svCommand(c,'scavenge',u.h);}
+  else if(u.k==='piece'){trrPanelOpen(u.p.k==='bench'?'craft':u.p.k==='box'?'base':u.p.k==='tc'?'base':'base');}}
+ else if(kind==='S'){const s=trrCtxStrike(c);if(!s){svSay('NOTHING TO STRIKE',2);return;}
+  if(s.k==='foe'){c.task='hunt';c.prey=s.e;c.path=null;svSay(c.name+': ATTACKING',2);}else if(s.k==='chop'){trrGatherStart(c,'wood');}else if(s.k==='mine'){trrGatherStart(c,'stone');}else if(s.k==='smash'){svStartAct(c,'loot',1.4,s.o,()=>trrOpenX(s.o,'crew'));}}
+ else{const b=trrCtxBuild(c);if(b.k==='repair'){const ok=trrRepair(b.p);if(ok===false)svSay('CANNOT REPAIR THAT NOW',2);}else trrPanelOpen('build');}}
+{const _re=svRingExtra;svRingExtra=function(c,list){_re(c,list);if(!TRR.on||!c.role||TRR.rumble)return;const i=list.findIndex(b=>b[0]==='trr:close'),add=[['trr:ctxB','BUILD','🔨'],['trr:ctxU','USE','🖐'],['trr:ctxS','STRIKE','⚔']];list.splice(i<0?list.length:i,0,...add);const k=list.findIndex(b=>b[0]==='build');if(k>=0)list.splice(k,1);};}
+{const _cm=svCommand;svCommand=function(c,cmd,arg){if(typeof cmd==='string'&&cmd.startsWith('trr:ctx')){trrCtxDo(c,cmd.slice(7));return false;}return _cm(c,cmd,arg);};}
+function trrCtxAvail(c,k){if(!c||c.inTank)return false;if(k==='U')return !!trrCtxUse(c);if(k==='S')return !!trrCtxStrike(c);const b=trrCtxBuild(c);return b.k==='repair'||true;}
+// HUD: phase chip + wave banner under the top strip
+TRR_HOOK.hud.push(()=>{if(!TRR.on||TRR.cfg.br||TRR.rumble)return;const g=ctxMain;g.save();g.setTransform(DPR,0,0,DPR,0,0);const ph=trrPhase(),y0=trrStripBottom()+4;
+ const B=TRR.waveBanner;if(B&&B.t>0){const a=Math.min(1,B.t/1.2);g.globalAlpha=a;g.font='900 15px '+TRR_UF;g.textAlign='center';const w=Math.max(g.measureText(B.txt).width,g.measureText(B.sub||'').width*0.8)+30;g.fillStyle=ph==='night'?'rgba(40,16,50,0.82)':'rgba(40,30,16,0.82)';trrRR(g,W/2-w/2,y0+34,w,B.sub?44:28,10);g.fill();g.fillStyle=ph==='night'?'#ff9ad0':'#ffd54a';g.fillText(B.txt,W/2,y0+54);if(B.sub){g.font='700 10px '+TRR_UF;g.fillStyle='#e8d8ff';g.fillText(B.sub,W/2,y0+70);}g.globalAlpha=1;}
+ if(ph!=='day'){const txt={dusk:'🌇 DUSK · FIND COVER',night:'☾ NIGHT '+(TRR.nightN||1)+(TRR.nw&&TRR.nw.stage>=0?' · WAVE '+(TRR.nw.stage+1)+'/3':''),dawn:'🌅 DAWN'}[ph];g.font='800 10px '+TRR_UF;const w=g.measureText(txt).width+16;g.fillStyle='rgba(20,14,40,0.75)';trrRR(g,W-safe.r-8-34-8-w,y0,w,18,8);g.fill();g.fillStyle=ph==='night'?'#c8b8ff':'#ffd8a0';g.textAlign='center';g.fillText(txt,W-safe.r-8-34-8-w/2,y0+12);
+  const R=SV.crew.filter(c=>!c.dead);const safeN=R.filter(c=>c.safe||c.inTank&&0).length;if(ph!=='dawn'){g.font='700 9px '+TRR_UF;g.fillStyle=safeN===R.length&&R.length?'#9dffbf':'#ff9a8a';g.fillText(safeN+'/'+R.length+' CREW SAFE',W-safe.r-8-34-8-w/2,y0+30);}}
+ g.restore();});
+
+// the Night waves setting (Settings > Tank Rumble & Night) fills new saves unless Custom Game set one
+{const _f=trrFresh;trrFresh=function(slot,cfg){cfg=Object.assign({},cfg||{});if(cfg.nightWave==null&&settings.trrWave&&settings.trrWave!=='normal')cfg.nightWave=settings.trrWave;return _f(slot,cfg);};}
+
+
+// ---- trr-95-gear.js ----
+// ===================== TRR 2.5: shared gear systems (ammo types, turbo, patch kits, medkits, crew perks, skins, tank unlocks, progress) =====================
+// Used by BOTH Survival and Tank Rumble.
+const TRR_PROGK='tankRoyalRumble.prog';
+const TRR_PROG0={rounds:0,wins:0,kills:0,best:99,top5:0,top10:0,nights:0,tank:'medium',perks:{cpt:'calm',gun:'eagle',mec:'mender',med:'calm'}};
+function trrProg(){if(!TRR._prog){let o={};try{o=JSON.parse(localStorage.getItem(TRR_PROGK)||'{}')||{};}catch(e){}TRR._prog=Object.assign(JSON.parse(JSON.stringify(TRR_PROG0)),o);TRR._prog.perks=Object.assign({},TRR_PROG0.perks,o.perks||{});}return TRR._prog;}
+function trrProgSave(){try{localStorage.setItem(TRR_PROGK,JSON.stringify(trrProg()));}catch(e){}}
+function trrProgNight(){const P=trrProg();P.nights++;trrProgSave();}
+function trrXP(){const P=trrProg();return P.rounds+Math.floor(P.nights/2);}
+// ---- new carried items ----
+TRR_RES.push(['apN','AP SHELLS','🎯'],['smkN','SMOKE SHELLS','☁'],['patch','PATCH KITS','🩹']);TRR_RK.push('apN','smkN','patch');
+TRR_REC.push(
+ {id:'apshell',n:'AP shells x4',d:'Armor-piercing: +30% damage to tanks and they bounce off armor far less. Small blast.',t:1,c:{metal:8,chem:3},s:14,o:{apN:4},ic:'shell'},
+ {id:'smkshell',n:'Smoke shells x3',d:'Fire a smoke cloud that hides you from enemy tanks. No damage.',t:1,c:{cloth:4,chem:2},s:10,o:{smkN:3},ic:'shell'},
+ {id:'patchkit',n:'Armor patch kit',d:'Slap-on plates: restores a third of the tank armor and 25% of every damaged part.',t:1,c:{metal:8,cloth:4},s:12,o:{patch:1},ic:'plate'});
+for(const r of TRR_REC)TRR_RECM[r.id]=r;
+// bigger shell stacks and patch kits turn up in military loot
+{const _l=svLootRoll;svLootRoll=function(kind,big){const g=_l(kind,big);if(!TRR.on)return g;const m=big||kind==='mil'||kind==='military'||kind==='crate';
+  if(rnd()<(m?0.4:0.08))g.apN=(g.apN||0)+2+((rnd()*3)|0);if(rnd()<(m?0.32:0.05))g.smkN=(g.smkN||0)+1+((rnd()*2)|0);if(rnd()<(m?0.3:0.07))g.patch=(g.patch||0)+1;return g;};}
+// ---- skins (paint): unlocked by rounds played / wins ----
+Object.assign(TRR_PAINT,{urban:{base:'#6c7078',lite:'#9aa0a8',dark:'#34383e'},tiger:{base:'#c98a2a',lite:'#f0b858',dark:'#3a2208'},ember:{base:'#a8321a',lite:'#e8703a',dark:'#4a1208'},gold:{base:'#d4af37',lite:'#fff0a0',dark:'#7a5c10'},jade:{base:'#2f8a6a',lite:'#62c8a0',dark:'#144a38'}});
+const TRR_SKINREQ={desert:{rounds:1},snow:{rounds:3},black:{rounds:5},urban:{rounds:8},jade:{rounds:12},tiger:{wins:1},ember:{wins:3},gold:{wins:5}};
+function trrSkinOK(k){const r=TRR_SKINREQ[k];if(!r)return true;const P=trrProg();return (!r.rounds||trrXP()>=r.rounds)&&(!r.wins||P.wins>=r.wins);}
+function trrSkinNeed(k){const r=TRR_SKINREQ[k];if(!r)return '';return r.wins?'win '+r.wins+' Rumble round'+(r.wins>1?'s':''):'play '+r.rounds+' rounds / survive nights';}
+function trrPaintKeys(){return Object.keys(TRR_PAINT).filter(trrSkinOK);}
+// ---- tanks you can start a Rumble round in ----
+const TRR_RUMBLE_TANKS=[['light',null],['medium',null],['heavy','Finish top 10 in Rumble once'],['td','Finish top 5 in Rumble once'],['flame','Win a Rumble round'],['artillery','Win 3 Rumble rounds']];
+function trrTankUnlocked(k){const P=trrProg();return k==='light'||k==='medium'||(k==='heavy'&&(P.top10>0||P.wins>0))||(k==='td'&&(P.top5>0||P.wins>0))||(k==='flame'&&P.wins>=1)||(k==='artillery'&&P.wins>=3);}
+// ---- crew perks ----
+const TRR_PERKS={eagle:{n:'Eagle eye',r:'gun',d:'Tighter aim: 15% less shell scatter.',u:0},quick:{n:'Quick hands',r:'gun',d:'Gun reloads 12% faster.',u:3},mender:{n:'Mender',r:'mec',d:'Repairs 40% faster.',u:0},
+ tough:{n:'Tough',r:'any',d:'Takes 25% less damage.',u:4},calm:{n:'Calm',r:'any',d:'Steady nerves: 10% less damage. A calm medic also heals 40% faster.',u:0},sprint:{n:'Sprinter',r:'any',d:'Turbo recharges 25% faster.',u:2}};
+const TRR_ROLEK=['cpt','gun','mec','med'];
+function trrPerkOK(k){return trrXP()>=TRR_PERKS[k].u;}
+function trrHasPerk(k){const P=trrProg().perks;return TRR_ROLEK.some((r,i)=>P[r]===k&&SV.crew&&SV.crew[i]&&!SV.crew[i].dead);}
+function trrPerkOf(i){return trrProg().perks[TRR_ROLEK[i]];}
+function trrPerkCycle(role){const P=trrProg(),list=Object.keys(TRR_PERKS).filter(k=>trrPerkOK(k)&&(TRR_PERKS[k].r==='any'||TRR_PERKS[k].r===role));const i=list.indexOf(P.perks[role]);P.perks[role]=list[(i+1)%list.length];trrProgSave();return P.perks[role];}
+{const _s=scatterHalf;scatterHalf=function(){let v=_s.apply(this,arguments);if(TRR.on){if(trrHasPerk('eagle'))v*=0.85;if(SV.crew&&SV.crew[1]&&SV.crew[1].dead)v*=1.8;}return v;};}
+{const _h=svCrewHurt;svCrewHurt=function(c,d){if(TRR.on&&SV.crew.indexOf(c)>=0&&trrPerkOf(SV.crew.indexOf(c))==='tough')d*=0.75;else if(TRR.on&&SV.crew.indexOf(c)>=0&&trrPerkOf(SV.crew.indexOf(c))==='calm')d*=0.9;return _h(c,d);};}
+// ---- ammo types ----
+const TRR_AM={he:{n:'HE',ic:'💥'},ap:{n:'AP',ic:'🎯'},smoke:{n:'SMK',ic:'☁'}};
+function trrAmmoN(k){return k==='ap'?(SV.apN||0):k==='smoke'?(SV.smkN||0):Math.floor(SV.ammo||0);}
+function trrAmmoCycle(){const T=SV.tank.T;if(T&&(T.flame||T.mg)){svSay('THIS GUN ONLY FIRES ONE KIND OF SHELL',2);return;}const o=['he','ap','smoke'];let i=o.indexOf(SV.shT||'he');for(let k=1;k<=3;k++){const n=o[(i+k)%3];if(n==='he'||trrAmmoN(n)>0){SV.shT=n;break;}}
+ svSay({he:'HE SHELLS: BIG BLAST, LESS PUNCH',ap:'AP SHELLS: PIERCE ARMOR',smoke:'SMOKE SHELLS: HIDE YOURSELF'}[SV.shT||'he'],2.2);sfx('select');}
+{const _f=svFireTank;svFireTank=function(tx,ty){if(!TRR.on)return _f(tx,ty);const T=SV.tank.T;let k=SV.shT||'he';if(T.flame||T.mg)k='he';
+  if(k==='ap'&&!(SV.apN>0)){k=SV.shT='he';svSay('OUT OF AP - BACK TO HE',2);}if(k==='smoke'&&!(SV.smkN>0)){k=SV.shT='he';svSay('OUT OF SMOKE SHELLS',2);}
+  const n0=SV.shells.length,a0=SV.ammo,ok=_f(tx,ty);if(!ok||SV.shells.length<=n0)return ok;
+  const s=SV.shells[SV.shells.length-1];s.kind=k;
+  if(k==='ap'){SV.apN--;SV.ammo=a0;s.dmg=Math.round(s.dmg*1.3);s.splR*=0.45;s.splD*=0.5;s.ap=1;}
+  else if(k==='smoke'){SV.smkN--;SV.ammo=a0;s.dmg=0;s.splR=0;s.splD=0;s.smoke=1;}
+  else if(!T.flame&&!T.mg){s.dmg=Math.round(s.dmg*0.85);s.splR=Math.max(s.splR*1.5,s.splR>0?0:14);s.splD*=1.4;s.he=1;}
+  if(trrHasPerk('quick')){const t=SV.tank;t.reload*=0.88;t.reloadMax=t.reload;}
+  return ok;};}
+{const _h=svShellHitsTank;svShellHitsTank=function(a,b,d){const r=_h(a,b,d);if(r==='rico'&&TRR._apS&&rnd()<0.6)return 'hit';if(r==='hit'&&TRR._heS&&rnd()<0.12)return 'rico';return r;};}
+{const _r=svRivShell;svRivShell=function(s){TRR._apS=!!s.ap;TRR._heS=!!s.he;try{return _r(s);}finally{TRR._apS=TRR._heS=false;}};}
+{const _u=svShellsUpdate;svShellsUpdate=function(dt){const sm=SV.shells.filter(s=>s.smoke);_u(dt);for(const s of sm)if(s.dead){const x=s.lob?s.ex:s.x,y=s.lob?s.ey:s.y;SV.smokes.push({x,y,r:92,t:22,m:22});SV.smokes.push({x:x+rr(-30,30),y:y+rr(-30,30),r:70,t:20,m:20});sfx('boom',x,y,0.25);}};}
+// ---- turbo: 6 s of x1.6 speed, 25 s to recharge ----
+function trrTurbo(){if(!TRR.on)return false;const t=SV.tank;if(!t.alive||t.wreck)return false;if((SV.turboCD||0)>0){svSay('TURBO RECHARGING: '+Math.ceil(SV.turboCD)+'s',1.6);return false;}if(!svCanDrive()){svSay('TURBO NEEDS A DRIVER AND GAS',2);return false;}
+ SV.turboT=6;SV.turboCD=25*(trrHasPerk('sprint')?0.75:1);svSay('🚀 TURBO!',1.6);sfx('big',t.x,t.y,0.3);return true;}
+{const _m=svTankSpeedMul;svTankSpeedMul=function(){let v=_m();if(TRR.on){if(SV.turboT>0)v*=1.6;if(TRR.rumble&&SV.crew[2]&&SV.crew[2].dead)v*=0.8;}return v;};}
+TRR_HOOK.tick.push(dt=>{if(SV.turboT>0){SV.turboT-=dt;if(SV.turboT<=0)SV.turboT=0;const t=SV.tank;if(rnd()<dt*30)SV.fx.push({x:t.x-Math.cos(t.body)*t.r,y:t.y-Math.sin(t.body)*t.r,vx:rr(-8,8),vy:rr(-10,-3),t:0.5,m:0.5,col:'#ffb04a',size:3});}else if(SV.turboCD>0)SV.turboCD=Math.max(0,SV.turboCD-dt);});
+TRR_HOOK.start.push(()=>{SV.turboT=0;SV.turboCD=0;SV.shT='he';});
+// ---- patch kit / medkit ----
+function trrUsePatch(){const t=SV.tank;if(!(SV.patch>0)){svSay('NO PATCH KITS - CRAFT ONE OR FIND A CRATE',2.5);return false;}if(!t.alive||t.wreck){svSay('THE TANK IS WRECKED - USE THE GARAGE',2.5);return false;}
+ if(t.hp>=t.maxHp&&Object.values(t.parts).every(v=>v>=100)){svSay('TANK ARMOR IS ALREADY FINE',2);return false;}
+ SV.patch--;t.hp=Math.min(t.maxHp,t.hp+t.maxHp*0.33);for(const p in t.parts)if(t.parts[p]<100)t.parts[p]=Math.min(100,t.parts[p]+25);if(t.engFire)t.engFire=0;
+ svFloat(t.x,t.y-24,'PATCHED','#8fe3a0');svFx(t.x,t.y,10,'#cfd8dc',70,0.5,2);sfx('pick');return true;}
+function trrUseMed(){if(!(SV.med>0)){svSay('NO MED KITS - CRAFT BANDAGES',2.5);return false;}
+ let w=null;for(const c of SV.crew)if(!c.dead&&c.hp<100&&(!w||c.hp<w.hp))w=c;if(!w){svSay('EVERYONE IS FINE',2);return false;}
+ SV.med--;w.hp=Math.min(100,w.hp+(w.sick?0:55));w.sick=0;svFloat(w.x||SV.tank.x,(w.y||SV.tank.y)-24,'+MED KIT','#8fe3a0');sfx('pick');svSay(w.name+' PATCHED UP',2);return true;}
+function trrBtnTap(id){if(!TRR.on)return false;if(id==='ammo')trrAmmoCycle();else if(id==='turbo')trrTurbo();else if(id==='patch')trrUsePatch();else if(id==='med')trrUseMed();else return false;return id;}
+{const _p=svP3Buttons;svP3Buttons=function(){const L=_p();if(!TRR.on||SV.layout||!L.length)return L;const b0=L[1]||L[0],x=b0.x;let y=b0.y;const r=b0.r,sp=r*2+10;const k=SV.shT||'he',cd=SV.turboCD>0,onT=SV.turboT>0;
+  L.push({id:'ammo',x,y:y-=sp,r,icon:TRR_AM[k].ic,label:TRR_AM[k].n+' '+trrAmmoN(k),on:k!=='he'},{id:'turbo',x,y:y-=sp,r,icon:'🚀',label:onT?'GO!':cd?Math.ceil(SV.turboCD)+'s':'TURBO',on:onT},
+  {id:'patch',x,y:y-=sp,r,icon:'🩹',label:'PATCH '+(SV.patch||0)},{id:'med',x,y:y-=sp,r,icon:'✚',label:'MED '+(SV.med||0)});return L;};}
+// the tap handler used to treat every right-hand button as "smoke"
+// (patched in rep.py: non-lights/smoke buttons go to trrBtnTap)
+
+
+// ---- trr-96-rumble.js ----
+// ===================== TANK RUMBLE (2.5): a round-based tank battle. Crew stay inside; shrinking zone; crates; bots that loot and hunt =====================
+// Reuses the Battle Royale plumbing (cfg.br = no base, no building, rivals have no camps) and adds the rules below.
+const TRR_RZ=[[0,1],[110,1],[290,0.66],[370,0.66],[540,0.38],[610,0.38],[790,0.14],[900,0.09]];   // [seconds, zone radius as a fraction of the start radius]
+const TRR_BOTN=['Rusty','Biscuit','Thunder','Moss','Anvil','Pickle','Comet','Bolt','Grumble','Tiny','Mango','Lobster','Gizmo','Nugget','Cobalt','Ziggy','Pebble','Waffle','Clank','Sprocket'];
+const TRR_RDUR=900;
+function trrRumbleN(){const v=+settings.trrRumbleN;return v===12?12:20;}
+function trrZoneFrac(t){for(let i=1;i<TRR_RZ.length;i++){const a=TRR_RZ[i-1],b=TRR_RZ[i];if(t<=b[0])return a[1]+(b[1]-a[1])*clamp((t-a[0])/(b[0]-a[0]),0,1);}return TRR_RZ[TRR_RZ.length-1][1];}
+function trrRumbleGo(type){const P=trrProg();P.tank=type;trrProgSave();
+ const prev=localStorage.getItem(TRR_LS+'last');trrMenuHide();$('trrPop').classList.remove('show');
+ trrFresh(3,{br:true,rumble:true,rivalsN:0,anyTank:type,nightWave:'off',animals:'off',bandits:'off'});
+ if(prev==null)localStorage.removeItem(TRR_LS+'last');else localStorage.setItem(TRR_LS+'last',prev);}
+// ---- loadout screen ----
+function trrRumbleLoadout(){const P=trrProg(),cur=trrTankUnlocked(P.tank)?P.tank:'medium';P.tank=cur;
+ const skin=TRR.paint&&trrSkinOK(TRR.paint)?TRR.paint:(localStorage.getItem('tankRoyalRumble.skin')||'none'),skins=trrPaintKeys();
+ const tanks=TRR_RUMBLE_TANKS.map(([k,why])=>{const ok=trrTankUnlocked(k),T=TYPES[k];return `<button class="trrBtn${k===cur?'':' alt'}" ${ok?`data-tk="${k}"`:'disabled'} style="flex:1 1 30%;min-width:96px;padding:8px 4px;font-size:12px;margin:0">${ok?'':'🔒 '}${T?T.name:k}${ok?'':`<small style="display:block;font-weight:500;font-size:9px">${why}</small>`}</button>`;}).join('');
+ const perks=TRR_ROLEK.map((r,i)=>{const k=P.perks[r],p=TRR_PERKS[k]||{n:'—',d:''};return `<div class="trrItem"><div class="tx"><b>${['CAPTAIN','GUNNER','MECHANIC','MEDIC'][i]}</b><i>${p.n}: ${p.d}</i></div><button data-pk="${r}">CHANGE</button></div>`;}).join('');
+ const next=Object.keys(TRR_PERKS).filter(k=>!trrPerkOK(k)).map(k=>TRR_PERKS[k].n+' at '+TRR_PERKS[k].u+' rounds').join(' · ');
+ const html=`<p style="margin:2px 0 6px;font-size:12px;opacity:.85">${trrRumbleN()} tanks. 15 minutes. Crew stay inside. Last tank rolling wins.<br>Record: ${P.wins} wins · best place ${P.best>=99?'—':'#'+P.best} · ${P.kills} kills · ${P.rounds} rounds</p>
+ <div class="trrH">YOUR TANK</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tanks}</div>
+ <div class="trrH">SKIN</div><div style="display:flex;flex-wrap:wrap;gap:6px">${skins.map(k=>`<div data-sk="${k}" style="cursor:pointer;width:46px;${skin===k?'outline:2px solid #ffd54a':''}"><small style="font-size:8px">${k.toUpperCase()}</small><b style="display:block;height:12px;border-radius:4px;background:${TRR_PAINT[k]?TRR_PAINT[k].base:'repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)'}"></b></div>`).join('')}</div>
+ <div class="trrH">CREW PERKS</div><div style="max-height:28vh;overflow:auto">${perks}</div>${next?`<p style="font-size:10px;opacity:.6;margin:4px 0">More perks: ${next}</p>`:''}`;
+ trrPopup('TANK RUMBLE',html,[['START ROUND',()=>{localStorage.setItem('tankRoyalRumble.skin',skin);TRR.pendSkin=skin;trrRumbleGo(cur);}],['Back',()=>trrMenuShow()]]);
+ const B=$('trrPopBox');B.querySelectorAll('[data-tk]').forEach(b=>b.onclick=()=>{P.tank=b.dataset.tk;trrProgSave();sfx('blip');trrRumbleLoadout();});
+ B.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{localStorage.setItem('tankRoyalRumble.skin',b.dataset.sk);TRR.paint=b.dataset.sk==='none'?null:b.dataset.sk;sfx('blip');trrRumbleLoadout();});
+ B.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{trrPerkCycle(b.dataset.pk);sfx('blip');trrRumbleLoadout();});}
+{const _m=trrMenuShow;trrMenuShow=function(){_m();const B=$('trrMenuBox'),c=$('trrCustBtn');if(!B||!c||$('trrRumBtn'))return;const b=document.createElement('button');b.className='trrBtn';b.id='trrRumBtn';b.innerHTML='🏆 TANK RUMBLE <span style="opacity:.75;font-weight:600;font-size:11px">· '+trrRumbleN()+' tanks · 15 min</span>';b.onclick=()=>{sfx('select');trrRumbleLoadout();};B.insertBefore(b,c);};}
+// ---- start of a round ----
+function trrRumbleStart(){const t=SV.tank,N=trrRumbleN(),R=N>16?3400:2800,cx=SVW/2+rr(-400,400),cy=SVH/2+rr(-400,400);
+ TRR.rumble=true;TRR.brz={x:cx,y:cy,r:R,r0:R,t:0,dur:TRR_RDUR,alive:N,rumble:1};TRR.rcr=[];TRR.rk={kills:0,start:SV.t,loot:0,log:[]};TRR.ad=null;TRR.adT=150;
+ SV.inf=[];SV.hostiles=[];TRR.bld=[];TRR.gridDirty=true;
+ const slots=[],a0=rnd()*TAU;for(let i=0;i<N;i++){const a=a0+i/N*TAU+rr(-0.12,0.12),d=R*rr(0.72,0.9);let x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;for(let k=0;k<40&&!svFree(x,y,34);k++){const q=rnd()*TAU;x=cx+Math.cos(a)*d+Math.cos(q)*k*14;y=cy+Math.sin(a)*d+Math.sin(q)*k*14;}slots.push([clamp(x,120,SVW-120),clamp(y,120,SVH-120),a]);}
+ t.x=slots[0][0];t.y=slots[0][1];t.body=slots[0][2]+Math.PI;t.turret=t.body;t.path=null;SV.camX=t.x;SV.camY=t.y;
+ for(const c of SV.crew){c.inTank=true;c.dead=false;c.hp=100;c.vac=false;c.kia=false;c.moveT=0;c.x=t.x;c.y=t.y;c.inside=null;c.task='idle';}
+ t.hp=t.maxHp;for(const k in t.parts)t.parts[k]=100;t.alive=true;t.wreck=false;t.fire=0;SV.ammo=Math.min(SV.ammoMax||60,Math.max(SV.ammo||0,Math.round((SV.ammoMax||60)*0.7)));SV.gas=SV.gasMax||100;SV.med=1;SV.patch=1;SV.apN=2;SV.smkN=1;SV.smokeN=2;SV.turboCD=0;
+ const pool=N>=16?['light','medium','medium','heavy','td','flame','light','medium','heavy','junker']:['light','medium','medium','heavy','td','flame','light','medium'];
+ const names=TRR_BOTN.slice().sort(()=>rnd()-0.5);
+ for(let i=1;i<N;i++){const fac='br'+(i-1);TRR_FAC[fac]={n:names[i%names.length].toUpperCase(),uni:'#6a6a6a',tank:{base:'#'+((0x40+((rnd()*0x80)|0)).toString(16).padStart(2,'0'))+((0x40+((rnd()*0x80)|0)).toString(16).padStart(2,'0'))+((0x40+((rnd()*0x80)|0)).toString(16).padStart(2,'0')),lite:'#9a9a9a',dark:'#2c2c2c'}};
+  const B={x:slots[i][0],y:slots[i][1],fac,name:TRR_FAC[fac].n,lvl:1+((rnd()*2)|0)};const r=trrMkFTank(B,pool[(rnd()*pool.length)|0]);r.fB=null;r.mission='br';r.state='patrol';r.agg=rnd();r.x=slots[i][0];r.y=slots[i][1];r.body=slots[i][2]+Math.PI;r.hp=r.maxHp;}
+ for(let i=0;i<Math.round(N*1.25);i++)trrRumbleCrate(false);
+ TRR.rumbleRec=[];trrPaintApply();
+ svSay('🏆 TANK RUMBLE: '+N+' TANKS. STAY IN THE ZONE. LAST TANK WINS.',5);}
+function trrPaintApply(){const k=TRR.pendSkin||localStorage.getItem('tankRoyalRumble.skin')||'none';TRR.paint=k==='none'||!trrSkinOK(k)?null:k;}
+trrBRStart=function(){if(TRR.cfg.rumble)return trrRumbleStart();};   // (the old Battle Royale custom option is gone: Tank Rumble replaces it)
+// ---- crates ----
+const TRR_CR=[['ammo',3,'+AMMO'],['ap',2,'+AP SHELLS'],['smoke',1.5,'+SMOKE SHELLS'],['patch',2,'+PATCH KIT'],['med',2,'+MED KIT'],['repair',1.5,'FIELD REPAIR'],['gas',1.5,'+GAS'],['turbo',1,'TURBO READY']];
+function trrRumbleCrate(big,x,y){const Z=TRR.brz;if(x==null){for(let k=0;k<60;k++){const a=rnd()*TAU,d=Math.sqrt(rnd())*Z.r*0.85;x=Z.x+Math.cos(a)*d;y=Z.y+Math.sin(a)*d;if(svFree(x,y,24)&&Math.hypot(x-SV.tank.x,y-SV.tank.y)>260)break;}}
+ TRR.rcr.push({x,y,big:!!big,t:0,id:(TRR.rcrN=(TRR.rcrN||0)+1)});}
+function trrCrateRoll(){let tot=0;for(const c of TRR_CR)tot+=c[1];let r=rnd()*tot;for(const c of TRR_CR){r-=c[1];if(r<=0)return c;}return TRR_CR[0];}
+function trrCrateGive(k,T){const t=T||SV.tank;switch(k){case 'ammo':SV.ammo=Math.min(SV.ammoMax||60,SV.ammo+12);break;case 'ap':SV.apN=(SV.apN||0)+3;break;case 'smoke':SV.smkN=(SV.smkN||0)+2;break;case 'patch':SV.patch=(SV.patch||0)+1;break;case 'med':SV.med=(SV.med||0)+1;break;
+ case 'repair':t.hp=Math.min(t.maxHp,t.hp+t.maxHp*0.2);for(const p in t.parts)t.parts[p]=Math.min(100,t.parts[p]+20);break;case 'gas':SV.gas=Math.min(SV.gasMax||100,SV.gas+35);break;case 'turbo':SV.turboCD=0;break;}}
+function trrCrateTake(c,by){const idx=TRR.rcr.indexOf(c);if(idx<0)return;TRR.rcr.splice(idx,1);
+ if(by===SV.tank){const n=c.big?3:1,got=[];for(let i=0;i<n;i++){const r=trrCrateRoll();trrCrateGive(r[0]);got.push(r[2]);}TRR.rk.loot++;svFloat(c.x,c.y-30,got.join(' · '),'#ffe38a');svSay('📦 '+got.join(' · '),2.4);sfx('pick');svFx(c.x,c.y,12,'#ffe38a',80,0.6,2);if(typeof TRR_LINES!=='undefined'&&rnd()<0.5)svSay('📦 '+got.join(' · ')+'  —  '+TRR_LINES.crate[(rnd()*TRR_LINES.crate.length)|0],3);}
+ else{by.hp=Math.min(by.maxHp,by.hp+by.maxHp*(c.big?0.35:0.18));by.ammoBoost=SV.t+40;}}
+// airdrops: the old plane animation drops a crate; we convert it into a big Rumble crate
+function trrRumbleAD(){const A=TRR.ad;if(A&&A.ph===2&&A.crate&&!A.conv){A.conv=1;const M=SV.map,k=((A.x/400)|0)+','+((A.y/400)|0);if(M.XB[k])M.XB[k]=M.XB[k].filter(o=>o!==A.crate);trrRumbleCrate(true,A.x,A.y);svSay('📦 BIG AIRDROP LANDED - GO GO GO!',3);}}
+// ---- the round ----
+function trrRumbleTick(dt){const Z=TRR.brz;if(!Z||!TRR.rumble)return;const t=SV.tank,R=TRR.rk;
+ Z.t+=dt;Z.r=Z.r0*trrZoneFrac(Z.t);const over=Z.t>=TRR_RDUR,mul=1+Math.min(2.5,Z.t/TRR_RDUR*2)+(over?3:0);
+ const out=o=>Math.hypot(o.x-Z.x,o.y-Z.y)>Z.r;
+ if(t.alive&&out(t)){svHurtTank(t.maxHp*0.012*mul*dt,0,null);if(!Z.wT||SV.t-Z.wT>3){Z.wT=SV.t;svSay('⚠ OUTSIDE THE ZONE - DRIVE IN!',2);}}
+ let n=t.alive?1:0;const bots=SV.rivals.filter(r=>r.alive&&!r.bailed);
+ for(const r of bots){n++;if(out(r))svRivHurt(r,r.maxHp*0.012*mul*dt,{x:Z.x,y:Z.y,fac:'zone'});}
+ Z.alive=n;
+ // bot brain every 1.2 s: grab crates, hunt, stay in the zone
+ R.bT=(R.bT||0)-dt;if(R.bT<=0){R.bT=1.2;
+  for(const r of bots){if(r.tgt&&r.tgt.alive)continue;const dz=Math.hypot(r.x-Z.x,r.y-Z.y);
+   if(dz>Z.r*0.82){if(!r.zT||SV.t-r.zT>3){r.zT=SV.t;svRivGo(r,Z.x+rr(-Z.r*0.3,Z.r*0.3),Z.y+rr(-Z.r*0.3,Z.r*0.3),1);}continue;}
+   let bc=null,bd=1100;for(const c of TRR.rcr){const d=Math.hypot(c.x-r.x,c.y-r.y);if(d<bd){bd=d;bc=c;}}
+   if(bc&&(r.agg<0.8||bd<500)){if(r.lootC!==bc.id||!r.path||!r.path.length){r.lootC=bc.id;svRivGo(r,bc.x,bc.y,1);}continue;}
+   if(!r.path||!r.path.length||r.pathT<=0||SV.t-(r.hT||0)>7){r.hT=SV.t;r.pathT=5;let q=null,qd=1500*(0.5+r.agg);const cand=[t,...bots];for(const o of cand){if(o===r||!o.alive||o.bailed)continue;const d=Math.hypot(o.x-r.x,o.y-r.y);if(d<qd){qd=d;q=o;}}
+    if(q&&r.agg>0.35)svRivGo(r,q.x+rr(-90,90),q.y+rr(-90,90),1);else{const a=rnd()*TAU,d=rnd()*Z.r*0.6;svRivGo(r,Z.x+Math.cos(a)*d,Z.y+Math.sin(a)*d,1);}}}}
+ // crates taken by whoever drives over them
+ for(const c of TRR.rcr.slice()){c.t+=dt;if(t.alive&&Math.hypot(c.x-t.x,c.y-t.y)<t.r+22){trrCrateTake(c,t);continue;}for(const r of bots)if(Math.hypot(c.x-r.x,c.y-r.y)<r.r+22){trrCrateTake(c,r);break;}}
+ R.cT=(R.cT||0)+dt;if(R.cT>22&&TRR.rcr.length<Math.round(trrRumbleN()*0.9)&&Z.t<TRR_RDUR-120){R.cT=0;trrRumbleCrate(false);}
+ trrRumbleAD();
+ // the player was the last one rolling
+ if(t.alive&&n===1&&!Z.won&&!SV.over){Z.won=1;trrRumbleEnd(1);}
+ if(t.alive&&SV.crew.every(c=>c.dead)&&!SV.over)trrTankDown('crew');
+ trrRumbleRecord(dt);}
+{const _b=trrBRTick;trrBRTick=function(dt){if(TRR.rumble)return;return _b(dt);};}
+TRR_HOOK.tick.push(dt=>{if(TRR.rumble&&!SV.over&&state==='playing')trrRumbleTick(dt);});
+TRR_HOOK.start.push(loaded=>{TRR.rumble=!!TRR.cfg.rumble;if(!TRR.rumble)return;TRR.rcr=TRR.rcr||[];});
+// nothing in a Rumble round is saved or continued
+{const _s=trrSave;trrSave=function(){if(TRR.rumble)return false;return _s.apply(this,arguments);};}
+// the crew never leave the tank and nobody gets ordered around: you drive, the crew do their stations
+{const _e=svExit;svExit=function(c){if(TRR.rumble&&TRR.on)return;return _e(c);};}
+{const _c=svCommand;svCommand=function(c,cmd,arg){if(TRR.rumble&&TRR.on){if(cmd==='repair'&&typeof arg==='string'){if(typeof trrRepairPrio==='function')trrRepairPrio(arg);return true;}if(typeof cmd==='string'&&cmd.startsWith('trr:fm'))return _c(c,cmd,arg);svSay('THE CREW STAY INSIDE - TAP THE CUTAWAY FOR REPAIRS',2.4);return false;}return _c(c,cmd,arg);};}
+{const _s=svSelect;svSelect=function(o){if(TRR.rumble&&TRR.on&&o&&o!==SV.tank){if(o.role&&typeof trrCutOpen==='function')trrCutOpen(true);return;}return _s(o);};}
+{const _p=trrTabsOn;trrTabsOn=function(){return !TRR.rumble&&_p();};}
+{const _h=svRingButtons;svRingButtons=function(){if(TRR.rumble&&TRR.on)return [];return _h();};}
+// ---- drawing: zone ring + crates ----
+{const _x=svIsoExtra;svIsoExtra=function(L,hs,lowG){_x(L,hs,lowG);if(TRR.rumble&&TRR.rcr)for(const c of TRR.rcr)if(isoVis(c.x,c.y,60))L.push(isoE(isoKey(c.x,c.y),trrDrawCrate,c));};}
+function trrDrawCrate(c){const p=isoS(c.x,c.y,0),g=ctx,T=performance.now()/1000,s=c.big?1.5:1,b=Math.sin(T*3+c.id)*2;
+ g.save();g.translate(p[0],p[1]);const gl=g.createLinearGradient(0,-130,0,0);gl.addColorStop(0,'rgba(255,230,120,0)');gl.addColorStop(1,'rgba(255,230,120,'+(c.big?0.5:0.3)+')');g.fillStyle=gl;g.fillRect(-4*s,-130,8*s,130);
+ g.fillStyle='rgba(0,0,0,0.3)';g.beginPath();g.ellipse(0,2,13*s,6*s,0,0,TAU);g.fill();
+ g.translate(0,-8*s+b);g.fillStyle=c.big?'#3a7a3a':'#8a6a38';g.fillRect(-10*s,-8*s,20*s,16*s);g.fillStyle=c.big?'#5aa85a':'#b08a4a';g.beginPath();g.moveTo(-10*s,-8*s);g.lineTo(0,-14*s);g.lineTo(10*s,-8*s);g.lineTo(0,-3*s);g.closePath();g.fill();
+ g.strokeStyle='#2a1a08';g.lineWidth=1.5;g.strokeRect(-10*s,-8*s,20*s,16*s);g.fillStyle='#ffe38a';g.font='bold '+(11*s|0)+'px system-ui';g.textAlign='center';g.fillText(c.big?'★':'?',0,5*s);g.restore();}
+// ---- HUD: tanks left, clock, zone, nearest crate ----
+TRR_HOOK.hud.push(()=>{if(!TRR.rumble||!TRR.brz)return;const Z=TRR.brz,g=ctxMain,y=trrStripBottom()+4,left=Math.max(0,TRR_RDUR-Z.t),mm=Math.floor(left/60),ss=Math.floor(left%60);
+ const sh=trrZoneFrac(Z.t+4)<trrZoneFrac(Z.t)-0.0005;g.save();g.setTransform(DPR,0,0,DPR,0,0);g.font='bold 12px '+TRR_UF;g.textBaseline='middle';
+ const items=['🏆 '+Z.alive+'/'+trrRumbleN(),'⏱ '+mm+':'+String(ss).padStart(2,'0'),'💥 '+TRR.rk.kills];const w=60;let tw=items.length*w+(sh?0:0),x0=W/2-tw/2;
+ g.fillStyle='rgba(20,24,60,0.82)';trrRR(g,x0,y,tw,22,10);g.fill();g.fillStyle='#fff';g.textAlign='center';items.forEach((s,i)=>g.fillText(s,x0+w*(i+0.5),y+11.5));
+ if(sh||Z.t>=TRR_RDUR){g.fillStyle=Z.t>=TRR_RDUR?'rgba(160,30,30,0.9)':'rgba(40,90,170,0.9)';trrRR(g,W/2-70,y+26,140,18,8);g.fill();g.fillStyle='#fff';g.font='bold 10px '+TRR_UF;g.fillText(Z.t>=TRR_RDUR?'SUDDEN DEATH':'⚠ ZONE SHRINKING',W/2,y+35.5);}
+ // nearest crate arrow
+ const t=SV.tank;let bc=null,bd=1e9;for(const c of TRR.rcr||[]){const d=Math.hypot(c.x-t.x,c.y-t.y);if(d<bd){bd=d;bc=c;}}
+ if(bc&&t.alive){svIsoSetup();const p=isoS(bc.x,bc.y,0);if(p[0]<30||p[0]>W-30||p[1]<90||p[1]>H-200){const a=Math.atan2(p[1]-H/2,p[0]-W/2),r=Math.min(W,H)*0.4,ax=clamp(W/2+Math.cos(a)*r*0.9,26,W-26),ay=clamp(H/2+Math.sin(a)*r*1.2,110,H-220);g.translate(ax,ay);g.rotate(a);g.fillStyle='rgba(255,226,120,0.9)';g.beginPath();g.moveTo(12,0);g.lineTo(-6,-8);g.lineTo(-6,8);g.closePath();g.fill();g.rotate(-a);g.fillStyle='#fff';g.font='bold 9px '+TRR_UF;g.textAlign='center';g.fillText('📦'+Math.round(bd/10)+'m',0,-14);}}
+ g.restore();});
+// ---- kills + last hit tracking (for placement, kill credit and the replay) ----
+{const _r=svRivShell;svRivShell=function(s){TRR._pS=!s.en;try{return _r(s);}finally{TRR._pS=false;}};}
+{const _h=svRivHurt;svRivHurt=function(r,dmg,src){const was=r.alive;_h(r,dmg,src);if(TRR.rumble&&was&&!r.alive){const mine=TRR._pS;if(mine){TRR.rk.kills++;TRR.kills=(TRR.kills||0)+1;svFloat(r.x,r.y-34,'KNOCKED OUT: '+r.name,'#ffd54a');}else svFloat(r.x,r.y-34,r.name+' IS OUT','#cfd8dc');
+   r.out=true;r.wreck=true;r.bailed=true;TRR.brz.alive=Math.max(1,(TRR.brz.alive||2)-1);sfx('big',r.x,r.y,0.6);svFx(r.x,r.y,26,'#ff8a1a',150,1,4);}};}
+// a Rumble tank does not bail out into infantry: it is simply out of the round
+{const _b=svBail;svBail=function(r,n){if(TRR.rumble&&TRR.on){r.hatch=1;if(r.alive){r.alive=false;r.wreck=true;r.out=true;if(TRR._pS){TRR.rk.kills++;TRR.kills=(TRR.kills||0)+1;svFloat(r.x,r.y-34,'KNOCKED OUT: '+r.name,'#ffd54a');}else svFloat(r.x,r.y-34,r.name+' IS OUT','#cfd8dc');TRR.brz.alive=Math.max(1,(TRR.brz.alive||2)-1);svFx(r.x,r.y,26,'#ff8a1a',150,1,4);sfx('big',r.x,r.y,0.6);}return;}return _b(r,n);};}
+// ---- replay buffer: last 4 seconds of positions ----
+function trrRumbleRecord(dt){const R=TRR.rk;R.rT=(R.rT||0)-dt;if(R.rT>0)return;R.rT=0.1;const t=SV.tank,Z=TRR.brz,k=R.lastHit&&SV.t-R.lastHit.t<6?R.lastHit.r:null;
+ TRR.rumbleRec.push({t:SV.t,px:t.x,py:t.y,pb:t.body,pu:t.turret,kx:k?k.x:null,ky:k?k.y:null,kb:k?k.body:0,ku:k?k.turret:0,zr:Z.r,sh:SV.shells.filter(s=>Math.hypot(s.x-t.x,s.y-t.y)<900).slice(0,8).map(s=>[s.x,s.y,s.en?1:0])});
+ while(TRR.rumbleRec.length&&SV.t-TRR.rumbleRec[0].t>4.2)TRR.rumbleRec.shift();}
+// ---- the end of the round ----
+function trrRumbleEnd(place){if(TRR.rk.ended)return;TRR.rk.ended=true;const P=trrProg(),Z=TRR.brz,N=trrRumbleN(),R=TRR.rk,before={tanks:TRR_RUMBLE_TANKS.map(a=>a[0]).filter(trrTankUnlocked),skins:trrPaintKeys(),perks:Object.keys(TRR_PERKS).filter(trrPerkOK)};
+ P.rounds++;P.kills+=R.kills;P.best=Math.min(P.best,place);if(place<=5)P.top5++;if(place<=10)P.top10++;if(place===1)P.wins++;trrProgSave();
+ const nw=[];for(const k of TRR_RUMBLE_TANKS.map(a=>a[0]).filter(trrTankUnlocked))if(!before.tanks.includes(k))nw.push((TYPES[k]||{name:k}).name+' tank');for(const k of trrPaintKeys())if(!before.skins.includes(k))nw.push(k+' skin');for(const k of Object.keys(TRR_PERKS).filter(trrPerkOK))if(!before.perks.includes(k))nw.push(TRR_PERKS[k].n+' perk');
+ const alive=SV.crew.filter(c=>!c.dead).length,tm=Math.round(Z.t),by=R.lastHit&&SV.t-R.lastHit.t<8?R.lastHit.r:null;
+ R.place=place;R.newUnl=nw;R.crewLeft=alive;R.by=by?by.name+' ('+(TYPES[by.type]||{name:by.type}).name+')':(place===1?'':'the zone');
+ const html=`<div style="font-size:42px;font-weight:900;color:${place===1?'#ffd54a':'#fff'};line-height:1.1">${place===1?'🏆 WINNER!':'#'+place}</div><div style="opacity:.8;font-size:12px;margin-bottom:6px">${place===1?'Last tank rolling out of '+N+'.':'Out of '+N+' tanks'+(R.by?' · knocked out by '+R.by:'')}</div>
+ <div style="display:flex;gap:6px;justify-content:center;margin:6px 0;font-size:12px"><span class="trrChip">💥 ${R.kills} kills</span><span class="trrChip">👥 ${alive}/4 crew</span><span class="trrChip">⏱ ${Math.floor(tm/60)}:${String(tm%60).padStart(2,'0')}</span><span class="trrChip">📦 ${R.loot}</span></div>
+ ${nw.length?`<div style="margin:6px 0;padding:6px;border-radius:8px;background:#2a3a1a;color:#bfe88a;font-size:12px">🔓 UNLOCKED: ${nw.join(', ')}</div>`:''}
+ <canvas id="trrReplay" width="300" height="170" style="width:100%;max-width:300px;border-radius:10px;background:#10142c"></canvas><div style="font-size:10px;opacity:.6">${by||place===1?'KILL-SHOT REPLAY':'LAST 4 SECONDS'}</div>`;
+ setTimeout(()=>{trrPopup(place===1?'ROUND WON':'ROUND OVER',html,[['PLAY AGAIN',()=>{TRR.on=false;trrRumbleLoadout();}],['Menu',()=>{TRR.on=false;toTitle();}]]);trrReplayStart();},place===1?600:350);}
+{const _d=trrShowDeath;trrShowDeath=function(){if(TRR.rumble){const Z=TRR.brz;trrRumbleEnd(Math.max(1,Z.alive||1));return;}return _d();};}
+let _trrRP=null;
+function trrReplayStart(){const cv=$('trrReplay');if(!cv)return;const rec=(TRR.rumbleRec||[]).slice(),g=cv.getContext('2d');if(!rec.length)return;let k=0;const t0=performance.now(),dur=(rec[rec.length-1].t-rec[0].t)*1000||1;
+ cancelAnimationFrame(_trrRP);const draw=()=>{if(!document.body.contains(cv))return;const el=((performance.now()-t0)%(dur+900));const tt=rec[0].t+Math.min(el,dur)/1000;let i=0;while(i<rec.length-1&&rec[i+1].t<=tt)i++;const a=rec[i],b=rec[Math.min(i+1,rec.length-1)],f=b.t>a.t?clamp((tt-a.t)/(b.t-a.t),0,1):0,L=(u,v)=>u+(v-u)*f;
+  const px=L(a.px,b.px),py=L(a.py,b.py);let cx=px,cy=py;if(a.kx!=null){cx=(px+a.kx)/2;cy=(py+a.ky)/2;}const sc=a.kx!=null?clamp(240/(Math.hypot(px-a.kx,py-a.ky)+200),0.12,0.5):0.4;
+  const X=x=>150+(x-cx)*sc,Y=y=>85+(y-cy)*sc;g.clearRect(0,0,300,170);g.fillStyle='#161c3a';g.fillRect(0,0,300,170);g.strokeStyle='rgba(80,160,255,.8)';g.lineWidth=2;g.beginPath();g.arc(X(TRR.brz.x),Y(TRR.brz.y),a.zr*sc,0,TAU);g.stroke();
+  const tank=(x,y,bd,u,col)=>{g.save();g.translate(X(x),Y(y));g.rotate(bd);g.fillStyle=col;g.fillRect(-9,-5,18,10);g.fillStyle='#0006';g.fillRect(-9,-5,18,2);g.rotate(u-bd);g.fillStyle=col;g.fillRect(-3,-3,7,6);g.fillRect(2,-1,12,2);g.restore();};
+  if(a.kx!=null)tank(L(a.kx,b.kx==null?a.kx:b.kx),L(a.ky,b.ky==null?a.ky:b.ky),a.kb,a.ku,'#c0504a');tank(px,py,a.pb,a.pu,'#5aa0e0');
+  for(const s of a.sh){g.fillStyle=s[2]?'#ffb04a':'#fff';g.beginPath();g.arc(X(s[0]),Y(s[1]),2.5,0,TAU);g.fill();}
+  if(el>dur){g.fillStyle='rgba(255,120,40,.55)';g.beginPath();g.arc(X(px),Y(py),18+Math.min(10,(el-dur)/30),0,TAU);g.fill();}
+  _trrRP=requestAnimationFrame(draw);};draw();}
+// remember who hit us last
+{const _h=svHurtTank;svHurtTank=function(d,pc,src){if(TRR.rumble&&src&&src.alive!==undefined&&TRR.rk)TRR.rk.lastHit={r:src,t:SV.t};return _h(d,pc,src);};}
+// ---- settings ----
+{const _s=suTankSpec;suTankSpec=function(){const S=_s();if(!TRR.on&&!document.getElementById('trrMenu'))return S;
+  let c=S.cats.find(c=>c.id==='trr25');if(!c){c={id:'trr25',name:'Tank Rumble & Night',icon:'🏆',items:[]};S.cats.push(c);}
+  c.items.push({k:'trrRumbleN',l:'Tanks per Rumble round',d:'20 is the full fight. Pick 12 if your phone struggles: fewer tanks to draw and think about.',t:'opt',o:[[20,'20 tanks'],[12,'12 tanks']],get:()=>trrRumbleN(),set:v=>{settings.trrRumbleN=+v;saveSettings();},th:'text'},
+   {k:'trrSplash',l:'Cartoon splash when crew are knocked out',d:'Adds a little red cartoon splash to the cutaway when a crewman goes down. Needs the arcade Blood setting to be on. Off by default; there is always a clean X.',t:'bool',get:()=>!!settings.trrSplash,set:v=>{settings.trrSplash=v;saveSettings();},th:'text'},
+   {k:'trrWave',l:'Night waves (Survival)',d:'How hard the night attack is. Takes effect on new saves; existing saves keep theirs.',t:'opt',o:[['normal','Normal'],['light','Light'],['brutal','Brutal'],['off','Off']],get:()=>settings.trrWave||'normal',set:v=>{settings.trrWave=v;saveSettings();},th:'text'});
+  return S;};}
+
+
+// ---- trr-97-cutaway.js ----
+// ===================== TANK RUMBLE 2.5: the crew cutaway (a look inside your tank: 4 stations, modules, damage) =====================
+// Everything is drawn with code. Crew who go down show a clean X (no gore). An optional cartoon splash lives in Settings (off by default).
+const TRR_PARTS=[['tracks','Tracks'],['engine','Engine'],['turret','Turret ring'],['gun','Main gun'],['armor','Armor'],['fuel','Fuel tank'],['rack','Ammo rack']];
+const TRR_ST=[{id:'cpt',lb:'CPT',cx:92,cy:49,col:'#3f64b0'},{id:'gun',lb:'GUN',cx:124,cy:51,col:'#a04444'},{id:'mec',lb:'MEC',cx:84,cy:76,col:'#a07a30'},{id:'med',lb:'MED',cx:110,cy:76,col:'#3f9a66'}];
+function trrCutInit(){TRR.cut={open:false,pings:[],dents:[],sparks:[],splash:[],shake:0,flash:0,prio:null,swap:null,drag:null,rep:null,rk:0,t:0,tap:null};}
+TRR_HOOK.start.push(()=>{trrCutInit();});
+function trrCutOpen(v){if(!TRR.cut)trrCutInit();TRR.cut.open=v!==false;TRR.cut.drag=null;sfx('blip');}
+function trrRepairPrio(p){const C=TRR.cut;C.prio=C.prio===p?null:p;svSay(C.prio?'MECHANIC: FIXING THE '+(TRR_PARTS.find(a=>a[0]===p)||[0,p])[1].toUpperCase()+' FIRST':'MECHANIC: WORKING ON THE WORST DAMAGE',2.2);sfx('select');}
+function trrStOK(i){const c=SV.crew[i];return !!c&&!c.dead&&!(c.moveT>0);}
+{const _g=svGunner;svGunner=function(){if(TRR.rumble&&TRR.on)return trrStOK(1);return _g();};}
+// ---------- crew damage + module damage ----------
+function trrCrewDmg(i,d,why){const c=SV.crew[i];if(!c||c.dead)return;const pk=trrPerkOf(i);if(pk==='tough')d*=0.75;else if(pk==='calm')d*=0.9;c.hp-=d;c.hurtT=0.8;if(c.hp>0)return;c.hp=0;c.dead=true;c.kia=true;c.koT=SV.t;c.moveT=0;if(TRR.cut&&TRR.cut.swap&&(TRR.cut.swap.from===i||TRR.cut.swap.to===i))TRR.cut.swap=null;
+ const role=['CAPTAIN','GUNNER','MECHANIC','MEDIC'][i];svSay('⚠ '+role+' '+c.name.toUpperCase()+' IS DOWN'+({0:' - RADAR LOST',1:' - SLOWER, WORSE AIM',2:' - NO REPAIRS, SLOWER ENGINE',3:' - NO HEALING'}[i]),4);sfx('crunch',SV.tank.x,SV.tank.y,0.5);
+ if(settings.trrSplash&&goreOn())TRR.cut.splash.push({i,t:0});}
+{const _h=svHurtTank;svHurtTank=function(d,pc,src){if(!(TRR.rumble&&TRR.on)||!SV.tank.alive||TRR._inHit)return _h(d,pc,src);const t=SV.tank,C=TRR.cut||(trrCutInit(),TRR.cut),hp0=t.hp,fr0=d/t.maxHp;
+  TRR._inHit=true;try{_h(d,pc,src);}finally{TRR._inHit=false;}
+  const real=hp0-t.hp,fr=real/t.maxHp;if(real<=0.01)return;
+  if(src&&src.x!=null&&src.alive!==undefined){const a=Math.atan2(src.y-t.y,src.x-t.x)-t.body,fx=Math.cos(a),side=Math.abs(Math.sin(a));let x=100+fx*58+rr(-6,6),y=side>0.7&&rnd()<0.6?rr(32,52):rr(60,82);x=clamp(x,26,182);const big=fr>0.08;
+   C.pings.push({x,y,t:0,big});C.dents.push({x,y,r:rr(2.5,5)*(big?1.4:1),a:rnd()*TAU});if(C.dents.length>16)C.dents.shift();for(let k=0;k<(big?10:5);k++)C.sparks.push({x,y,vx:rr(-60,60),vy:rr(-70,10),t:rr(0.2,0.55)});C.shake=Math.min(1,C.shake+(big?0.7:0.35));C.flash=big?0.5:0.25;sfx(big?'big':'crunch',t.x,t.y,big?0.4:0.5);}
+  // the crew feel it: a hit may hurt somebody inside
+  if(src&&src.alive!==undefined&&rnd()<clamp(0.2+fr*3.2,0,0.85)){const live=[0,1,2,3].filter(i=>!SV.crew[i].dead);if(live.length){const i=live[(rnd()*live.length)|0];trrCrewDmg(i,rr(12,26)*(0.7+fr*5));}}
+  if(!t.alive||SV.over)return;
+  if(t.parts.engine<=0&&!t.engFire&&!t.engOut&&rnd()<0.6){t.engFire=1;t.engT=0;svSay('🔥 ENGINE FIRE!',3);}
+  if(t.parts.rack<=0&&!t.rackBoom&&rnd()<0.45){t.rackBoom=1;trrRackBoom();}};}
+function trrRackBoom(){const t=SV.tank,C=TRR.cut;svSay('💥 AMMO RACK EXPLODED!',3.5);SV.ammo=Math.floor(SV.ammo*0.3);C.flash=1;C.shake=1;for(let k=0;k<30;k++)C.sparks.push({x:rr(100,150),y:rr(55,75),vx:rr(-120,120),vy:rr(-130,-20),t:rr(0.3,0.8)});sfx('big',t.x,t.y,0.9);svFx(t.x,t.y,26,'#ffb02e',140,0.9,4);
+ for(const i of [0,1,2,3])if(!SV.crew[i].dead)trrCrewDmg(i,rr(18,34));TRR._inHit=true;try{svHurtTank(t.maxHp*0.18,0,null);}finally{TRR._inHit=false;}}
+// ---------- the crew at work ----------
+TRR_HOOK.tick.push(dt=>{if(!TRR.rumble||!TRR.cut||SV.over||state!=='playing')return;const t=SV.tank,C=TRR.cut;if(!t.alive)return;C.t+=dt;
+ for(const c of SV.crew){if(c.hurtT>0)c.hurtT-=dt;if(c.moveT>0){c.moveT-=dt;}}
+ // station swap in progress
+ if(C.swap){C.swap.t+=dt;if(C.swap.t>=4){const a=SV.crew[C.swap.from],b=SV.crew[C.swap.to];const F=['name','hp','sick','kia'];const tmp={};if(b.dead){for(const k of F){b[k]=a[k];}b.dead=false;b.vac=false;b.kia=false;a.dead=true;a.vac=true;a.kia=false;a.hp=0;}else{for(const k of F){tmp[k]=a[k];a[k]=b[k];b[k]=tmp[k];}}a.moveT=0;b.moveT=0;svSay('CREW SWAPPED STATIONS',2);sfx('select');C.swap=null;}}
+ const spd=Math.abs(t.spd||0),still=spd<8;
+ // mechanic: field repairs
+ C.rep=null;if(trrStOK(2)){let part=null;if(C.prio&&t.parts[C.prio]<100)part=C.prio;else{let lo=100;for(const [k] of TRR_PARTS)if(t.parts[k]<lo){lo=t.parts[k];part=k;}}
+  if(part){const rate=2.1*(trrPerkOf(2)==='mender'?1.4:1)*(still?1:0.25)*(part===C.prio?2.2:1);t.parts[part]=Math.min(100,t.parts[part]+rate*dt);C.rep={part,still};if(part==='engine'&&t.parts.engine>30&&t.engOut)t.engOut=0;}}
+ // engine fire
+ if(t.engFire){t.engT+=dt;svHurtTank(t.maxHp*0.007*dt,0,null);if(rnd()<dt*8)C.sparks.push({x:rr(36,62),y:rr(66,78),vx:rr(-20,20),vy:rr(-60,-20),t:0.5});
+  if(trrStOK(2))t.engT+=dt*(trrPerkOf(2)==='mender'?1.4:1)*1.2;if(t.engT>=(trrStOK(2)?7:20)){t.engFire=0;t.engOut=1;svSay(trrStOK(2)?'FIRE IS OUT':'THE FIRE BURNED ITSELF OUT',2.5);}if(t.engT>14&&t.parts.rack>0&&!t.rackBoom&&rnd()<dt*0.12){t.rackBoom=1;t.parts.rack=0;trrRackBoom();}}
+ // medic: heals the worst hurt crewman
+ if(trrStOK(3)){let w=null;for(let i=0;i<4;i++){const c=SV.crew[i];if(!c.dead&&c.hp<100&&(!w||c.hp<w.hp))w=c;}if(w)w.hp=Math.min(100,w.hp+2.2*(trrPerkOf(3)==='calm'?1.4:1)*dt);}
+ for(const p of C.pings)p.t+=dt;C.pings=C.pings.filter(p=>p.t<0.8);for(const s of C.sparks){s.t-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=140*dt;}C.sparks=C.sparks.filter(s=>s.t>0);C.shake=Math.max(0,C.shake-dt*2.4);C.flash=Math.max(0,C.flash-dt*1.6);for(const s of C.splash)s.t+=dt;C.splash=C.splash.filter(s=>s.t<0.9);});
+function trrMoveCrew(from,to){const C=TRR.cut,a=SV.crew[from],b=SV.crew[to];if(from===to||C.swap)return false;if(a.dead){svSay('HE CAN\'T BE MOVED',1.8);return false;}
+ if(b.dead&&b.kia&&false)return false;C.swap={from,to,t:0};a.moveT=4;b.moveT=4;svSay(a.name+' IS CLIMBING OVER (4 s) - BOTH STATIONS ARE EMPTY UNTIL HE SITS',3);sfx('select');return true;}
+function trrMedOn(i){const c=SV.crew[i];if(c.dead||c.hp>=100){svSay(c.dead?'TOO LATE FOR HIM':'HE IS FINE',1.8);return;}if(!(SV.med>0)){svSay('NO MED KITS - GRAB A CRATE',2);return;}SV.med--;c.hp=Math.min(100,c.hp+55);svSay(c.name+' PATCHED UP',1.8);sfx('pick');}
+// ---------- drawing ----------
+function trrCutFont(s){return 'bold 6.2px '+TRR_UF;}
+function trrCutBust(g,st,c,i,x,y,T,alpha){const dead=c.dead&&!c.vac,vac=c.dead&&c.vac,hurt=!c.dead&&c.hp<55,crit=!c.dead&&c.hp<28,slump=dead?Math.min(1,(SV.t-(c.koT||0))*2.5):0;
+ g.save();g.globalAlpha=alpha==null?1:alpha;g.translate(x,y+3);g.scale(1.3,1.3);g.translate(0,-3);
+ g.fillStyle='#1a1d24';g.fillRect(-8,3,16,6);g.fillStyle='#2a2f3a';g.fillRect(-8,2,16,2);   // seat
+ if(vac){g.strokeStyle='#59627a';g.lineWidth=0.8;g.setLineDash([2,2]);g.strokeRect(-6,-9,12,12);g.setLineDash([]);g.restore();return;}
+ const bob=dead?0:Math.sin(T*2+i)*0.4+(c.hurtT>0?Math.sin(T*40)*0.7:0),by=(dead?2.5*slump:0)+bob;
+ // body
+ g.fillStyle=dead?'#555b66':st.col;g.beginPath();g.moveTo(-6.5,4);g.lineTo(-5,-2+by);g.quadraticCurveTo(0,-4+by,5,-2+by);g.lineTo(6.5,4);g.closePath();g.fill();g.fillStyle='rgba(255,255,255,0.18)';g.fillRect(-4,-1+by,8,1);
+ // head
+ g.save();g.translate(dead?1.5*slump:0,-7+by+(dead?2.5*slump:0));g.rotate(dead?0.55*slump:(hurt?Math.sin(T*3)*0.08:0));
+ g.fillStyle=dead?'#b9b2a6':'#f0c8a0';g.beginPath();g.arc(0,0,4.2,0,TAU);g.fill();
+ g.fillStyle=dead?'#4a4f5a':st.col;g.beginPath();g.arc(0,-0.6,4.5,Math.PI,TAU);g.fill();g.fillRect(-4.6,-1,9.2,1);
+ if(hurt&&!dead){g.fillStyle='#fff';g.save();g.rotate(-0.5);g.fillRect(-4.5,-2.6,9,1.6);g.restore();g.fillStyle='#e07a8a';g.fillRect(-0.6,-3.2,1.2,2.4);}
+ g.strokeStyle='#14161c';g.fillStyle='#14161c';g.lineWidth=0.8;
+ if(dead){for(const ex of [-1.8,1.8]){g.beginPath();g.moveTo(ex-0.9,0.1);g.lineTo(ex+0.9,1.9);g.moveTo(ex+0.9,0.1);g.lineTo(ex-0.9,1.9);g.stroke();}g.beginPath();g.moveTo(-1,3.2);g.lineTo(1,3.2);g.stroke();}
+ else if(crit){g.beginPath();g.moveTo(-2.8,0.9);g.lineTo(-0.9,0.9);g.moveTo(0.9,0.9);g.lineTo(2.8,0.9);g.stroke();g.beginPath();g.arc(0,3.3,0.9,0,TAU);g.stroke();}
+ else{g.beginPath();g.arc(-1.7,1,0.55,0,TAU);g.arc(1.7,1,0.55,0,TAU);g.fill();g.beginPath();g.arc(0,2.4,hurt?0.8:1.1,hurt?Math.PI:0,hurt?TAU:Math.PI);g.stroke();}
+ g.restore();
+ if(crit){g.fillStyle='#ffe38a';for(let k=0;k<3;k++){const a=T*4+k*2.1;g.beginPath();g.arc(Math.cos(a)*5,-14+Math.sin(a)*1.6,0.9,0,TAU);g.fill();}}
+ // optional cartoon splash (Settings, off by default, needs Blood on)
+ g.restore();}
+function trrCutBody(g,X,Y,S,full){const t=SV.tank,C=TRR.cut||(trrCutInit(),TRR.cut),T=performance.now()/1000,K=svTankCols(t),P=t.parts;
+ g.save();g.translate(X,Y);g.scale(S,S);g.beginPath();trrRR(g,0,0,200,110,7);g.clip();
+ const bg=g.createLinearGradient(0,0,0,110);bg.addColorStop(0,'#222a42');bg.addColorStop(1,'#0e1222');g.fillStyle=bg;g.fillRect(0,0,200,110);
+ g.strokeStyle='rgba(120,150,255,0.07)';g.lineWidth=0.5;for(let i=10;i<200;i+=10){g.beginPath();g.moveTo(i,0);g.lineTo(i,110);g.stroke();}for(let j=10;j<110;j+=10){g.beginPath();g.moveTo(0,j);g.lineTo(200,j);g.stroke();}
+ g.translate((rnd()-0.5)*C.shake*3,(rnd()-0.5)*C.shake*3);
+ g.fillStyle='rgba(0,0,0,0.35)';g.beginPath();g.ellipse(100,106,92,4,0,0,TAU);g.fill();
+ // ---- tracks + wheels
+ const tr=P.tracks,brk=tr<=0,off=((t.tread||0)*0.7)%6;
+ g.fillStyle='#1c1f25';g.strokeStyle='#08090b';g.lineWidth=1;g.beginPath();trrRR(g,10,84,180,20,9);g.fill();g.stroke();
+ g.strokeStyle='#33383f';g.lineWidth=1.2;for(let x=12-off;x<188;x+=6){if(brk&&x>88&&x<112)continue;g.beginPath();g.moveTo(x,85);g.lineTo(x,88);g.moveTo(x,100);g.lineTo(x,103);g.stroke();}
+ for(let i=0;i<7;i++){const wx=26+i*24.7,wy=95;g.fillStyle='#3a4049';g.beginPath();g.arc(wx,wy,6.6,0,TAU);g.fill();g.strokeStyle='#14161a';g.lineWidth=1;g.stroke();g.fillStyle='#6b727e';g.beginPath();g.arc(wx,wy,2.4,0,TAU);g.fill();g.strokeStyle='#8a929e';g.lineWidth=0.8;const ra=(t.tread||0)*0.12+i;g.beginPath();g.moveTo(wx+Math.cos(ra)*2,wy+Math.sin(ra)*2);g.lineTo(wx-Math.cos(ra)*5,wy-Math.sin(ra)*5);g.stroke();}
+ if(tr<50){g.strokeStyle=brk?'#ff5a3a':'#ffb04a';g.lineWidth=1.4;g.setLineDash(brk?[]:[3,2]);g.beginPath();trrRR(g,10,84,180,20,9);g.stroke();g.setLineDash([]);}
+ if(brk){g.fillStyle='#0e1222';g.fillRect(90,83,22,22);g.strokeStyle='#33383f';g.lineWidth=2;g.beginPath();g.moveTo(88,98);g.quadraticCurveTo(95,110,100,106);g.moveTo(114,98);g.quadraticCurveTo(108,110,104,106);g.stroke();}
+ // ---- hull (extruded look: side face + lit top plate)
+ const hg=g.createLinearGradient(0,56,0,86);hg.addColorStop(0,K.lite);hg.addColorStop(0.35,K.base);hg.addColorStop(1,K.dark);
+ g.fillStyle=hg;g.strokeStyle='#05060a';g.lineWidth=1.3;g.beginPath();g.moveTo(20,85);g.lineTo(24,63);g.lineTo(42,57);g.lineTo(168,57);g.lineTo(190,72);g.lineTo(186,85);g.closePath();g.fill();g.stroke();
+ g.fillStyle='rgba(255,255,255,0.22)';g.beginPath();g.moveTo(42,57);g.lineTo(168,57);g.lineTo(176,61);g.lineTo(38,61);g.closePath();g.fill();
+ // interior cavity
+ g.fillStyle='rgba(8,10,16,0.93)';g.beginPath();g.moveTo(32,65);g.lineTo(170,65);g.lineTo(178,76);g.lineTo(30,81);g.closePath();g.fill();g.strokeStyle='#000';g.lineWidth=0.8;g.stroke();
+ g.strokeStyle='rgba(120,140,190,0.25)';g.lineWidth=0.6;g.beginPath();g.moveTo(70,65);g.lineTo(70,80);g.moveTo(121,65);g.lineTo(121,80);g.moveTo(152,65);g.lineTo(152,78);g.stroke();
+ // engine block + fuel cell + ammo rack + driver bay
+ const ew=P.engine,run=!t.alive?0:(Math.abs(t.spd||0)>2?1:0.35);g.fillStyle=ew<=0?'#2c2220':'#4b525e';g.fillRect(34,67,32,13);g.strokeStyle='#14161a';g.lineWidth=0.8;g.strokeRect(34,67,32,13);
+ for(let i=0;i<4;i++){const py=ew>0?Math.sin(T*18*run+i*1.6)*1.6*run:0;g.fillStyle=ew<=0?'#3a2a26':'#8a929e';g.fillRect(38+i*7,69+py,4,6);g.fillStyle='#262a32';g.fillRect(38+i*7,75,4,4);}
+ g.fillStyle='#8a6a2a';g.fillRect(72,70,14,10);g.fillStyle='#e0b050';g.fillRect(73,79-8*clamp(SV.gas/(SV.gasMax||100),0,1),12,8*clamp(SV.gas/(SV.gasMax||100),0,1));g.strokeStyle='#14161a';g.strokeRect(72,70,14,10);
+ const af=clamp(SV.ammo/(SV.ammoMax||60),0,1);g.fillStyle='#2a2f3a';g.fillRect(124,66,26,14);g.strokeStyle=P.rack<50?'#ff5a3a':'#14161a';g.lineWidth=P.rack<50?1.2:0.8;g.strokeRect(124,66,26,14);for(let i=0;i<8;i++){const lit=i/8<af;g.fillStyle=lit?'#d8b24a':'#3a3d46';g.fillRect(126+i*3,68,2,10);g.fillStyle=lit?'#f5e08a':'#4a4d56';g.fillRect(126+i*3,68,2,2.5);}
+ g.fillStyle='#232832';g.fillRect(155,67,18,12);g.fillStyle='#39414f';g.fillRect(158,70,10,6);
+ // ---- turret
+ const turDmg=P.turret;g.fillStyle=hg;g.strokeStyle='#05060a';g.lineWidth=1.3;g.beginPath();g.moveTo(66,58);g.lineTo(72,38);g.quadraticCurveTo(100,22,136,28);g.lineTo(152,38);g.lineTo(154,58);g.closePath();g.fill();g.stroke();
+ g.fillStyle='rgba(255,255,255,0.2)';g.beginPath();g.moveTo(72,38);g.quadraticCurveTo(100,22,136,28);g.lineTo(138,32);g.quadraticCurveTo(102,27,76,41);g.closePath();g.fill();
+ g.fillStyle='rgba(8,10,16,0.93)';g.beginPath();g.moveTo(78,56);g.lineTo(82,41);g.quadraticCurveTo(104,32,134,36);g.lineTo(146,42);g.lineTo(148,56);g.closePath();g.fill();g.strokeStyle='#000';g.lineWidth=0.7;g.stroke();
+ g.fillStyle='#3d4452';g.fillRect(64,56,92,3);if(turDmg<50){g.strokeStyle=turDmg<=0?'#ff5a3a':'#ffb04a';g.lineWidth=1;g.beginPath();g.moveTo(66,57.5);g.lineTo(156,57.5);g.stroke();}
+ // gun + breech + recoil
+ const rec=clamp(t.recoil||0,0,1)*5,gw=P.gun;g.save();g.translate(-rec,0);g.fillStyle='#464d58';g.fillRect(128,43,22,7);g.fillStyle='#2a2f38';g.fillRect(128,43,22,2);g.restore();
+ g.fillStyle=gw<=0?'#3a3c40':'#585f6a';g.strokeStyle='#08090b';g.lineWidth=0.9;g.save();g.translate(-rec*0.6,0);if(gw<=0){g.beginPath();g.moveTo(152,40);g.lineTo(176,42);g.lineTo(184,52);g.lineTo(180,55);g.lineTo(172,47);g.lineTo(152,45);g.closePath();g.fill();g.stroke();}else{g.fillRect(152,39,46,6);g.strokeRect(152,39,46,6);g.fillStyle='#2f353e';g.fillRect(192,38,8,8);g.fillStyle='rgba(255,255,255,0.22)';g.fillRect(152,39,46,1.5);}g.restore();
+ g.fillStyle='#3a414c';g.beginPath();g.moveTo(150,34);g.lineTo(158,36);g.lineTo(158,50);g.lineTo(150,52);g.closePath();g.fill();
+ if(gw<50&&gw>0){g.strokeStyle='#ffb04a';g.lineWidth=0.8;g.strokeRect(152,39,46,6);}
+ // commander cupola
+ g.fillStyle='#3d4452';g.fillRect(86,26,16,4);g.fillStyle=K.base;g.fillRect(88,22,12,5);
+ // ---- crew
+ const sw=C.swap;for(let i=0;i<4;i++){const c=SV.crew[i],st=TRR_ST[i];if(sw&&(sw.from===i)){continue;}trrCutBust(g,st,c,i,st.cx,st.cy+(i>1?2:0),T,c.moveT>0&&!c.dead?0.25:1);}
+ if(sw){const a=TRR_ST[sw.from],b=TRR_ST[sw.to],k=clamp(sw.t/4,0,1),e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2,x=a.cx+(b.cx-a.cx)*e,y=a.cy+(b.cy-a.cy)*e-Math.sin(k*Math.PI)*10;trrCutBust(g,a,SV.crew[sw.from],sw.from,x,y,T,0.95);}
+ if(C.drag){const d=C.drag,c=SV.crew[d.i];trrCutBust(g,TRR_ST[d.i],c,d.i,d.mx,d.my,T,0.95);}
+ // hp bars + labels
+ for(let i=0;i<4;i++){const c=SV.crew[i],st=TRR_ST[i];if(c.dead&&c.vac&&!(C.swap&&C.swap.to===i))continue;const f=clamp(c.hp/100,0,1),by=st.cy+(i>1?2:0)-20;
+  g.fillStyle='rgba(0,0,0,0.6)';g.fillRect(st.cx-7,by,14,2.2);g.fillStyle=c.dead?'#555':f>0.55?'#5ee08a':f>0.28?'#ffd54a':'#ff5a4a';g.fillRect(st.cx-7,by,14*f,2.2);}
+ g.font=trrCutFont(S*(full?1.05:1));g.textAlign='center';for(let i=0;i<4;i++){const st=TRR_ST[i],y=st.cy+(i>1?2:0)+13;g.lineWidth=2;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(st.lb,st.cx,y);g.fillStyle=SV.crew[i].dead?'#7a8090':'#cfd6ee';g.fillText(st.lb,st.cx,y);}
+ // splash (optional cartoon)
+ for(const s of C.splash){const st=TRR_ST[s.i],k=s.t/0.9;g.save();g.translate(st.cx,st.cy-6);g.globalAlpha=1-k;g.fillStyle='#e03a3a';g.beginPath();for(let j=0;j<16;j++){const a=j/16*TAU,r=(j%2?5:11)*(0.4+k*1.2);g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.restore();}
+ // dents, fire, smoke, sparks, pings
+ for(const d of C.dents){g.save();g.translate(d.x,d.y);g.rotate(d.a);const rg=g.createRadialGradient(0,0,0,0,0,d.r);rg.addColorStop(0,'rgba(0,0,0,0.55)');rg.addColorStop(0.7,'rgba(0,0,0,0.25)');rg.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=rg;g.beginPath();g.ellipse(0,0,d.r,d.r*0.7,0,0,TAU);g.fill();g.strokeStyle='rgba(255,255,255,0.35)';g.lineWidth=0.6;g.beginPath();g.arc(0,0,d.r*0.8,Math.PI*1.1,Math.PI*1.8);g.stroke();g.restore();}
+ if(t.engFire){for(let i=0;i<6;i++){const fx=38+i*5.2,h=6+Math.sin(T*14+i*2)*3+rnd()*3;g.fillStyle=i%2?'#ff8a1a':'#ffd23a';g.beginPath();g.moveTo(fx-3,70);g.quadraticCurveTo(fx,70-h*1.4,fx+0.5,70-h);g.quadraticCurveTo(fx+1,70-h*0.3,fx+3,70);g.fill();}g.fillStyle='rgba(30,30,30,0.5)';for(let i=0;i<4;i++){const q=(T*0.8+i*0.25)%1;g.beginPath();g.arc(46+i*6+Math.sin(T*3+i)*3,66-q*30,2+q*5,0,TAU);g.fill();}}
+ else if(ew<50&&t.alive){g.fillStyle='rgba(120,120,120,0.4)';for(let i=0;i<3;i++){const q=(T*0.6+i*0.33)%1;g.beginPath();g.arc(48+i*7,66-q*22,2+q*4,0,TAU);g.fill();}}
+ for(const s of C.sparks){g.fillStyle=s.t>0.25?'#fff3a0':'#ff9a3a';g.fillRect(s.x,s.y,1.4,1.4);}
+ for(const p of C.pings){const k=p.t/0.8,r=2+k*(p.big?26:16);g.strokeStyle='rgba(255,'+(180-k*100|0)+',60,'+(1-k)+')';g.lineWidth=2.2*(1-k)+0.4;g.beginPath();g.arc(p.x,p.y,r,0,TAU);g.stroke();if(k<0.25){g.fillStyle='rgba(255,240,170,'+(1-k*4)+')';g.beginPath();g.arc(p.x,p.y,5+(p.big?5:0),0,TAU);g.fill();}}
+ if(C.flash>0){g.fillStyle='rgba(255,230,160,'+Math.min(0.5,C.flash*0.6)+')';g.fillRect(0,0,200,110);}
+ // low-crew alarm
+ const low=SV.crew.some(c=>!c.dead&&c.hp<28);if(low&&((T*3)|0)%2===0){g.strokeStyle='rgba(255,70,60,0.8)';g.lineWidth=3;g.strokeRect(1.5,1.5,197,107);}
+ g.restore();}
+// ---------- geometry (compact panel + expanded sheet) ----------
+function trrCutGeom(){const L=trrLay(),w=Math.round(Math.min(214,W*0.47)),h=Math.round(w*0.55);return{x:Math.round(safe.l+8),y:Math.round(L.yb-h-54),w,h};}
+function trrCutXGeom(){const x=8+safe.l,w=W-16-safe.l-safe.r,y=Math.round(trrStripBottom()+30),h=H-y-safe.b-16,S=Math.min((w-20)/200,(h*0.42)/110);return{x,y,w,h,S,cx:x+(w-200*S)/2,cy:y+34};}
+function trrCutXLayout(){const G=trrCutXGeom(),y0=G.cy+110*G.S+26,rh=Math.max(24,Math.min(30,(G.y+G.h-y0-100)/7)),rows=TRR_PARTS.map((p,i)=>({id:p[0],name:p[1],x:G.x+10,y:y0+i*rh,w:G.w-20,h:rh-3})),cy=y0+7*rh+4,cw=(G.w-20-18)/4,cards=[0,1,2,3].map(i=>({i,x:G.x+10+i*(cw+6),y:cy,w:cw,h:Math.min(70,G.y+G.h-cy-8)}));return{G,rows,cards,close:{x:G.x+G.w-40,y:G.y+4,w:34,h:28}};}
+function trrCutStationAt(mx,my,G){const S=G.S;for(let i=0;i<4;i++){const st=TRR_ST[i],px=G.cx+st.cx*S,py=G.cy+(st.cy+(i>1?2:0)-4)*S;if(Math.hypot(mx-px,my-py)<16*S+6)return i;}return -1;}
+// ---------- HUD draw ----------
+TRR_HOOK.hud.push(()=>{if(!TRR.rumble||!TRR.cut||!SV.on||SV.over&&state!=='playing')return;const g=ctxMain;if(state!=='playing'&&state!=='paused')return;g.save();g.setTransform(DPR,0,0,DPR,0,0);const C=TRR.cut,t=SV.tank;
+ // captain down: the radar goes dark and your view of the field narrows
+ if(!trrStOK(0)&&t.alive){const gr=g.createRadialGradient(W/2,H/2,Math.min(W,H)*0.28,W/2,H/2,Math.max(W,H)*0.62);gr.addColorStop(0,'rgba(5,8,16,0)');gr.addColorStop(1,'rgba(5,8,16,0.82)');g.fillStyle=gr;g.fillRect(0,0,W,H);const M=trrMiniGeom();g.fillStyle='rgba(10,12,24,0.94)';trrRR(g,M.mx-2,M.my-2,M.ms+4,M.ms+4,8);g.fill();g.fillStyle='#ff8a7a';g.font='bold 10px '+TRR_UF;g.textAlign='center';g.fillText('NO RADAR',M.mx+M.ms/2,M.my+M.ms/2-2);g.fillStyle='#8a90a8';g.font='9px '+TRR_UF;g.fillText('captain down',M.mx+M.ms/2,M.my+M.ms/2+10);}
+ const P=trrCutGeom();g.fillStyle='rgba(8,10,20,0.9)';trrRR(g,P.x-3,P.y-3,P.w+6,P.h+6,9);g.fill();trrCutBody(g,P.x,P.y,P.w/200,false);g.strokeStyle='rgba(150,170,255,0.55)';g.lineWidth=1.5;trrRR(g,P.x,P.y,P.w,P.h,7);g.stroke();
+ g.fillStyle='rgba(8,10,20,0.78)';trrRR(g,P.x+P.w-70,P.y+3,67,14,6);g.fill();g.fillStyle='#bcc6ee';g.font='bold 8px '+TRR_UF;g.textAlign='center';g.fillText('TAP TO EXPAND',P.x+P.w-36.5,P.y+13);
+ if(C.rep){g.fillStyle='rgba(8,10,20,0.78)';trrRR(g,P.x+3,P.y+3,92,14,6);g.fill();g.fillStyle=C.rep.still?'#8fe3a0':'#ffd54a';g.textAlign='left';g.fillText((C.rep.still?'🔧 ':'🔧 slow · ')+(TRR_PARTS.find(a=>a[0]===C.rep.part)||[0,''])[1].toUpperCase(),P.x+8,P.y+13);}
+ if(C.open)trrCutDrawX(g);
+ g.restore();});
+function trrCutDrawX(g){const C=TRR.cut,t=SV.tank,Lx=trrCutXLayout(),G=Lx.G;g.fillStyle='rgba(0,0,0,0.6)';g.fillRect(0,0,W,H);g.fillStyle='rgba(14,18,38,0.98)';trrRR(g,G.x,G.y,G.w,G.h,12);g.fill();g.strokeStyle='#5a66c0';g.lineWidth=2;g.stroke();
+ g.fillStyle='#fff';g.font='bold 14px '+TRR_UF;g.textAlign='left';g.fillText('🛠 '+t.T.name.toUpperCase()+' · CREW & MODULES',G.x+12,G.y+22);const cl=Lx.close;g.fillStyle='#3a2230';trrRR(g,cl.x,cl.y,cl.w,cl.h,8);g.fill();g.fillStyle='#ff9a9a';g.textAlign='center';g.font='bold 16px '+TRR_UF;g.fillText('✕',cl.x+cl.w/2,cl.y+20);
+ trrCutBody(g,G.cx,G.cy,G.S,true);g.strokeStyle='rgba(150,170,255,0.5)';g.lineWidth=1.5;trrRR(g,G.cx,G.cy,200*G.S,110*G.S,7);g.stroke();
+ g.font='10px '+TRR_UF;g.textAlign='left';g.fillStyle='#9aa4cc';const ry=Lx.rows[0].y-3;g.fillText(C.swap?'Crew are climbing over… ('+Math.ceil(4-C.swap.t)+'s)':'Drag a crewman onto another seat to swap places (takes 4 s)',G.x+10,ry-12);g.fillText('Tap a module to fix it first · tap a crewman to use a med kit',G.x+10,ry);
+ for(const r of Lx.rows){const v=t.parts[r.id],col=v>66?'#5ee08a':v>33?'#ffd54a':'#ff5a4a',pr=C.prio===r.id,wk=C.rep&&C.rep.part===r.id;g.fillStyle=pr?'rgba(90,72,16,0.9)':'rgba(30,36,72,0.9)';trrRR(g,r.x,r.y,r.w,r.h,7);g.fill();if(pr){g.strokeStyle='#ffd54a';g.lineWidth=1.5;g.stroke();}
+  g.fillStyle='#e8ecff';g.font='bold 11px '+TRR_UF;g.textAlign='left';g.fillText(r.name+(r.id==='engine'&&t.engFire?' 🔥':''),r.x+8,r.y+r.h/2+4);const bx=r.x+98,bw=r.w-98-96;g.fillStyle='#0c0f20';g.fillRect(bx,r.y+r.h/2-4,bw,8);g.fillStyle=col;g.fillRect(bx,r.y+r.h/2-4,bw*clamp(v/100,0,1),8);
+  g.fillStyle='#cfd6ee';g.textAlign='right';g.font='10px '+TRR_UF;g.fillText(Math.round(v)+'%',r.x+r.w-60,r.y+r.h/2+4);g.fillStyle=pr?'#ffd54a':wk?'#8fe3a0':'#7a84b8';g.font='bold 10px '+TRR_UF;g.fillText(pr?'FIX FIRST':wk?'🔧 FIXING':'FIX',r.x+r.w-8,r.y+r.h/2+4);}
+ const nm=['CAPTAIN','GUNNER','MECHANIC','MEDIC'];for(const k of Lx.cards){const c=SV.crew[k.i],f=clamp(c.hp/100,0,1),pk=TRR_PERKS[trrPerkOf(k.i)]||{n:''};g.fillStyle=c.dead?'rgba(40,30,34,0.9)':'rgba(30,36,72,0.9)';trrRR(g,k.x,k.y,k.w,k.h,8);g.fill();
+  g.fillStyle=c.dead?'#8a8090':'#fff';g.font='bold 10px '+TRR_UF;g.textAlign='center';g.fillText(nm[k.i],k.x+k.w/2,k.y+14);g.font='10px '+TRR_UF;g.fillStyle='#cfd6ee';g.fillText(c.vac?'(empty seat)':c.name+(c.dead?' ✖':''),k.x+k.w/2,k.y+27);
+  g.fillStyle='#0c0f20';g.fillRect(k.x+8,k.y+33,k.w-16,6);g.fillStyle=c.dead?'#555':f>0.55?'#5ee08a':f>0.28?'#ffd54a':'#ff5a4a';g.fillRect(k.x+8,k.y+33,(k.w-16)*f,6);
+  g.fillStyle='#9aa4cc';g.font='9px '+TRR_UF;g.fillText(pk.n,k.x+k.w/2,k.y+51);if(!c.dead&&c.hp<100&&SV.med>0){g.fillStyle='#8fe3a0';g.font='bold 9px '+TRR_UF;g.fillText('✚ TAP: MED KIT',k.x+k.w/2,k.y+64);}}
+ g.fillStyle='#9aa4cc';g.font='10px '+TRR_UF;g.textAlign='right';g.fillText('MED '+(SV.med||0)+' · PATCH '+(SV.patch||0),G.x+G.w-12,G.y+G.h-4);
+ if(C.drag){const d=C.drag;g.fillStyle='rgba(255,213,74,0.25)';g.beginPath();g.arc(d.sx,d.sy,18,0,TAU);g.fill();}}
+// ---------- input (captured at the window so it beats the game's own touch handling) ----------
+(function(){let st=null;const pt=(cx,cy)=>toGame(cx,cy);
+ const hit=(x,y,r)=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h;
+ const active=()=>TRR.rumble&&TRR.on&&TRR.cut&&SV.on&&state==='playing'&&!SV.over;
+ function down(cx,cy,e){if(!active())return false;const [x,y]=pt(cx,cy),C=TRR.cut;
+  if(C.open){const Lx=trrCutXLayout();st={x,y,t:performance.now(),k:'x'};if(!hit(x,y,Lx.G)||hit(x,y,Lx.close)){st.k='close';return true;}
+   const i=trrCutStationAt(x,y,Lx.G);if(i>=0&&!SV.crew[i].dead){C.drag={i,sx:x,sy:y,mx:(x-Lx.G.cx)/Lx.G.S,my:(y-Lx.G.cy)/Lx.G.S,moved:false};st.k='drag';return true;}return true;}
+  const P=trrCutGeom();if(hit(x,y,{x:P.x-4,y:P.y-4,w:P.w+8,h:P.h+8})){st={x,y,t:performance.now(),k:'open'};return true;}return false;}
+ function move(cx,cy){if(!st)return false;const [x,y]=pt(cx,cy),C=TRR.cut;if(st.k==='drag'&&C.drag){const Lx=trrCutXLayout();C.drag.sx=x;C.drag.sy=y;C.drag.mx=(x-Lx.G.cx)/Lx.G.S;C.drag.my=(y-Lx.G.cy)/Lx.G.S;if(Math.hypot(x-st.x,y-st.y)>10)C.drag.moved=true;}return true;}
+ function up(cx,cy){if(!st)return false;const [x,y]=pt(cx,cy),C=TRR.cut,s=st;st=null;if(!active()){if(C)C.drag=null;return true;}
+  if(s.k==='open'){if(Math.hypot(x-s.x,y-s.y)<14)trrCutOpen(true);return true;}
+  const Lx=trrCutXLayout();
+  if(s.k==='close'){if(!hit(x,y,Lx.G)||hit(x,y,Lx.close)){C.open=false;sfx('blip');}return true;}
+  if(s.k==='drag'){const d=C.drag;C.drag=null;if(!d)return true;if(d.moved){const j=trrCutStationAt(x,y,Lx.G);if(j>=0&&j!==d.i)trrMoveCrew(d.i,j);else if(j<0)sfx('blip');}else trrMedOn(d.i);return true;}
+  for(const r of Lx.rows)if(hit(x,y,r)){trrRepairPrio(r.id);return true;}
+  for(const k of Lx.cards)if(hit(x,y,k)){if(!SV.crew[k.i].dead)trrMedOn(k.i);else{svSay(SV.crew[k.i].vac?'EMPTY SEAT - DRAG A CREWMAN HERE':SV.crew[k.i].name+' IS OUT FOR THE ROUND',2);}return true;}
+  return true;}
+ const T=(f,pass)=>e=>{const c=pass==='u'?(e.changedTouches[0]):e.changedTouches[0];if(!c)return;if(f(c.clientX,c.clientY,e)){e.preventDefault();e.stopPropagation();}};
+ window.addEventListener('touchstart',T(down),{capture:true,passive:false});window.addEventListener('touchmove',T(move),{capture:true,passive:false});window.addEventListener('touchend',T(up),{capture:true,passive:false});window.addEventListener('touchcancel',()=>{st=null;if(TRR.cut)TRR.cut.drag=null;},{capture:true});
+ const M=f=>e=>{if(f(e.clientX,e.clientY,e)){e.preventDefault();e.stopPropagation();}};
+ window.addEventListener('mousedown',M(down),{capture:true});window.addEventListener('mousemove',M(move),{capture:true});window.addEventListener('mouseup',M(up),{capture:true});
+})();
+
+
 // ---- trr-99-boot.js ----
 // ===================== TRR boot: hooks into the Survival engine, pause menu, dark theme for the old overlays =====================
 {const _s=svStart;svStart=function(type){_s(type);if(TRR.on)trrAfterStart(type);};}
@@ -6848,9 +7609,11 @@ function trrOnFloor(x,y){return !!(TRR.fset&&TRR.fset.size&&TRR.fset.has(Math.fl
 .btn.alt{background:linear-gradient(#2c2f52,#22243f)!important;border-color:#3c4170!important}
 #settings{z-index:70!important}#pause{z-index:45!important}#pauseBtn{z-index:22}`;document.head.appendChild(st);}
 // test-only handle: OFF in normal play. Only exists when the test flag tankRoyalRumble.testHooks=1 is set in storage by the test runner.
-if((()=>{try{return localStorage.getItem('tankRoyalRumble.testHooks')==='1';}catch(_){return false;}})())window.TRRT={TRR,snap:()=>trrSnap(),save:()=>trrSave(true),load:n=>trrLoad(n),fresh:(n,c)=>{trrMenuHide();trrFresh(n||0,c||{});return SV.on;},ev:s=>eval(s),inv:()=>{const o={};for(const k of TRR_RK)o[k]=SV[k]||0;return o;}};
+if((()=>{try{return localStorage.getItem('tankRoyalRumble.testHooks')==='1';}catch(_){return false;}})())window.TRRT={TRR,snap:()=>trrSnap(),save:()=>trrSave(true),load:n=>trrLoad(n),fresh:(n,c)=>{trrMenuHide();trrFresh(n||0,c||{});return SV.on;},rumble:(t)=>{trrRumbleGo(t||'medium');return SV.on;},ev:s=>eval(s),inv:()=>{const o={};for(const k of TRR_RK)o[k]=SV[k]||0;return o;}};
 // boot straight into the TRR menu
 state='title';setTimeout(()=>{trrMenuShow();},0);
+(function(){const st=document.createElement('style');st.textContent='.trrChip{background:#222a58;border-radius:10px;padding:4px 8px;font-weight:700}';document.head.appendChild(st);})();
+(function(){const st=document.createElement('style');st.textContent='#trrPop{z-index:70!important}#trrPopBox{max-height:90vh;overflow:auto}#trrPopBox .trrBtn[disabled]{opacity:.45}';document.head.appendChild(st);})();
 
 
 })();
