@@ -61,10 +61,10 @@ var ST={gfx:LS.g('arcade.gfx')||'auto',fps:LS.g('arcade.fps')==='1',shake:LS.g('
 var lowGfx=ST.gfx==='low',medGfx=ST.gfx==='medium';
 /* ---------- tanks ---------- */
 var TANKS=[
- {id:'ranger',name:'Ranger',desc:'Balanced starter. Special: Dash.',hp:100,spd:215,rate:.5,bs:700,dmg:34,bounce:2,cost:0,sp:'dash',stat:[.5,.5,.6,.5]},
- {id:'bulldog',name:'Bulldog',desc:'Heavy armour, slow big shells. Special: Dash (rams).',hp:175,spd:165,rate:.8,bs:640,dmg:46,bounce:2,cost:140,sp:'dash',stat:[.95,.3,.4,.8]},
- {id:'rattler',name:'Rattler',desc:'NEW. Shells ricochet 5 times and fly fast. Special: Triple bank shot.',hp:90,spd:205,rate:.7,bs:860,dmg:30,bounce:5,cost:260,sp:'triple',stat:[.45,.45,.5,.5],nw:1},
- {id:'phantom',name:'Phantom',desc:'NEW. Fast and fragile. Special: Cloak (bots lose you for 3 s).',hp:72,spd:270,rate:.4,bs:760,dmg:24,bounce:3,cost:360,sp:'cloak',stat:[.3,.95,.8,.4],nw:1}];
+ {id:'ranger',name:'Ranger',desc:'Balanced starter. Special: Dash.',hp:100,spd:93,rate:.55,bs:268,dmg:34,bounce:2,cost:0,sp:'dash',stat:[.5,.5,.6,.5]},
+ {id:'bulldog',name:'Bulldog',desc:'Heavy armour, slow big shells. Special: Dash (rams).',hp:175,spd:70,rate:.85,bs:250,dmg:46,bounce:2,cost:140,sp:'dash',stat:[.95,.3,.4,.8]},
+ {id:'rattler',name:'Rattler',desc:'NEW. Shells ricochet 5 times. Special: Triple bank shot.',hp:90,spd:87,rate:.75,bs:335,dmg:30,bounce:5,cost:260,sp:'triple',stat:[.45,.45,.5,.5],nw:1},
+ {id:'phantom',name:'Phantom',desc:'NEW. Quick and fragile. Special: Cloak (bots lose you for 3 s).',hp:72,spd:118,rate:.42,bs:292,dmg:24,bounce:3,cost:360,sp:'cloak',stat:[.3,.95,.8,.4],nw:1}];
 var COLORS=['#2f7bd9','#e06a2c','#3fae5a','#b04ad0','#e8c33a','#d84a5a'];
 var BOTC=['#e06a2c','#d84a5a','#3fae5a','#b04ad0','#e8c33a','#2fb8b0','#8a8f9a'];
 var SV={coins:0,owned:['ranger'],sel:'ranger',color:0,wins:0,played:0,kills:0,best:0};
@@ -184,7 +184,7 @@ function botThink(t,dt){
 function moveTank(t,mx,my,dt){
   var m=Math.hypot(mx,my);var sp=t.sp.spd*(t.dash>0?2.3:1);
   t.vx=0;t.vy=0;
-  if(m>.05){var want=Math.atan2(my,mx);var d=angd(want,t.a);var tr=8*dt;t.a+=Math.max(-tr,Math.min(tr,d));var f=Math.max(0,Math.cos(angd(want,t.a)));var sc=Math.min(1,m)*f;t.vx=Math.cos(t.a)*sp*sc;t.vy=Math.sin(t.a)*sp*sc;t.trk+=sc*dt*6;}
+  if(m>.05){var want=Math.atan2(my,mx);var d=angd(want,t.a);var tr=4.2*dt;t.a+=Math.max(-tr,Math.min(tr,d));var f=Math.max(0,Math.cos(angd(want,t.a)));var sc=Math.min(1,m)*f;t.vx=Math.cos(t.a)*sp*sc;t.vy=Math.sin(t.a)*sp*sc;t.trk+=sc*dt*6;}
   t.x+=t.vx*dt;t.y+=t.vy*dt;
   for(var it=0;it<2;it++)for(var k=0;k<walls.length;k++){var w=walls[k];if(Math.abs(w.x+w.w/2-t.x)>w.w/2+t.r+4||Math.abs(w.y+w.h/2-t.y)>w.h/2+t.r+4)continue;var c=circRect(t.x,t.y,t.r,w);if(c){t.x+=c.nx*c.pen;t.y+=c.ny*c.pen;if(t.bot)t.stuck+=dt;}}
   for(var q=0;q<G.tanks.length;q++){var o=G.tanks[q];if(o===t||!o.alive)continue;var dx=t.x-o.x,dy=t.y-o.y,d=Math.hypot(dx,dy);if(d<t.r+o.r&&d>.01){var p=(t.r+o.r-d)/2;t.x+=dx/d*p;t.y+=dy/d*p;o.x-=dx/d*p;o.y-=dy/d*p;}}
