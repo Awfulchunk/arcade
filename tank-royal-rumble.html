@@ -427,7 +427,7 @@ const DIFF={easy:{inacc:1.8,react:1.5,turn:0.8,dmg:0.6},normal:{inacc:1,react:1,
 // shared keys exist in both the main settings and the Custom Game setup (Custom Game uses its own copy while a custom match runs)
 const GFX_PRESETS={low:{particles:'lite',blood:true,smoke:'lite',shadows:false,dpr:1},med:{particles:'full',blood:true,smoke:'full',shadows:true,dpr:1.5},high:{particles:'full',blood:true,smoke:'full',shadows:true,dpr:2}};
 const SHARED_DEF={gore:'max',ctrl:'twin',autoFire:false,stickPos:'float',smoothCam:true,lookAhead:true,ownShake:false,shakeAmt:50,
-  gfx:'med',theme:'gritty',particles:'full',blood:true,smoke:'full',shadows:true,fps:false,orient:'auto',sideNotice:false,svView:'iso',svMapSize:'small',svHandling:'real',svAutoAim:true,svAimStr:60,svRivals:'auto',svDayLen:12,svAlwaysDay:false,svFireVis:'normal',svBuildCost:'normal',svGhillie:true,svGrab:true,svHostages:true,svInterrog:true,svSabotage:true,svAssault:true,svJam:true,svSnipers:true,svCarWrecks:true,svMorale:true,svDetMul:'normal',svGrabDiff:'normal',svIntSucc:'normal',svHostEsc:90,svPermadeath:false,svExtract:false,mzCity:true,mzCiv:'auto',mzCivOn:true,mzMemory:true,mzFlank:true,mzTeam:true,mzRetreat:true};
+  gfx:'med',theme:'gritty',particles:'full',blood:true,smoke:'full',shadows:true,fps:false,orient:'auto',sideNotice:false,svView:'top',svMapSize:'small',svHandling:'real',svAutoAim:true,svAimStr:60,svRivals:'auto',svDayLen:12,svAlwaysDay:false,svFireVis:'normal',svBuildCost:'normal',svGhillie:true,svGrab:true,svHostages:true,svInterrog:true,svSabotage:true,svAssault:true,svJam:true,svSnipers:true,svCarWrecks:true,svMorale:true,svDetMul:'normal',svGrabDiff:'normal',svIntSucc:'normal',svHostEsc:90,svPermadeath:false,svExtract:false,mzCity:true,mzCiv:'auto',mzCivOn:true,mzMemory:true,mzFlank:true,mzTeam:true,mzRetreat:true};
 const SHARED_KEYS=Object.keys(SHARED_DEF);
 const settings=Object.assign({sound:true,tank:'medium',sticks:{}},SHARED_DEF);
 try{const o=JSON.parse(localStorage.getItem(LS+'settings')||'{}');
@@ -2800,7 +2800,7 @@ function sharedSchema(isCustom){return[
   {k:'smoke',l:'Smoke',t:'opt',o:[['full','FULL'],['lite','LITE']]},
   {k:'shadows',l:'Shadows',t:'bool'},
   {k:'fps',l:'FPS + frame-time graph',t:'bool'},
-  {k:'svView',l:'Survival view',t:'opt',o:isCustom?[['iso','ZOMBOID ISO'],['flat','FLAT TOP-DOWN'],['true','TRUE ISOMETRIC'],['34','3/4 ANGLED (RPG)']]:[['iso','ZOMBOID ISO'],['flat','FLAT TOP-DOWN']]},
+  {k:'svView',l:'Survival view',t:'opt',o:isCustom?[['top','TOP-DOWN (default)'],['iso','ANGLED ISO'],['flat','OLD FLAT'],['true','TRUE ISOMETRIC'],['34','3/4 ANGLED (RPG)']]:[['top','TOP-DOWN (default)'],['iso','ANGLED ISO'],['flat','OLD FLAT']]},
   {k:'svMapSize',l:'Map size (Survival)',t:'opt',o:[['small','SMALL'],['big','BIG 3x'],['huge','HUGE 5x'],['monster','MONSTER 10x']]},
   {k:'svHandling',l:'Tank handling (Survival)',t:'opt',o:[['real','REALISTIC'],['arcade','ARCADE']]},
   {k:'svAutoAim',l:'Auto aim & fire (Survival control)',t:'bool'},
@@ -3730,9 +3730,9 @@ Object.assign(TMIO.surv,{
 // All views are one affine ground projection [a b; c d] + a screen-up height axis (hz), so the ground layer is drawn with ctx.setTransform
 // and taps/pan/sticks go back through the inverse. Depth sort = projected ground screen-y (c*x+d*y, i.e. x+y in iso).
 // CHUNK B hooks: svIsoTank (detailed hull/hatch/rolling links/exhaust), svIsoMan (uniform/walk/crawl/aim anims), SV_HOUSE_H.
-const SV_PROJ={iso:{a:0.7071,b:-0.7071,c:0.3536,d:0.3536,hz:0.9},true:{a:0.7071,b:-0.7071,c:0.4082,d:0.4082,hz:0.82},'34':{a:1,b:0,c:0,d:0.7,hz:0.75}};
+const SV_PROJ={top:{a:1,b:0,c:0,d:1,hz:0.05},iso:{a:0.7071,b:-0.7071,c:0.3536,d:0.3536,hz:0.9},true:{a:0.7071,b:-0.7071,c:0.4082,d:0.4082,hz:0.82},'34':{a:1,b:0,c:0,d:0.7,hz:0.75}};
 const SV_HOUSE_H=46;
-function svView(){const cv_=custom&&custom.svView;if(cv_&&cv_!=='iso'&&SV_PROJ[cv_]||cv_==='flat')return cv_;return settings.svView==='flat'?'flat':'iso';}
+function svView(){const cv_=custom&&custom.svView;if(cv_&&cv_!=='iso'&&cv_!=='top'&&SV_PROJ[cv_]||cv_==='flat')return cv_;const sv_=settings.svView;return sv_==='flat'?'flat':sv_==='iso'?'iso':'top';} /* 2.7.0: top-down (same art, straight-down camera) is the default */
 function svIsoOn(){return SV.on&&svView()!=='flat';}
 const IP={a:1,b:0,c:0,d:1,hz:1,z:1,cx:0,cy:0,S:1,sx:0,sy:0};
 function svIsoSetup(){const p=SV_PROJ[svView()]||SV_PROJ.iso;IP.a=p.a;IP.b=p.b;IP.c=p.c;IP.d=p.d;IP.hz=p.hz;IP.z=svZ();IP.cx=camX+VW/2;IP.cy=camY+VH/2;}
@@ -3936,7 +3936,7 @@ function svPickIso(sx,sy,wx,wy){const t=SV.tank,u=IP.z;svIsoSetup();
   return{k:'ground'};}
 function svPanBy(dx,dy){if(svIsoOn()){svIsoSetup();const w=isoDir(dx,dy);SV.panX-=w[0]/svZ();SV.panY-=w[1]/svZ();}else{SV.panX-=dx/svZ();SV.panY-=dy/svZ();}}
 function svStickW(x,y){if(!svIsoOn()||(!x&&!y))return[x,y];svIsoSetup();const m=Math.hypot(x,y),w=isoDir(x,y),l=Math.hypot(w[0],w[1])||1;return[w[0]/l*m,w[1]/l*m];}
-Object.assign(TMIO.surv,{view(){return svView();},setView(v){if(v==='flat'||v==='iso'){settings.svView=v;custom.svView='iso';}else{custom.svView=v;}return svView();},
+Object.assign(TMIO.surv,{view(){return svView();},setView(v){if(v==='flat'||v==='iso'||v==='top'){settings.svView=v;custom.svView='iso';}else{custom.svView=v;}return svView();},
   isoS(x,y,h){svIsoSetup();return isoS(x,y,h||0);},renderIso(){svRenderIso();},isoOrder(){return SV.isoOrder||[];},houseFade(id){const h=SV.map.houses[id];return h.fade==null?1:+h.fade.toFixed(3);},isoDrawn(){return SV.isoDrawn||0;},isoChunks(){return SV.isoChunks||0;},
   crewTapXY(role){svIsoSetup();const c=SV.crew[SV_ROLES.indexOf(role)];return svIsoOn()?isoS(c.x,c.y,9):svW2S(c.x,c.y);}});
 // ---- v11: Survival detail pass (chunk B) ----
@@ -5298,7 +5298,7 @@ document.title='Tank Royal Rumble';
 const TRR={on:false,slot:0,seed:1234,cfg:{},stash:null,base:null,autoT:45,day:1,dead:{},looted:new Set(),stripped:new Set(),tanks:[],saveT:0,ver:1};
 const TRR_LS='tankRoyalRumble.';
 // main-game defaults (Custom Game can change any of them per save)
-const TRR_DEF={svMapSize:'huge',svView:'iso',svDayLen:18,svRivals:'off',svExtract:false,svGrab:false,svHostages:false,svInterrog:false,svSabotage:false,svAssault:false,svJam:false,svSnipers:false,svGhillie:false,svCarWrecks:true,svMorale:true,svPermadeath:false,
+const TRR_DEF={svMapSize:'huge',svView:'top',svDayLen:18,svRivals:'off',svExtract:false,svGrab:false,svHostages:false,svInterrog:false,svSabotage:false,svAssault:false,svJam:false,svSnipers:false,svGhillie:false,svCarWrecks:true,svMorale:true,svPermadeath:false,
  svAutoAim:true,svHandling:'real'};
 {const _C=C;C=function(k){const c=TRR.cfg;if(c&&c[k]!==undefined)return c[k];if(TRR_DEF[k]!==undefined&&(settings[k]===undefined||k.indexOf('sv')===0&&!TRR_SET_KEYS.has(k)))return TRR_DEF[k];return _C(k);};}
 const TRR_SET_KEYS=new Set(['svView','svHandling','svAutoAim','svAimStr','svFireVis']); // these stay player Settings, the rest are per-save game rules
@@ -6640,6 +6640,77 @@ function trrDrawBars(g){const V=TRR._vr;if(!V||!(V[0]>0||V[1]>0))return;g.fillSt
   hud.items.push({k:'trrHints',l:'Hint line',d:'Shows little tips like "tap ground to drive" above the buttons.',t:'bool',th:'text',get:()=>!!settings.trrHints,set:v=>{settings.trrHints=v;saveSettings();}});
   const TH2={hudFade:'hud',hudOpacity:'hud',stickSize:'stick',ctrl:'stick',trrNight:'light'};for(const c of S.cats)for(const it of c.items)if(TH2[it.k])it.th=TH2[it.k];
   return S;};}
+
+
+// ---- trr-91-view270.js ----
+/* 2.7.0: top-down view default (one-time migration of old saves that were on the angled ISO view) */
+try{if(!settings.v270view){settings.svView='top';settings.v270view=1;if(typeof saveSettings==='function')saveSettings();}}catch(e){}
+
+
+// ---- trr-91b-joy270.js ----
+/* 2.7.0: analog joystick driving for the tank. Left half of the screen = drive stick (how far you push = how fast), right half = aim + fire stick.
+   A quick tap (under 0.25 s, no drag) still gives the normal tap command (move here, target, etc.). Off in Settings = the old tap/pan controls. */
+const TRRJ={m:new Map(),on:false,drv:false,aim:false,hold:0};
+function trrJoyOn(){return !!(TRR.on&&settings.trrJoy!==false&&!SV.ctl&&!SV.layout&&state==='playing'&&!SV.place&&!SV.bmenu&&!SV.ring&&!(TRR.cut&&TRR.cut.open));}
+function trrJoyBlocked(x,y){
+  if(typeof trrTabRects==='function')for(const r of trrTabRects())if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return true;
+  if(typeof trrMiniGeom==='function'){const M=trrMiniGeom();if(x>=M.mx&&x<=M.mx+M.ms&&y>=M.my&&y<=M.my+M.ms)return true;}
+  for(const b of svBarButtons())if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return true;
+  for(const b of svP3Buttons())if(Math.hypot(x-b.x,y-b.y)<=b.r+6)return true;
+  const R=svLayoutBtnRect();if(x>=R.x&&x<=R.x+R.w&&y>=R.y&&y<=R.y+R.h)return true;
+  if(typeof trrCutGeom==='function'){const P=trrCutGeom();if(x>=P.x-4&&x<=P.x+P.w+4&&y>=P.y-4&&y<=P.y+P.h+4)return true;}
+  if(y<(typeof trrStripBottom==='function'?trrStripBottom()+6:60))return true;
+  return false;}
+{const _a=svStickStart,_b=svStickMove,_c=svStickEnd;
+ svStickStart=function(id,x,y){if(!trrJoyOn())return _a(id,x,y);if(trrJoyBlocked(x,y))return false;const side=x<W/2?'L':'R';for(const v of TRRJ.m.values())if(v.side===side)return false;
+   TRRJ.m.set(id,{side,ox:x,oy:y,x,y,t0:performance.now(),maxd:0});return true;};
+ svStickMove=function(id,x,y){const v=TRRJ.m.get(id);if(!v)return _b(id,x,y);v.x=x;v.y=y;const dx=x-v.ox,dy=y-v.oy,d=Math.hypot(dx,dy),k=d>50?50/d:1;v.maxd=Math.max(v.maxd,d);
+   if(v.side==='L'){SV.stick.lx=dx*k/50;SV.stick.ly=dy*k/50;}else{SV.stick.rx=dx*k/50;SV.stick.ry=dy*k/50;SV.stick.rOn=d>8;}return true;};
+ svStickEnd=function(id){const v=TRRJ.m.get(id);if(!v)return _c(id);TRRJ.m.delete(id);if(v.side==='L'){SV.stick.lx=SV.stick.ly=0;}else{SV.stick.rx=SV.stick.ry=0;SV.stick.rOn=false;}
+   if(v.maxd<10&&performance.now()-v.t0<250&&state==='playing'){try{svTap(v.ox,v.oy);}catch(e){}}return true;};}
+// drive + aim
+{const _stu=svTankUpdate;svTankUpdate=function(dt){const t=SV.tank;let drive=false,mag=0;
+  if(trrJoyOn()&&t.alive){const S=SV.stick,m=Math.hypot(S.lx,S.ly);
+   if(m>0.18){const w=svStickW(S.lx,S.ly),L=Math.hypot(w[0],w[1])||1;mag=Math.min(1,(m-0.12)/0.78);t.path=[[t.x+w[0]/L*90,t.y+w[1]/L*90]];drive=true;t.joyDrive=true;}
+   else if(t.joyDrive){t.path=null;t.joyDrive=false;}}
+  else if(t.joyDrive){t.joyDrive=false;if(!SV.ctl)t.path=null;}
+  TRRJ.drv=drive;
+  _stu(dt);
+  if(drive){const T=t.T,cap=T.speed*SV_SPD*svHandMul()*svTankSpeedMul()*Math.max(0.15,mag);if(t.spd>cap)t.spd=cap;if(t.path&&t.path.length&&Math.hypot(t.path[0][0]-t.x,t.path[0][1]-t.y)<t.r+6)t.path=[[t.x+Math.cos(t.body)*90,t.y+Math.sin(t.body)*90]];}
+  TRRJ.aim=false;
+  if(trrJoyOn()&&t.alive){const S=SV.stick,m=Math.hypot(S.rx,S.ry);
+   if(S.rOn&&m>0.3){const w=svStickW(S.rx,S.ry),a=Math.atan2(w[1],w[0]),T=t.T;TRRJ.aim=true;t.target=null;
+    if(T.fixed){if(svCanDrive())t.body+=clamp(angDiff(a,t.body),-T.turn*dt,T.turn*dt);t.turret=t.body;}
+    else t.turret+=clamp(angDiff(a,t.turret),-T.turret*svTurretMul()*dt*1.2,T.turret*svTurretMul()*dt*1.2);
+    const jam=!T.fixed&&svTurretMul()===0;
+    if(!jam&&Math.abs(angDiff(a,t.turret))<0.1&&t.reload<=0){if(svGunner()){const rng=Math.min(shellRange(T),T.lob?T.maxR:9999),d=Math.min(rng,Math.max(T.lob?T.minR*0.6:60,m*rng));svFireTank(t.x+Math.cos(a)*d,t.y+Math.sin(a)*d);}else if(!SV.noAmmoT){svSay('NO GUNNER IN THE TANK',2);SV.noAmmoT=2;}}}}
+ };}
+// stick rings
+TRR_HOOK.hud.push(()=>{if(!trrJoyOn())return;const g=ctxMain;g.save();g.setTransform(DPR,0,0,DPR,0,0);g.textAlign='center';
+  const act=side=>{for(const v of TRRJ.m.values())if(v.side===side)return v;return null;};
+  for(const [side,hx,hy,lab,col] of [['L',safe.l+84,H*0.6,'DRIVE','76,217,255'],['R',W-safe.r-96,H*0.6,'AIM + FIRE','255,110,80']]){const v=act(side),ox=v?v.ox:hx,oy=v?v.oy:hy;let kx=ox,ky=oy;if(v){const dx=v.x-v.ox,dy=v.y-v.oy,d=Math.hypot(dx,dy),k=d>50?50/d:1;kx=ox+dx*k;ky=oy+dy*k;}
+   g.globalAlpha=v?0.7:0.2;g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(ox,oy,50,0,TAU);g.stroke();g.fillStyle='rgba('+col+',0.65)';g.beginPath();g.arc(kx,ky,20,0,TAU);g.fill();g.globalAlpha=v?0.8:0.3;g.fillStyle='#fff';g.font='bold 8px sans-serif';g.fillText(lab,ox,oy+62);}
+  g.restore();});
+// settings switch
+{const _s=suTankSpec;suTankSpec=function(){const S=_s();if(!TRR.on&&!document.getElementById('trrMenu'))return S;
+  let c=S.cats.find(c=>c.id==='trr25');if(!c){c={id:'trr25',name:'Tank Rumble & Night',icon:'🏆',items:[]};S.cats.push(c);}
+  c.items.unshift({k:'trrJoy',l:'Joystick drive (analog)',d:'On: the left half of the screen is a drive stick (push further = faster), the right half aims and fires. A quick tap still sends a command. Off: tap to drive, drag to pan.',t:'bool',get:()=>settings.trrJoy!==false,set:v=>{settings.trrJoy=!!v;saveSettings();},th:'text'});
+  return S;};}
+window.__trrJoy=TRRJ;
+
+
+// ---- trr-91c-near270.js ----
+/* 2.7.0: building and scavenging need your TANK close to the spot. (The mechanics stay; you can no longer build or loot a house from across the map.) */
+const TRR_NEAR_B=330,TRR_NEAR_S=300;
+function trrTankNear(x,y,r){const t=SV.tank;return !!t&&Math.hypot(t.x-x,t.y-y)<=r;}
+{const _pc=trrPlaceCheck;trrPlaceCheck=function(k,gx,gy,side,tier){const w=_pc(k,gx,gy,side,tier);if(w)return w;
+  if(TRR.on&&!TRR.rumble&&!trrTankNear(gx*BT+BT/2,gy*BT+BT/2,TRR_NEAR_B))return 'Move your tank closer to build here';return '';};}
+{const _pp=trrPlacePrefab;trrPlacePrefab=function(id,gx,gy,free,list){if(!free&&TRR.on&&!TRR.rumble&&!trrTankNear(gx*BT+BT/2,gy*BT+BT/2,TRR_NEAR_B)){svSay('MOVE YOUR TANK CLOSER TO BUILD HERE',2.5);sfx('blip');return false;}return _pp(id,gx,gy,free,list);};}
+{const _cm=svCommand;svCommand=function(c,cmd,arg){
+  if(cmd==='scavenge'&&TRR.on&&!TRR.rumble&&c&&SV.crew.includes(c)){let h=arg||SV.house;if(!h||h.empty){let bd=1e9;h=null;for(const o of SV.map.houses){if(o.empty)continue;const d=Math.hypot(o.door.x-c.x,o.door.y-c.y);if(d<bd){bd=d;h=o;}}}
+   if(h&&!trrTankNear(h.door.x,h.door.y,TRR_NEAR_S)&&!trrTankNear(h.x+h.w/2,h.y+h.h/2,TRR_NEAR_S)){svSay('MOVE YOUR TANK CLOSER TO THE '+String(h.kind||'house').toUpperCase()+' FIRST',3);sfx('blip');c.task=c.inTank?'idle':c.task;return false;}}
+  return _cm(c,cmd,arg);};}
+{const _si=svInteract;svInteract=function(id){const c=SV.ctl;if(c&&TRR.on&&!TRR.rumble){const L=svInteractList(c),a=L.find(x=>x.id===id)||(!id&&L[0]);if(a&&a.id==='scavenge'&&a.h&&!trrTankNear(a.h.door.x,a.h.door.y,TRR_NEAR_S)&&!trrTankNear(a.h.x+a.h.w/2,a.h.y+a.h.h/2,TRR_NEAR_S)){svSay('MOVE YOUR TANK CLOSER TO THE '+String(a.h.kind||'house').toUpperCase()+' FIRST',3);sfx('blip');return false;}}return _si(id);};}
 
 
 // ---- trr-92-patch.js ----
