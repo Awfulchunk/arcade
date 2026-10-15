@@ -1,7 +1,9 @@
 <!doctype html><html><head><meta name="theme-color" content="#151a33"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tough &amp; J's Arcade - Download</title>
 <style>html{background:#120f26}body{font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Rounded",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;min-height:100vh;background:radial-gradient(120% 80% at 50% 0%,#232a52 0%,#171c38 55%,#120f26 100%) fixed;color:#e7eaf6;text-align:center;padding:40px 20px}h1{color:#f1f3fb;font-weight:900}h3{color:#a3abcc;margin-top:34px;letter-spacing:.06em;text-transform:uppercase;font-size:14px}a{display:block;margin:16px auto;max-width:340px;padding:18px;border-radius:16px;background:linear-gradient(180deg,#5b6cff,#4253d6);color:#fff;font-size:20px;font-weight:800;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.35)}a.p{background:#262e57;border:1px solid #343d6e;font-size:17px}a.o{background:#1f2647;border:1px solid #343d6e;color:#cfd5f3;font-size:15px;padding:12px;font-weight:700}p{color:#a3abcc;max-width:360px;margin:8px auto;line-height:1.4}</style></head>
 <body><h1>Tough & J's Arcade</h1>
-<p>New in 2.5.2 (Cartridge only). Big Files now takes ANY size (143 MB+ files read in small slices, no 4 MB block; files over 4 MB loaded from the shelf go to Big Files). Pick the part size (5/10/20/50 MB) and part file type, and tick a checkbox on every part to track what you sent (saved). NEW: Upload to Tough button with a green/red server light. The app now has Internet permission, used only for that button and light. Also: <a href="todo.html">Jay's to-do list page</a>.</p>
+<p>New in 2.5.3 (Cartridge splitter fix only). Parts are now 22 MB by default (always 20.99-23.99 MB so they fit a 25 MB chat; the last part is the leftover), with 21 / 23.9 / 10 / 5 MB options. Fixed the empty and oversized parts: saves now go one at a time and every part is cut, checked (size and bytes) and verified on the phone before it shows "checked &amp; saved"; a bad part is re-cut automatically. Each part's size is listed.</p>
+<a href="ToughAndJsArcade-2.5.3.apk" download>Download Android APK (2.5.3)</a>
+<p>2.5.2 (Cartridge only). Big Files now takes ANY size (143 MB+ files read in small slices, no 4 MB block; files over 4 MB loaded from the shelf go to Big Files). Pick the part size (5/10/20/50 MB) and part file type, and tick a checkbox on every part to track what you sent (saved). NEW: Upload to Tough button with a green/red server light. The app now has Internet permission, used only for that button and light. Also: <a href="todo.html">Jay's to-do list page</a>.</p>
 <a href="ToughAndJsArcade-2.5.2.apk" download>Download Android APK (2.5.2)</a>
 <p>2.5.1 (mode audit for Tank Royal Rumble). Tank Rumble is now a pure tank battle: no wood from crushing trees, no clock or night, no weather, no zombies, no hunger, no pack/build panels, no headlights. Survival gets none of Rumble. Also: patch kit shields the next hit, med kits heal over 8 seconds, turbo runs the engine hot, knocked-out bots drop crates, hurt bots run away, crew perks in the Garage, Q cycles ammo, crate amount and slow-motion settings, Back to Arcade on the round-over screen.</p>
 <a href="ToughAndJsArcade-2.5.1.apk" download>Download Android APK (2.5.1)</a>
@@ -32,7 +34,7 @@
 <p>2.4.5: DOT.IO v2. Bigger bubbles swallow smaller ones on contact, Chip shots do real damage, and 6 snakes roam: missiles lock onto their heads, their bodies block shots and kill any bubble that touches them, 5 head hits kill one. Play as a bubble or a snake (smooth tight turns, Boost button). DOT.IO v1 and STANDING STILL are still in there.</p>
 <a class="p" href="dot-io-v1.html">Play DOT.IO v1</a>
 <p>Tap the button. It saves tough-and-js-arcade.html. Then in the app tap Update and pick that file. No unzip.</p>
-<a id="still" href="tough-and-js-arcade.html" download="tough-and-js-arcade.html">Download menu update (2.5.2 arcade)</a>
+<a id="still" href="tough-and-js-arcade.html" download="tough-and-js-arcade.html">Download menu update (2.5.3 arcade)</a>
 <p>Tap the button. It saves tough-and-js-arcade.html. In the app tap Update and pick that file. No unzip.</p>
 <script>
 document.getElementById("still").addEventListener("click",function(e){
@@ -43,8 +45,8 @@ document.getElementById("still").addEventListener("click",function(e){
     a.href=URL.createObjectURL(new Blob([b],{type:"application/octet-stream"}));
     a.download="tough-and-js-arcade.html";
     document.body.appendChild(a); a.click(); a.remove();
-    el.textContent="Download menu update (2.5.2 arcade)";
-  }).catch(function(){ el.textContent="Download menu update (2.5.2 arcade)"; location.href="tough-and-js-arcade.html"; });
+    el.textContent="Download menu update (2.5.3 arcade)";
+  }).catch(function(){ el.textContent="Download menu update (2.5.3 arcade)"; location.href="tough-and-js-arcade.html"; });
 });
 </script>
 <a href="dot-io-update.zip" download>Download DOT.IO menu update</a>
