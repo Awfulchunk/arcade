@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d10">
-<title>Tank Royal Rumble</title>
+<title>Tank Royal Rumble</title><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta name="trr-build" content="2.5.4">
 <style>
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#07040c;color:#eee;
   touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none;
@@ -5448,7 +5448,7 @@ function trrApplyHooks(S){for(const f of TRR_HOOK.apply)f(S);}
 <div id="trrPop"><div class="box" id="trrPopBox"></div></div>`;
  while(d.firstChild)document.body.appendChild(d.firstChild);})();
 function trrAgo(t){const s=(Date.now()-t)/1000;return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<172800?Math.round(s/3600)+' h ago':Math.round(s/86400)+' days ago';}
-function trrMenuShow(){const B=$('trrMenuBox');TRR.on=false;let h=`<div class="trrTitle">TANK ROYAL<br>RUMBLE<small>SURVIVE · BUILD · RAID</small></div><div class="trrSub">One huge world. A junk tank, four crew, and everyone wants your stuff.</div>`;
+function trrMenuShow(){const B=$('trrMenuBox');TRR.on=false;let h=`<div class="trrTitle">TANK ROYAL<br>RUMBLE<small>SURVIVE · BUILD · RAID · v2.5.4</small></div><div class="trrSub">One huge world. A junk tank, four crew, and everyone wants your stuff.</div>`;
  const last=+(localStorage.getItem(TRR_LS+'last')||-1),LS_=trrReadSlot(last);
  if(LS_)h+=`<button class="trrBtn" id="trrCont">▶ CONTINUE  <span style="opacity:.75;font-weight:600">(slot ${last+1} · day ${LS_.day||1})</span></button>`;
  h+=`<div class="trrH">SAVE SLOTS</div>`;
@@ -7618,6 +7618,18 @@ function trrCutDrawX(g){const C=TRR.cut,t=SV.tank,Lx=trrCutXLayout(),G=Lx.G;g.fi
 
 {const _d=trrDD;trrDD=function(){const v=_d();return (TRR.rumble&&TRR.on&&SV.on&&!trrStOK(0))?Math.max(40,Math.round(v*0.5)):v;};}
 // optional slow motion while the cutaway is open (Settings)
+
+
+// ---- trr-98-fix254.js ----
+// ===================== 2.5.4: Tank Rumble minimap zone ring + build stamp =====================
+const TRR_BUILD='2.5.4';
+// the shrinking zone ring on the minimap and on the full-screen map (Tank Rumble only)
+{const _d=svMiniDots;svMiniDots=function(ox,oy,k,clip){_d(ox,oy,k,clip);
+ const Z=TRR.brz;if(!(TRR.rumble&&TRR.on&&Z&&SV.map))return;const g=ctx,cx=ox+Z.x*k,cy=oy+Z.y*k,r=Math.max(1,Z.r*k);
+ g.save();g.beginPath();g.rect(ox,oy,SVW*k,SVH*k);g.clip();
+ g.fillStyle='rgba(40,70,255,0.28)';g.beginPath();g.rect(ox-4,oy-4,SVW*k+8,SVH*k+8);g.arc(cx,cy,r,0,TAU,true);g.fill('evenodd');
+ g.strokeStyle='#7fa8ff';g.lineWidth=Math.max(1.5,Math.min(3,k*500));g.beginPath();g.arc(cx,cy,r,0,TAU);g.stroke();
+ g.restore();};}
 
 
 // ---- trr-99-boot.js ----
