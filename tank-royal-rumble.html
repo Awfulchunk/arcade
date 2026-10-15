@@ -6047,7 +6047,8 @@ function trrPanelRender(){if(!TRR.tab)return;const id=TRR.tab,bd=$('trrPanBd'),t
   h+=`<div class="trrH">PARKED TANKS (${TRR.tanks.length}/${trrParkCap()})</div>`;if(!TRR.tanks.length)h+=`<div class="trrSub" style="text-align:left">No spare tanks yet. Craft a tank kit at workbench 3, or capture one.</div>`;
   TRR.tanks.forEach((q,i)=>{h+=`<div class="trrItem">${trrIconHTML('tank')}<div class="tx"><b>${TYPES[q.type].name}</b><i>HP ${Math.round(q.hp)}/${TYPES[q.type].hp}</i></div><button data-swap="${i}" ${at?'':'disabled'}>DRIVE</button></div>`;});
   const kits=['light','medium','heavy','flame'].filter(k=>TRR.items['kit_'+k]>0);if(kits.length){h+=`<div class="trrH">TANK KITS</div>`;for(const k of kits)h+=`<div class="trrItem">${trrIconHTML('tank')}<div class="tx"><b>${TYPES[k].name} kit × ${TRR.items['kit_'+k]}</b><i>Put it together into a new tank.</i></div><button data-kit="${k}" ${at?'':'disabled'}>BUILD</button></div>`;}
-  h+=`<div class="trrH">PAINT</div><div class="trrInv">${trrPaintKeys().map(k=>`<div data-paint="${k}" style="cursor:pointer;${(TRR.paint||'none')===k?'outline:2px solid #ffd54a':''}"><small>${k.toUpperCase()}</small><b style="display:block;height:12px;border-radius:4px;background:${TRR_PAINT[k]?TRR_PAINT[k].base:'repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)'}"></b></div>`).join('')}</div>`;}
+  h+=`<div class="trrH">PAINT</div><div class="trrInv">${trrPaintKeys().map(k=>`<div data-paint="${k}" style="cursor:pointer;${(TRR.paint||'none')===k?'outline:2px solid #ffd54a':''}"><small>${k.toUpperCase()}</small><b style="display:block;height:12px;border-radius:4px;background:${TRR_PAINT[k]?TRR_PAINT[k].base:'repeating-linear-gradient(45deg,#555 0 4px,#333 4px 8px)'}"></b></div>`).join('')}</div>`
+  h+=`<div class="trrH">CREW PERKS</div>`+TRR_ROLEK.map((r,i)=>{const pk=TRR_PERKS[trrProg().perks[r]]||{n:'-',d:''};return `<div class="trrItem"><div class="tx"><b>${['CAPTAIN','GUNNER','MECHANIC','MEDIC'][i]}</b><i>${pk.n}: ${pk.d}</i></div><button data-pkg="${r}">CHANGE</button></div>`;}).join('')+`<div class="trrSub" style="text-align:left;font-size:10px">More perks unlock as you survive nights and play Tank Rumble rounds.</div>`;}
  bd.innerHTML=h;trrPaintIcons(bd);if(id==='garage')trrDrawDiagram($('trrDiag'));
  const each=(sel,f)=>bd.querySelectorAll(sel).forEach(b=>b.onclick=()=>{f(b);trrPanelRender();});
  each('[data-eat]',b=>svEat(SV.crew[+b.dataset.eat],true));each('[data-drink]',b=>trrDrink(SV.crew[+b.dataset.drink]));each('[data-med]',b=>{const c=SV.crew[+b.dataset.med];if(SV.med>0){SV.med--;c.hp=100;sfx('pick');}});
@@ -6056,6 +6057,7 @@ function trrPanelRender(){if(!TRR.tab)return;const id=TRR.tab,bd=$('trrPanBd'),t
  each('[data-dep]',()=>trrDeposit());each('[data-trip]',()=>trrPackTrip());each('[data-take]',b=>trrTake(b.dataset.take,10));each('[data-fuel]',()=>{const n=Math.min(TRR.stash.gas,(SV.gasMax||100)-SV.gas);TRR.stash.gas-=n;SV.gas+=n;sfx('pick');});
  each('[data-rep]',()=>trrFullRepair());each('[data-od]',()=>{TRR.od=!TRR.od;svSay(TRR.od?'⛽ OVERDRIVE ON - FAST BUT HOT':'OVERDRIVE OFF',2);});each('[data-swap]',b=>trrSwapTank(+b.dataset.swap));each('[data-kit]',b=>trrBuildKit(b.dataset.kit));
  each('[data-paint]',b=>{TRR.paint=b.dataset.paint==='none'?null:b.dataset.paint;});
+ each('[data-pkg]',b=>{trrPerkCycle(b.dataset.pkg);sfx('blip');});
  if(typeof trrPanelExtraBind==='function')trrPanelExtraBind(bd,each);}
 function trrItemName(k){return({spike:'🪤 SPIKE TRAPS',mine:'💣 LANDMINES',satchel:'🧨 SATCHELS',c4:'🧨 C4',kit_light:'🛠 LIGHT KIT',kit_medium:'🛠 MEDIUM KIT',kit_heavy:'🛠 HEAVY KIT',kit_flame:'🛠 FLAME KIT',caltrop:'📌 CALTROPS'})[k]||k.toUpperCase();}
 function trrUpkeepTxt(){const c=trrUpkeepCost();if(!Object.keys(c).length)return trrTC()?'nothing to pay':'no tool cupboard!';return trrCostTxt(c)+' / min'+(TRR.upkeepOK===false?' ⚠ NOT PAID':'');}
@@ -7216,17 +7218,17 @@ function trrSkinOK(k){const r=TRR_SKINREQ[k];if(!r)return true;const P=trrProg()
 function trrSkinNeed(k){const r=TRR_SKINREQ[k];if(!r)return '';return r.wins?'win '+r.wins+' Rumble round'+(r.wins>1?'s':''):'play '+r.rounds+' rounds / survive nights';}
 function trrPaintKeys(){return Object.keys(TRR_PAINT).filter(trrSkinOK);}
 // ---- tanks you can start a Rumble round in ----
-const TRR_RUMBLE_TANKS=[['light',null],['medium',null],['heavy','Finish top 10 in Rumble once'],['td','Finish top 5 in Rumble once'],['flame','Win a Rumble round'],['artillery','Win 3 Rumble rounds']];
-function trrTankUnlocked(k){const P=trrProg();return k==='light'||k==='medium'||(k==='heavy'&&(P.top10>0||P.wins>0))||(k==='td'&&(P.top5>0||P.wins>0))||(k==='flame'&&P.wins>=1)||(k==='artillery'&&P.wins>=3);}
+const TRR_RUMBLE_TANKS=[['junker',null],['light',null],['medium',null],['heavy','Finish top 10 in Rumble once'],['td','Finish top 5 in Rumble once'],['flame','Win a Rumble round'],['artillery','Win 3 Rumble rounds']];
+function trrTankUnlocked(k){const P=trrProg();return k==='junker'||k==='light'||k==='medium'||(k==='heavy'&&(P.top10>0||P.wins>0))||(k==='td'&&(P.top5>0||P.wins>0))||(k==='flame'&&P.wins>=1)||(k==='artillery'&&P.wins>=3);}
 // ---- crew perks ----
 const TRR_PERKS={eagle:{n:'Eagle eye',r:'gun',d:'Tighter aim: 15% less shell scatter.',u:0},quick:{n:'Quick hands',r:'gun',d:'Gun reloads 12% faster.',u:3},mender:{n:'Mender',r:'mec',d:'Repairs 40% faster.',u:0},
- tough:{n:'Tough',r:'any',d:'Takes 25% less damage.',u:4},calm:{n:'Calm',r:'any',d:'Steady nerves: 10% less damage. A calm medic also heals 40% faster.',u:0},sprint:{n:'Sprinter',r:'any',d:'Turbo recharges 25% faster.',u:2}};
+ tough:{n:'Tough',r:'any',d:'Takes 25% less damage.',u:4},calm:{n:'Calm',r:'any',d:'Steady nerves: 10% less damage, your smoke clouds last 40% longer, and a calm medic heals 40% faster.',u:0},sprint:{n:'Sprinter',r:'any',d:'Turbo recharges 25% faster.',u:2}};
 const TRR_ROLEK=['cpt','gun','mec','med'];
 function trrPerkOK(k){return trrXP()>=TRR_PERKS[k].u;}
 function trrHasPerk(k){const P=trrProg().perks;return TRR_ROLEK.some((r,i)=>P[r]===k&&SV.crew&&SV.crew[i]&&!SV.crew[i].dead);}
 function trrPerkOf(i){return trrProg().perks[TRR_ROLEK[i]];}
 function trrPerkCycle(role){const P=trrProg(),list=Object.keys(TRR_PERKS).filter(k=>trrPerkOK(k)&&(TRR_PERKS[k].r==='any'||TRR_PERKS[k].r===role));const i=list.indexOf(P.perks[role]);P.perks[role]=list[(i+1)%list.length];trrProgSave();return P.perks[role];}
-{const _s=scatterHalf;scatterHalf=function(){let v=_s.apply(this,arguments);if(TRR.on){if(trrHasPerk('eagle'))v*=0.85;if(SV.crew&&SV.crew[1]&&SV.crew[1].dead)v*=1.8;}return v;};}
+{const _s=scatterHalf;scatterHalf=function(){let v=_s.apply(this,arguments);if(TRR.on){if(trrHasPerk('eagle'))v*=0.85;if(SV.crew&&SV.crew[1]&&SV.crew[1].dead)v*=2;}return v;};}
 {const _h=svCrewHurt;svCrewHurt=function(c,d){if(TRR.on&&SV.crew.indexOf(c)>=0&&trrPerkOf(SV.crew.indexOf(c))==='tough')d*=0.75;else if(TRR.on&&SV.crew.indexOf(c)>=0&&trrPerkOf(SV.crew.indexOf(c))==='calm')d*=0.9;return _h(c,d);};}
 // ---- ammo types ----
 const TRR_AM={he:{n:'HE',ic:'💥'},ap:{n:'AP',ic:'🎯'},smoke:{n:'SMK',ic:'☁'}};
@@ -7240,31 +7242,37 @@ function trrAmmoCycle(){const T=SV.tank.T;if(T&&(T.flame||T.mg)){svSay('THIS GUN
   if(k==='ap'){SV.apN--;SV.ammo=a0;s.dmg=Math.round(s.dmg*1.3);s.splR*=0.45;s.splD*=0.5;s.ap=1;}
   else if(k==='smoke'){SV.smkN--;SV.ammo=a0;s.dmg=0;s.splR=0;s.splD=0;s.smoke=1;}
   else if(!T.flame&&!T.mg){s.dmg=Math.round(s.dmg*0.85);s.splR=Math.max(s.splR*1.5,s.splR>0?0:14);s.splD*=1.4;s.he=1;}
-  if(trrHasPerk('quick')){const t=SV.tank;t.reload*=0.88;t.reloadMax=t.reload;}
+  {const t=SV.tank;if(TRR.rumble&&!svGunner()){t.reload=t.reload/2.5*1.6;}if(trrHasPerk('quick'))t.reload*=0.88;t.reloadMax=t.reload;}
   return ok;};}
 {const _h=svShellHitsTank;svShellHitsTank=function(a,b,d){const r=_h(a,b,d);if(r==='rico'&&TRR._apS&&rnd()<0.6)return 'hit';if(r==='hit'&&TRR._heS&&rnd()<0.12)return 'rico';return r;};}
 {const _r=svRivShell;svRivShell=function(s){TRR._apS=!!s.ap;TRR._heS=!!s.he;try{return _r(s);}finally{TRR._apS=TRR._heS=false;}};}
-{const _u=svShellsUpdate;svShellsUpdate=function(dt){const sm=SV.shells.filter(s=>s.smoke);_u(dt);for(const s of sm)if(s.dead){const x=s.lob?s.ex:s.x,y=s.lob?s.ey:s.y;SV.smokes.push({x,y,r:92,t:22,m:22});SV.smokes.push({x:x+rr(-30,30),y:y+rr(-30,30),r:70,t:20,m:20});sfx('boom',x,y,0.25);}};}
+{const _u=svShellsUpdate;svShellsUpdate=function(dt){const sm=SV.shells.filter(s=>s.smoke);_u(dt);for(const s of sm)if(s.dead){const x=s.lob?s.ex:s.x,y=s.lob?s.ey:s.y;{const k=trrHasPerk('calm')?1.4:1;SV.smokes.push({x,y,r:92,t:22*k,m:22*k});SV.smokes.push({x:x+rr(-30,30),y:y+rr(-30,30),r:70,t:20*k,m:20*k});}sfx('boom',x,y,0.25);}};}
 // ---- turbo: 6 s of x1.6 speed, 25 s to recharge ----
 function trrTurbo(){if(!TRR.on)return false;const t=SV.tank;if(!t.alive||t.wreck)return false;if((SV.turboCD||0)>0){svSay('TURBO RECHARGING: '+Math.ceil(SV.turboCD)+'s',1.6);return false;}if(!svCanDrive()){svSay('TURBO NEEDS A DRIVER AND GAS',2);return false;}
  SV.turboT=6;SV.turboCD=25*(trrHasPerk('sprint')?0.75:1);svSay('🚀 TURBO!',1.6);sfx('big',t.x,t.y,0.3);return true;}
-{const _m=svTankSpeedMul;svTankSpeedMul=function(){let v=_m();if(TRR.on){if(SV.turboT>0)v*=1.6;if(TRR.rumble&&SV.crew[2]&&SV.crew[2].dead)v*=0.8;}return v;};}
-TRR_HOOK.tick.push(dt=>{if(SV.turboT>0){SV.turboT-=dt;if(SV.turboT<=0)SV.turboT=0;const t=SV.tank;if(rnd()<dt*30)SV.fx.push({x:t.x-Math.cos(t.body)*t.r,y:t.y-Math.sin(t.body)*t.r,vx:rr(-8,8),vy:rr(-10,-3),t:0.5,m:0.5,col:'#ffb04a',size:3});}else if(SV.turboCD>0)SV.turboCD=Math.max(0,SV.turboCD-dt);});
+{const _m=svTankSpeedMul;svTankSpeedMul=function(){let v=_m();if(TRR.on){if(SV.turboT>0)v*=1.6;if(TRR.rumble&&SV.crew[2]&&SV.crew[2].dead)v*=0.75;}return v;};}
+TRR_HOOK.tick.push(dt=>{if(SV.turboT>0){SV.turboT-=dt;if(SV.turboT<=0){SV.turboT=0;const P=SV.tank.parts;if(P)P.engine=Math.max(15,P.engine-6);svSay('ENGINE RUNNING HOT - TURBO SPENT',2);}const t=SV.tank;if(rnd()<dt*30)SV.fx.push({x:t.x-Math.cos(t.body)*t.r,y:t.y-Math.sin(t.body)*t.r,vx:rr(-8,8),vy:rr(-10,-3),t:0.5,m:0.5,col:'#ffb04a',size:3});}else if(SV.turboCD>0)SV.turboCD=Math.max(0,SV.turboCD-dt);});
 TRR_HOOK.start.push(()=>{SV.turboT=0;SV.turboCD=0;SV.shT='he';});
 // ---- patch kit / medkit ----
 function trrUsePatch(){const t=SV.tank;if(!(SV.patch>0)){svSay('NO PATCH KITS - CRAFT ONE OR FIND A CRATE',2.5);return false;}if(!t.alive||t.wreck){svSay('THE TANK IS WRECKED - USE THE GARAGE',2.5);return false;}
  if(t.hp>=t.maxHp&&Object.values(t.parts).every(v=>v>=100)){svSay('TANK ARMOR IS ALREADY FINE',2);return false;}
- SV.patch--;t.hp=Math.min(t.maxHp,t.hp+t.maxHp*0.33);for(const p in t.parts)if(t.parts[p]<100)t.parts[p]=Math.min(100,t.parts[p]+25);if(t.engFire)t.engFire=0;
- svFloat(t.x,t.y-24,'PATCHED','#8fe3a0');svFx(t.x,t.y,10,'#cfd8dc',70,0.5,2);sfx('pick');return true;}
+ SV.patch--;SV.pshield=1;t.hp=Math.min(t.maxHp,t.hp+t.maxHp*0.33);for(const p in t.parts)if(t.parts[p]<100)t.parts[p]=Math.min(100,t.parts[p]+25);if(t.engFire)t.engFire=0;
+ svFloat(t.x,t.y-24,'PATCHED +SHIELD','#8fe3a0');svFx(t.x,t.y,10,'#cfd8dc',70,0.5,2);sfx('pick');return true;}
 function trrUseMed(){if(!(SV.med>0)){svSay('NO MED KITS - CRAFT BANDAGES',2.5);return false;}
  let w=null;for(const c of SV.crew)if(!c.dead&&c.hp<100&&(!w||c.hp<w.hp))w=c;if(!w){svSay('EVERYONE IS FINE',2);return false;}
- SV.med--;w.hp=Math.min(100,w.hp+(w.sick?0:55));w.sick=0;svFloat(w.x||SV.tank.x,(w.y||SV.tank.y)-24,'+MED KIT','#8fe3a0');sfx('pick');svSay(w.name+' PATCHED UP',2);return true;}
+ SV.med--;trrMedStart(w);return true;}
+function trrMedStart(w){w.medT=8;w.sick=0;svFloat(w.x||SV.tank.x,(w.y||SV.tank.y)-24,'+MED KIT (8 s)','#8fe3a0');sfx('pick');svSay(w.name+' IS BEING PATCHED UP (8 s)',2.4);}
+TRR_HOOK.tick.push(dt=>{for(const c of SV.crew)if(c.medT>0){if(c.dead){c.medT=0;continue;}c.medT-=dt;c.hp=Math.min(100,c.hp+55/8*dt);}});
+{const _h=svHurtTank;svHurtTank=function(d,pc,src){if(TRR.on&&SV.pshield>0&&src&&src.x!=null){SV.pshield=0;d*=0.1;svFloat(SV.tank.x,SV.tank.y-30,'PATCH ABSORBED IT','#8fe3a0');sfx('ping',SV.tank.x,SV.tank.y,0.5);}return _h(d,pc,src);};}
 function trrBtnTap(id){if(!TRR.on)return false;if(id==='ammo')trrAmmoCycle();else if(id==='turbo')trrTurbo();else if(id==='patch')trrUsePatch();else if(id==='med')trrUseMed();else return false;return id;}
 {const _p=svP3Buttons;svP3Buttons=function(){const L=_p();if(!TRR.on||SV.layout||!L.length)return L;const b0=L[1]||L[0],x=b0.x;let y=b0.y;const r=b0.r,sp=r*2+10;const k=SV.shT||'he',cd=SV.turboCD>0,onT=SV.turboT>0;
   L.push({id:'ammo',x,y:y-=sp,r,icon:TRR_AM[k].ic,label:TRR_AM[k].n+' '+trrAmmoN(k),on:k!=='he'},{id:'turbo',x,y:y-=sp,r,icon:'🚀',label:onT?'GO!':cd?Math.ceil(SV.turboCD)+'s':'TURBO',on:onT},
   {id:'patch',x,y:y-=sp,r,icon:'🩹',label:'PATCH '+(SV.patch||0)},{id:'med',x,y:y-=sp,r,icon:'✚',label:'MED '+(SV.med||0)});return L;};}
 // the tap handler used to treat every right-hand button as "smoke"
 // (patched in rep.py: non-lights/smoke buttons go to trrBtnTap)
+
+{const _sm=svSmoke;svSmoke=function(){const n=SV.smokes.length,ok=_sm();if(ok!==false&&TRR.on&&trrHasPerk('calm'))for(let i=n;i<SV.smokes.length;i++){SV.smokes[i].t*=1.4;SV.smokes[i].m*=1.4;}return ok;};}
+addEventListener('keydown',e=>{if(TRR.on&&SV.on&&state==='playing'&&(e.key==='q'||e.key==='Q'))trrAmmoCycle();});
 
 
 // ---- trr-96-rumble.js ----
@@ -7273,11 +7281,12 @@ function trrBtnTap(id){if(!TRR.on)return false;if(id==='ammo')trrAmmoCycle();els
 const TRR_RZ=[[0,1],[110,1],[290,0.66],[370,0.66],[540,0.38],[610,0.38],[790,0.14],[900,0.09]];   // [seconds, zone radius as a fraction of the start radius]
 const TRR_BOTN=['Rusty','Biscuit','Thunder','Moss','Anvil','Pickle','Comet','Bolt','Grumble','Tiny','Mango','Lobster','Gizmo','Nugget','Cobalt','Ziggy','Pebble','Waffle','Clank','Sprocket'];
 const TRR_RDUR=900;
+function trrCrateMul(){return ({low:0.6,normal:1,lots:1.6})[settings.trrCrates||'normal']||1;}
 function trrRumbleN(){const v=+settings.trrRumbleN;return v===12?12:20;}
 function trrZoneFrac(t){for(let i=1;i<TRR_RZ.length;i++){const a=TRR_RZ[i-1],b=TRR_RZ[i];if(t<=b[0])return a[1]+(b[1]-a[1])*clamp((t-a[0])/(b[0]-a[0]),0,1);}return TRR_RZ[TRR_RZ.length-1][1];}
 function trrRumbleGo(type){const P=trrProg();P.tank=type;trrProgSave();
  const prev=localStorage.getItem(TRR_LS+'last');trrMenuHide();$('trrPop').classList.remove('show');
- trrFresh(3,{br:true,rumble:true,rivalsN:0,anyTank:type,nightWave:'off',animals:'off',bandits:'off'});
+ trrFresh(3,{br:true,rumble:true,rivalsN:0,anyTank:type,nightWave:'off',animals:'off',bandits:'off',zombies:'off',sleep:false,sick:false,regions:false});
  if(prev==null)localStorage.removeItem(TRR_LS+'last');else localStorage.setItem(TRR_LS+'last',prev);}
 // ---- loadout screen ----
 function trrRumbleLoadout(){const P=trrProg(),cur=trrTankUnlocked(P.tank)?P.tank:'medium';P.tank=cur;
@@ -7306,7 +7315,7 @@ function trrRumbleStart(){const t=SV.tank,N=trrRumbleN(),R=N>16?3400:2800,cx=SVW
  const names=TRR_BOTN.slice().sort(()=>rnd()-0.5);
  for(let i=1;i<N;i++){const fac='br'+(i-1);TRR_FAC[fac]={n:names[i%names.length].toUpperCase(),uni:'#6a6a6a',tank:{base:'#'+((0x40+((rnd()*0x80)|0)).toString(16).padStart(2,'0'))+((0x40+((rnd()*0x80)|0)).toString(16).padStart(2,'0'))+((0x40+((rnd()*0x80)|0)).toString(16).padStart(2,'0')),lite:'#9a9a9a',dark:'#2c2c2c'}};
   const B={x:slots[i][0],y:slots[i][1],fac,name:TRR_FAC[fac].n,lvl:1+((rnd()*2)|0)};const r=trrMkFTank(B,pool[(rnd()*pool.length)|0]);r.fB=null;r.mission='br';r.state='patrol';r.agg=rnd();r.x=slots[i][0];r.y=slots[i][1];r.body=slots[i][2]+Math.PI;r.hp=r.maxHp;}
- for(let i=0;i<Math.round(N*1.25);i++)trrRumbleCrate(false);
+ SV.svv=[];SV.lights=false;for(let i=0;i<Math.round(N*1.25*trrCrateMul());i++)trrRumbleCrate(false);
  TRR.rumbleRec=[];trrPaintApply();
  svSay('🏆 TANK RUMBLE: '+N+' TANKS. STAY IN THE ZONE. LAST TANK WINS.',5);}
 function trrPaintApply(){const k=TRR.pendSkin||localStorage.getItem('tankRoyalRumble.skin')||'none';TRR.paint=k==='none'||!trrSkinOK(k)?null:k;}
@@ -7333,7 +7342,8 @@ function trrRumbleTick(dt){const Z=TRR.brz;if(!Z||!TRR.rumble)return;const t=SV.
  Z.alive=n;
  // bot brain every 1.2 s: grab crates, hunt, stay in the zone
  R.bT=(R.bT||0)-dt;if(R.bT<=0){R.bT=1.2;
-  for(const r of bots){if(r.tgt&&r.tgt.alive)continue;const dz=Math.hypot(r.x-Z.x,r.y-Z.y);
+  for(const r of bots){if(r.cow==null)r.cow=rnd()<0.6;if(r.hp<r.maxHp*0.3&&r.cow){let q=null,qd=800;for(const o of [t,...bots]){if(o===r||!o.alive||o.bailed)continue;const d=Math.hypot(o.x-r.x,o.y-r.y);if(d<qd){qd=d;q=o;}}if(q){const a=Math.atan2(r.y-q.y,r.x-q.x);if(!r.fT||SV.t-r.fT>2.5){r.fT=SV.t;svRivGo(r,clamp(r.x+Math.cos(a)*700,Z.x-Z.r*0.8,Z.x+Z.r*0.8),clamp(r.y+Math.sin(a)*700,Z.y-Z.r*0.8,Z.y+Z.r*0.8),1);}continue;}}
+   if(r.tgt&&r.tgt.alive)continue;const dz=Math.hypot(r.x-Z.x,r.y-Z.y);
    if(dz>Z.r*0.82){if(!r.zT||SV.t-r.zT>3){r.zT=SV.t;svRivGo(r,Z.x+rr(-Z.r*0.3,Z.r*0.3),Z.y+rr(-Z.r*0.3,Z.r*0.3),1);}continue;}
    let bc=null,bd=1100;for(const c of TRR.rcr){const d=Math.hypot(c.x-r.x,c.y-r.y);if(d<bd){bd=d;bc=c;}}
    if(bc&&(r.agg<0.8||bd<500)){if(r.lootC!==bc.id||!r.path||!r.path.length){r.lootC=bc.id;svRivGo(r,bc.x,bc.y,1);}continue;}
@@ -7341,7 +7351,7 @@ function trrRumbleTick(dt){const Z=TRR.brz;if(!Z||!TRR.rumble)return;const t=SV.
     if(q&&r.agg>0.35)svRivGo(r,q.x+rr(-90,90),q.y+rr(-90,90),1);else{const a=rnd()*TAU,d=rnd()*Z.r*0.6;svRivGo(r,Z.x+Math.cos(a)*d,Z.y+Math.sin(a)*d,1);}}}}
  // crates taken by whoever drives over them
  for(const c of TRR.rcr.slice()){c.t+=dt;if(t.alive&&Math.hypot(c.x-t.x,c.y-t.y)<t.r+22){trrCrateTake(c,t);continue;}for(const r of bots)if(Math.hypot(c.x-r.x,c.y-r.y)<r.r+22){trrCrateTake(c,r);break;}}
- R.cT=(R.cT||0)+dt;if(R.cT>22&&TRR.rcr.length<Math.round(trrRumbleN()*0.9)&&Z.t<TRR_RDUR-120){R.cT=0;trrRumbleCrate(false);}
+ R.cT=(R.cT||0)+dt;if(R.cT>22&&TRR.rcr.length<Math.round(trrRumbleN()*0.9*trrCrateMul())&&Z.t<TRR_RDUR-120){R.cT=0;trrRumbleCrate(false);}
  trrRumbleAD();
  // the player was the last one rolling
  if(t.alive&&n===1&&!Z.won&&!SV.over){Z.won=1;trrRumbleEnd(1);}
@@ -7378,9 +7388,9 @@ TRR_HOOK.hud.push(()=>{if(!TRR.rumble||!TRR.brz)return;const Z=TRR.brz,g=ctxMain
 // ---- kills + last hit tracking (for placement, kill credit and the replay) ----
 {const _r=svRivShell;svRivShell=function(s){TRR._pS=!s.en;try{return _r(s);}finally{TRR._pS=false;}};}
 {const _h=svRivHurt;svRivHurt=function(r,dmg,src){const was=r.alive;_h(r,dmg,src);if(TRR.rumble&&was&&!r.alive){const mine=TRR._pS;if(mine){TRR.rk.kills++;TRR.kills=(TRR.kills||0)+1;svFloat(r.x,r.y-34,'KNOCKED OUT: '+r.name,'#ffd54a');}else svFloat(r.x,r.y-34,r.name+' IS OUT','#cfd8dc');
-   r.out=true;r.wreck=true;r.bailed=true;TRR.brz.alive=Math.max(1,(TRR.brz.alive||2)-1);sfx('big',r.x,r.y,0.6);svFx(r.x,r.y,26,'#ff8a1a',150,1,4);}};}
+   r.out=true;r.wreck=true;r.bailed=true;TRR.brz.alive=Math.max(1,(TRR.brz.alive||2)-1);sfx('big',r.x,r.y,0.6);svFx(r.x,r.y,26,'#ff8a1a',150,1,4);trrRumbleCrate(false,r.x,r.y);}};}
 // a Rumble tank does not bail out into infantry: it is simply out of the round
-{const _b=svBail;svBail=function(r,n){if(TRR.rumble&&TRR.on){r.hatch=1;if(r.alive){r.alive=false;r.wreck=true;r.out=true;if(TRR._pS){TRR.rk.kills++;TRR.kills=(TRR.kills||0)+1;svFloat(r.x,r.y-34,'KNOCKED OUT: '+r.name,'#ffd54a');}else svFloat(r.x,r.y-34,r.name+' IS OUT','#cfd8dc');TRR.brz.alive=Math.max(1,(TRR.brz.alive||2)-1);svFx(r.x,r.y,26,'#ff8a1a',150,1,4);sfx('big',r.x,r.y,0.6);}return;}return _b(r,n);};}
+{const _b=svBail;svBail=function(r,n){if(TRR.rumble&&TRR.on){r.hatch=1;if(r.alive){r.alive=false;r.wreck=true;r.out=true;if(TRR._pS){TRR.rk.kills++;TRR.kills=(TRR.kills||0)+1;svFloat(r.x,r.y-34,'KNOCKED OUT: '+r.name,'#ffd54a');}else svFloat(r.x,r.y-34,r.name+' IS OUT','#cfd8dc');TRR.brz.alive=Math.max(1,(TRR.brz.alive||2)-1);svFx(r.x,r.y,26,'#ff8a1a',150,1,4);sfx('big',r.x,r.y,0.6);trrRumbleCrate(false,r.x,r.y);}return;}return _b(r,n);};}
 // ---- replay buffer: last 4 seconds of positions ----
 function trrRumbleRecord(dt){const R=TRR.rk;R.rT=(R.rT||0)-dt;if(R.rT>0)return;R.rT=0.1;const t=SV.tank,Z=TRR.brz,k=R.lastHit&&SV.t-R.lastHit.t<6?R.lastHit.r:null;
  TRR.rumbleRec.push({t:SV.t,px:t.x,py:t.y,pb:t.body,pu:t.turret,kx:k?k.x:null,ky:k?k.y:null,kb:k?k.body:0,ku:k?k.turret:0,zr:Z.r,sh:SV.shells.filter(s=>Math.hypot(s.x-t.x,s.y-t.y)<900).slice(0,8).map(s=>[s.x,s.y,s.en?1:0])});
@@ -7392,16 +7402,16 @@ function trrRumbleEnd(place){if(TRR.rk.ended)return;TRR.rk.ended=true;const P=tr
  const alive=SV.crew.filter(c=>!c.dead).length,tm=Math.round(Z.t),by=R.lastHit&&SV.t-R.lastHit.t<8?R.lastHit.r:null;
  R.place=place;R.newUnl=nw;R.crewLeft=alive;R.by=by?by.name+' ('+(TYPES[by.type]||{name:by.type}).name+')':(place===1?'':'the zone');
  const html=`<div style="font-size:42px;font-weight:900;color:${place===1?'#ffd54a':'#fff'};line-height:1.1">${place===1?'🏆 WINNER!':'#'+place}</div><div style="opacity:.8;font-size:12px;margin-bottom:6px">${place===1?'Last tank rolling out of '+N+'.':'Out of '+N+' tanks'+(R.by?' · knocked out by '+R.by:'')}</div>
- <div style="display:flex;gap:6px;justify-content:center;margin:6px 0;font-size:12px"><span class="trrChip">💥 ${R.kills} kills</span><span class="trrChip">👥 ${alive}/4 crew</span><span class="trrChip">⏱ ${Math.floor(tm/60)}:${String(tm%60).padStart(2,'0')}</span><span class="trrChip">📦 ${R.loot}</span></div>
+ <div style="display:flex;gap:6px;justify-content:center;margin:6px 0;font-size:12px"><span class="trrChip">💥 ${R.kills} kills</span><span class="trrChip">👥 ${SV.crew.map(c=>c.dead?'✖':'✔').join(' ')}</span><span class="trrChip">⏱ ${Math.floor(tm/60)}:${String(tm%60).padStart(2,'0')}</span><span class="trrChip">📦 ${R.loot}</span></div>
  ${nw.length?`<div style="margin:6px 0;padding:6px;border-radius:8px;background:#2a3a1a;color:#bfe88a;font-size:12px">🔓 UNLOCKED: ${nw.join(', ')}</div>`:''}
  <canvas id="trrReplay" width="300" height="170" style="width:100%;max-width:300px;border-radius:10px;background:#10142c"></canvas><div style="font-size:10px;opacity:.6">${by||place===1?'KILL-SHOT REPLAY':'LAST 4 SECONDS'}</div>`;
- setTimeout(()=>{trrPopup(place===1?'ROUND WON':'ROUND OVER',html,[['PLAY AGAIN',()=>{TRR.on=false;trrRumbleLoadout();}],['Menu',()=>{TRR.on=false;toTitle();}]]);trrReplayStart();},place===1?600:350);}
+ setTimeout(()=>{trrPopup(place===1?'ROUND WON':'ROUND OVER',html,[['PLAY AGAIN',()=>{TRR.on=false;trrRumbleLoadout();}],['Menu',()=>{TRR.on=false;toTitle();}]]);trrReplayStart();const W_=$('trrPopBtns'),ab=typeof SETUI!=='undefined'&&SETUI.arcadeButton?SETUI.arcadeButton('trrBtn alt','◄ Back to Arcade'):null;if(W_&&ab)W_.appendChild(ab);},place===1?600:350);}
 {const _d=trrShowDeath;trrShowDeath=function(){if(TRR.rumble){const Z=TRR.brz;trrRumbleEnd(Math.max(1,Z.alive||1));return;}return _d();};}
 let _trrRP=null;
-function trrReplayStart(){const cv=$('trrReplay');if(!cv)return;const rec=(TRR.rumbleRec||[]).slice(),g=cv.getContext('2d');if(!rec.length)return;let k=0;const t0=performance.now(),dur=(rec[rec.length-1].t-rec[0].t)*1000||1;
- cancelAnimationFrame(_trrRP);const draw=()=>{if(!document.body.contains(cv))return;const el=((performance.now()-t0)%(dur+900));const tt=rec[0].t+Math.min(el,dur)/1000;let i=0;while(i<rec.length-1&&rec[i+1].t<=tt)i++;const a=rec[i],b=rec[Math.min(i+1,rec.length-1)],f=b.t>a.t?clamp((tt-a.t)/(b.t-a.t),0,1):0,L=(u,v)=>u+(v-u)*f;
+function trrReplayStart(){const cv=$('trrReplay');if(!cv)return;const rec=(TRR.rumbleRec||[]).slice(),g=cv.getContext('2d');if(!rec.length||!TRR.brz)return;const ZB={x:TRR.brz.x,y:TRR.brz.y};let k=0;const t0=performance.now(),dur=(rec[rec.length-1].t-rec[0].t)*1000||1;
+ cancelAnimationFrame(_trrRP);const draw=()=>{if(!document.body.contains(cv)||!TRR.rumble)return;const el=((performance.now()-t0)%(dur+900));const tt=rec[0].t+Math.min(el,dur)/1000;let i=0;while(i<rec.length-1&&rec[i+1].t<=tt)i++;const a=rec[i],b=rec[Math.min(i+1,rec.length-1)],f=b.t>a.t?clamp((tt-a.t)/(b.t-a.t),0,1):0,L=(u,v)=>u+(v-u)*f;
   const px=L(a.px,b.px),py=L(a.py,b.py);let cx=px,cy=py;if(a.kx!=null){cx=(px+a.kx)/2;cy=(py+a.ky)/2;}const sc=a.kx!=null?clamp(240/(Math.hypot(px-a.kx,py-a.ky)+200),0.12,0.5):0.4;
-  const X=x=>150+(x-cx)*sc,Y=y=>85+(y-cy)*sc;g.clearRect(0,0,300,170);g.fillStyle='#161c3a';g.fillRect(0,0,300,170);g.strokeStyle='rgba(80,160,255,.8)';g.lineWidth=2;g.beginPath();g.arc(X(TRR.brz.x),Y(TRR.brz.y),a.zr*sc,0,TAU);g.stroke();
+  const X=x=>150+(x-cx)*sc,Y=y=>85+(y-cy)*sc;g.clearRect(0,0,300,170);g.fillStyle='#161c3a';g.fillRect(0,0,300,170);g.strokeStyle='rgba(80,160,255,.8)';g.lineWidth=2;g.beginPath();g.arc(X(ZB.x),Y(ZB.y),a.zr*sc,0,TAU);g.stroke();
   const tank=(x,y,bd,u,col)=>{g.save();g.translate(X(x),Y(y));g.rotate(bd);g.fillStyle=col;g.fillRect(-9,-5,18,10);g.fillStyle='#0006';g.fillRect(-9,-5,18,2);g.rotate(u-bd);g.fillStyle=col;g.fillRect(-3,-3,7,6);g.fillRect(2,-1,12,2);g.restore();};
   if(a.kx!=null)tank(L(a.kx,b.kx==null?a.kx:b.kx),L(a.ky,b.ky==null?a.ky:b.ky),a.kb,a.ku,'#c0504a');tank(px,py,a.pb,a.pu,'#5aa0e0');
   for(const s of a.sh){g.fillStyle=s[2]?'#ffb04a':'#fff';g.beginPath();g.arc(X(s[0]),Y(s[1]),2.5,0,TAU);g.fill();}
@@ -7413,9 +7423,22 @@ function trrReplayStart(){const cv=$('trrReplay');if(!cv)return;const rec=(TRR.r
 {const _s=suTankSpec;suTankSpec=function(){const S=_s();if(!TRR.on&&!document.getElementById('trrMenu'))return S;
   let c=S.cats.find(c=>c.id==='trr25');if(!c){c={id:'trr25',name:'Tank Rumble & Night',icon:'🏆',items:[]};S.cats.push(c);}
   c.items.push({k:'trrRumbleN',l:'Tanks per Rumble round',d:'20 is the full fight. Pick 12 if your phone struggles: fewer tanks to draw and think about.',t:'opt',o:[[20,'20 tanks'],[12,'12 tanks']],get:()=>trrRumbleN(),set:v=>{settings.trrRumbleN=+v;saveSettings();},th:'text'},
+   {k:'trrCrates',l:'Crate amount (Tank Rumble)',d:'How many loot crates lie around the field.',t:'opt',o:[['normal','Normal'],['low','Fewer'],['lots','Lots']],get:()=>settings.trrCrates||'normal',set:v=>{settings.trrCrates=v;saveSettings();},th:'text'},
+   {k:'trrSlow',l:'Slow motion in the cutaway (Tank Rumble)',d:'The game runs at half speed while the big cutaway is open, so you can fix things calmly.',t:'bool',get:()=>!!settings.trrSlow,set:v=>{settings.trrSlow=v;saveSettings();},th:'text'},
    {k:'trrSplash',l:'Cartoon splash when crew are knocked out',d:'Adds a little red cartoon splash to the cutaway when a crewman goes down. Needs the arcade Blood setting to be on. Off by default; there is always a clean X.',t:'bool',get:()=>!!settings.trrSplash,set:v=>{settings.trrSplash=v;saveSettings();},th:'text'},
    {k:'trrWave',l:'Night waves (Survival)',d:'How hard the night attack is. Takes effect on new saves; existing saves keep theirs.',t:'opt',o:[['normal','Normal'],['light','Light'],['brutal','Brutal'],['off','Off']],get:()=>settings.trrWave||'normal',set:v=>{settings.trrWave=v;saveSettings();},th:'text'});
   return S;};}
+
+// ===== audit 2.5.1: Tank Rumble is a pure tank battle. Nothing from Survival may leak in. =====
+// no gathering (the tank crushing trees used to pay wood), no clock/night, no weather, no hunger, no creatures, no panels, no headlights
+{const _g=trrGive;trrGive=function(){if(TRR.rumble&&TRR.on)return;return _g.apply(this,arguments);};}
+const TRR_SVRES=['wood','stone','metal','hq','cloth','chem','food','water','parts','meat'];
+TRR_HOOK.tick.unshift(dt=>{if(!TRR.rumble||!TRR.on||!SV.on)return;SV.tod=0.45;TRR.wx={k:'clear',t:1e9,a:1};SV.lights=false;for(const k of TRR_SVRES)SV[k]=0;
+ for(const c of SV.crew){c.hunger=100;c.thirst=100;c.tired=0;c.sick=0;}if(SV.inf.length)SV.inf=[];if(SV.svv&&SV.svv.length)SV.svv=[];if(TRR.bld.length)TRR.bld=[];});
+{const _po=trrPanelOpen;trrPanelOpen=function(id){if(TRR.rumble&&TRR.on){svSay('NO PACK, CRAFTING OR BUILDING IN TANK RUMBLE - TAP THE CUTAWAY',2.4);return;}return _po(id);};}
+{const _p=svP3Buttons;svP3Buttons=function(){const L=_p();return TRR.rumble&&TRR.on?L.filter(b=>b.id!=='lights'):L;};}
+// an old Battle Royale save (v1.2 Custom Game) has no Rumble rules: it becomes a normal Survival game instead of a broken half-mode
+TRR_HOOK.start.unshift(loaded=>{if(TRR.cfg.br&&!TRR.cfg.rumble)TRR.cfg.br=false;if(!TRR.cfg.rumble){TRR.rumble=false;TRR.rcr=[];TRR.brz=null;TRR.ad=null;}});
 
 
 // ---- trr-97-cutaway.js ----
@@ -7462,7 +7485,7 @@ TRR_HOOK.tick.push(dt=>{if(!TRR.rumble||!TRR.cut||SV.over||state!=='playing')ret
  for(const p of C.pings)p.t+=dt;C.pings=C.pings.filter(p=>p.t<0.8);for(const s of C.sparks){s.t-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=140*dt;}C.sparks=C.sparks.filter(s=>s.t>0);C.shake=Math.max(0,C.shake-dt*2.4);C.flash=Math.max(0,C.flash-dt*1.6);for(const s of C.splash)s.t+=dt;C.splash=C.splash.filter(s=>s.t<0.9);});
 function trrMoveCrew(from,to){const C=TRR.cut,a=SV.crew[from],b=SV.crew[to];if(from===to||C.swap)return false;if(a.dead){svSay('HE CAN\'T BE MOVED',1.8);return false;}
  if(b.dead&&b.kia&&false)return false;C.swap={from,to,t:0};a.moveT=4;b.moveT=4;svSay(a.name+' IS CLIMBING OVER (4 s) - BOTH STATIONS ARE EMPTY UNTIL HE SITS',3);sfx('select');return true;}
-function trrMedOn(i){const c=SV.crew[i];if(c.dead||c.hp>=100){svSay(c.dead?'TOO LATE FOR HIM':'HE IS FINE',1.8);return;}if(!(SV.med>0)){svSay('NO MED KITS - GRAB A CRATE',2);return;}SV.med--;c.hp=Math.min(100,c.hp+55);svSay(c.name+' PATCHED UP',1.8);sfx('pick');}
+function trrMedOn(i){const c=SV.crew[i];if(c.dead||c.hp>=100){svSay(c.dead?'TOO LATE FOR HIM':'HE IS FINE',1.8);return;}if(c.medT>0){svSay('HE IS ALREADY BEING PATCHED UP',1.8);return;}if(!(SV.med>0)){svSay('NO MED KITS - GRAB A CRATE',2);return;}SV.med--;trrMedStart(c);}
 // ---------- drawing ----------
 function trrCutFont(s){return 'bold 6.2px '+TRR_UF;}
 function trrCutBust(g,st,c,i,x,y,T,alpha){const dead=c.dead&&!c.vac,vac=c.dead&&c.vac,hurt=!c.dead&&c.hp<55,crit=!c.dead&&c.hp<28,slump=dead?Math.min(1,(SV.t-(c.koT||0))*2.5):0;
@@ -7529,7 +7552,7 @@ function trrCutBody(g,X,Y,S,full){const t=SV.tank,C=TRR.cut||(trrCutInit(),TRR.c
  if(C.drag){const d=C.drag,c=SV.crew[d.i];trrCutBust(g,TRR_ST[d.i],c,d.i,d.mx,d.my,T,0.95);}
  // hp bars + labels
  for(let i=0;i<4;i++){const c=SV.crew[i],st=TRR_ST[i];if(c.dead&&c.vac&&!(C.swap&&C.swap.to===i))continue;const f=clamp(c.hp/100,0,1),by=st.cy+(i>1?2:0)-20;
-  g.fillStyle='rgba(0,0,0,0.6)';g.fillRect(st.cx-7,by,14,2.2);g.fillStyle=c.dead?'#555':f>0.55?'#5ee08a':f>0.28?'#ffd54a':'#ff5a4a';g.fillRect(st.cx-7,by,14*f,2.2);}
+  if(c.medT>0&&((T*4)|0)%2===0){g.fillStyle='#8fe3a0';g.fillRect(st.cx+8,by-2,1.6,5);g.fillRect(st.cx+6.3,by-0.4,5,1.6);}g.fillStyle='rgba(0,0,0,0.6)';g.fillRect(st.cx-7,by,14,2.2);g.fillStyle=c.dead?'#555':f>0.55?'#5ee08a':f>0.28?'#ffd54a':'#ff5a4a';g.fillRect(st.cx-7,by,14*f,2.2);}
  g.font=trrCutFont(S*(full?1.05:1));g.textAlign='center';for(let i=0;i<4;i++){const st=TRR_ST[i],y=st.cy+(i>1?2:0)+13;g.lineWidth=2;g.strokeStyle='rgba(0,0,0,.7)';g.strokeText(st.lb,st.cx,y);g.fillStyle=SV.crew[i].dead?'#7a8090':'#cfd6ee';g.fillText(st.lb,st.cx,y);}
  // splash (optional cartoon)
  for(const s of C.splash){const st=TRR_ST[s.i],k=s.t/0.9;g.save();g.translate(st.cx,st.cy-6);g.globalAlpha=1-k;g.fillStyle='#e03a3a';g.beginPath();for(let j=0;j<16;j++){const a=j/16*TAU,r=(j%2?5:11)*(0.4+k*1.2);g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();g.restore();}
@@ -7593,11 +7616,16 @@ function trrCutDrawX(g){const C=TRR.cut,t=SV.tank,Lx=trrCutXLayout(),G=Lx.G;g.fi
  window.addEventListener('mousedown',M(down),{capture:true});window.addEventListener('mousemove',M(move),{capture:true});window.addEventListener('mouseup',M(up),{capture:true});
 })();
 
+{const _d=trrDD;trrDD=function(){const v=_d();return (TRR.rumble&&TRR.on&&SV.on&&!trrStOK(0))?Math.max(40,Math.round(v*0.5)):v;};}
+// optional slow motion while the cutaway is open (Settings)
+
 
 // ---- trr-99-boot.js ----
 // ===================== TRR boot: hooks into the Survival engine, pause menu, dark theme for the old overlays =====================
 {const _s=svStart;svStart=function(type){_s(type);if(TRR.on)trrAfterStart(type);};}
 {const _u=survUpdate;survUpdate=function(dt){_u(dt);if(TRR.on&&state==='playing'&&!SV.layout&&!SV.frozen){trrTick(dt);if(typeof trrHooksTick==='function')trrHooksTick(dt);}};}
+// optional slow motion while the Tank Rumble cutaway is open (Settings). Wraps the WHOLE update so zone, bots and shells slow together.
+{const _u=survUpdate;survUpdate=function(dt){if(TRR.rumble&&TRR.on&&TRR.cut&&TRR.cut.open&&settings.trrSlow)dt*=0.5;return _u(dt);};}
 {const _t=toTitle;toTitle=function(){if(TRR.on&&SV.on&&!SV.over)trrSave(true);TRR.on=false;_t();trrPanelClose&&trrPanelClose();$('trrTabs').classList.remove('show');trrMenuShow();};}
 {const _p=pauseGame;pauseGame=function(){_p();if(TRR.on)trrSave(true);};}
 // pause menu: Save game
