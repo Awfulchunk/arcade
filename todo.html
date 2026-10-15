@@ -1,0 +1,101 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#151a33"><title>Jay's To-Do - Tough &amp; J's Arcade</title>
+<style>
+*{box-sizing:border-box}html{background:#120f26}
+body{margin:0;min-height:100vh;font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Rounded",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#eef0ff;background:linear-gradient(#151a33,#120f26);padding:0 0 110px}
+header{position:sticky;top:0;z-index:5;background:#151a33ee;backdrop-filter:blur(8px);padding:max(12px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid #2b3160}
+h1{margin:0;font-size:20px}header p{margin:3px 0 0;font-size:12px;color:#9aa3d6}
+.bar{display:flex;gap:8px;margin-top:8px}
+.bar input{flex:1;min-width:0;height:40px;border-radius:12px;border:1px solid #3a4180;background:#1d2247;color:#fff;padding:0 12px;font-size:15px}
+button{font:inherit;cursor:pointer}
+.btn{height:40px;border-radius:12px;border:1px solid #3a4180;background:#232a5a;color:#eef0ff;padding:0 14px;font-size:14px;font-weight:700}
+.btn.pri{background:#e8a33c;border-color:#e8a33c;color:#1b1330}
+main{padding:12px 14px;max-width:720px;margin:0 auto}
+section{margin:16px 0 0}
+section h2{font-size:12px;letter-spacing:.14em;color:#e8a33c;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+section h2 small{color:#9aa3d6;letter-spacing:0;font-weight:600}
+.item{background:#1b2150;border:1px solid #2f3770;border-radius:14px;padding:10px 12px;margin:0 0 8px}
+.item.done{opacity:.7;border-color:#2e6a45;background:#17332f}
+.row{display:flex;gap:12px;align-items:flex-start}
+.row input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:0 0 28px;width:28px;height:28px;border-radius:8px;border:2px solid #6b74c9;background:#10143a;margin:1px 0 0;cursor:pointer;display:grid;place-content:center}
+.row input[type=checkbox]:checked{background:#3fbf6f;border-color:#3fbf6f}
+.row input[type=checkbox]:checked::after{content:"";width:8px;height:14px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.row label{flex:1;font-size:16px;line-height:1.3;padding-top:3px;cursor:pointer;word-break:break-word}
+.item.done .row label{text-decoration:line-through;text-decoration-color:#5ad28a}
+.del{flex:0 0 auto;background:none;border:0;color:#7480c9;font-size:18px;padding:2px 6px}
+.note{width:100%;margin-top:8px;height:38px;border-radius:10px;border:1px solid #333b7c;background:#12163d;color:#d8dcff;padding:0 10px;font-size:14px}
+.note::placeholder{color:#6f78bd}
+.add{display:flex;gap:8px;margin-top:6px}
+.add input{flex:1;min-width:0;height:40px;border-radius:12px;border:1px solid #3a4180;background:#1d2247;color:#fff;padding:0 12px;font-size:15px}
+footer{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#151a33f2;border-top:1px solid #2b3160;padding:10px 14px max(10px,env(safe-area-inset-bottom));display:flex;gap:8px;max-width:100%}
+footer .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:#3fbf6f;color:#07220f;padding:9px 16px;border-radius:12px;font-weight:800;z-index:9;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+a.back{color:#9aa3d6;font-size:12px}
+</style></head><body>
+<header><h1>Jay's To-Do</h1><p>Tap a box when it's done. Add a note under any item. Saved on this phone. <a class="back" href="./">&larr; Arcade</a></p>
+<div class="bar"><input id="q" type="search" placeholder="Search the list"><button class="btn" id="hide">Hide done</button></div></header>
+<main id="main"></main>
+<footer><button class="btn pri" id="copy">COPY ALL</button><button class="btn" id="copyOpen">Copy not done</button><button class="btn" id="reset">Reset</button></footer>
+<div class="toast" id="toast">Copied</div>
+<script>
+(function(){
+var KEY='jay-todo-v1';
+var SEED=[
+ ['Fix',['TRR wood still drops in Tank Rumble','TRR minimap no zone circle','Dot io snake choppy/freezing on boost','Dot io missiles ~40% slower']],
+ ['Settings',['Dot io graphics presets Low/Med/High/Auto for performance','Master settings panel across all games','FPS counter toggle','Reset-all-settings']],
+ ['Games',['Standing Still Yard PZ tilt','Trash talk + emoji quick-bar in every game except tank games','Chess / checkers / pixel racer for Chill Games','Standing Still gun tracers + art pass']],
+ ['Later',['Castle Royale overhaul','Hold the Bridge','Meat Sling','Castle Wars test patch','Fallow reskin','Music Bum','Music Mixer']]
+];
+function uid(){return 'i'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4)}
+function seed(){var s={hide:false,sections:[]};SEED.forEach(function(g){s.sections.push({name:g[0],items:g[1].map(function(t){return{id:uid(),text:t,done:false,note:''}})})});return s}
+var S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
+if(!S||!S.sections)S=seed();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var main=document.getElementById('main'),q=document.getElementById('q');
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function render(){
+ var f=q.value.trim().toLowerCase(),h='';
+ S.sections.forEach(function(sec,si){
+  var shown=sec.items.filter(function(it){return(!S.hide||!it.done)&&(!f||(it.text+' '+it.note).toLowerCase().indexOf(f)>=0)});
+  var done=sec.items.filter(function(i){return i.done}).length;
+  h+='<section><h2>'+esc(sec.name.toUpperCase())+'<small>'+done+' / '+sec.items.length+' done</small></h2>';
+  shown.forEach(function(it){
+   h+='<div class="item'+(it.done?' done':'')+'" data-id="'+it.id+'"><div class="row"><input type="checkbox" id="c'+it.id+'"'+(it.done?' checked':'')+' data-k="chk"><label for="c'+it.id+'">'+esc(it.text)+'</label><button class="del" data-k="del" title="Remove" aria-label="Remove">&times;</button></div><input class="note" data-k="note" type="text" placeholder="Note..." value="'+esc(it.note)+'"></div>';
+  });
+  h+='<div class="add"><input type="text" placeholder="Add to '+esc(sec.name)+'..." data-sec="'+si+'"><button class="btn" data-add="'+si+'">Add</button></div></section>';
+ });
+ main.innerHTML=h;
+ document.getElementById('hide').textContent=S.hide?'Show done':'Hide done';
+}
+function find(id){for(var a=0;a<S.sections.length;a++){var l=S.sections[a].items;for(var b=0;b<l.length;b++)if(l[b].id===id)return{sec:S.sections[a],i:b,it:l[b]}}}
+main.addEventListener('change',function(e){var t=e.target;if(t.dataset.k!=='chk')return;var r=find(t.closest('.item').dataset.id);if(!r)return;r.it.done=t.checked;save();render()});
+main.addEventListener('input',function(e){var t=e.target;if(t.dataset.k!=='note')return;var r=find(t.closest('.item').dataset.id);if(r){r.it.note=t.value;save()}});
+main.addEventListener('click',function(e){var t=e.target;
+ if(t.dataset.k==='del'){var r=find(t.closest('.item').dataset.id);if(r&&confirm('Remove "'+r.it.text+'"?')){r.sec.items.splice(r.i,1);save();render()}}
+ if(t.dataset.add!=null)addItem(+t.dataset.add)});
+main.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.dataset.sec!=null)addItem(+e.target.dataset.sec)});
+function addItem(si){var inp=main.querySelector('input[data-sec="'+si+'"]');var v=inp&&inp.value.trim();if(!v)return;S.sections[si].items.push({id:uid(),text:v,done:false,note:''});save();render()}
+q.addEventListener('input',render);
+document.getElementById('hide').onclick=function(){S.hide=!S.hide;save();render()};
+function toast(t){var el=document.getElementById('toast');el.textContent=t;el.classList.add('on');setTimeout(function(){el.classList.remove('on')},1600)}
+function exportText(onlyOpen){
+ var out=[],d=new Date();out.push("Jay's To-Do - "+d.toLocaleString());
+ S.sections.forEach(function(sec){
+  var l=sec.items.filter(function(i){return onlyOpen?!i.done:(i.done||i.note.trim())});
+  if(!l.length)return;out.push('');out.push(sec.name.toUpperCase()+':');
+  l.forEach(function(i){out.push((i.done?'[x] ':'[ ] ')+i.text+(i.note.trim()?'  -- '+i.note.trim():''))});
+ });
+ if(out.length===1)out.push(onlyOpen?'(nothing left)':'(nothing checked and no notes yet)');
+ return out.join('\n');
+}
+function copy(txt,msg){
+ function fallback(){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();toast(ok?msg:'Could not copy')}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){toast(msg)},fallback);else fallback();
+}
+document.getElementById('copy').onclick=function(){copy(exportText(false),'Copied checked items + notes')};
+document.getElementById('copyOpen').onclick=function(){copy(exportText(true),'Copied what is left')};
+document.getElementById('reset').onclick=function(){if(confirm('Reset the whole list to the starting list? This clears all ticks and notes.')){S=seed();save();render()}};
+window.__todo={exportText:exportText,state:function(){return S}};
+render();
+})();
+</script></body></html>
