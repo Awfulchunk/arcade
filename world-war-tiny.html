@@ -7,13 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#4caf3c">
-<title>World War Tiny 1.0.4</title>
+<title>World War Tiny 1.0.6</title>
 <style>
 :root{--ink:#2b1d14;--f:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Arial Black",system-ui,sans-serif}
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3f8f34;color:#fff;
   touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none;
   -webkit-tap-highlight-color:transparent;font-family:var(--f);font-weight:900}
 #c{position:fixed;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+body.wwt-mm .ov,body.wwt-mm .sheet,body.wwt-mm .hbtn,body.wwt-mm #orders,body.wwt-mm #squads,body.wwt-mm #placebar,body.wwt-mm #selChip,body.wwt-mm #ring,body.wwt-mm #toast,body.wwt-mm #v5city,body.wwt-mm #wallBar{display:none!important;pointer-events:none!important}
 #safe{position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 .ink{text-shadow:0 2px 0 var(--ink),2px 0 0 var(--ink),-2px 0 0 var(--ink),0 -2px 0 var(--ink),2px 2px 0 var(--ink),-2px 2px 0 var(--ink),2px -2px 0 var(--ink),-2px -2px 0 var(--ink),0 5px 0 rgba(0,0,0,.3)}
 .ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:10;touch-action:manipulation;
@@ -326,7 +327,7 @@ SETUI.perfLoad('wwt');
       <button class="btn blue small" id="howBtn">❓ How to play</button>
       <button class="btn grey small" id="setBtn">⚙ Settings</button>
     </div>
-    <div class="ver ink">World War Tiny 1.0.4 · WWT · offline</div>
+    <div class="ver ink">World War Tiny 1.0.6 · WWT · offline</div>
   </div>
 </div>
 
@@ -561,7 +562,7 @@ function gibDecal(x,y,size,col){if(!goreOn())return;decal(x,y,size+6,g=>{g.fillS
 // ================== PARTICLES (pooled, capped, cartoon circles) ==================
 const FIRE=0,SMOKE=1,SPARK=2,BLOOD=3,CHUNK=4,GIB=5,RING=6,DUST=7,PUFF=8,STAR=9;
 const PCAP_MAX=1400,P=[];let pN=0;
-const pCap=()=>{const g=settings.particles&&settings.particles!=='auto'?settings.particles:settings.gfx;return g==='low'?300:g==='high'?1400:850;};
+const pCap=()=>{const g=settings.particles&&settings.particles!=='auto'?settings.particles:settings.gfx;return g==='low'?220:g==='high'?700:450;}; /* 1.0.5: high capped — 1400 froze */
 for(let i=0;i<PCAP_MAX;i++)P.push({x:0,y:0,z:0,vx:0,vy:0,vz:0,life:0,max:1,size:1,type:0,c:'',rot:0,vr:0,f:0});
 function spawnP(type,x,y,vx,vy,life,size,c){
   const cap=goreOn()?pCap():Math.min(550,pCap());if(pN>=cap)return null;
@@ -2167,7 +2168,7 @@ function eBuildLow(){eGrassInit();const k=1/8,c=mkCanvas(EW*k,EH*k),g=c.getConte
 function eMakeMini(w,h){const c=mkCanvas(w,h),g=c.getContext('2d');g.imageSmoothingEnabled=true;if(!E.tLow)eBuildLow();g.drawImage(E.tLow,0,0,w,h);return c;}
 function eDrawTerrain(){
   if(!E.tLow)eBuildLow();
-  const want=E.pinch?(E.tscale||1):clamp(Math.round(EZ*DPR*4)/4,0.5,settings.gfx==='low'?1:settings.gfx==='high'?1.75:1.5);
+  const want=E.pinch?(E.tscale||1):clamp(Math.round(EZ*DPR*4)/4,0.5,settings.gfx==='low'?1:settings.gfx==='high'?1.25:1.15); /* 1.0.5: softer terrain scale */
   if(E.tscale!==want){E.tscale=want;E.tchunks.clear();}
   const L=E.tLow,k=L.width/EW,x0=Math.max(0,camX-8),y0=Math.max(0,camY-8),x1=Math.min(EW,camX+VW+8),y1=Math.min(EH,camY+VH+8);
   if(x1>x0&&y1>y0)ctx.drawImage(L,x0*k,y0*k,(x1-x0)*k,(y1-y0)*k,x0,y0,x1-x0,y1-y0);
@@ -2740,9 +2741,10 @@ function eZoomLimits(){const L=EL;if(!L)return[0.3,2.2];if(E&&E.cfg.custom&&!E.c
 function eSetZoom(z,sx,sy){if(!EL||!E)return EZ;const L=EL,lim=eZoomLimits();z=clamp(z,lim[0],lim[1]);if(sx===undefined){sx=L.px+L.pw/2;sy=L.py+L.ph/2;}
   const wx=camX+(sx-L.px)/EZ,wy=camY+(sy-L.py)/(EZ*KY);EZ=z;VW=L.pw/EZ;VH=L.ph/(EZ*KY);camX=wx-(sx-L.px)/EZ;camY=wy-(sy-L.py)/(EZ*KY);E.zoom=EZ/L.zBase;eClampCam();return EZ;}
 function eZoomReset(){if(!EL)return;E.zoom=1;const lim=eZoomLimits();EZ=clamp(EL.zBase,lim[0],lim[1]);VW=EL.pw/EZ;VH=EL.ph/(EZ*KY);}
-function eDPRCap(){return settings.gfx==='low'?1:settings.gfx==='high'?2:1.5;}
+function eDPRCap(){return settings.gfx==='low'?1:settings.gfx==='high'?1.5:1.25;} /* 1.0.5: high no longer 2x — was freezing phones */
 function resize(){
   W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,eDPRCap())*Math.max(1,SETUI.res()); /* WWT: never soft-scale UI below 100% */
+  try{window.__WWT_W=W;window.__WWT_H=H;window.__WWT_DPR=DPR;}catch(e){}
   cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
   const cs=getComputedStyle($('safe'));safe.l=parseFloat(cs.paddingLeft)||0;safe.r=parseFloat(cs.paddingRight)||0;safe.t=parseFloat(cs.paddingTop)||0;safe.b=parseFloat(cs.paddingBottom)||0;
   if(E&&state!=='title')eLayout();
@@ -3395,10 +3397,10 @@ function suEmpChange(k){saveSettings();if(k==='gfx'){resize();if(E){eTerrainRese
  if(E&&!E.cfg.custom){if(k==='betterAnim')E.cfg.betterAnim=settings.betterAnim;if(k==='dmgFx')E.cfg.dmgFx=settings.dmgFx;if(k==='tilt')E.cfg.tilt=settings.tilt;if(k==='gore')E.cfg.gore=settings.gore;}}
 function suEmpSpec(){const S=settings,it=(k,l,d,t,o,th,def)=>({k,l,d,t,o,th,get:()=>S[k]===undefined?def:S[k],set:v=>{S[k]=v;suEmpChange(k);}});
  const G=[
-  it('gfx','Preset','Quick setting for the whole look. Low = fastest, High = prettiest.','opt',[['low','Low'],['med','Med'],['high','High']],'gfx'),
+  {k:'gfx',l:'Graphics preset',d:'0=Low (fast) · 1=Med · 2=High (prettier, capped so phones do not freeze).',t:'range',min:0,max:2,step:1,fmt:function(v){return ['0 Low','1 Med','2 High'][+v]||String(v);},th:'gfx',get:function(){return S.gfx==='high'?2:S.gfx==='low'?0:1;},set:function(v){S.gfx=['low','med','high'][clamp(+v,0,2)];suEmpChange('gfx');}},
   it('fps','FPS + frame-time graph','Shows a speed counter and a little graph in the corner.','bool',null,'meter'),
-  it('particles','Particles','Sparks, dust, blood drops and smoke bits. Fewer = faster.','opt',[['auto','By preset'],['low','Few'],['med','Some'],['high','Lots']],'particles','auto'),
-  it('bodies','Bodies left on the ground','How many fallen soldiers stay before they fade away. Fewer = faster.','opt',[[0,'By preset'],[20,'20'],[40,'40'],[60,'60'],[90,'90'],[140,'140']],'decals',0),
+  {k:'particles',l:'Particles',d:'Sparks, dust, blood, smoke. 0=by preset · 1=few · 2=some · 3=lots.',t:'range',min:0,max:3,step:1,fmt:function(v){return ['0 Auto','1 Few','2 Some','3 Lots'][+v]||String(v);},th:'particles',get:function(){var p=S.particles;if(p===undefined||p==='auto')return 0;return p==='low'?1:p==='high'?3:2;},set:function(v){S.particles=['auto','low','med','high'][clamp(+v,0,3)];suEmpChange('particles');}},
+  {k:'bodies',l:'Bodies on ground',d:'How many fallen soldiers stay. 0 = by graphics preset.',t:'range',min:0,max:140,step:10,fmt:function(v){return +v===0?'0 Auto':String(v);},th:'decals',get:function(){return S.bodies===undefined?0:+S.bodies;},set:function(v){S.bodies=+v;suEmpChange('bodies');}},
   it('betterAnim','Animation detail','On = soldiers bob, swing and fall over nicely. Off = simpler, faster.','bool',null,'anim',true),
   it('dmgFx','Fire & smoke on hurt buildings','Broken buildings burn and smoke.','bool',null,'particles',true)].concat(SETUI.perfItems());
  return{game:'wwt',sfx:()=>sfx('blip'),cats:[
@@ -3999,12 +4001,15 @@ function v5CityStep(dt){v5CityCheck();if(!V5.city)return;V5.cityT+=dt;
 {const _sp=suEmpSpec;suEmpSpec=function(){const s=_sp(),S=settings,it=(k,l,d,t,o,th,def,fx)=>({k,l,d,t,o,th,get:()=>S[k]===undefined?def:S[k],set:v=>{S[k]=v;saveSettings();if(fx)fx(v);}});
   for(const c of s.cats)c.items=c.items.filter(i=>i.k!=='tilt');
   const cam=s.cats.find(c=>c.id==='camera'),gr=s.cats.find(c=>c.id==='graphics');
-  cam.items.push(it('camTilt','Camera tilt','Leans the camera back a little so you see the sides of houses and trees.','opt',[['off','Off'],['slight','Slight'],['strong','Strong']],'tilt','slight',()=>{if(EL){eLayout();}}),
+  cam.items.push(
+    {k:'camTilt',l:'Camera tilt',d:'0=Off · 1=Slight · 2=Strong. Leans camera so you see sides of houses/trees.',t:'range',min:0,max:2,step:1,fmt:function(v){return ['0 Off','1 Slight','2 Strong'][+v]||String(v);},th:'tilt',get:function(){var v=S.camTilt===undefined?'slight':S.camTilt;return v==='off'?0:v==='strong'?2:1;},set:function(v){S.camTilt=['off','slight','strong'][clamp(+v,0,2)];saveSettings();if(EL)eLayout();}},
     it('cityView','City view','Zoom all the way into your town and it runs itself while you watch.','bool',null,'anim',true));
-  gr.items.unshift(it('artStyle','Art style','Empire Clash = ChatGPT sheet look (DEFAULT for game + Map Maker). Stick = whole stick-toy world. Other styles stay available.','opt',[['classic','Empire Clash'],['stick','Stick figures']],'color','classic',()=>{if(window.WWT_flushArt)WWT_flushArt();}));
-  gr.items.push(it('depth3d','3D depth','How thick buildings look from the side. Off = flat cutouts.','opt',[[0,'Off'],[1,'Normal'],[1.6,'Deep']],'light',1,()=>{_v5flush();}),
+  gr.items.unshift(it('artStyle','Art style','Empire Clash = ChatGPT sheet look (DEFAULT live match). Stick = whole stick-toy world. Other styles stay available.','opt',[['classic','Empire Clash'],['stick','Stick figures']],'color','classic',()=>{if(window.WWT_flushArt)WWT_flushArt();}));
+  gr.items.push(
+    {k:'depth3d',l:'3D depth',d:'How thick buildings look from the side. 0=flat · 1=normal · 2=deep.',t:'range',min:0,max:2,step:1,fmt:function(v){return ['0 Off','1 Normal','2 Deep'][+v]||String(v);},th:'light',get:function(){var d=S.depth3d===undefined?1:+S.depth3d;return d>=1.5?2:d<=0?0:1;},set:function(v){S.depth3d=[0,1,1.6][clamp(+v,0,2)];saveSettings();_v5flush();}},
     it('shadows','Shadows','Buildings and trees cast shadows on the grass.','opt',[['on','On'],['off','Off']],'shadows','on'),
-    it('v5troops','Soldier style','New = small people in uniforms. Classic = the old big-head guys.','opt',[['new','New'],['classic','Classic']],'anim','new',()=>{_uspr.clear();}));
+    it('v5troops','Soldier style','New = small people in uniforms. Classic = the old big-head guys.','opt',[['new','New'],['classic','Classic']],'anim','new',()=>{_uspr.clear();}),
+    {k:'stickSize',l:'Stick figure size',d:'Only when Art style = Stick. Slider scales stick people/buildings. 50–150.',t:'range',min:50,max:150,step:5,fmt:function(v){return v+'%';},th:'size',show:function(){return S.artStyle==='stick';},get:function(){return S.stickSize===undefined?100:+S.stickSize;},set:function(v){S.stickSize=+v;saveSettings();if(window.WWT_flushArt)WWT_flushArt();}});
   s.cats.push({id:'game',name:'Game',icon:'🎮',items:[
     it('dayNight','Day and night','Night comes every few minutes: the dark spreads and monsters raid your base.','bool',null,'light',true),
     it('hints','Help text','Shows the little how-to line at the bottom.','bool',null,'anim',false),
@@ -4052,7 +4057,7 @@ function v51FIndex(){if(V51.fcRef===E.obs&&V51.fcN===E.obs.length)return V51.fc;
   list.sort((a,b)=>a.my0-b.my0);
   V51.fc={map,list};V51.fcRef=E.obs;V51.fcN=E.obs.length;return V51.fc;}
 function v51Hot(o){return (o.claim||0)>0||(o.hp!==undefined&&o.hp<o.max)||o.shake>0;}
-function v51BakeQ(){const q=EZ*DPR;if(q>2.6||q<0.2)return 0;return Math.round(q*1000)/1000;}
+function v51BakeQ(){let q=EZ*DPR;if(settings.gfx==='high')q=Math.min(q,1.35);else if(settings.gfx!=='low')q=Math.min(q,1.5);if(q>2.6||q<0.2)return 0;return Math.round(q*1000)/1000;}
 function v51Bake(c,qb,key){
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const iy=1/KY,R=[];
   for(const o of c.m){if(o.hp!==undefined&&o.hp<=0)continue;if(v51Hot(o))continue;const f=v5ObsFull(o),w=f.width/V5TS,h=f.height/V5TS,ax=o.x-f.ax,ay=o.y-f.ay*iy;R.push([o,f,ax,ay,w,h*iy]);
@@ -4274,9 +4279,9 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
 
 
 
-/* ===== WWT 1.0.4: Stick whole-look + Map Maker (fixed) ===== */
+/* ===== WWT 1.0.6: Map Maker fullscreen + EC scale + gfx freeze + numeric sliders ===== */
 (function(){
-  const WWT_MM_INDEX = {"tiles":[{"id":"trenches_trench","file":"trenches/trenches_trench.png","category":"trenches","label":"TRENCH WIDE","num":24,"play":"prop","game":"trench","w":223,"h":85,"source":"atlas_01_32_wide"},{"id":"trenches_trench_a_wide","file":"trenches/trenches_trench_a_wide.png","category":"trenches","label":"TRENCH L WIDE","num":24,"play":"prop","game":"trench","w":223,"h":85,"source":"atlas_01_32_wide"},{"id":"trenches_trench_b_wide","file":"trenches/trenches_trench_b_wide.png","category":"trenches","label":"TRENCH SHORT WIDE","num":24,"play":"prop","game":"trench","w":131,"h":71,"source":"atlas_01_32_wide"},{"id":"trenches_trench_c_wide","file":"trenches/trenches_trench_c_wide.png","category":"trenches","label":"TRENCH U WIDE","num":24,"play":"prop","game":"trench","w":178,"h":57,"source":"atlas_01_32_wide"},{"id":"trenches_trench_e_wide","file":"trenches/trenches_trench_e_wide.png","category":"trenches","label":"TRENCH END WIDE","num":24,"play":"prop","game":"trench","w":66,"h":68,"source":"atlas_01_32_wide"},{"id":"trenches_trench_a","file":"trenches/trenches_trench_a.png","category":"trenches","label":"TRENCH L","num":24,"play":"prop","game":"trench","w":124,"h":68,"source":"atlas_01_32_extra"},{"id":"trenches_trench_b","file":"trenches/trenches_trench_b.png","category":"trenches","label":"TRENCH SHORT","num":24,"play":"prop","game":"trench","w":73,"h":57,"source":"atlas_01_32_extra"},{"id":"trenches_trench_c","file":"trenches/trenches_trench_c.png","category":"trenches","label":"TRENCH U","num":24,"play":"prop","game":"trench","w":99,"h":46,"source":"atlas_01_32_extra"},{"id":"walls_wood_wall_seg","file":"walls/walls_wood_wall_seg.png","category":"walls","label":"WOOD WALL PIECE","num":20,"play":"wall","game":"wood","w":42,"h":21,"source":"atlas_01_32_extra"},{"id":"infantry_rifleman","file":"infantry/infantry_rifleman.png","category":"infantry","label":"RIFLEMAN","num":1,"play":"unit","game":"rifle","w":39,"h":57,"source":"atlas_01_32"},{"id":"infantry_assault","file":"infantry/infantry_assault.png","category":"infantry","label":"ASSAULT","num":2,"play":"unit","game":"rifle","w":46,"h":55,"source":"atlas_01_32"},{"id":"infantry_sniper","file":"infantry/infantry_sniper.png","category":"infantry","label":"SNIPER","num":3,"play":"unit","game":"scout","w":48,"h":54,"source":"atlas_01_32"},{"id":"infantry_mg","file":"infantry/infantry_mg.png","category":"infantry","label":"MG","num":4,"play":"unit","game":"brute","w":49,"h":56,"source":"atlas_01_32"},{"id":"infantry_officer","file":"infantry/infantry_officer.png","category":"infantry","label":"OFFICER","num":5,"play":"unit","game":"hero","w":46,"h":62,"source":"atlas_01_32"},{"id":"infantry_medic","file":"infantry/infantry_medic.png","category":"infantry","label":"MEDIC","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32"},{"id":"infantry_engineer","file":"infantry/infantry_engineer.png","category":"infantry","label":"ENGINEER","num":7,"play":"unit","game":"worker","w":43,"h":63,"source":"atlas_01_32"},{"id":"infantry_flamethrower","file":"infantry/infantry_flamethrower.png","category":"infantry","label":"FLAME","num":8,"play":"unit","game":"gren","w":36,"h":64,"source":"atlas_01_32"},{"id":"infantry_mortar_crew","file":"infantry/infantry_mortar_crew.png","category":"infantry","label":"MORTAR","num":9,"play":"unit","game":"mortar","w":48,"h":63,"source":"atlas_01_32"},{"id":"infantry_radio","file":"infantry/infantry_radio.png","category":"infantry","label":"RADIO","num":10,"play":"unit","game":"scout","w":37,"h":77,"source":"atlas_01_32"},{"id":"infantry_scout","file":"infantry/infantry_scout.png","category":"infantry","label":"SCOUT","num":11,"play":"unit","game":"scout","w":43,"h":64,"source":"atlas_01_32"},{"id":"infantry_command","file":"infantry/infantry_command.png","category":"infantry","label":"COMMAND","num":12,"play":"unit","game":"hero","w":45,"h":64,"source":"atlas_01_32"},{"id":"buildings_hq","file":"buildings/buildings_hq.png","category":"buildings","label":"HQ","num":13,"play":"bld","game":"hq","w":202,"h":151,"source":"atlas_01_32"},{"id":"buildings_barracks","file":"buildings/buildings_barracks.png","category":"buildings","label":"BARRACKS","num":14,"play":"bld","game":"barracks","w":196,"h":140,"source":"atlas_01_32"},{"id":"buildings_hospital","file":"buildings/buildings_hospital.png","category":"buildings","label":"HOSPITAL","num":15,"play":"bld","game":"hospital","w":199,"h":141,"source":"atlas_01_32"},{"id":"buildings_workshop","file":"buildings/buildings_workshop.png","category":"buildings","label":"WORKSHOP","num":16,"play":"bld","game":"workshop","w":188,"h":139,"source":"atlas_01_32"},{"id":"buildings_supply","file":"buildings/buildings_supply.png","category":"buildings","label":"SUPPLY","num":17,"play":"bld","game":"forge","w":205,"h":128,"source":"atlas_01_32"},{"id":"buildings_watchtower","file":"buildings/buildings_watchtower.png","category":"buildings","label":"TOWER","num":18,"play":"bld","game":"tower","w":132,"h":136,"source":"atlas_01_32"},{"id":"buildings_bunker","file":"buildings/buildings_bunker.png","category":"buildings","label":"BUNKER","num":19,"play":"bld","game":"tower","w":192,"h":130,"source":"atlas_01_32"},{"id":"walls_wood_wall","file":"walls/walls_wood_wall.png","category":"walls","label":"WOOD WALL","num":20,"play":"wall","game":"wood","w":213,"h":117,"source":"atlas_01_32"},{"id":"walls_stone_wall","file":"walls/walls_stone_wall.png","category":"walls","label":"STONE WALL","num":21,"play":"wall","game":"stone","w":211,"h":133,"source":"atlas_01_32"},{"id":"walls_wire_fence","file":"walls/walls_wire_fence.png","category":"walls","label":"WIRE","num":22,"play":"wall","game":"wire","w":204,"h":67,"source":"atlas_01_32"},{"id":"barricades_sandbags","file":"barricades/barricades_sandbags.png","category":"barricades","label":"SANDBAGS","num":23,"play":"wall","game":"sandbag","w":116,"h":48,"source":"atlas_01_32"},{"id":"nature_pine","file":"nature/nature_pine.png","category":"nature","label":"PINE","num":25,"play":"tree","game":"pine","w":58,"h":68,"source":"atlas_01_32"},{"id":"nature_broadleaf","file":"nature/nature_broadleaf.png","category":"nature","label":"BROADLEAF","num":26,"play":"tree","game":"broadleaf","w":68,"h":141,"source":"atlas_01_32"},{"id":"nature_bush","file":"nature/nature_bush.png","category":"nature","label":"BUSH","num":27,"play":"prop","game":"bush","w":67,"h":70,"source":"atlas_01_32"},{"id":"nature_rock","file":"nature/nature_rock.png","category":"nature","label":"ROCK","num":28,"play":"rock","game":"rock","w":116,"h":81,"source":"atlas_01_32"},{"id":"nature_dead_tree","file":"nature/nature_dead_tree.png","category":"nature","label":"DEAD TREE","num":29,"play":"tree","game":"dead","w":80,"h":69,"source":"atlas_01_32"},{"id":"nature_flowers","file":"nature/nature_flowers.png","category":"nature","label":"FLOWERS","num":30,"play":"prop","game":"flowers","w":51,"h":65,"source":"atlas_01_32"},{"id":"nature_logs_stumps","file":"nature/nature_logs_stumps.png","category":"nature","label":"LOGS","num":31,"play":"prop","game":"logs","w":91,"h":88,"source":"atlas_01_32"},{"id":"nature_terrain_clutter","file":"nature/nature_terrain_clutter.png","category":"nature","label":"CLUTTER","num":32,"play":"prop","game":"clutter","w":87,"h":79,"source":"atlas_01_32"},{"id":"infantry_rifleman_f2","file":"infantry/infantry_rifleman_f2.png","category":"infantry","label":"RIFLEMAN 2","num":1,"play":"unit","game":"rifle","w":36,"h":57,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f3","file":"infantry/infantry_rifleman_f3.png","category":"infantry","label":"RIFLEMAN 3","num":1,"play":"unit","game":"rifle","w":37,"h":58,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f4","file":"infantry/infantry_rifleman_f4.png","category":"infantry","label":"RIFLEMAN 4","num":1,"play":"unit","game":"rifle","w":39,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f5","file":"infantry/infantry_rifleman_f5.png","category":"infantry","label":"RIFLEMAN 5","num":1,"play":"unit","game":"rifle","w":37,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f6","file":"infantry/infantry_rifleman_f6.png","category":"infantry","label":"RIFLEMAN 6","num":1,"play":"unit","game":"rifle","w":37,"h":57,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f2","file":"infantry/infantry_assault_f2.png","category":"infantry","label":"ASSAULT 2","num":2,"play":"unit","game":"rifle","w":45,"h":55,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f3","file":"infantry/infantry_assault_f3.png","category":"infantry","label":"ASSAULT 3","num":2,"play":"unit","game":"rifle","w":43,"h":55,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f4","file":"infantry/infantry_assault_f4.png","category":"infantry","label":"ASSAULT 4","num":2,"play":"unit","game":"rifle","w":43,"h":54,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f5","file":"infantry/infantry_assault_f5.png","category":"infantry","label":"ASSAULT 5","num":2,"play":"unit","game":"rifle","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f6","file":"infantry/infantry_assault_f6.png","category":"infantry","label":"ASSAULT 6","num":2,"play":"unit","game":"rifle","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f2","file":"infantry/infantry_sniper_f2.png","category":"infantry","label":"SNIPER 2","num":3,"play":"unit","game":"scout","w":48,"h":53,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f3","file":"infantry/infantry_sniper_f3.png","category":"infantry","label":"SNIPER 3","num":3,"play":"unit","game":"scout","w":34,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f4","file":"infantry/infantry_sniper_f4.png","category":"infantry","label":"SNIPER 4","num":3,"play":"unit","game":"scout","w":36,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f5","file":"infantry/infantry_sniper_f5.png","category":"infantry","label":"SNIPER 5","num":3,"play":"unit","game":"scout","w":32,"h":59,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f6","file":"infantry/infantry_sniper_f6.png","category":"infantry","label":"SNIPER 6","num":3,"play":"unit","game":"scout","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f2","file":"infantry/infantry_mg_f2.png","category":"infantry","label":"MG 2","num":4,"play":"unit","game":"brute","w":44,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f3","file":"infantry/infantry_mg_f3.png","category":"infantry","label":"MG 3","num":4,"play":"unit","game":"brute","w":36,"h":57,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f4","file":"infantry/infantry_mg_f4.png","category":"infantry","label":"MG 4","num":4,"play":"unit","game":"brute","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f5","file":"infantry/infantry_mg_f5.png","category":"infantry","label":"MG 5","num":4,"play":"unit","game":"brute","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f6","file":"infantry/infantry_mg_f6.png","category":"infantry","label":"MG 6","num":4,"play":"unit","game":"brute","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f2","file":"infantry/infantry_officer_f2.png","category":"infantry","label":"OFFICER 2","num":5,"play":"unit","game":"hero","w":46,"h":64,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f3","file":"infantry/infantry_officer_f3.png","category":"infantry","label":"OFFICER 3","num":5,"play":"unit","game":"hero","w":36,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f4","file":"infantry/infantry_officer_f4.png","category":"infantry","label":"OFFICER 4","num":5,"play":"unit","game":"hero","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f5","file":"infantry/infantry_officer_f5.png","category":"infantry","label":"OFFICER 5","num":5,"play":"unit","game":"hero","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f6","file":"infantry/infantry_officer_f6.png","category":"infantry","label":"OFFICER 6","num":5,"play":"unit","game":"hero","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f2","file":"infantry/infantry_medic_f2.png","category":"infantry","label":"MEDIC 2","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f3","file":"infantry/infantry_medic_f3.png","category":"infantry","label":"MEDIC 3","num":6,"play":"unit","game":"worker","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f4","file":"infantry/infantry_medic_f4.png","category":"infantry","label":"MEDIC 4","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f5","file":"infantry/infantry_medic_f5.png","category":"infantry","label":"MEDIC 5","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f6","file":"infantry/infantry_medic_f6.png","category":"infantry","label":"MEDIC 6","num":6,"play":"unit","game":"worker","w":40,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f2","file":"infantry/infantry_engineer_f2.png","category":"infantry","label":"ENGINEER 2","num":7,"play":"unit","game":"worker","w":43,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f3","file":"infantry/infantry_engineer_f3.png","category":"infantry","label":"ENGINEER 3","num":7,"play":"unit","game":"worker","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f4","file":"infantry/infantry_engineer_f4.png","category":"infantry","label":"ENGINEER 4","num":7,"play":"unit","game":"worker","w":42,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f5","file":"infantry/infantry_engineer_f5.png","category":"infantry","label":"ENGINEER 5","num":7,"play":"unit","game":"worker","w":39,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f6","file":"infantry/infantry_engineer_f6.png","category":"infantry","label":"ENGINEER 6","num":7,"play":"unit","game":"worker","w":48,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_flamethrower_f3","file":"infantry/infantry_flamethrower_f3.png","category":"infantry","label":"FLAME 3","num":8,"play":"unit","game":"gren","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_flamethrower_f4","file":"infantry/infantry_flamethrower_f4.png","category":"infantry","label":"FLAME 4","num":8,"play":"unit","game":"gren","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_flamethrower_f6","file":"infantry/infantry_flamethrower_f6.png","category":"infantry","label":"FLAME 6","num":8,"play":"unit","game":"gren","w":38,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f2","file":"infantry/infantry_mortar_crew_f2.png","category":"infantry","label":"MORTAR 2","num":9,"play":"unit","game":"mortar","w":50,"h":73,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f3","file":"infantry/infantry_mortar_crew_f3.png","category":"infantry","label":"MORTAR 3","num":9,"play":"unit","game":"mortar","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f4","file":"infantry/infantry_mortar_crew_f4.png","category":"infantry","label":"MORTAR 4","num":9,"play":"unit","game":"mortar","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f5","file":"infantry/infantry_mortar_crew_f5.png","category":"infantry","label":"MORTAR 5","num":9,"play":"unit","game":"mortar","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f6","file":"infantry/infantry_mortar_crew_f6.png","category":"infantry","label":"MORTAR 6","num":9,"play":"unit","game":"mortar","w":47,"h":54,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f2","file":"infantry/infantry_radio_f2.png","category":"infantry","label":"RADIO 2","num":10,"play":"unit","game":"scout","w":37,"h":77,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f3","file":"infantry/infantry_radio_f3.png","category":"infantry","label":"RADIO 3","num":10,"play":"unit","game":"scout","w":40,"h":77,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f4","file":"infantry/infantry_radio_f4.png","category":"infantry","label":"RADIO 4","num":10,"play":"unit","game":"scout","w":37,"h":76,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f6","file":"infantry/infantry_radio_f6.png","category":"infantry","label":"RADIO 6","num":10,"play":"unit","game":"scout","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f2","file":"infantry/infantry_scout_f2.png","category":"infantry","label":"SCOUT 2","num":11,"play":"unit","game":"scout","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f3","file":"infantry/infantry_scout_f3.png","category":"infantry","label":"SCOUT 3","num":11,"play":"unit","game":"scout","w":34,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f4","file":"infantry/infantry_scout_f4.png","category":"infantry","label":"SCOUT 4","num":11,"play":"unit","game":"scout","w":32,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f5","file":"infantry/infantry_scout_f5.png","category":"infantry","label":"SCOUT 5","num":11,"play":"unit","game":"scout","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f6","file":"infantry/infantry_scout_f6.png","category":"infantry","label":"SCOUT 6","num":11,"play":"unit","game":"scout","w":43,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f2","file":"infantry/infantry_command_f2.png","category":"infantry","label":"COMMAND 2","num":12,"play":"unit","game":"hero","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f3","file":"infantry/infantry_command_f3.png","category":"infantry","label":"COMMAND 3","num":12,"play":"unit","game":"hero","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f4","file":"infantry/infantry_command_f4.png","category":"infantry","label":"COMMAND 4","num":12,"play":"unit","game":"hero","w":35,"h":64,"source":"atlas_01_32_frame"},{"id":"infantry_command_f5","file":"infantry/infantry_command_f5.png","category":"infantry","label":"COMMAND 5","num":12,"play":"unit","game":"hero","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f6","file":"infantry/infantry_command_f6.png","category":"infantry","label":"COMMAND 6","num":12,"play":"unit","game":"hero","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"walls_wire_fence_2","file":"walls/walls_wire_fence_2.png","category":"walls","label":"WIRE 2","num":22,"play":"wall","game":"wire","w":118,"h":52,"source":"atlas_01_32_extra"},{"id":"barricades_sandbags_2","file":"barricades/barricades_sandbags_2.png","category":"barricades","label":"SANDBAGS 2","num":23,"play":"wall","game":"sandbag","w":108,"h":45,"source":"atlas_01_32_extra"},{"id":"barricades_sandbags_3","file":"barricades/barricades_sandbags_3.png","category":"barricades","label":"SANDBAGS 3","num":23,"play":"wall","game":"sandbag","w":61,"h":63,"source":"atlas_01_32_extra"},{"id":"barricades_sandbags_4","file":"barricades/barricades_sandbags_4.png","category":"barricades","label":"SANDBAGS 4","num":23,"play":"wall","game":"sandbag","w":61,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_pine_2","file":"nature/nature_pine_2.png","category":"nature","label":"PINE 2","num":25,"play":"tree","game":"pine","w":48,"h":81,"source":"atlas_01_32_extra"},{"id":"nature_pine_3","file":"nature/nature_pine_3.png","category":"nature","label":"PINE 3","num":25,"play":"tree","game":"pine","w":46,"h":73,"source":"atlas_01_32_extra"},{"id":"nature_pine_4","file":"nature/nature_pine_4.png","category":"nature","label":"PINE 4","num":25,"play":"tree","game":"pine","w":42,"h":65,"source":"atlas_01_32_extra"},{"id":"nature_pine_5","file":"nature/nature_pine_5.png","category":"nature","label":"PINE 5","num":25,"play":"tree","game":"pine","w":42,"h":61,"source":"atlas_01_32_extra"},{"id":"nature_pine_6","file":"nature/nature_pine_6.png","category":"nature","label":"PINE 6","num":25,"play":"tree","game":"pine","w":42,"h":62,"source":"atlas_01_32_extra"},{"id":"nature_pine_7","file":"nature/nature_pine_7.png","category":"nature","label":"PINE 7","num":25,"play":"tree","game":"pine","w":41,"h":57,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_2","file":"nature/nature_broadleaf_2.png","category":"nature","label":"BROADLEAF 2","num":26,"play":"tree","game":"broadleaf","w":68,"h":71,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_3","file":"nature/nature_broadleaf_3.png","category":"nature","label":"BROADLEAF 3","num":26,"play":"tree","game":"broadleaf","w":60,"h":70,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_4","file":"nature/nature_broadleaf_4.png","category":"nature","label":"BROADLEAF 4","num":26,"play":"tree","game":"broadleaf","w":57,"h":80,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_5","file":"nature/nature_broadleaf_5.png","category":"nature","label":"BROADLEAF 5","num":26,"play":"tree","game":"broadleaf","w":52,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_bush_2","file":"nature/nature_bush_2.png","category":"nature","label":"BUSH 2","num":27,"play":"prop","game":"bush","w":61,"h":72,"source":"atlas_01_32_extra"},{"id":"nature_bush_3","file":"nature/nature_bush_3.png","category":"nature","label":"BUSH 3","num":27,"play":"prop","game":"bush","w":70,"h":76,"source":"atlas_01_32_extra"},{"id":"nature_bush_4","file":"nature/nature_bush_4.png","category":"nature","label":"BUSH 4","num":27,"play":"prop","game":"bush","w":58,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_bush_5","file":"nature/nature_bush_5.png","category":"nature","label":"BUSH 5","num":27,"play":"prop","game":"bush","w":57,"h":51,"source":"atlas_01_32_extra"},{"id":"nature_bush_6","file":"nature/nature_bush_6.png","category":"nature","label":"BUSH 6","num":27,"play":"prop","game":"bush","w":53,"h":51,"source":"atlas_01_32_extra"},{"id":"nature_bush_7","file":"nature/nature_bush_7.png","category":"nature","label":"BUSH 7","num":27,"play":"prop","game":"bush","w":38,"h":32,"source":"atlas_01_32_extra"},{"id":"nature_rock_2","file":"nature/nature_rock_2.png","category":"nature","label":"ROCK 2","num":28,"play":"rock","game":"rock","w":117,"h":99,"source":"atlas_01_32_extra"},{"id":"nature_rock_3","file":"nature/nature_rock_3.png","category":"nature","label":"ROCK 3","num":28,"play":"rock","game":"rock","w":63,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_rock_4","file":"nature/nature_rock_4.png","category":"nature","label":"ROCK 4","num":28,"play":"rock","game":"rock","w":63,"h":52,"source":"atlas_01_32_extra"},{"id":"nature_rock_5","file":"nature/nature_rock_5.png","category":"nature","label":"ROCK 5","num":28,"play":"rock","game":"rock","w":59,"h":42,"source":"atlas_01_32_extra"},{"id":"nature_rock_6","file":"nature/nature_rock_6.png","category":"nature","label":"ROCK 6","num":28,"play":"rock","game":"rock","w":44,"h":36,"source":"atlas_01_32_extra"},{"id":"nature_rock_7","file":"nature/nature_rock_7.png","category":"nature","label":"ROCK 7","num":28,"play":"rock","game":"rock","w":36,"h":31,"source":"atlas_01_32_extra"},{"id":"nature_rock_8","file":"nature/nature_rock_8.png","category":"nature","label":"ROCK 8","num":28,"play":"rock","game":"rock","w":38,"h":32,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_2","file":"nature/nature_dead_tree_2.png","category":"nature","label":"DEAD TREE 2","num":29,"play":"tree","game":"dead","w":72,"h":69,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_3","file":"nature/nature_dead_tree_3.png","category":"nature","label":"DEAD TREE 3","num":29,"play":"tree","game":"dead","w":49,"h":71,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_4","file":"nature/nature_dead_tree_4.png","category":"nature","label":"DEAD TREE 4","num":29,"play":"tree","game":"dead","w":50,"h":69,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_5","file":"nature/nature_dead_tree_5.png","category":"nature","label":"DEAD TREE 5","num":29,"play":"tree","game":"dead","w":50,"h":72,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_6","file":"nature/nature_dead_tree_6.png","category":"nature","label":"DEAD TREE 6","num":29,"play":"tree","game":"dead","w":45,"h":71,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_7","file":"nature/nature_dead_tree_7.png","category":"nature","label":"DEAD TREE 7","num":29,"play":"tree","game":"dead","w":45,"h":72,"source":"atlas_01_32_extra"},{"id":"nature_flowers_2","file":"nature/nature_flowers_2.png","category":"nature","label":"FLOWERS 2","num":30,"play":"prop","game":"flowers","w":47,"h":67,"source":"atlas_01_32_extra"},{"id":"nature_flowers_3","file":"nature/nature_flowers_3.png","category":"nature","label":"FLOWERS 3","num":30,"play":"prop","game":"flowers","w":50,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_flowers_4","file":"nature/nature_flowers_4.png","category":"nature","label":"FLOWERS 4","num":30,"play":"prop","game":"flowers","w":43,"h":82,"source":"atlas_01_32_extra"},{"id":"nature_flowers_5","file":"nature/nature_flowers_5.png","category":"nature","label":"FLOWERS 5","num":30,"play":"prop","game":"flowers","w":49,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_flowers_6","file":"nature/nature_flowers_6.png","category":"nature","label":"FLOWERS 6","num":30,"play":"prop","game":"flowers","w":50,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_flowers_7","file":"nature/nature_flowers_7.png","category":"nature","label":"FLOWERS 7","num":30,"play":"prop","game":"flowers","w":40,"h":49,"source":"atlas_01_32_extra"},{"id":"nature_flowers_8","file":"nature/nature_flowers_8.png","category":"nature","label":"FLOWERS 8","num":30,"play":"prop","game":"flowers","w":31,"h":41,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_2","file":"nature/nature_logs_stumps_2.png","category":"nature","label":"LOGS 2","num":31,"play":"prop","game":"logs","w":85,"h":44,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_3","file":"nature/nature_logs_stumps_3.png","category":"nature","label":"LOGS 3","num":31,"play":"prop","game":"logs","w":59,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_4","file":"nature/nature_logs_stumps_4.png","category":"nature","label":"LOGS 4","num":31,"play":"prop","game":"logs","w":49,"h":56,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_5","file":"nature/nature_logs_stumps_5.png","category":"nature","label":"LOGS 5","num":31,"play":"prop","game":"logs","w":54,"h":53,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_6","file":"nature/nature_logs_stumps_6.png","category":"nature","label":"LOGS 6","num":31,"play":"prop","game":"logs","w":46,"h":41,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_7","file":"nature/nature_logs_stumps_7.png","category":"nature","label":"LOGS 7","num":31,"play":"prop","game":"logs","w":47,"h":28,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_8","file":"nature/nature_logs_stumps_8.png","category":"nature","label":"LOGS 8","num":31,"play":"prop","game":"logs","w":44,"h":22,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_2","file":"nature/nature_terrain_clutter_2.png","category":"nature","label":"CLUTTER 2","num":32,"play":"prop","game":"clutter","w":103,"h":76,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_3","file":"nature/nature_terrain_clutter_3.png","category":"nature","label":"CLUTTER 3","num":32,"play":"prop","game":"clutter","w":53,"h":45,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_4","file":"nature/nature_terrain_clutter_4.png","category":"nature","label":"CLUTTER 4","num":32,"play":"prop","game":"clutter","w":48,"h":35,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_5","file":"nature/nature_terrain_clutter_5.png","category":"nature","label":"CLUTTER 5","num":32,"play":"prop","game":"clutter","w":51,"h":36,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_6","file":"nature/nature_terrain_clutter_6.png","category":"nature","label":"CLUTTER 6","num":32,"play":"prop","game":"clutter","w":42,"h":37,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_7","file":"nature/nature_terrain_clutter_7.png","category":"nature","label":"CLUTTER 7","num":32,"play":"prop","game":"clutter","w":36,"h":35,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_8","file":"nature/nature_terrain_clutter_8.png","category":"nature","label":"CLUTTER 8","num":32,"play":"prop","game":"clutter","w":32,"h":43,"source":"atlas_01_32_extra"},{"id":"destroyed_church","file":"destroyed/destroyed_church.png","category":"destroyed","label":"CHURCH","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_destroyed_building","file":"destroyed/destroyed_destroyed_building.png","category":"destroyed","label":"DESTROYED BUILDING","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_factory","file":"destroyed/destroyed_factory.png","category":"destroyed","label":"FACTORY","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_farm","file":"destroyed/destroyed_farm.png","category":"destroyed","label":"FARM","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_garage","file":"destroyed/destroyed_garage.png","category":"destroyed","label":"GARAGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_house","file":"destroyed/destroyed_house.png","category":"destroyed","label":"HOUSE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_house_ruin","file":"destroyed/destroyed_house_ruin.png","category":"destroyed","label":"HOUSE RUIN","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_town_ruin","file":"destroyed/destroyed_town_ruin.png","category":"destroyed","label":"TOWN RUIN","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_warehouse","file":"destroyed/destroyed_warehouse.png","category":"destroyed","label":"WAREHOUSE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_wreck_vehicle","file":"destroyed/destroyed_wreck_vehicle.png","category":"destroyed","label":"WRECK VEHICLE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_beach","file":"terrain/terrain_beach.png","category":"terrain","label":"BEACH","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_cave","file":"terrain/terrain_cave.png","category":"terrain","label":"CAVE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_cliff","file":"terrain/terrain_cliff.png","category":"terrain","label":"CLIFF","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_desert","file":"terrain/terrain_desert.png","category":"terrain","label":"DESERT","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_elevation","file":"terrain/terrain_elevation.png","category":"terrain","label":"ELEVATION","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_map_edge","file":"terrain/terrain_map_edge.png","category":"terrain","label":"MAP EDGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_mountain","file":"terrain/terrain_mountain.png","category":"terrain","label":"MOUNTAIN","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_snow","file":"terrain/terrain_snow.png","category":"terrain","label":"SNOW","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"rubble_blood_decal","file":"rubble/rubble_blood_decal.png","category":"rubble","label":"BLOOD DECAL","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"rubble_burned_ground","file":"rubble/rubble_burned_ground.png","category":"rubble","label":"BURNED GROUND","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"rubble_crater_large","file":"rubble/rubble_crater_large.png","category":"rubble","label":"CRATER LARGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"rubble_crater_small","file":"rubble/rubble_crater_small.png","category":"rubble","label":"CRATER SMALL","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"rubble_fire_smoke","file":"rubble/rubble_fire_smoke.png","category":"rubble","label":"FIRE SMOKE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"rubble_rubble_pile","file":"rubble/rubble_rubble_pile.png","category":"rubble","label":"RUBBLE PILE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_barrels_crates","file":"clutter/clutter_barrels_crates.png","category":"clutter","label":"BARRELS CRATES","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_cart_wagon","file":"clutter/clutter_cart_wagon.png","category":"clutter","label":"CART WAGON","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_civilian_props","file":"clutter/clutter_civilian_props.png","category":"clutter","label":"CIVILIAN PROPS","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_extra_props","file":"clutter/clutter_extra_props.png","category":"clutter","label":"EXTRA PROPS","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_resource_node","file":"clutter/clutter_resource_node.png","category":"clutter","label":"RESOURCE NODE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_signs_flags","file":"clutter/clutter_signs_flags.png","category":"clutter","label":"SIGNS FLAGS","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_spawn_markers","file":"clutter/clutter_spawn_markers.png","category":"clutter","label":"SPAWN MARKERS","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_stumps_logs","file":"clutter/clutter_stumps_logs.png","category":"clutter","label":"STUMPS LOGS","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"clutter_utility_pole","file":"clutter/clutter_utility_pole.png","category":"clutter","label":"UTILITY POLE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"trenches_at_ditch","file":"trenches/trenches_at_ditch.png","category":"trenches","label":"AT DITCH","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"trenches_bunker_med","file":"trenches/trenches_bunker_med.png","category":"trenches","label":"BUNKER MED","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"trenches_bunker_small","file":"trenches/trenches_bunker_small.png","category":"trenches","label":"BUNKER SMALL","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"trenches_foxhole","file":"trenches/trenches_foxhole.png","category":"trenches","label":"FOXHOLE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"trenches_obs_post","file":"trenches/trenches_obs_post.png","category":"trenches","label":"OBS POST","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"trenches_pillbox","file":"trenches/trenches_pillbox.png","category":"trenches","label":"PILLBOX","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"trenches_tank_trap","file":"trenches/trenches_tank_trap.png","category":"trenches","label":"TANK TRAP","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"barricades_concrete_barrier","file":"barricades/barricades_concrete_barrier.png","category":"barricades","label":"CONCRETE BARRIER","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"barricades_gate","file":"barricades/barricades_gate.png","category":"barricades","label":"GATE","play":"wall","game":"","w":103,"h":114,"source":"legacy"},{"id":"barricades_hedge","file":"barricades/barricades_hedge.png","category":"barricades","label":"HEDGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"barricades_sandbag_walls_b","file":"barricades/barricades_sandbag_walls_b.png","category":"barricades","label":"SANDBAG WALLS B","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"barricades_wire_fence","file":"barricades/barricades_wire_fence.png","category":"barricades","label":"WIRE FENCE","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"walls_gate_pillars","file":"walls/walls_gate_pillars.png","category":"walls","label":"GATE PILLARS","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"walls_stone_fence","file":"walls/walls_stone_fence.png","category":"walls","label":"STONE FENCE","play":"wall","game":"","w":104,"h":114,"source":"legacy"},{"id":"walls_wood_fence","file":"walls/walls_wood_fence.png","category":"walls","label":"WOOD FENCE","play":"wall","game":"","w":103,"h":114,"source":"legacy"},{"id":"walls_wooden_walls_b","file":"walls/walls_wooden_walls_b.png","category":"walls","label":"WOODEN WALLS B","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_bushes","file":"nature/nature_bushes.png","category":"nature","label":"BUSHES","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"nature_bushes_b","file":"nature/nature_bushes_b.png","category":"nature","label":"BUSHES B","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_dead_trees","file":"nature/nature_dead_trees.png","category":"nature","label":"DEAD TREES","play":"tree","game":"","w":103,"h":114,"source":"legacy"},{"id":"nature_dead_trees_b","file":"nature/nature_dead_trees_b.png","category":"nature","label":"DEAD TREES B","play":"tree","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_grass_dirt","file":"nature/nature_grass_dirt.png","category":"nature","label":"GRASS DIRT","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"nature_grass_tufts","file":"nature/nature_grass_tufts.png","category":"nature","label":"GRASS TUFTS","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_pines_b","file":"nature/nature_pines_b.png","category":"nature","label":"PINES B","play":"tree","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_rocks","file":"nature/nature_rocks.png","category":"nature","label":"ROCKS","play":"rock","game":"","w":103,"h":114,"source":"legacy"},{"id":"nature_rocks_b","file":"nature/nature_rocks_b.png","category":"nature","label":"ROCKS B","play":"rock","game":"","w":128,"h":119,"source":"legacy"}],"categories":["infantry","buildings","walls","barricades","trenches","nature","destroyed","terrain","rubble","clutter"],"version":"1.0.4"};
+  const WWT_MM_INDEX = {"tiles":[{"id":"trenches_trench","file":"trenches/trenches_trench.png","category":"trenches","label":"TRENCH WIDE","num":24,"play":"prop","game":"trench","w":223,"h":85,"source":"atlas_01_32_wide"},{"id":"trenches_trench_a_wide","file":"trenches/trenches_trench_a_wide.png","category":"trenches","label":"TRENCH L WIDE","num":24,"play":"prop","game":"trench","w":223,"h":85,"source":"atlas_01_32_wide"},{"id":"trenches_trench_b_wide","file":"trenches/trenches_trench_b_wide.png","category":"trenches","label":"TRENCH SHORT WIDE","num":24,"play":"prop","game":"trench","w":131,"h":71,"source":"atlas_01_32_wide"},{"id":"trenches_trench_c_wide","file":"trenches/trenches_trench_c_wide.png","category":"trenches","label":"TRENCH U WIDE","num":24,"play":"prop","game":"trench","w":178,"h":57,"source":"atlas_01_32_wide"},{"id":"trenches_trench_e_wide","file":"trenches/trenches_trench_e_wide.png","category":"trenches","label":"TRENCH END WIDE","num":24,"play":"prop","game":"trench","w":66,"h":68,"source":"atlas_01_32_wide"},{"id":"trenches_trench_a","file":"trenches/trenches_trench_a.png","category":"trenches","label":"TRENCH L","num":24,"play":"prop","game":"trench","w":124,"h":68,"source":"atlas_01_32_extra"},{"id":"trenches_trench_b","file":"trenches/trenches_trench_b.png","category":"trenches","label":"TRENCH SHORT","num":24,"play":"prop","game":"trench","w":73,"h":57,"source":"atlas_01_32_extra"},{"id":"trenches_trench_c","file":"trenches/trenches_trench_c.png","category":"trenches","label":"TRENCH U","num":24,"play":"prop","game":"trench","w":99,"h":46,"source":"atlas_01_32_extra"},{"id":"walls_wood_wall_seg","file":"walls/walls_wood_wall_seg.png","category":"walls","label":"WOOD WALL PIECE","num":20,"play":"wall","game":"wood","w":42,"h":21,"source":"atlas_01_32_extra"},{"id":"infantry_rifleman","file":"infantry/infantry_rifleman.png","category":"infantry","label":"RIFLEMAN","num":1,"play":"unit","game":"rifle","w":39,"h":57,"source":"atlas_01_32"},{"id":"infantry_assault","file":"infantry/infantry_assault.png","category":"infantry","label":"ASSAULT","num":2,"play":"unit","game":"rifle","w":46,"h":55,"source":"atlas_01_32"},{"id":"infantry_sniper","file":"infantry/infantry_sniper.png","category":"infantry","label":"SNIPER","num":3,"play":"unit","game":"scout","w":48,"h":54,"source":"atlas_01_32"},{"id":"infantry_mg","file":"infantry/infantry_mg.png","category":"infantry","label":"MG","num":4,"play":"unit","game":"brute","w":49,"h":56,"source":"atlas_01_32"},{"id":"infantry_officer","file":"infantry/infantry_officer.png","category":"infantry","label":"OFFICER","num":5,"play":"unit","game":"hero","w":46,"h":62,"source":"atlas_01_32"},{"id":"infantry_medic","file":"infantry/infantry_medic.png","category":"infantry","label":"MEDIC","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32"},{"id":"infantry_engineer","file":"infantry/infantry_engineer.png","category":"infantry","label":"ENGINEER","num":7,"play":"unit","game":"worker","w":43,"h":63,"source":"atlas_01_32"},{"id":"infantry_flamethrower","file":"infantry/infantry_flamethrower.png","category":"infantry","label":"FLAME","num":8,"play":"unit","game":"gren","w":36,"h":64,"source":"atlas_01_32"},{"id":"infantry_mortar_crew","file":"infantry/infantry_mortar_crew.png","category":"infantry","label":"MORTAR","num":9,"play":"unit","game":"mortar","w":48,"h":63,"source":"atlas_01_32"},{"id":"infantry_radio","file":"infantry/infantry_radio.png","category":"infantry","label":"RADIO","num":10,"play":"unit","game":"scout","w":37,"h":77,"source":"atlas_01_32"},{"id":"infantry_scout","file":"infantry/infantry_scout.png","category":"infantry","label":"SCOUT","num":11,"play":"unit","game":"scout","w":43,"h":64,"source":"atlas_01_32"},{"id":"infantry_command","file":"infantry/infantry_command.png","category":"infantry","label":"COMMAND","num":12,"play":"unit","game":"hero","w":45,"h":64,"source":"atlas_01_32"},{"id":"buildings_hq","file":"buildings/buildings_hq.png","category":"buildings","label":"HQ","num":13,"play":"bld","game":"hq","w":202,"h":151,"source":"atlas_01_32"},{"id":"buildings_barracks","file":"buildings/buildings_barracks.png","category":"buildings","label":"BARRACKS","num":14,"play":"bld","game":"barracks","w":196,"h":140,"source":"atlas_01_32"},{"id":"buildings_hospital","file":"buildings/buildings_hospital.png","category":"buildings","label":"HOSPITAL","num":15,"play":"bld","game":"hospital","w":199,"h":141,"source":"atlas_01_32"},{"id":"buildings_workshop","file":"buildings/buildings_workshop.png","category":"buildings","label":"WORKSHOP","num":16,"play":"bld","game":"workshop","w":188,"h":139,"source":"atlas_01_32"},{"id":"buildings_supply","file":"buildings/buildings_supply.png","category":"buildings","label":"SUPPLY","num":17,"play":"bld","game":"forge","w":205,"h":128,"source":"atlas_01_32"},{"id":"buildings_watchtower","file":"buildings/buildings_watchtower.png","category":"buildings","label":"TOWER","num":18,"play":"bld","game":"tower","w":132,"h":136,"source":"atlas_01_32"},{"id":"buildings_bunker","file":"buildings/buildings_bunker.png","category":"buildings","label":"BUNKER","num":19,"play":"bld","game":"tower","w":192,"h":130,"source":"atlas_01_32"},{"id":"walls_wood_wall","file":"walls/walls_wood_wall.png","category":"walls","label":"WOOD WALL","num":20,"play":"wall","game":"wood","w":213,"h":117,"source":"atlas_01_32"},{"id":"walls_stone_wall","file":"walls/walls_stone_wall.png","category":"walls","label":"STONE WALL","num":21,"play":"wall","game":"stone","w":211,"h":133,"source":"atlas_01_32"},{"id":"walls_wire_fence","file":"walls/walls_wire_fence.png","category":"walls","label":"WIRE","num":22,"play":"wall","game":"wire","w":204,"h":67,"source":"atlas_01_32"},{"id":"barricades_sandbags","file":"barricades/barricades_sandbags.png","category":"barricades","label":"SANDBAGS","num":23,"play":"wall","game":"sandbag","w":116,"h":48,"source":"atlas_01_32"},{"id":"nature_pine","file":"nature/nature_pine.png","category":"nature","label":"PINE","num":25,"play":"tree","game":"pine","w":58,"h":68,"source":"atlas_01_32"},{"id":"nature_broadleaf","file":"nature/nature_broadleaf.png","category":"nature","label":"BROADLEAF","num":26,"play":"tree","game":"broadleaf","w":68,"h":141,"source":"atlas_01_32"},{"id":"nature_bush","file":"nature/nature_bush.png","category":"nature","label":"BUSH","num":27,"play":"prop","game":"bush","w":67,"h":70,"source":"atlas_01_32"},{"id":"nature_rock","file":"nature/nature_rock.png","category":"nature","label":"ROCK","num":28,"play":"rock","game":"rock","w":116,"h":81,"source":"atlas_01_32"},{"id":"nature_dead_tree","file":"nature/nature_dead_tree.png","category":"nature","label":"DEAD TREE","num":29,"play":"tree","game":"dead","w":80,"h":69,"source":"atlas_01_32"},{"id":"nature_flowers","file":"nature/nature_flowers.png","category":"nature","label":"FLOWERS","num":30,"play":"prop","game":"flowers","w":51,"h":65,"source":"atlas_01_32"},{"id":"nature_logs_stumps","file":"nature/nature_logs_stumps.png","category":"nature","label":"LOGS","num":31,"play":"prop","game":"logs","w":91,"h":88,"source":"atlas_01_32"},{"id":"nature_terrain_clutter","file":"nature/nature_terrain_clutter.png","category":"nature","label":"CLUTTER","num":32,"play":"prop","game":"clutter","w":87,"h":79,"source":"atlas_01_32"},{"id":"infantry_rifleman_f2","file":"infantry/infantry_rifleman_f2.png","category":"infantry","label":"RIFLEMAN 2","num":1,"play":"unit","game":"rifle","w":36,"h":57,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f3","file":"infantry/infantry_rifleman_f3.png","category":"infantry","label":"RIFLEMAN 3","num":1,"play":"unit","game":"rifle","w":37,"h":58,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f4","file":"infantry/infantry_rifleman_f4.png","category":"infantry","label":"RIFLEMAN 4","num":1,"play":"unit","game":"rifle","w":39,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f5","file":"infantry/infantry_rifleman_f5.png","category":"infantry","label":"RIFLEMAN 5","num":1,"play":"unit","game":"rifle","w":37,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_rifleman_f6","file":"infantry/infantry_rifleman_f6.png","category":"infantry","label":"RIFLEMAN 6","num":1,"play":"unit","game":"rifle","w":37,"h":57,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f2","file":"infantry/infantry_assault_f2.png","category":"infantry","label":"ASSAULT 2","num":2,"play":"unit","game":"rifle","w":45,"h":55,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f3","file":"infantry/infantry_assault_f3.png","category":"infantry","label":"ASSAULT 3","num":2,"play":"unit","game":"rifle","w":43,"h":55,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f4","file":"infantry/infantry_assault_f4.png","category":"infantry","label":"ASSAULT 4","num":2,"play":"unit","game":"rifle","w":43,"h":54,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f5","file":"infantry/infantry_assault_f5.png","category":"infantry","label":"ASSAULT 5","num":2,"play":"unit","game":"rifle","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_assault_f6","file":"infantry/infantry_assault_f6.png","category":"infantry","label":"ASSAULT 6","num":2,"play":"unit","game":"rifle","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f2","file":"infantry/infantry_sniper_f2.png","category":"infantry","label":"SNIPER 2","num":3,"play":"unit","game":"scout","w":48,"h":53,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f3","file":"infantry/infantry_sniper_f3.png","category":"infantry","label":"SNIPER 3","num":3,"play":"unit","game":"scout","w":34,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f4","file":"infantry/infantry_sniper_f4.png","category":"infantry","label":"SNIPER 4","num":3,"play":"unit","game":"scout","w":36,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f5","file":"infantry/infantry_sniper_f5.png","category":"infantry","label":"SNIPER 5","num":3,"play":"unit","game":"scout","w":32,"h":59,"source":"atlas_01_32_frame"},{"id":"infantry_sniper_f6","file":"infantry/infantry_sniper_f6.png","category":"infantry","label":"SNIPER 6","num":3,"play":"unit","game":"scout","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f2","file":"infantry/infantry_mg_f2.png","category":"infantry","label":"MG 2","num":4,"play":"unit","game":"brute","w":44,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f3","file":"infantry/infantry_mg_f3.png","category":"infantry","label":"MG 3","num":4,"play":"unit","game":"brute","w":36,"h":57,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f4","file":"infantry/infantry_mg_f4.png","category":"infantry","label":"MG 4","num":4,"play":"unit","game":"brute","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f5","file":"infantry/infantry_mg_f5.png","category":"infantry","label":"MG 5","num":4,"play":"unit","game":"brute","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_mg_f6","file":"infantry/infantry_mg_f6.png","category":"infantry","label":"MG 6","num":4,"play":"unit","game":"brute","w":35,"h":56,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f2","file":"infantry/infantry_officer_f2.png","category":"infantry","label":"OFFICER 2","num":5,"play":"unit","game":"hero","w":46,"h":64,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f3","file":"infantry/infantry_officer_f3.png","category":"infantry","label":"OFFICER 3","num":5,"play":"unit","game":"hero","w":36,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f4","file":"infantry/infantry_officer_f4.png","category":"infantry","label":"OFFICER 4","num":5,"play":"unit","game":"hero","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f5","file":"infantry/infantry_officer_f5.png","category":"infantry","label":"OFFICER 5","num":5,"play":"unit","game":"hero","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_officer_f6","file":"infantry/infantry_officer_f6.png","category":"infantry","label":"OFFICER 6","num":5,"play":"unit","game":"hero","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f2","file":"infantry/infantry_medic_f2.png","category":"infantry","label":"MEDIC 2","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f3","file":"infantry/infantry_medic_f3.png","category":"infantry","label":"MEDIC 3","num":6,"play":"unit","game":"worker","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f4","file":"infantry/infantry_medic_f4.png","category":"infantry","label":"MEDIC 4","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f5","file":"infantry/infantry_medic_f5.png","category":"infantry","label":"MEDIC 5","num":6,"play":"unit","game":"worker","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_medic_f6","file":"infantry/infantry_medic_f6.png","category":"infantry","label":"MEDIC 6","num":6,"play":"unit","game":"worker","w":40,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f2","file":"infantry/infantry_engineer_f2.png","category":"infantry","label":"ENGINEER 2","num":7,"play":"unit","game":"worker","w":43,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f3","file":"infantry/infantry_engineer_f3.png","category":"infantry","label":"ENGINEER 3","num":7,"play":"unit","game":"worker","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f4","file":"infantry/infantry_engineer_f4.png","category":"infantry","label":"ENGINEER 4","num":7,"play":"unit","game":"worker","w":42,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f5","file":"infantry/infantry_engineer_f5.png","category":"infantry","label":"ENGINEER 5","num":7,"play":"unit","game":"worker","w":39,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_engineer_f6","file":"infantry/infantry_engineer_f6.png","category":"infantry","label":"ENGINEER 6","num":7,"play":"unit","game":"worker","w":48,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_flamethrower_f3","file":"infantry/infantry_flamethrower_f3.png","category":"infantry","label":"FLAME 3","num":8,"play":"unit","game":"gren","w":37,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_flamethrower_f4","file":"infantry/infantry_flamethrower_f4.png","category":"infantry","label":"FLAME 4","num":8,"play":"unit","game":"gren","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_flamethrower_f6","file":"infantry/infantry_flamethrower_f6.png","category":"infantry","label":"FLAME 6","num":8,"play":"unit","game":"gren","w":38,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f2","file":"infantry/infantry_mortar_crew_f2.png","category":"infantry","label":"MORTAR 2","num":9,"play":"unit","game":"mortar","w":50,"h":73,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f3","file":"infantry/infantry_mortar_crew_f3.png","category":"infantry","label":"MORTAR 3","num":9,"play":"unit","game":"mortar","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f4","file":"infantry/infantry_mortar_crew_f4.png","category":"infantry","label":"MORTAR 4","num":9,"play":"unit","game":"mortar","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f5","file":"infantry/infantry_mortar_crew_f5.png","category":"infantry","label":"MORTAR 5","num":9,"play":"unit","game":"mortar","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_mortar_crew_f6","file":"infantry/infantry_mortar_crew_f6.png","category":"infantry","label":"MORTAR 6","num":9,"play":"unit","game":"mortar","w":47,"h":54,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f2","file":"infantry/infantry_radio_f2.png","category":"infantry","label":"RADIO 2","num":10,"play":"unit","game":"scout","w":37,"h":77,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f3","file":"infantry/infantry_radio_f3.png","category":"infantry","label":"RADIO 3","num":10,"play":"unit","game":"scout","w":40,"h":77,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f4","file":"infantry/infantry_radio_f4.png","category":"infantry","label":"RADIO 4","num":10,"play":"unit","game":"scout","w":37,"h":76,"source":"atlas_01_32_frame"},{"id":"infantry_radio_f6","file":"infantry/infantry_radio_f6.png","category":"infantry","label":"RADIO 6","num":10,"play":"unit","game":"scout","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f2","file":"infantry/infantry_scout_f2.png","category":"infantry","label":"SCOUT 2","num":11,"play":"unit","game":"scout","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f3","file":"infantry/infantry_scout_f3.png","category":"infantry","label":"SCOUT 3","num":11,"play":"unit","game":"scout","w":34,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f4","file":"infantry/infantry_scout_f4.png","category":"infantry","label":"SCOUT 4","num":11,"play":"unit","game":"scout","w":32,"h":62,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f5","file":"infantry/infantry_scout_f5.png","category":"infantry","label":"SCOUT 5","num":11,"play":"unit","game":"scout","w":38,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_scout_f6","file":"infantry/infantry_scout_f6.png","category":"infantry","label":"SCOUT 6","num":11,"play":"unit","game":"scout","w":43,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f2","file":"infantry/infantry_command_f2.png","category":"infantry","label":"COMMAND 2","num":12,"play":"unit","game":"hero","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f3","file":"infantry/infantry_command_f3.png","category":"infantry","label":"COMMAND 3","num":12,"play":"unit","game":"hero","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f4","file":"infantry/infantry_command_f4.png","category":"infantry","label":"COMMAND 4","num":12,"play":"unit","game":"hero","w":35,"h":64,"source":"atlas_01_32_frame"},{"id":"infantry_command_f5","file":"infantry/infantry_command_f5.png","category":"infantry","label":"COMMAND 5","num":12,"play":"unit","game":"hero","w":36,"h":63,"source":"atlas_01_32_frame"},{"id":"infantry_command_f6","file":"infantry/infantry_command_f6.png","category":"infantry","label":"COMMAND 6","num":12,"play":"unit","game":"hero","w":35,"h":63,"source":"atlas_01_32_frame"},{"id":"walls_wire_fence_2","file":"walls/walls_wire_fence_2.png","category":"walls","label":"WIRE 2","num":22,"play":"wall","game":"wire","w":118,"h":52,"source":"atlas_01_32_extra"},{"id":"barricades_sandbags_2","file":"barricades/barricades_sandbags_2.png","category":"barricades","label":"SANDBAGS 2","num":23,"play":"wall","game":"sandbag","w":108,"h":45,"source":"atlas_01_32_extra"},{"id":"barricades_sandbags_3","file":"barricades/barricades_sandbags_3.png","category":"barricades","label":"SANDBAGS 3","num":23,"play":"wall","game":"sandbag","w":61,"h":63,"source":"atlas_01_32_extra"},{"id":"barricades_sandbags_4","file":"barricades/barricades_sandbags_4.png","category":"barricades","label":"SANDBAGS 4","num":23,"play":"wall","game":"sandbag","w":61,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_pine_2","file":"nature/nature_pine_2.png","category":"nature","label":"PINE 2","num":25,"play":"tree","game":"pine","w":48,"h":81,"source":"atlas_01_32_extra"},{"id":"nature_pine_3","file":"nature/nature_pine_3.png","category":"nature","label":"PINE 3","num":25,"play":"tree","game":"pine","w":46,"h":73,"source":"atlas_01_32_extra"},{"id":"nature_pine_4","file":"nature/nature_pine_4.png","category":"nature","label":"PINE 4","num":25,"play":"tree","game":"pine","w":42,"h":65,"source":"atlas_01_32_extra"},{"id":"nature_pine_5","file":"nature/nature_pine_5.png","category":"nature","label":"PINE 5","num":25,"play":"tree","game":"pine","w":42,"h":61,"source":"atlas_01_32_extra"},{"id":"nature_pine_6","file":"nature/nature_pine_6.png","category":"nature","label":"PINE 6","num":25,"play":"tree","game":"pine","w":42,"h":62,"source":"atlas_01_32_extra"},{"id":"nature_pine_7","file":"nature/nature_pine_7.png","category":"nature","label":"PINE 7","num":25,"play":"tree","game":"pine","w":41,"h":57,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_2","file":"nature/nature_broadleaf_2.png","category":"nature","label":"BROADLEAF 2","num":26,"play":"tree","game":"broadleaf","w":68,"h":71,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_3","file":"nature/nature_broadleaf_3.png","category":"nature","label":"BROADLEAF 3","num":26,"play":"tree","game":"broadleaf","w":60,"h":70,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_4","file":"nature/nature_broadleaf_4.png","category":"nature","label":"BROADLEAF 4","num":26,"play":"tree","game":"broadleaf","w":57,"h":80,"source":"atlas_01_32_extra"},{"id":"nature_broadleaf_5","file":"nature/nature_broadleaf_5.png","category":"nature","label":"BROADLEAF 5","num":26,"play":"tree","game":"broadleaf","w":52,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_bush_2","file":"nature/nature_bush_2.png","category":"nature","label":"BUSH 2","num":27,"play":"prop","game":"bush","w":61,"h":72,"source":"atlas_01_32_extra"},{"id":"nature_bush_3","file":"nature/nature_bush_3.png","category":"nature","label":"BUSH 3","num":27,"play":"prop","game":"bush","w":70,"h":76,"source":"atlas_01_32_extra"},{"id":"nature_bush_4","file":"nature/nature_bush_4.png","category":"nature","label":"BUSH 4","num":27,"play":"prop","game":"bush","w":58,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_bush_5","file":"nature/nature_bush_5.png","category":"nature","label":"BUSH 5","num":27,"play":"prop","game":"bush","w":57,"h":51,"source":"atlas_01_32_extra"},{"id":"nature_bush_6","file":"nature/nature_bush_6.png","category":"nature","label":"BUSH 6","num":27,"play":"prop","game":"bush","w":53,"h":51,"source":"atlas_01_32_extra"},{"id":"nature_bush_7","file":"nature/nature_bush_7.png","category":"nature","label":"BUSH 7","num":27,"play":"prop","game":"bush","w":38,"h":32,"source":"atlas_01_32_extra"},{"id":"nature_rock_2","file":"nature/nature_rock_2.png","category":"nature","label":"ROCK 2","num":28,"play":"rock","game":"rock","w":117,"h":99,"source":"atlas_01_32_extra"},{"id":"nature_rock_3","file":"nature/nature_rock_3.png","category":"nature","label":"ROCK 3","num":28,"play":"rock","game":"rock","w":63,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_rock_4","file":"nature/nature_rock_4.png","category":"nature","label":"ROCK 4","num":28,"play":"rock","game":"rock","w":63,"h":52,"source":"atlas_01_32_extra"},{"id":"nature_rock_5","file":"nature/nature_rock_5.png","category":"nature","label":"ROCK 5","num":28,"play":"rock","game":"rock","w":59,"h":42,"source":"atlas_01_32_extra"},{"id":"nature_rock_6","file":"nature/nature_rock_6.png","category":"nature","label":"ROCK 6","num":28,"play":"rock","game":"rock","w":44,"h":36,"source":"atlas_01_32_extra"},{"id":"nature_rock_7","file":"nature/nature_rock_7.png","category":"nature","label":"ROCK 7","num":28,"play":"rock","game":"rock","w":36,"h":31,"source":"atlas_01_32_extra"},{"id":"nature_rock_8","file":"nature/nature_rock_8.png","category":"nature","label":"ROCK 8","num":28,"play":"rock","game":"rock","w":38,"h":32,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_2","file":"nature/nature_dead_tree_2.png","category":"nature","label":"DEAD TREE 2","num":29,"play":"tree","game":"dead","w":72,"h":69,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_3","file":"nature/nature_dead_tree_3.png","category":"nature","label":"DEAD TREE 3","num":29,"play":"tree","game":"dead","w":49,"h":71,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_4","file":"nature/nature_dead_tree_4.png","category":"nature","label":"DEAD TREE 4","num":29,"play":"tree","game":"dead","w":50,"h":69,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_5","file":"nature/nature_dead_tree_5.png","category":"nature","label":"DEAD TREE 5","num":29,"play":"tree","game":"dead","w":50,"h":72,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_6","file":"nature/nature_dead_tree_6.png","category":"nature","label":"DEAD TREE 6","num":29,"play":"tree","game":"dead","w":45,"h":71,"source":"atlas_01_32_extra"},{"id":"nature_dead_tree_7","file":"nature/nature_dead_tree_7.png","category":"nature","label":"DEAD TREE 7","num":29,"play":"tree","game":"dead","w":45,"h":72,"source":"atlas_01_32_extra"},{"id":"nature_flowers_2","file":"nature/nature_flowers_2.png","category":"nature","label":"FLOWERS 2","num":30,"play":"prop","game":"flowers","w":47,"h":67,"source":"atlas_01_32_extra"},{"id":"nature_flowers_3","file":"nature/nature_flowers_3.png","category":"nature","label":"FLOWERS 3","num":30,"play":"prop","game":"flowers","w":50,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_flowers_4","file":"nature/nature_flowers_4.png","category":"nature","label":"FLOWERS 4","num":30,"play":"prop","game":"flowers","w":43,"h":82,"source":"atlas_01_32_extra"},{"id":"nature_flowers_5","file":"nature/nature_flowers_5.png","category":"nature","label":"FLOWERS 5","num":30,"play":"prop","game":"flowers","w":49,"h":58,"source":"atlas_01_32_extra"},{"id":"nature_flowers_6","file":"nature/nature_flowers_6.png","category":"nature","label":"FLOWERS 6","num":30,"play":"prop","game":"flowers","w":50,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_flowers_7","file":"nature/nature_flowers_7.png","category":"nature","label":"FLOWERS 7","num":30,"play":"prop","game":"flowers","w":40,"h":49,"source":"atlas_01_32_extra"},{"id":"nature_flowers_8","file":"nature/nature_flowers_8.png","category":"nature","label":"FLOWERS 8","num":30,"play":"prop","game":"flowers","w":31,"h":41,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_2","file":"nature/nature_logs_stumps_2.png","category":"nature","label":"LOGS 2","num":31,"play":"prop","game":"logs","w":85,"h":44,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_3","file":"nature/nature_logs_stumps_3.png","category":"nature","label":"LOGS 3","num":31,"play":"prop","game":"logs","w":59,"h":55,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_4","file":"nature/nature_logs_stumps_4.png","category":"nature","label":"LOGS 4","num":31,"play":"prop","game":"logs","w":49,"h":56,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_5","file":"nature/nature_logs_stumps_5.png","category":"nature","label":"LOGS 5","num":31,"play":"prop","game":"logs","w":54,"h":53,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_6","file":"nature/nature_logs_stumps_6.png","category":"nature","label":"LOGS 6","num":31,"play":"prop","game":"logs","w":46,"h":41,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_7","file":"nature/nature_logs_stumps_7.png","category":"nature","label":"LOGS 7","num":31,"play":"prop","game":"logs","w":47,"h":28,"source":"atlas_01_32_extra"},{"id":"nature_logs_stumps_8","file":"nature/nature_logs_stumps_8.png","category":"nature","label":"LOGS 8","num":31,"play":"prop","game":"logs","w":44,"h":22,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_2","file":"nature/nature_terrain_clutter_2.png","category":"nature","label":"CLUTTER 2","num":32,"play":"prop","game":"clutter","w":103,"h":76,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_3","file":"nature/nature_terrain_clutter_3.png","category":"nature","label":"CLUTTER 3","num":32,"play":"prop","game":"clutter","w":53,"h":45,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_4","file":"nature/nature_terrain_clutter_4.png","category":"nature","label":"CLUTTER 4","num":32,"play":"prop","game":"clutter","w":48,"h":35,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_5","file":"nature/nature_terrain_clutter_5.png","category":"nature","label":"CLUTTER 5","num":32,"play":"prop","game":"clutter","w":51,"h":36,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_6","file":"nature/nature_terrain_clutter_6.png","category":"nature","label":"CLUTTER 6","num":32,"play":"prop","game":"clutter","w":42,"h":37,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_7","file":"nature/nature_terrain_clutter_7.png","category":"nature","label":"CLUTTER 7","num":32,"play":"prop","game":"clutter","w":36,"h":35,"source":"atlas_01_32_extra"},{"id":"nature_terrain_clutter_8","file":"nature/nature_terrain_clutter_8.png","category":"nature","label":"CLUTTER 8","num":32,"play":"prop","game":"clutter","w":32,"h":43,"source":"atlas_01_32_extra"},{"id":"destroyed_church","file":"destroyed/destroyed_church.png","category":"destroyed","label":"CHURCH","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_destroyed_building","file":"destroyed/destroyed_destroyed_building.png","category":"destroyed","label":"DESTROYED BUILDING","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_factory","file":"destroyed/destroyed_factory.png","category":"destroyed","label":"FACTORY","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_farm","file":"destroyed/destroyed_farm.png","category":"destroyed","label":"FARM","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_garage","file":"destroyed/destroyed_garage.png","category":"destroyed","label":"GARAGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_house","file":"destroyed/destroyed_house.png","category":"destroyed","label":"HOUSE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_house_ruin","file":"destroyed/destroyed_house_ruin.png","category":"destroyed","label":"HOUSE RUIN","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"destroyed_town_ruin","file":"destroyed/destroyed_town_ruin.png","category":"destroyed","label":"TOWN RUIN","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_warehouse","file":"destroyed/destroyed_warehouse.png","category":"destroyed","label":"WAREHOUSE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"destroyed_wreck_vehicle","file":"destroyed/destroyed_wreck_vehicle.png","category":"destroyed","label":"WRECK VEHICLE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_beach","file":"terrain/terrain_beach.png","category":"terrain","label":"BEACH","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_cave","file":"terrain/terrain_cave.png","category":"terrain","label":"CAVE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_cliff","file":"terrain/terrain_cliff.png","category":"terrain","label":"CLIFF","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_desert","file":"terrain/terrain_desert.png","category":"terrain","label":"DESERT","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_elevation","file":"terrain/terrain_elevation.png","category":"terrain","label":"ELEVATION","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"terrain_map_edge","file":"terrain/terrain_map_edge.png","category":"terrain","label":"MAP EDGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_mountain","file":"terrain/terrain_mountain.png","category":"terrain","label":"MOUNTAIN","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"terrain_snow","file":"terrain/terrain_snow.png","category":"terrain","label":"SNOW","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"rubble_blood_decal","file":"rubble/rubble_blood_decal.png","category":"rubble","label":"BLOOD DECAL","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"rubble_burned_ground","file":"rubble/rubble_burned_ground.png","category":"rubble","label":"BURNED GROUND","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"rubble_crater_large","file":"rubble/rubble_crater_large.png","category":"rubble","label":"CRATER LARGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"rubble_crater_small","file":"rubble/rubble_crater_small.png","category":"rubble","label":"CRATER SMALL","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"rubble_fire_smoke","file":"rubble/rubble_fire_smoke.png","category":"rubble","label":"FIRE SMOKE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"rubble_rubble_pile","file":"rubble/rubble_rubble_pile.png","category":"rubble","label":"RUBBLE PILE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_barrels_crates","file":"clutter/clutter_barrels_crates.png","category":"clutter","label":"BARRELS CRATES","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_cart_wagon","file":"clutter/clutter_cart_wagon.png","category":"clutter","label":"CART WAGON","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_civilian_props","file":"clutter/clutter_civilian_props.png","category":"clutter","label":"CIVILIAN PROPS","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_extra_props","file":"clutter/clutter_extra_props.png","category":"clutter","label":"EXTRA PROPS","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_resource_node","file":"clutter/clutter_resource_node.png","category":"clutter","label":"RESOURCE NODE","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"clutter_signs_flags","file":"clutter/clutter_signs_flags.png","category":"clutter","label":"SIGNS FLAGS","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_spawn_markers","file":"clutter/clutter_spawn_markers.png","category":"clutter","label":"SPAWN MARKERS","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"clutter_stumps_logs","file":"clutter/clutter_stumps_logs.png","category":"clutter","label":"STUMPS LOGS","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"clutter_utility_pole","file":"clutter/clutter_utility_pole.png","category":"clutter","label":"UTILITY POLE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"trenches_at_ditch","file":"trenches/trenches_at_ditch.png","category":"trenches","label":"AT DITCH","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"trenches_bunker_med","file":"trenches/trenches_bunker_med.png","category":"trenches","label":"BUNKER MED","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"trenches_bunker_small","file":"trenches/trenches_bunker_small.png","category":"trenches","label":"BUNKER SMALL","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"trenches_foxhole","file":"trenches/trenches_foxhole.png","category":"trenches","label":"FOXHOLE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"trenches_obs_post","file":"trenches/trenches_obs_post.png","category":"trenches","label":"OBS POST","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"trenches_pillbox","file":"trenches/trenches_pillbox.png","category":"trenches","label":"PILLBOX","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"trenches_tank_trap","file":"trenches/trenches_tank_trap.png","category":"trenches","label":"TANK TRAP","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"barricades_concrete_barrier","file":"barricades/barricades_concrete_barrier.png","category":"barricades","label":"CONCRETE BARRIER","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"barricades_gate","file":"barricades/barricades_gate.png","category":"barricades","label":"GATE","play":"wall","game":"","w":103,"h":114,"source":"legacy"},{"id":"barricades_hedge","file":"barricades/barricades_hedge.png","category":"barricades","label":"HEDGE","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"barricades_sandbag_walls_b","file":"barricades/barricades_sandbag_walls_b.png","category":"barricades","label":"SANDBAG WALLS B","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"barricades_wire_fence","file":"barricades/barricades_wire_fence.png","category":"barricades","label":"WIRE FENCE","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"walls_gate_pillars","file":"walls/walls_gate_pillars.png","category":"walls","label":"GATE PILLARS","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"walls_stone_fence","file":"walls/walls_stone_fence.png","category":"walls","label":"STONE FENCE","play":"wall","game":"","w":104,"h":114,"source":"legacy"},{"id":"walls_wood_fence","file":"walls/walls_wood_fence.png","category":"walls","label":"WOOD FENCE","play":"wall","game":"","w":103,"h":114,"source":"legacy"},{"id":"walls_wooden_walls_b","file":"walls/walls_wooden_walls_b.png","category":"walls","label":"WOODEN WALLS B","play":"wall","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_bushes","file":"nature/nature_bushes.png","category":"nature","label":"BUSHES","play":"prop","game":"","w":104,"h":114,"source":"legacy"},{"id":"nature_bushes_b","file":"nature/nature_bushes_b.png","category":"nature","label":"BUSHES B","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_dead_trees","file":"nature/nature_dead_trees.png","category":"nature","label":"DEAD TREES","play":"tree","game":"","w":103,"h":114,"source":"legacy"},{"id":"nature_dead_trees_b","file":"nature/nature_dead_trees_b.png","category":"nature","label":"DEAD TREES B","play":"tree","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_grass_dirt","file":"nature/nature_grass_dirt.png","category":"nature","label":"GRASS DIRT","play":"prop","game":"","w":103,"h":114,"source":"legacy"},{"id":"nature_grass_tufts","file":"nature/nature_grass_tufts.png","category":"nature","label":"GRASS TUFTS","play":"prop","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_pines_b","file":"nature/nature_pines_b.png","category":"nature","label":"PINES B","play":"tree","game":"","w":128,"h":119,"source":"legacy"},{"id":"nature_rocks","file":"nature/nature_rocks.png","category":"nature","label":"ROCKS","play":"rock","game":"","w":103,"h":114,"source":"legacy"},{"id":"nature_rocks_b","file":"nature/nature_rocks_b.png","category":"nature","label":"ROCKS B","play":"rock","game":"","w":128,"h":119,"source":"legacy"}],"categories":["infantry","buildings","walls","barricades","trenches","nature","destroyed","terrain","rubble","clutter"],"version":"1.0.6"};
   function isStick(){return (settings&&settings.artStyle)==='stick';}
 
   window.WWT_flushArt=function(){
@@ -4457,7 +4462,7 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     };
   }
 
-  /* ---- Map Maker 1.0.4: free place + readable UI + playable props ---- */
+  /* ---- Map Maker 1.0.5: fullscreen + EC live scale ---- */
   const MM={on:false, tiles:[], cats:[], cat:'infantry', sel:0, props:[], camX:0, camY:0, loaded:false, err:null, from:'title', trayScroll:0, ghost:null, brushScale:1, selProp:-1, play:null, catScroll:0, now:0};
   function mmBase(){
     try{
@@ -4483,6 +4488,17 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
   function mmHideUI(){
     try{ if(typeof show==='function'){ ['title','diff','custom','help','settings','pause','over'].forEach(id=>{try{show(id,false);}catch(e){}}); } }catch(e){}
     try{ if(typeof hudButtons==='function')hudButtons(false);}catch(e){}
+    // hard-hide every overlay DOM so Map Maker owns the full screen (title was peeking through)
+    ['title','diff','custom','help','settings','pause','over','placebar','bmenu','binfo','ring','selChip','v5city','wallBar'].forEach(id=>{
+      try{ const el=document.getElementById(id); if(el){ el.classList.remove('show'); el.style.display='none'; } }catch(e){}
+    });
+    try{ document.body.classList.add('wwt-mm'); }catch(e){}
+  }
+  function mmRestoreUI(){
+    try{ document.body.classList.remove('wwt-mm'); }catch(e){}
+    ['title','diff','custom','help','settings','pause','over'].forEach(id=>{
+      try{ const el=document.getElementById(id); if(el){ el.style.display=''; } }catch(e){}
+    });
   }
   function mmLabel(t){
     if(t.label) return t.label;
@@ -4497,14 +4513,42 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     im.src=mmBase()+t.file;
   }
   function mmDrawSize(t){
-    // Wider trenches by default; units stay readable; buildings capped
-    let maxS=110, mult=MM.brushScale||1;
-    if(t.category==='trenches' || /trench/i.test(t.id||'') || /trench/i.test(t.game||'')){ maxS=168; mult*=1.35; }
-    if(t.play==='unit'){ maxS=72; }
-    if(t.play==='bld'){ maxS=140; }
-    const w=t.w||64, h=t.h||64;
-    const sc=Math.min(maxS/Math.max(w,1), maxS/Math.max(h,1), 2.6)*mult;
-    return [Math.max(22,w*sc), Math.max(22,h*sc)];
+    // EMPIRE CLASH LIVE scale (US≈0.6 tiny troops, BS≈0.5 buildings) — NOT atlas panel pixels
+    const mult=MM.brushScale||1;
+    const play=t.play||'prop';
+    let tw, th;
+    if(play==='unit'){
+      // live eDrawUnit mm path uses ~28px tall for tiny (r*3.5 floored at 28)
+      const uh=28*mult; const aspect=(t.w||40)/Math.max(1,t.h||56);
+      tw=uh*aspect; th=uh;
+    } else if(play==='bld'){
+      // live buildings ~ BLD_HW*3 ≈ 42–56 tall at 50% bldSize; HQ a bit bigger
+      const bh=(/hq/i.test(t.id||'')||t.game==='hq'?64:52)*mult;
+      const aspect=(t.w||180)/Math.max(1,t.h||140);
+      tw=bh*aspect; th=bh;
+    } else if(play==='wall'){
+      const wh=22*mult; const aspect=(t.w||80)/Math.max(1,t.h||40);
+      tw=Math.max(28,wh*aspect); th=wh;
+    } else if(play==='tree'){
+      const thh=36*mult; const aspect=(t.w||50)/Math.max(1,t.h||70);
+      tw=thh*aspect; th=thh;
+    } else if(play==='rock'){
+      const rh=22*mult; const aspect=(t.w||60)/Math.max(1,t.h||50);
+      tw=rh*aspect; th=rh;
+    } else if(t.category==='trenches' || /trench/i.test(t.id||'') || /trench/i.test(t.game||'')){
+      // wider so units fit, but still EC-relative (not atlas 223px)
+      const thh=34*mult; const aspect=(t.w||160)/Math.max(1,t.h||70);
+      tw=Math.max(70, thh*aspect*1.55); th=thh;
+    } else if(/flower|bush|clutter|log/i.test(t.id||'') || /flower|bush|logs|clutter/i.test(t.game||'')){
+      // props MUST be smaller than people (Jay)
+      const isFlower=/flower/i.test(t.id||'')||/flower/i.test(t.game||'');
+      const ph=(isFlower?12:18)*mult; const aspect=(t.w||64)/Math.max(1,t.h||64);
+      tw=ph*aspect; th=ph;
+    } else {
+      const ph=16*mult; const aspect=(t.w||64)/Math.max(1,t.h||64);
+      tw=ph*aspect; th=ph;
+    }
+    return [Math.max(12,tw), Math.max(12,th)];
   }
   function mmUnitFrames(t){
     // Collect same-num infantry frames for walk/fire preview
@@ -4542,17 +4586,11 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
   }
 
   function mmOpen(){
-    MM.from=(state==='playing'||state==='paused')?'game':'title';
-    if(state==='playing'){ try{state='paused';}catch(e){} }
-    mmHideUI();
-    mmLoad().then(()=>{
-      MM.on=true; MM.camX=0; MM.camY=0; MM.trayScroll=0; MM.selProp=-1; MM.play=null; MM.catScroll=0;
-      mmHideUI();
-      try{mmDraw();}catch(e){}
-    });
+    /* 1.0.6 OFF */ try{ if(typeof banner==='function') banner('MAP MAKER OFF','Play the live war — ChatGPT sprites are in-match now',2.2); }catch(e){}
+    return;
   }
   function mmClose(){
-    MM.on=false; mmStopPlay();
+    MM.on=false; mmStopPlay(); mmRestoreUI();
     try{
       if(MM.from==='game'){ show('pause',true); }
       else { show('title',true); if(state!=='title') state='title'; }
@@ -4618,7 +4656,7 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
       }catch(e){ MM.err='start '+e; return {ok:false,reason:String(e)}; }
     }
     const r=mmPlayableInject(MM.props);
-    MM.on=false; mmStopPlay();
+    MM.on=false; mmStopPlay(); mmRestoreUI();
     try{ show('pause',false); state='playing'; if(typeof hudButtons==='function')hudButtons(true);}catch(e){}
     return r;
   }
@@ -4634,14 +4672,17 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     if(!MM.on)return;
     const cv=document.getElementById('c'); if(!cv)return;
     const g=cv.getContext('2d');
-    const W=window.W||cv.clientWidth, H=window.H||cv.clientHeight, DPR=window.DPR||1;
-    g.setTransform(DPR,0,0,DPR,0,0);
-    // clean grass field (Empire Clash sheet feel)
-    g.fillStyle='#7cb05a'; g.fillRect(0,0,W,H);
+    // MUST use game DPR/W/H (closure). window.DPR is undefined → old bug drew 1x into HiDPI buffer = tiny top-left overlay on title
+    // Read outer game W/H/DPR — never redeclare W/H locally (var hoist shadows outer)
+    const mW=(typeof W==='number'&&W>0)?W:(window.__WWT_W||cv.clientWidth||innerWidth);
+    const mH=(typeof H==='number'&&H>0)?H:(window.__WWT_H||cv.clientHeight||innerHeight);
+    const mD=(typeof DPR==='number'&&DPR>0)?DPR:(window.__WWT_DPR||Math.min(window.devicePixelRatio||1,2));
+    if(cv.width!==Math.round(mW*mD)||cv.height!==Math.round(mH*mD)){ cv.width=Math.round(mW*mD); cv.height=Math.round(mH*mD); }
+    g.setTransform(mD,0,0,mD,0,0);
+    g.fillStyle='#7cb05a'; g.fillRect(0,0,mW,mH);
     g.fillStyle='rgba(255,255,255,.06)';
-    for(let x=0;x<W;x+=32) for(let y=0;y<H;y+=32) if(((x+y)/32|0)%2) g.fillRect(x,y,32,32);
-    // soft vignette edges
-    g.fillStyle='rgba(20,40,16,.12)'; g.fillRect(0,0,W,8); g.fillRect(0,H-8,W,8);
+    for(let x=0;x<mW;x+=32) for(let y=0;y<mH;y+=32) if(((x+y)/32|0)%2) g.fillRect(x,y,32,32);
+    g.fillStyle='rgba(20,40,16,.12)'; g.fillRect(0,0,mW,8); g.fillRect(0,mH-8,mW,8);
 
     // placed props
     for(let i=0;i<MM.props.length;i++){
@@ -4784,7 +4825,7 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
   function mmPointer(e,kind){
     if(!MM.on)return false;
     const [x,y]=mmXY(e);
-    const W=window.W||innerWidth, H=window.H||innerHeight;
+    const W=window.__WWT_W||innerWidth, H=window.__WWT_H||innerHeight;
     const trayY=MM._trayY||(H-138);
     if(kind==='down'){
       if(mmInHit(MM._hitClose,x,y)){mmClose();return true;}
@@ -4864,161 +4905,395 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     return true;
   }
   // rebind once — remove old by flag
-  if(!window.__WWT_MM_BOUND_104){
-    window.__WWT_MM_BOUND_104=1;
+  if(!window.__WWT_MM_BOUND_105){
+    window.__WWT_MM_BOUND_105=1;
     ['pointerdown','mousedown','touchstart'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'down')){e.preventDefault();e.stopPropagation();}},{passive:false,capture:true}));
     ['pointermove','mousemove','touchmove'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'move')){e.preventDefault();e.stopPropagation();}},{passive:false,capture:true}));
     ['pointerup','mouseup','pointercancel','touchend','touchcancel'].forEach(ev=>window.addEventListener(ev,e=>{if(MM.on){mmPointer(e,'up');e.preventDefault();}},{passive:false,capture:true}));
   }
 
-  // CRITICAL: title frame() must not paint over Map Maker
+  // CRITICAL: title frame() must not paint over Map Maker — keep fullscreen editor
   if(typeof frame==='function'){
     const _frame=frame;
-    frame=function(now){
+    const _mmFrame=function(now){
       if(MM.on){
-        requestAnimationFrame(frame);
+        requestAnimationFrame(_mmFrame);
         let dt=(now-last)/1000; last=now; if(dt<=0)return; if(dt>0.05)dt=0.05;
-        try{mmStepPlay(dt); mmDraw();}catch(e){}
+        try{mmHideUI(); mmStepPlay(dt); mmDraw();}catch(e){}
         return;
       }
       return _frame(now);
     };
+    frame=_mmFrame;
+    try{ window.__WWT_frame=frame; }catch(e){}
   }
 
+  /* WWT 1.0.6: Map Maker OFF — Jay rage-GO. Keep code parked, hide all entry. */
+  const WWT_MAP_MAKER_ENABLED=false;
   function addBtn(){
-    if(document.getElementById('wwtMapBtn'))return;
-    const host=document.getElementById('title')||document.body;
-    const b=document.createElement('button');
-    b.id='wwtMapBtn'; b.className='btn blue small'; b.textContent='🗺 Map Maker';
-    b.style.cssText='display:block;margin:10px auto;min-width:200px';
-    b.onclick=function(e){e.stopPropagation();e.preventDefault();mmOpen();};
-    const play=document.getElementById('playBtn');
-    if(play&&play.parentNode) play.parentNode.insertBefore(b, play.nextSibling);
-    else host.appendChild(b);
+    try{ const b=document.getElementById('wwtMapBtn'); if(b) b.remove(); }catch(e){}
   }
   function addPauseBtn(){
-    const p=document.getElementById('pause'); if(!p||document.getElementById('wwtMapPause'))return;
-    const b=document.createElement('button'); b.id='wwtMapPause'; b.className='btn blue'; b.textContent='🗺 Map Maker';
-    b.onclick=function(){try{show('pause',false);}catch(e){} mmOpen();};
-    const box=p.querySelector('.panel')||p; box.appendChild(b);
+    try{ const b=document.getElementById('wwtMapPause'); if(b) b.remove(); }catch(e){}
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{addBtn();addPauseBtn();});
   else {addBtn();addPauseBtn();}
-  setInterval(addPauseBtn,1000);
+  setInterval(function(){ addBtn(); addPauseBtn(); }, 800);
 
-  // Draw MM props + atlas-skinned walls/trees/units in live match
+  /* ===== WWT 1.0.6 HEAVY: live ChatGPT atlas = Empire Clash movement + usable buildings + trenches ===== */
   (function(){
-    function drawMmImg(g, img, x, y, w, h){
-      if(!img) return false;
-      try{ g.drawImage(img, x-w/2, y-h, w, h); return true; }catch(e){ return false; }
+    const BASE=mmBase();
+    const IMG={}; // path -> HTMLImageElement
+    function load(file){
+      if(!file) return null;
+      if(IMG[file]) return IMG[file];
+      const im=new Image(); IMG[file]=im; im._ok=0; im._err=0;
+      im.onload=()=>{im._ok=1;}; im.onerror=()=>{im._err=1;};
+      im.src=BASE+file;
+      return im;
     }
-    const _eDrawTree=typeof eDrawTree==='function'?eDrawTree:null;
-    if(_eDrawTree){
-      eDrawTree=function(g,x,y,r,seed){
-        // if last obs with mm img near — handled in paint loop below; keep classic for normal trees
-        return _eDrawTree(g,x,y,r,seed);
-      };
+    function ready(im){ return im && im._ok && im.naturalWidth>0; }
+
+    // Unit type → atlas infantry sheet (+ walk frames)
+    const UNIT_MAP={
+      rifle:['infantry/infantry_rifleman.png','infantry/infantry_rifleman_f2.png','infantry/infantry_rifleman_f3.png','infantry/infantry_rifleman_f4.png','infantry/infantry_rifleman_f5.png','infantry/infantry_rifleman_f6.png'],
+      grunt:['infantry/infantry_assault.png','infantry/infantry_assault_f2.png','infantry/infantry_assault_f3.png','infantry/infantry_assault_f4.png','infantry/infantry_assault_f5.png','infantry/infantry_assault_f6.png'],
+      scout:['infantry/infantry_scout.png','infantry/infantry_scout_f2.png','infantry/infantry_scout_f3.png','infantry/infantry_scout_f4.png','infantry/infantry_scout_f5.png','infantry/infantry_scout_f6.png'],
+      sniper:['infantry/infantry_sniper.png','infantry/infantry_sniper_f2.png','infantry/infantry_sniper_f3.png','infantry/infantry_sniper_f4.png','infantry/infantry_sniper_f5.png','infantry/infantry_sniper_f6.png'],
+      brute:['infantry/infantry_mg.png','infantry/infantry_mg_f2.png','infantry/infantry_mg_f3.png','infantry/infantry_mg_f4.png','infantry/infantry_mg_f5.png','infantry/infantry_mg_f6.png'],
+      hero:['infantry/infantry_officer.png','infantry/infantry_officer_f2.png','infantry/infantry_officer_f3.png','infantry/infantry_officer_f4.png','infantry/infantry_officer_f5.png','infantry/infantry_officer_f6.png'],
+      worker:['infantry/infantry_medic.png','infantry/infantry_medic_f2.png','infantry/infantry_medic_f3.png','infantry/infantry_medic_f4.png','infantry/infantry_medic_f5.png','infantry/infantry_medic_f6.png'],
+      gren:['infantry/infantry_flamethrower.png','infantry/infantry_flamethrower_f3.png','infantry/infantry_flamethrower_f4.png','infantry/infantry_flamethrower_f6.png'],
+      mortar:['infantry/infantry_mortar_crew.png','infantry/infantry_mortar_crew_f2.png','infantry/infantry_mortar_crew_f3.png','infantry/infantry_mortar_crew_f4.png','infantry/infantry_mortar_crew_f5.png','infantry/infantry_mortar_crew_f6.png'],
+      sapper:['infantry/infantry_engineer.png','infantry/infantry_engineer_f2.png','infantry/infantry_engineer_f3.png','infantry/infantry_engineer_f4.png','infantry/infantry_engineer_f5.png','infantry/infantry_engineer_f6.png'],
+      barri:['infantry/infantry_assault.png','infantry/infantry_assault_f2.png','infantry/infantry_assault_f3.png'],
+      trap:['infantry/infantry_scout.png','infantry/infantry_scout_f2.png'],
+      tech:['infantry/infantry_engineer.png','infantry/infantry_engineer_f2.png'],
+      mason:['infantry/infantry_engineer.png','infantry/infantry_engineer_f3.png'],
+      radio:['infantry/infantry_radio.png','infantry/infantry_radio_f2.png','infantry/infantry_radio_f3.png']
+    };
+    const BLD_MAP={
+      barracks:'buildings/buildings_barracks.png',
+      hospital:'buildings/buildings_hospital.png',
+      forge:'buildings/buildings_supply.png',
+      workshop:'buildings/buildings_workshop.png',
+      armory:'buildings/buildings_bunker.png',
+      tower:'buildings/buildings_watchtower.png',
+      storage:'buildings/buildings_supply.png',
+      lumber:'buildings/buildings_workshop.png',
+      brothel:'buildings/buildings_hospital.png',
+      school:'buildings/buildings_hq.png',
+      prison:'buildings/buildings_bunker.png'
+    };
+    const HQ_SPR='buildings/buildings_hq.png';
+    const TREE_SPR=['nature/nature_pine.png','nature/nature_pine_2.png','nature/nature_pine_3.png','nature/nature_broadleaf.png','nature/nature_broadleaf_2.png'];
+    const ROCK_SPR=['nature/nature_rock.png','nature/nature_rock_3.png','nature/nature_rock_5.png','nature/nature_rock_6.png'];
+    const FLOWER_SPR=['nature/nature_flowers.png','nature/nature_flowers_3.png','nature/nature_flowers_7.png','nature/nature_flowers_8.png'];
+    const BUSH_SPR=['nature/nature_bush.png','nature/nature_bush_5.png','nature/nature_bush_7.png'];
+    const TRENCH_SPR=['trenches/trenches_trench.png','trenches/trenches_trench_a_wide.png','trenches/trenches_trench_b_wide.png','trenches/trenches_trench_c_wide.png'];
+    const WALL_SPR={wood:'walls/walls_wood_wall_seg.png', stone:'walls/walls_stone_wall.png', wire:'walls/walls_wire_fence.png', sandbag:'barricades/barricades_sandbags.png'};
+
+    // preload hot set
+    Object.values(UNIT_MAP).forEach(a=>a.forEach(load));
+    Object.values(BLD_MAP).forEach(load); load(HQ_SPR);
+    TREE_SPR.forEach(load); ROCK_SPR.forEach(load); FLOWER_SPR.forEach(load); BUSH_SPR.forEach(load); TRENCH_SPR.forEach(load);
+    Object.values(WALL_SPR).forEach(load);
+
+    function isClassic(){ try{ return !isStick(); }catch(e){ return (settings&&settings.artStyle)!=='stick'; } }
+
+    // EC live height for tiny troops (~US 0.6 → ~28px)
+    function unitH(u){
+      const sc=(u&&u.d&&u.d.sc)||1;
+      return Math.max(22, Math.min(40, 28*sc*(typeof US==='number'?US/0.6:1)));
     }
-    const _eDrawWall=typeof eDrawWall==='function'?eDrawWall:null;
-    if(_eDrawWall){
-      eDrawWall=function(s){
-        if(s && s.mmSpr){
-          const img=s._mmImg;
-          if(img){ try{ const g=ctx; const w=Math.max(28,s.hw*2), h=Math.max(20,s.hh*2+16); g.drawImage(img, s.x-w/2, s.y-h+s.hh, w, h); return; }catch(e){} }
-        }
-        return _eDrawWall(s);
-      };
+    function bldH(s){
+      if(s&&s.kind==='hq') return Math.max(70, Math.min(110, 88*(typeof HQS==='number'?HQS/0.71:1)));
+      return Math.max(44, Math.min(78, 56*(typeof BS==='number'?BS/0.5:1)));
     }
-    // after world paint, draw mm props + override mm trees/rocks/units
-    const _paint = typeof ePaint==='function'?ePaint:(typeof paint==='function'?paint:null);
-    // Hook into frame draw of obs: wrap eDrawTree call site via obs paint in v5/empire
-    const _drawObs = null;
-    // Patch: when drawing trees/rocks, prefer mm sprite
-    if(typeof eDrawTree==='function'){
-      const __t=eDrawTree;
-      eDrawTree=function(g,x,y,r,seed){
-        let o=null;
-        try{ if(E&&E.obs){ for(const q of E.obs){ if(q.k==='tree'&&q.mmSpr&&Math.abs(q.x-x)<0.5&&Math.abs(q.y-y)<0.5){o=q;break;} } } }catch(e){}
-        if(o){
-          if(!o._mmImg && o.mmSpr){ const im=new Image(); im.onload=()=>{o._mmImg=im;}; im.src=mmBase()+o.mmSpr; }
-          if(o._mmImg){ const h=Math.max(28,r*3.2), w=h*(o._mmImg.width/Math.max(1,o._mmImg.height)); try{g.drawImage(o._mmImg,x-w/2,y-h+4,w,h);return;}catch(e){} }
-        }
-        return __t(g,x,y,r,seed);
-      };
+
+    function unitFrames(type){
+      const t=type==='sniper'?'scout':type;
+      return UNIT_MAP[t]||UNIT_MAP.rifle;
     }
-    if(typeof eDrawRock==='function'){
-      const __r=eDrawRock;
-      eDrawRock=function(g,x,y,r,seed){
-        let o=null;
-        try{ if(E&&E.obs){ for(const q of E.obs){ if(q.k==='rock'&&q.mmSpr&&Math.abs(q.x-x)<0.5&&Math.abs(q.y-y)<0.5){o=q;break;} } } }catch(e){}
-        if(o){
-          if(!o._mmImg && o.mmSpr){ const im=new Image(); im.onload=()=>{o._mmImg=im;}; im.src=mmBase()+o.mmSpr; }
-          if(o._mmImg){ const h=Math.max(18,r*2.4), w=h*(o._mmImg.width/Math.max(1,o._mmImg.height)); try{g.drawImage(o._mmImg,x-w/2,y-h/2,w,h);return;}catch(e){} }
-        }
-        return __r(g,x,y,r,seed);
-      };
+    function pickFrame(u){
+      const frames=unitFrames(u.type);
+      frames.forEach(load);
+      if(u.mmSpr){ // Map Maker inject override
+        const im=u._mmImg||load(u.mmSpr); if(ready(im)) return im;
+      }
+      // Real EC walk: cycle frames with leg while moving; idle = frame 0; fire-ish when attacking
+      let fi=0;
+      if(u.moving){
+        const leg=(u.leg||0);
+        fi=1+((Math.abs(leg*1.5)|0)%Math.max(1,frames.length-1));
+      } else if(u.atkT>0 || u.flash>0){
+        fi=Math.min(frames.length-1, Math.max(1, frames.length-2));
+      }
+      const im=load(frames[fi]||frames[0]);
+      return ready(im)?im:null;
     }
-    // units with mm sprites: wrap eUnitSpr usage lightly via a draw hook on eDrawUnit if present
+
+    // ---- DRAW OVERRIDES (classic only; stick untouched) ----
     if(typeof eDrawUnit==='function'){
       const __u=eDrawUnit;
       eDrawUnit=function(u){
-        if(u && u.mmSpr){
-          if(!u._mmImg){ const im=new Image(); im.onload=()=>{u._mmImg=im;}; im.src=mmBase()+u.mmSpr; }
-          if(u._mmImg){
-            try{
-              const h=Math.max(28, (u.r||8)*3.5), w=h*(u._mmImg.width/Math.max(1,u._mmImg.height));
-              ctx.drawImage(u._mmImg, u.x-w/2, u.y-h+4, w, h);
-              return;
-            }catch(e){}
-          }
-        }
-        return __u(u);
+        if(!isClassic() || !u || u.d&&u.d.creature) return __u(u);
+        const im=pickFrame(u);
+        if(!im) return __u(u);
+        try{
+          const h=unitH(u), w=h*(im.naturalWidth/Math.max(1,im.naturalHeight));
+          const bob=u.moving?(E.cfg&&E.cfg.betterAnim?-Math.abs(Math.sin((u.leg||0)*1.2*Math.PI/4))*1.6*US:-Math.abs(Math.sin((u.leg||0)*0.6*Math.PI/2))*1.2*US):0;
+          // selection + shadow like EC
+          if(u.sel&&typeof eDrawSelRing==='function') eDrawSelRing(u);
+          ctx.fillStyle='rgba(20,50,10,0.32)';ctx.beginPath();ctx.ellipse(u.x,u.y+0.5,u.r+1.5,(u.r+1.5)*0.45,0,0,TAU);ctx.fill();
+          ctx.save();
+          ctx.translate(u.x, u.y+bob);
+          // Empire Clash facing: flip on u.fx (NOT sideways slide-only)
+          if(u.fx<0) ctx.scale(-1,1);
+          if(u.flash>0){ ctx.globalCompositeOperation='lighter'; }
+          ctx.drawImage(im, -w/2, -h+4, w, h);
+          ctx.restore();
+          if(u.cover){ctx.fillStyle='#ffe14d';ctx.font=font(7);ctx.textAlign='center';ctx.fillText('🛡',u.x+u.r+2,u.y-h*0.7);}
+          if(u.stun>0){for(let i=0;i<3;i++){const a=gameTime*6+i*TAU/3;ctx.fillStyle='#ffe14d';ctx.beginPath();ctx.arc(u.x+Math.cos(a)*5,u.y-h-2+Math.sin(a)*1.6,1.2,0,TAU);ctx.fill();}}
+          return;
+        }catch(e){ return __u(u); }
       };
     }
-    // buildings with mm sprites
+
     if(typeof eDrawBld==='function'){
       const __b=eDrawBld;
       eDrawBld=function(s){
-        if(s && s.mmSpr){
-          if(!s._mmImg){ const im=new Image(); im.onload=()=>{s._mmImg=im;}; im.src=mmBase()+s.mmSpr; }
-          if(s._mmImg){
-            try{
-              const h=Math.max(40,(s.hh||20)*3), w=h*(s._mmImg.width/Math.max(1,s._mmImg.height));
-              ctx.drawImage(s._mmImg, s.x-w/2, s.y-h+ (s.hh||16), w, h);
-              return;
-            }catch(e){}
+        if(!isClassic() || !s) return __b(s);
+        const file=s.mmSpr || BLD_MAP[s.type];
+        if(!file) return __b(s);
+        const im=s._mmImg||load(file); if(!ready(im)) return __b(s);
+        try{
+          if(s.site) return __b(s); // keep scaffold anim
+          const h=bldH(s), w=h*(im.naturalWidth/Math.max(1,im.naturalHeight));
+          const pop=s.pop>0?1+Math.sin(s.pop/0.35*Math.PI)*0.12:1;
+          ctx.fillStyle='rgba(20,50,10,0.28)';ctx.beginPath();ctx.ellipse(s.x+4,s.y+h*0.35,w*0.42,h*0.12,0,0,TAU);ctx.fill();
+          ctx.drawImage(im, s.x-w*pop/2, s.y-h*pop+(s.hh||16)*0.35, w*pop, h*pop);
+          // name badge for usability (hospital = hospital)
+          if(EZ>0.55 && s.type){
+            const nm=(EBLD[s.type]&&EBLD[s.type].name)||String(s.type).toUpperCase();
+            eTextW(nm, s.x, s.y+14, 8, '#fffbe8');
           }
-        }
-        return __b(s);
+          if(s.heal>0){ctx.fillStyle='rgba(120,255,140,'+(0.22*s.heal).toFixed(2)+')';rrect(ctx,s.x-w/2,s.y-h,w,h,8);ctx.fill();}
+          if(s.flash>0){ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(255,255,255,0.28)';rrect(ctx,s.x-w/2,s.y-h,w,h,8);ctx.fill();ctx.globalCompositeOperation='source-over';}
+          return;
+        }catch(e){ return __b(s); }
       };
     }
-    // decorative mm props each frame
+
+    if(typeof eDrawHQs==='function'){
+      const __hq=eDrawHQs;
+      eDrawHQs=function(s){
+        if(!isClassic() || !s) return __hq(s);
+        const im=load(HQ_SPR); if(!ready(im)) return __hq(s);
+        try{
+          const h=bldH(s)*1.15, w=h*(im.naturalWidth/Math.max(1,im.naturalHeight));
+          ctx.fillStyle='rgba(20,50,10,0.28)';ctx.beginPath();ctx.ellipse(s.x+5,s.y+h*0.4,w*0.45,h*0.14,0,0,TAU);ctx.fill();
+          ctx.drawImage(im, s.x-w/2, s.y-h+s.hh*0.5, w, h);
+          eFlag(s.x, s.y-h+18, ESIDECOL[s.side].body, 16);
+          if(typeof eDrawShield==='function') eDrawShield(s);
+          return;
+        }catch(e){ return __hq(s); }
+      };
+    }
+
+    if(typeof eDrawWall==='function'){
+      const __w=eDrawWall;
+      eDrawWall=function(s){
+        if(!isClassic() || !s) return __w(s);
+        if(s.mmSpr){
+          const im=s._mmImg||load(s.mmSpr);
+          if(ready(im)){ try{ const w=Math.max(28,s.hw*2), h=Math.max(20,s.hh*2+16); ctx.drawImage(im, s.x-w/2, s.y-h+s.hh, w, h); return; }catch(e){} }
+        }
+        // default wood segment for main walls
+        const im=load(WALL_SPR.wood);
+        if(ready(im) && s.line && s.line.main){
+          try{ const w=Math.max(22,s.hw*2-2), h=Math.max(16,s.hh*2+10); ctx.drawImage(im, s.x-w/2, s.y-h+s.hh, w, h); return; }catch(e){}
+        }
+        return __w(s);
+      };
+    }
+
+    if(typeof v5DrawObs==='function'){
+      const __vo=v5DrawObs;
+      v5DrawObs=function(o){
+        if(!isClassic() || !o || o.hp!==undefined&&o.hp<=0) return __vo(o);
+        if(o.k==='folk'||o.hot) return __vo(o);
+        try{
+          ctx.save();
+          if(KY!==1){ctx.translate(0,o.y);ctx.scale(1,1/KY);ctx.translate(0,-o.y);}
+          if(o.k==='tree'){
+            const file=o.mmSpr||TREE_SPR[(o.seed||0)%TREE_SPR.length];
+            const im=o._mmImg||load(file);
+            if(ready(im)){
+              const h=Math.max(30, Math.min(52, o.r*2.6)), w=h*(im.naturalWidth/Math.max(1,im.naturalHeight));
+              ctx.drawImage(im, o.x-w/2, o.y-h+4, w, h);
+              if(o.hp!==undefined&&o.hp<o.max) eBar(o.x,o.y+4,18,o.hp/o.max,'#e0a868');
+              ctx.restore(); return;
+            }
+          } else if(o.k==='rock'){
+            const file=o.mmSpr||ROCK_SPR[(o.seed||0)%ROCK_SPR.length];
+            const im=o._mmImg||load(file);
+            if(ready(im)){
+              const h=Math.max(14, Math.min(28, o.r*1.6)), w=h*(im.naturalWidth/Math.max(1,im.naturalHeight));
+              ctx.drawImage(im, o.x-w/2, o.y-h*0.55, w, h);
+              ctx.restore(); return;
+            }
+          }
+          ctx.restore();
+        }catch(e){ try{ctx.restore();}catch(e2){} }
+        return __vo(o);
+      };
+    }
+
+    // ---- TRENCHES: functional cover + wide visuals ----
+    const _eInCover = typeof eInCover==='function' ? eInCover : null;
+    window.eInCover = eInCover = function(u){
+      if(_eInCover && _eInCover(u)) return true;
+      try{
+        if(E && E.trenches){
+          for(const t of E.trenches){
+            if(Math.abs(u.x - t.x) < t.hw && Math.abs(u.y - t.y) < t.hh) return true;
+          }
+        }
+      }catch(e){}
+      return false;
+    };
+
+    function seedTrenches(){
+      if(!E) return;
+      E.trenches = E.trenches || [];
+      if(E.trenches.length) return;
+      const rows = [
+        {side:0, yOff: 90},
+        {side:0, yOff: 160},
+        {side:1, yOff: 90},
+        {side:1, yOff: 160}
+      ];
+      const xs = [EW*0.22, EW*0.38, EW*0.55, EW*0.72];
+      let ti=0;
+      for(const row of rows){
+        for(const x of xs){
+          const y = eSY(row.side, EBASE + row.yOff);
+          const file = TRENCH_SPR[ti++ % TRENCH_SPR.length];
+          const im = load(file);
+          // wide trench hitbox so people fit
+          const hw=48, hh=22;
+          E.trenches.push({x, y, hw, hh, file, _img:im, side:row.side});
+          // also drop a soft sandbag bar so AI pathing / cover semantics stay familiar
+          try{
+            eAddStruct({kind:'bar', side:row.side, x, y:y-8, hw:hw*0.85, hh:7, hp:EBAR.hp*LF, max:EBAR.hp*LF, done:true, trench:1});
+          }catch(e){}
+        }
+      }
+      // Surprise: one FIELD HOSPITAL already standing near each HQ (usable — heals)
+      for(const side of [0,1]){
+        try{
+          const hq=E.hq[side]; if(!hq) continue;
+          const bx = hq.x + (side? -70: 70);
+          const by = hq.y + (side? 40: -40);
+          if(EBLD.hospital){
+            const d=EBLD.hospital, mx=d.hp||300;
+            const b=eAddStruct({kind:'bld', type:'hospital', side, x:bx, y:by, hw:BLD_HW||26, hh:BLD_HW||26, hp:mx*LF, max:mx*LF, lvl:1, buildT:0, prodT:0, invested:{}, smokeT:0, pop:0.3, done:true, mmSpr:BLD_MAP.hospital});
+            E.blds[side].push(b);
+          }
+        }catch(e){}
+      }
+      // Small flowers (NOT bigger than people) + bushes as mmProps
+      E.mmProps = E.mmProps || [];
+      const R = mulberry32((E.seed||1)^0xA11A5);
+      for(let i=0;i<28;i++){
+        const x=40+R()*(EW-80), y=EBASE+40+R()*(EH-2*EBASE-80);
+        const flower=R()<0.65;
+        const file=flower?FLOWER_SPR[i%FLOWER_SPR.length]:BUSH_SPR[i%BUSH_SPR.length];
+        // CRITICAL scale: flowers ~12px, bushes ~18px — people ~28px
+        const h=flower?12:18, aspect=1;
+        E.mmProps.push({x,y,w:h*aspect,h,file,id:flower?'flower':'bush',_img:load(file),z:y, tiny:1});
+      }
+    }
+
+    // Draw trenches + tiny props each frame after world
+    function drawTrenchLayer(){
+      if(!E||!isClassic()) return;
+      try{
+        if(E.trenches){
+          for(const t of E.trenches){
+            if(!onScreen(t.x,t.y,80)) continue;
+            const im=t._img||load(t.file); t._img=im;
+            if(!ready(im)) continue;
+            // wide draw: ~3 people wide
+            const h=34, w=Math.max(90, h*(im.naturalWidth/Math.max(1,im.naturalHeight))*1.35);
+            ctx.drawImage(im, t.x-w/2, t.y-h*0.55, w, h);
+          }
+        }
+        if(E.mmProps){
+          for(const p of E.mmProps){
+            if(!onScreen(p.x,p.y,40)) continue;
+            if(!p._img && p.file) p._img=load(p.file);
+            if(ready(p._img)){
+              // enforce tiny prop scale even if stale sizes
+              let h=p.h||16, w=p.w||16;
+              if(p.tiny || /flower/i.test(p.id||'')){ h=Math.min(h,12); w=h*(p._img.naturalWidth/Math.max(1,p._img.naturalHeight)); }
+              else if(/bush/i.test(p.id||'')){ h=Math.min(h,18); w=h*(p._img.naturalWidth/Math.max(1,p._img.naturalHeight)); }
+              ctx.drawImage(p._img, p.x-w/2, p.y-h, w, h);
+            }
+          }
+        }
+      }catch(e){}
+    }
+
+    // Hook paint: prefer ePaintWorld, else wrap frame
     if(typeof ePaintWorld==='function'){
       const __pw=ePaintWorld;
-      ePaintWorld=function(){
-        __pw();
+      ePaintWorld=function(){ __pw(); drawTrenchLayer(); };
+    } else if(typeof eRender==='function'){
+      const __er=eRender;
+      eRender=function(){ __er(); drawTrenchLayer(); };
+    }
+
+    // Hook match start
+    if(typeof eNewMatch==='function'){
+      const __nm=eNewMatch;
+      eNewMatch=function(cfgIn){
+        __nm(cfgIn);
+        try{ seedTrenches(); }catch(e){}
+        try{ banner('TRENCH WAR','ChatGPT troops · hospitals heal · get in the dirt',3.2); }catch(e){}
+      };
+    }
+
+    // Surprise: medics (workers near hospital) pulse-heal nearby friendlies
+    if(typeof eUpdate==='function'){
+      const __eu=eUpdate;
+      eUpdate=function(dt){
+        __eu(dt);
         try{
-          if(E&&E.mmProps){
-            for(const p of E.mmProps){
-              if(!p._img && p.file){ const im=new Image(); im.onload=()=>{p._img=im;}; im.src=mmBase()+p.file; }
-              if(p._img) ctx.drawImage(p._img, p.x-p.w/2, p.y-p.h, p.w, p.h);
+          if(!E||!E.units) return;
+          for(const u of E.units){
+            if(!u.alive||u.type!=='worker') continue;
+            // near a hospital?
+            let hosp=false;
+            for(const b of (E.blds[u.side]||[])){
+              if(b.alive&&b.type==='hospital'&&Math.hypot(b.x-u.x,b.y-u.y)<90){hosp=true;break;}
+            }
+            if(!hosp) continue;
+            for(const ally of E.units){
+              if(!ally.alive||ally.side!==u.side||ally===u) continue;
+              if(ally.hp>=ally.max) continue;
+              if(Math.hypot(ally.x-u.x,ally.y-u.y)<55){
+                ally.hp=Math.min(ally.max, ally.hp+12*dt);
+                if((gameTime*4|0)%2===0) ally.flash=0.05;
+              }
             }
           }
         }catch(e){}
       };
-    } else {
-      // fallback: attach to frame after paint via periodic overlay when playing
-      setInterval(function(){
-        if(MM.on) return;
-        if(typeof state==='undefined'||state!=='playing') return;
-        if(!E||!E.mmProps||!E.mmProps.length) return;
-        try{
-          for(const p of E.mmProps){
-            if(!p._img && p.file){ const im=new Image(); im.onload=()=>{p._img=im;}; im.src=mmBase()+p.file; }
-          }
-        }catch(e){}
-      }, 500);
     }
+
+    window.WWT_atlas={load,UNIT_MAP,BLD_MAP,seedTrenches,isClassic};
   })();
 
   window.WWT_MM=MM;
