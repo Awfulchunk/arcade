@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Testing Ground</title>
+<style>html,body{margin:0;padding:0;width:100%;height:100%;background:#fff;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+canvas{display:block;position:fixed;left:0;top:0;width:100%;height:100%;background:#fff}</style></head>
+<body><canvas id="c"></canvas>
+<script>
+(function(){
+'use strict';
+const D=Math.PI/180, TAU=Math.PI*2, sin=Math.sin, cos=Math.cos;
+const HD=0,NK=1,PV=2,EA=3,HA=4,EB=5,HB=6,KA=7,FA=8,KB=9,FB=10,NP=11;
+const LEN={head:14,torso:32,ua:17,fa:16,th:24,sh:24};
+const RAD=[9,8,9,4,4,4,4,5,5,5,5];
+const NAMES=['lean','ht','hA','kA','hB','kB','sA','eA','sB','eB','px','gx','gy','th','lift'];
+const BASE={lean:0,ht:0,hA:0,kA:4,hB:0,kB:4,sA:0,eA:10,sB:0,eB:10,px:0,gx:0,gy:0,th:0,lift:0};
+function K(t,o,k){const v=NAMES.map(n=>o[n]!==undefined?o[n]:BASE[n]);return{t:t,v:v,k:k===undefined?1:k};}
+
+/* Stick-only clips. Each task sequence is: jog → task → die */
+const CLIPS={
+ jog:{period:.85,loop:true,frames:[
+  K(0,{lean:6,hA:22,kA:6,hB:-18,kB:16,sA:-18,eA:20,sB:18,eB:30}),
+  K(.21,{lean:6,hA:2,kA:10,hB:8,kB:50,sA:0,eA:28,sB:0,eB:28}),
+  K(.42,{lean:6,hA:-18,kA:16,hB:22,kB:6,sA:18,eA:30,sB:-18,eB:20}),
+  K(.64,{lean:6,hA:8,kA:50,hB:2,kB:10,sA:0,eA:28,sB:0,eB:28})]},
+ run:{period:.55,loop:true,frames:[
+  K(0,{lean:14,hA:50,kA:22,hB:-45,kB:42,sA:-50,eA:85,sB:55,eB:95,lift:6}),
+  K(.14,{lean:14,hA:6,kA:48,hB:12,kB:105,sA:-8,eA:90,sB:8,eB:80,lift:0}),
+  K(.28,{lean:14,hA:-45,kA:42,hB:50,kB:22,sA:55,eA:95,sB:-50,eB:85,lift:6}),
+  K(.42,{lean:14,hA:12,kA:105,hB:6,kB:48,sA:8,eA:80,sB:-8,eB:90,lift:0})]},
+ crawl:{period:1.1,loop:true,frames:[
+  /* low lean, limbs reach forward on the ground */
+  K(0,{lean:62,ht:6,hA:70,kA:95,hB:20,kB:40,sA:70,eA:20,sB:10,eB:40,lift:2}),
+  K(.28,{lean:62,ht:6,hA:40,kA:70,hB:55,kB:90,sA:40,eA:30,sB:55,eB:25,lift:0}),
+  K(.55,{lean:62,ht:6,hA:20,kA:40,hB:70,kB:95,sA:10,eA:40,sB:70,eB:20,lift:2}),
+  K(.82,{lean:62,ht:6,hA:55,kA:90,hB:40,kB:70,sA:55,eA:25,sB:40,eB:30,lift:0})]},
+ kneel:{period:1.4,loop:true,frames:[
+  /* right knee down, left foot forward; slight rock */
+  K(0,{lean:4,ht:2,hA:35,kA:95,hB:-8,kB:12,sA:8,eA:40,sB:-12,eB:35,lift:0}),
+  K(.35,{lean:6,ht:2,hA:32,kA:98,hB:-6,kB:10,sA:14,eA:45,sB:-8,eB:30,lift:0}),
+  K(.7,{lean:3,ht:2,hA:38,kA:92,hB:-10,kB:14,sA:4,eA:35,sB:-16,eB:40,lift:0}),
+  K(1.05,{lean:5,ht:2,hA:34,kA:96,hB:-7,kB:11,sA:10,eA:42,sB:-10,eB:32,lift:0})]},
+ die:{period:3.0,loop:false,frames:[
+  K(0,{lean:6,hA:10,kA:10,hB:-8,kB:12,sA:6,eA:20,sB:-4,eB:20}),
+  K(.2,{lean:-18,ht:-12,hA:14,kA:18,hB:-10,kB:16,sA:-50,eA:25,sB:55,eB:30,px:-4}),
+  K(.55,{lean:-32,ht:-16,hA:48,kA:100,hB:28,kB:108,sA:-85,eA:30,sB:-30,eB:22,px:-8}),
+  K(1.05,{lean:-78,ht:-10,hA:72,kA:72,hB:58,kB:52,sA:-130,eA:12,sB:-110,eB:18,px:-14}),
+  K(1.5,{lean:-96,ht:-4,hA:86,kA:14,hB:94,kB:18,sA:-105,eA:10,sB:-85,eB:14,px:-14}),
+  K(3.0,{lean:-96,ht:-4,hA:86,kA:14,hB:94,kB:18,sA:-105,eA:10,sB:-85,eB:14,px:-14})]}
+};
+
+/* Global script: jog into each task, then death. Shared so every size dies together. */
+const PHASES=[
+ {name:'jog',task:'run',clip:'jog',dur:1.5},
+ {name:'run',task:'run',clip:'run',dur:2.4},
+ {name:'die',task:'run',clip:'die',dur:2.6},
+ {name:'jog',task:'crawl',clip:'jog',dur:1.5},
+ {name:'crawl',task:'crawl',clip:'crawl',dur:2.8},
+ {name:'die',task:'crawl',clip:'die',dur:2.6},
+ {name:'jog',task:'kneel',clip:'jog',dur:1.5},
+ {name:'kneel',task:'kneel',clip:'kneel',dur:2.8},
+ {name:'die',task:'kneel',clip:'die',dur:2.6}
+];
+
+function sampleKeys(fr,t,loop,period){
+ const n=fr.length,NV=fr[0].v.length;
+ if(loop)t=((t%period)+period)%period;else t=Math.max(fr[0].t,Math.min(fr[n-1].t,t));
+ let i=0;for(let j=0;j<n;j++){if(fr[j].t<=t)i=j;}
+ const last=i===n-1;
+ const T0=fr[i].t,T1=last?(loop?period+fr[0].t:fr[i].t):fr[i+1].t;
+ const i1=last?(loop?0:i):i+1;
+ const u=(T1-T0)>1e-6?(t-T0)/(T1-T0):0;
+ const out=new Array(NV);
+ const tn=function(idx){
+  if(loop){const w=((idx%n)+n)%n;const k=Math.floor(idx/n);return{t:fr[w].t+k*period,v:fr[w].v,k:fr[w].k};}
+  const w=Math.max(0,Math.min(n-1,idx));return{t:fr[w].t,v:fr[w].v,k:fr[w].k};};
+ const a=tn(i-1),b=tn(i),c=tn(last?(loop?n:i):i+1),d=tn(i+2);
+ const dt=Math.max(1e-6,T1-T0);
+ const u2=u*u,u3=u2*u;
+ const h00=2*u3-3*u2+1,h10=u3-2*u2+u,h01=-2*u3+3*u2,h11=u3-u2;
+ for(let p=0;p<NV;p++){
+  let m0,m1;
+  if(!loop&&(i===0))m0=0;else m0=(c.v[p]-a.v[p])/Math.max(1e-6,c.t-a.t);
+  if(!loop&&(i1===n-1))m1=0;else m1=(d.v[p]-b.v[p])/Math.max(1e-6,d.t-b.t);
+  m0*=b.k;m1*=c.k;
+  if(!loop&&last){out[p]=b.v[p];continue;}
+  out[p]=h00*b.v[p]+h10*dt*m0+h01*c.v[p]+h11*dt*m1;
+ }
+ return out;
+}
+function fk(v){
+ const lean=v[0]*D,ht=(v[0]+v[1])*D;
+ const pts=new Array(NP);
+ const pv=[v[10],0];
+ const nk=[pv[0]+sin(lean)*LEN.torso,pv[1]-cos(lean)*LEN.torso];
+ pts[PV]=pv;pts[NK]=nk;pts[HD]=[nk[0]+sin(ht)*LEN.head,nk[1]-cos(ht)*LEN.head];
+ const leg=function(h,k,ki,ai){const hh=h*D,kk=(h-k)*D;const kn=[pv[0]+sin(hh)*LEN.th,pv[1]+cos(hh)*LEN.th];pts[ki]=kn;pts[ai]=[kn[0]+sin(kk)*LEN.sh,kn[1]+cos(kk)*LEN.sh];};
+ leg(v[2],v[3],KA,FA);leg(v[4],v[5],KB,FB);
+ const arm=function(s,e,ei,hi){const ss=s*D,ee=(s+e)*D;const el=[nk[0]+sin(ss)*LEN.ua,nk[1]+cos(ss)*LEN.ua];pts[ei]=el;pts[hi]=[el[0]+sin(ee)*LEN.fa,el[1]+cos(ee)*LEN.fa];};
+ arm(v[6],v[7],EA,HA);arm(v[8],v[9],EB,HB);
+ let mx=-1e9;for(let i=0;i<NP;i++){const b=pts[i][1]+RAD[i];if(b>mx)mx=b;}
+ const dy=-mx-v[14];
+ for(let i=0;i<NP;i++)pts[i][1]+=dy;
+ return{pts:pts};
+}
+
+/* Sizes: largest → tiny. Portrait grid. */
+const SCALES=[1.0,0.55,0.30,0.16,0.09,0.05];
+const COLS=2;
+
+const S={pi:0,t:0,blend:1,prevClip:null,prevT:0};
+function phase(){return PHASES[S.pi];}
+function enterPhase(i){
+ const old=phase(),oldT=S.t;
+ S.pi=((i%PHASES.length)+PHASES.length)%PHASES.length;
+ S.prevClip=CLIPS[old.clip];S.prevT=oldT;S.blend=0;S.t=0;
+}
+function poseAt(clip,t){
+ const v=sampleKeys(clip.frames,t,!!clip.loop,clip.period||1);
+ return fk(v);
+}
+function getPose(){
+ const ph=phase(),clip=CLIPS[ph.clip];
+ const cur=poseAt(clip,S.t);
+ if(S.blend<1&&S.prevClip){
+  const u=S.blend*S.blend*(3-2*S.blend);
+  const prev=poseAt(S.prevClip,S.prevT);
+  const pts=prev.pts.map((p,i)=>[p[0]+(cur.pts[i][0]-p[0])*u,p[1]+(cur.pts[i][1]-p[1])*u]);
+  return{pts:pts};
+ }
+ return cur;
+}
+function update(dt){
+ S.t+=dt;
+ if(S.blend<1){S.blend+=dt/0.28;if(S.blend>=1){S.blend=1;S.prevClip=null;}}
+ const ph=phase();
+ if(S.t>=ph.dur)enterPhase(S.pi+1);
+}
+
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1,FPS=0,_fc=0,_ft=0;
+function resize(){
+ DPR=Math.min(2.5,window.devicePixelRatio||1);
+ W=window.innerWidth;H=window.innerHeight;
+ cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+ cv.style.width=W+'px';cv.style.height=H+'px';
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize',resize);resize();
+
+function drawStick(pts,sc,lw){
+ ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#111';ctx.fillStyle='#111';
+ ctx.lineWidth=Math.max(0.6,lw);
+ const L=function(a,b){ctx.beginPath();ctx.moveTo(pts[a][0]*sc,pts[a][1]*sc);ctx.lineTo(pts[b][0]*sc,pts[b][1]*sc);ctx.stroke();};
+ L(HD,NK);L(NK,PV);
+ L(NK,EA);L(EA,HA);L(NK,EB);L(EB,HB);
+ L(PV,KA);L(KA,FA);L(PV,KB);L(KB,FB);
+ const hr=Math.max(1.2,9*sc);
+ ctx.beginPath();ctx.arc(pts[HD][0]*sc,pts[HD][1]*sc,hr,0,TAU);ctx.fill();
+}
+
+function cellLayout(){
+ const n=SCALES.length,cols=COLS,rows=Math.ceil(n/cols);
+ const padX=10,padY=10,top=8,bot=8;
+ const cellW=(W-padX*(cols+1))/cols;
+ const cellH=(H-top-bot-padY*(rows-1))/rows;
+ const cells=[];
+ for(let i=0;i<n;i++){
+  const c=i%cols,r=(i/cols)|0;
+  const x=padX+c*(cellW+padX);
+  const y=top+r*(cellH+padY);
+  cells.push({x:x,y:y,w:cellW,h:cellH,sc:SCALES[i]});
+ }
+ return cells;
+}
+
+function bbox(pts){
+ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+ for(let i=0;i<pts.length;i++){const x=pts[i][0],y=pts[i][1],r=RAD[i];
+  if(x-r<x0)x0=x-r;if(y-r<y0)y0=y-r;if(x+r>x1)x1=x+r;if(y+r>y1)y1=y+r;}
+ return{x0:x0,y0:y0,x1:x1,y1:y1,w:x1-x0,h:y1-y0,cx:(x0+x1)/2,cy:(y0+y1)/2};
+}
+function render(){
+ ctx.clearRect(0,0,W,H);
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+ const pose=getPose();
+ const bb=bbox(pose.pts);
+ const cells=cellLayout();
+ /* Base fit = how big scale-1.0 would be inside one cell. Smaller scales stay truly smaller. */
+ const maxSc=SCALES[0];
+ const baseFit=Math.min(cells[0].w/(bb.w+8),cells[0].h/(bb.h+8));
+ for(const cell of cells){
+  const sc=baseFit*(cell.sc/maxSc);
+  const cx=cell.x+cell.w*0.5;
+  const cy=cell.y+cell.h*0.55;
+  ctx.save();
+  ctx.beginPath();ctx.rect(cell.x+1,cell.y+1,cell.w-2,cell.h-2);ctx.clip();
+  ctx.translate(cx-bb.cx*sc,cy-bb.cy*sc);
+  const lw=Math.max(0.65,Math.min(3.0,2.2*Math.sqrt(Math.max(0.04,cell.sc))));
+  drawStick(pose.pts,sc,lw);
+  ctx.restore();
+ }
+}
+
+let last=performance.now(),running=true;
+function frame(now){
+ if(!running)return;
+ let dt=Math.min(0.05,(now-last)/1000);last=now;
+ update(dt);render();
+ _fc++;_ft+=dt;if(_ft>=0.5){FPS=_fc/_ft;_fc=0;_ft=0;}
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+window.TG={
+ names:()=>PHASES.map(p=>p.name),
+ tasks:()=>['run','crawl','kneel'],
+ scales:()=>SCALES.slice(),
+ cur:()=>phase().name,
+ task:()=>phase().task,
+ clip:()=>phase().clip,
+ t:()=>S.t,
+ phase:()=>S.pi,
+ fps:()=>FPS,
+ go:function(i){enterPhase(i|0);},
+ step:function(dt){update(dt);render();},
+ hold:function(v){running=!v;if(!v){last=performance.now();requestAnimationFrame(frame);}}
+};
+})();
+</script></body></html>
