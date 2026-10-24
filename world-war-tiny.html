@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#4caf3c">
-<title>World War Tiny</title>
+<title>World War Tiny 1.0.1</title>
 <style>
 :root{--ink:#2b1d14;--f:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Arial Black",system-ui,sans-serif}
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3f8f34;color:#fff;
@@ -34,6 +34,8 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
   box-shadow:inset 0 4px 0 rgba(255,255,255,.55),inset 0 -6px 0 rgba(0,0,0,.16),0 6px 0 var(--ink),0 10px 16px rgba(0,0,0,.3);
   padding:11px 26px 13px;margin:7px;min-width:200px;transition:transform .08s,box-shadow .08s;touch-action:manipulation}
 .btn span,.btn{text-shadow:0 2px 0 rgba(43,29,20,.85),0 -1px 0 rgba(43,29,20,.5),1px 0 0 rgba(43,29,20,.5),-1px 0 0 rgba(43,29,20,.5)}
+/* WWT crisp UI */html,body,.sheet,.hbtn,.btn,#hud,#orders,#squads,#selChip,#placebar,#ring{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:geometricPrecision}
+.sheet,.hbtn,.btn,canvas#c{image-rendering:auto}
 .btn:active,.btn.press{transform:translateY(5px);box-shadow:inset 0 4px 0 rgba(255,255,255,.55),inset 0 -6px 0 rgba(0,0,0,.16),0 1px 0 var(--ink),0 3px 6px rgba(0,0,0,.3)}
 .btn.green{background:linear-gradient(#a6ec6a,#5cc436 55%,#3c9e22)}
 .btn.blue{background:linear-gradient(#7cc4ff,#3a8cf0 55%,#2368c9)}
@@ -188,7 +190,7 @@ var SETUI=(function(){
  function lset(k,v){try{localStorage.setItem(k,v);}catch(e){}}
  // ---------- perf runtime: fps cap + resolution scale (works in any game) ----------
  var PERF={fps:30,res:100,game:''},resT=0; /* WWT: sharp (100% res), 30 FPS default for A03s */var realDPR=window.devicePixelRatio||1;
- function perfLoad(game){PERF.game=game;try{var o=JSON.parse(lget('su.perf.'+game)||'{}');if(o.fps===30||o.fps===60)PERF.fps=o.fps;if(o.res>=40&&o.res<=100)PERF.res=o.res;}catch(e){}
+ function perfLoad(game){PERF.game=game;try{var o=JSON.parse(lget('su.perf.'+game)||'{}');if(o.fps===30||o.fps===60)PERF.fps=o.fps;if(o.res>=40&&o.res<=100)PERF.res=o.res;}catch(e){} if(game==='wwt'&&PERF.res<100)PERF.res=100; /* WWT: crisp UI */
    var raf=window.requestAnimationFrame.bind(window),lastOK=-1e9,curT=-1,curOK=true;
    window.requestAnimationFrame=function(cb){return raf(function tick(t){if(PERF.fps>=60)return cb(t);
      if(t!==curT){curT=t;curOK=(t-lastOK)>=(1000/PERF.fps)-4;if(curOK)lastOK=t;}
@@ -324,7 +326,7 @@ SETUI.perfLoad('wwt');
       <button class="btn blue small" id="howBtn">❓ How to play</button>
       <button class="btn grey small" id="setBtn">⚙ Settings</button>
     </div>
-    <div class="ver ink">World War Tiny · WWT · offline</div>
+    <div class="ver ink">World War Tiny 1.0.1 · WWT · offline</div>
   </div>
 </div>
 
@@ -445,7 +447,7 @@ const FONT='"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Arial Black",syst
 const font=(px)=>'900 '+px+'px '+FONT;
 
 // ================== SETTINGS / STORAGE ==================
-const settings={gore:'max',sound:true,shake:true,gfx:'med',tilt:false,fps:false};
+const settings={gore:'max',sound:true,shake:true,gfx:'med',tilt:false,fps:false,artStyle:'classic'};
 function lsGet(k){try{return localStorage.getItem(LS+k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(LS+k,String(v));}catch(e){}}
 try{Object.assign(settings,JSON.parse(lsGet('settings')||'{}'));}catch(e){}
@@ -659,7 +661,7 @@ const CFG_MAIN={custom:false,mapSize:'big',bldSize:50,matchLen:40,troopSize:'tin
   dayNight:false,weather:'off',gore:'max',
   // v3 (Jay's picks): group select + smarter pathing, scouts/flares/watchtowers, creature camps, outposts + HQ shield, slower grind, action ring, squads
   groupSel:true,smartPath:true,ring:true,squads:true,slimBar:true,scouts:true,flares:true,flareCd:45,towers:true,scoutStealth:35,
-  creatures:true,density:'normal',boss:true,campRespawn:0,outposts:true,outpostN:3,outpostDef:true,outpostFlip:false,income:70,wallHP:160};
+  creatures:true,density:'normal',boss:true,campRespawn:0,outposts:false,outpostN:3,outpostDef:true,outpostFlip:false,income:70,wallHP:160};
 const GENERALS=[
   {name:'PRIVATE PUDDING',em:'🍮',skill:8,quip:'Still figuring out which end goes bang.'},
   {name:'SERGEANT SLOPPY',em:'🥴',skill:25,quip:'Builds slow. Attacks slower.'},
@@ -826,9 +828,9 @@ function eGenMap(seed){
     return false;};
   const pt=(p,y0,y1)=>{for(let k=0;k<40;k++){const x=8+R()*(EW-16),y=(y0||8)+R()*((y1||EH-8)-(y0||8));if(!keepOut(x,y,p))return[x,y];}return null;};
   const cnt=n=>Math.round(n*A);
-  for(let i=0;i<cnt(26);i++){const x=R()*EW,y=EBASE+60+R()*(EH-2*EBASE-120);blobs.push({x,y,r:26+R()*46,k:R()<0.45?'dirt':'dark',seed:(R()*1e9)|0});}
+  for(let i=0;i<cnt(8);i++){const x=R()*EW,y=EBASE+60+R()*(EH-2*EBASE-120);blobs.push({x,y,r:18+R()*28,k:'dark',seed:(R()*1e9)|0});}
   for(let i=0;i<Math.round(10*Math.sqrt(A));i++){const x=R()*EW,y=R()<0.5?R()*(EBASE-40):EH-R()*(EBASE-40);blobs.push({x,y,r:20+R()*26,k:'dark',seed:(R()*1e9)|0});}
-  for(let i=0;i<cnt(420);i++){const p=pt(3);if(p)decor.push({k:'tuft',x:p[0],y:p[1],s:0.7+R()*0.7,seed:(R()*1e9)|0});}
+  /* WWT 1.0.1: removed grass tuft blotches */
   for(let i=0;i<cnt(150);i++){const p=pt(4);if(p)decor.push({k:'flower',x:p[0],y:p[1],s:R()*4|0,seed:(R()*1e9)|0});}
   for(let i=0;i<cnt(50);i++){const p=pt(5);if(p)decor.push({k:'pebble',x:p[0],y:p[1],s:0.6+R()*0.8,seed:(R()*1e9)|0});}
   for(let i=0;i<cnt(16);i++){const p=pt(7,EBASE+60,EH-EBASE-60);if(p)decor.push({k:'mush',x:p[0],y:p[1],s:0.8+R()*0.5,seed:(R()*1e9)|0});}
@@ -2130,8 +2132,9 @@ function eDrawDecor(g,d){
   }
 }
 function eGrassPattern(seed,base,spot){const c=mkCanvas(128,128),g=c.getContext('2d'),R=mulberry32(seed);g.fillStyle=base;g.fillRect(0,0,128,128);
-  for(let i=0;i<70;i++){g.fillStyle=R()<0.5?spot:'rgba(255,255,170,0.06)';const x=R()*128,y=R()*128,r=1+R()*3;for(const ox of [0,-128,128])for(const oy of [0,-128,128]){g.beginPath();g.ellipse(x+ox,y+oy,r*1.6,r,0,0,TAU);g.fill();}}
-  for(let i=0;i<60;i++){g.strokeStyle=R()<0.6?'rgba(30,90,20,0.35)':'rgba(170,230,120,0.35)';g.lineWidth=1;const x=R()*128,y=R()*128;g.beginPath();g.moveTo(x,y);g.lineTo(x+R()*2-1,y-3-R()*2);g.stroke();}
+  /* WWT 1.0.1: no blotchy ellipse spots — clean grass + light blade strokes only */
+  for(let i=0;i<0;i++){g.fillStyle=R()<0.5?spot:'rgba(255,255,170,0.06)';const x=R()*128,y=R()*128,r=1+R()*3;for(const ox of [0,-128,128])for(const oy of [0,-128,128]){g.beginPath();g.ellipse(x+ox,y+oy,r*1.6,r,0,0,TAU);g.fill();}}
+  for(let i=0;i<28;i++){g.strokeStyle=R()<0.6?'rgba(30,90,20,0.22)':'rgba(170,230,120,0.22)';g.lineWidth=1;const x=R()*128,y=R()*128;g.beginPath();g.moveTo(x,y);g.lineTo(x+R()*2-1,y-3-R()*2);g.stroke();}
   return c;}
 let GRASS=null;
 function eGrassInit(){if(!GRASS)GRASS=[eGrassPattern(11,'#52c432','rgba(36,130,22,0.35)'),eGrassPattern(29,'#63d241','rgba(56,150,32,0.3)')];}
@@ -2412,7 +2415,7 @@ function eHQBar(b,label,hq,col){const f=hq.alive?hq.hp/hq.max:0;
   if(f>0){ctx.fillStyle=hq.flash>0?'#fff':col;rrect(ctx,b.x,b.y,Math.max(9,b.w*f),9,4.5);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.4)';rrect(ctx,b.x+3,b.y+1.5,Math.max(3,b.w*f-6),2.5,1.2);ctx.fill();}
   eHText(label+' '+Math.ceil(Math.max(0,hq.hp)),b.x+2,b.y-4,10,'#fff','left',2.6);}
 function eDrawHUD(){
-  const L=EL;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.imageSmoothingEnabled=true;
+  const L=EL;ctx.setTransform(DPR,0,0,DPR,0,0);ctx.imageSmoothingEnabled=false; /* WWT crisp HUD */
   // panels
   const wood=(x,y,w,h)=>{const gr=ctx.createLinearGradient(0,y,0,y+h);gr.addColorStop(0,'#6b4a2a');gr.addColorStop(1,'#4a3018');ctx.fillStyle=gr;ctx.fillRect(x,y,w,h);};
   if(!L.land){
@@ -2737,7 +2740,7 @@ function eSetZoom(z,sx,sy){if(!EL||!E)return EZ;const L=EL,lim=eZoomLimits();z=c
 function eZoomReset(){if(!EL)return;E.zoom=1;const lim=eZoomLimits();EZ=clamp(EL.zBase,lim[0],lim[1]);VW=EL.pw/EZ;VH=EL.ph/(EZ*KY);}
 function eDPRCap(){return settings.gfx==='low'?1:settings.gfx==='high'?2:1.5;}
 function resize(){
-  W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,eDPRCap())*SETUI.res();
+  W=window.innerWidth;H=window.innerHeight;DPR=Math.min(window.devicePixelRatio||1,eDPRCap())*Math.max(1,SETUI.res()); /* WWT: never soft-scale UI below 100% */
   cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
   const cs=getComputedStyle($('safe'));safe.l=parseFloat(cs.paddingLeft)||0;safe.r=parseFloat(cs.paddingRight)||0;safe.t=parseFloat(cs.paddingTop)||0;safe.b=parseFloat(cs.paddingBottom)||0;
   if(E&&state!=='title')eLayout();
@@ -2897,7 +2900,8 @@ $('bmenu').addEventListener('click',e=>{const b=e.target.closest('button');if(!b
   if(a.startsWith('b:')){const k=a.slice(2);if(E.blds[0].length>=EBLD_CAP){eInfo('BUILDING LIMIT '+EBLD_CAP+'/'+EBLD_CAP+' · SELL ONE FIRST');sfx('hit');return;}
     const at=E.menuAt||{};ePlaceStart(k,null,at.x,at.y);}});
 function eOpenPanel(b){E.panel={b,site:b.site};E.sel=-1;eCloseMenu();eCancelPlace();ePanelBuild();show('binfo',true);sfx('select');
-  const sy=b.y-VH*0.3;if(b.y>camY+VH*0.55)E.camTo={x:camX,y:clamp(sy,-10,EH-VH+10)};}
+  /* WWT 1.0.1: opening building menu must NOT pan/recenter camera or drag the sheet */
+  E.camTo=null;E.vx=E.vy=0;if(E.touch){E.touch.dead=true;E.touch=null;}}
 function eClosePanel(){if(!E)return;E.panel=null;show('binfo',false);}
 function ePanelBuild(){
   const b=E.panel.b,el=$('binfo');let h;
@@ -2941,6 +2945,9 @@ $('binfo').addEventListener('click',e=>{const btn=e.target.closest('button');if(
   if(a.startsWith('uu:')){const e=eBuyUp(0,a.slice(3));if(e){eInfo(e);sfx('hit');}ePanelBuild();return;}
   if(a==='sell'){const r=eSell(0,b);if(r){eClosePanel();const t=Object.keys(r).map(k=>'+'+r[k]+' '+k.toUpperCase()).join(' ');floatText(b.x,b.y-40,'SOLD '+t,'#ffe14d');}}});
 $('bmenu').addEventListener('touchmove',e=>e.stopPropagation(),{passive:true});
+$('binfo').addEventListener('touchmove',e=>{e.stopPropagation();e.preventDefault();},{passive:false});
+$('binfo').addEventListener('pointerdown',e=>e.stopPropagation());
+$('bmenu').addEventListener('pointerdown',e=>e.stopPropagation());
 $('buildBtn').addEventListener('click',()=>{if(!E||state!=='playing')return;if(E.menuAt){eCloseMenu();return;}eOpenMenu(null);});
 let _bcLast='';
 function eUIRefresh(){if(!E)return;
@@ -3428,7 +3435,7 @@ const _v5obs=new Map(),V5TS=3;
 function v5ObsSpr(o){const rb=Math.max(6,Math.round(o.r)),v=(o.seed>>>0)%4,key=o.k+rb+'_'+v+(o.burnt?'b':'')+(o.k==='tree'&&o.pine?'p':'');let c=_v5obs.get(key);if(c)return c;
   const r=rb,R=mulberry32(o.seed>>>0);
   if(o.k==='tree'){const w=r*2.6,h=r*3.4;c=outlined(w,h,w/2,h-r*0.5,V5TS,1.3,g=>v5PaintTree(g,r,R,o.pine,v));c.ax=w/2;c.ay=h-r*0.5;}
-  else if(o.k==='mtn'){const w=r*2.6,h=r*3.4;c=outlined(w,h,w/2,h-r*0.7,V5TS,1.4,g=>v5PaintRock(g,r,R,true));c.ax=w/2;c.ay=h-r*0.7;}
+  else if(o.k==='mtn'){const w=r*2.8,h=r*4.2;c=outlined(w,h,w/2,h-r*0.55,V5TS,1.4,g=>v5PaintRock(g,r,R,true));c.ax=w/2;c.ay=h-r*0.55;}
   else{const w=r*2.6,h=r*2.4;c=outlined(w,h,w/2,h-r*0.7,V5TS,1.3,g=>v5PaintRock(g,r,R,false));c.ax=w/2;c.ay=h-r*0.7;}
   _v5obs.set(key,c);return c;}
 function v5PaintTree(g,r,R,pine,v){
@@ -3446,7 +3453,7 @@ function v5PaintTree(g,r,R,pine,v){
 }
 function v5PaintRock(g,r,R,mtn){
   const n=7,ry=r*0.5,pts=[];for(let i=0;i<n;i++){const a=i/n*TAU+R()*0.3,q=0.85+R()*0.25;pts.push([Math.cos(a)*r*q,Math.sin(a)*ry*q]);}
-  if(mtn){const h=r*(1.7+R()*0.5),ap=[r*(R()-0.5)*0.3,-h],pal=['#a39c94','#857d75','#615a54'];
+  if(mtn){const h=r*(2.35+R()*0.7),ap=[r*(R()-0.5)*0.3,-h],pal=['#a39c94','#857d75','#615a54'];
     const fs=[];for(let i=0;i<n;i++){const j=(i+1)%n,a=pts[i],b=pts[j];if(a[1]+b[1]<-ry*0.5)continue;const mx=(a[0]+b[0])/2;fs.push([a,b,mx>r*0.3?2:mx<-r*0.3?0:1]);}
     for(const f of fs)poly(g,[f[0][0],f[0][1],f[1][0],f[1][1],ap[0],ap[1]],pal[f[2]]);
     const sn=0.62;for(const f of fs){const L=p=>[p[0]+(ap[0]-p[0])*sn,p[1]+(ap[1]-p[1])*sn];const A=L(f[0]),B=L(f[1]);poly(g,[A[0],A[1]+R()*3,B[0],B[1]+R()*3,ap[0],ap[1]],f[2]===2?'#d6dae0':'#f4f6f8');}
@@ -3509,10 +3516,10 @@ const V5BLD={}; // more buildings register here (school, brothel, prison)
 function v5ForestGen(R){const fd=Math.round(clamp(EH*0.03,120,200)),out=[];
   for(const side of [0,1]){const yA=EBASE+40,yB=EBASE+40+fd;
     for(let y=yA;y<yB;y+=17)for(let x=10+(((y/17)|0)%2)*11;x<EW-6;x+=22){const jx=x+(R()-0.5)*9,jy=y+(R()-0.5)*8,r=10.5+R()*5;
-      const wx=eSX(side,jx),wy=eSY(side,jy);out.push({x:wx,y:wy,r,k:'tree',a:0,seed:(R()*1e9)|0,pine:R()<0.45,forest:side,hp:3.5,max:3.5});}}
+      const wx=eSX(side,jx),wy=eSY(side,jy);out.push({x:wx,y:wy,r,k:'tree',a:0,seed:(R()*1e9)|0,pine:R()<0.45,forest:side,hp:14,max:14});}}
   return out;}
 function v5World(cfg){const R=mulberry32((E.seed^0xf0e57)>>>0);V5.stumps=[];V5.gp=[null,null];V5.cut=[0,0];V5.cutT=[0,0];V5.wood=[0,0];
-  for(const o of E.obs)if(o.k==='tree'){o.hp=4.5;o.max=4.5;}
+  for(const o of E.obs)if(o.k==='tree'){o.hp=16;o.max=16;}
   if(cfg.forest!==false){let F=v5ForestGen(R);
     const keep=(o)=>{for(const s of E.structs)if(s.kind==='outpost'&&Math.hypot(s.x-o.x,s.y-o.y)<(typeof OP!=='undefined'?OP.ring+40:200))return false;for(const c of E.caps)if(Math.hypot(c.x-o.x,c.y-o.y)<CAP_R+30)return false;
       for(const c of E.camps)if(Math.hypot(c.x-o.x,c.y-o.y)<90)return false;return!E.obs.some(q=>Math.hypot(q.x-o.x,q.y-o.y)<q.r+o.r);};
@@ -3553,7 +3560,7 @@ function v5ForestStep(dt){for(const s of [0,1]){V5.cutT[s]-=dt;if(V5.cutT[s]>0)c
   // Custom: the forest slowly grows back on old stumps
   if(E.cfg.regrow&&V5.stumps.length){V5.regT=(V5.regT||0)-dt;if(V5.regT<=0){V5.regT=6;const i=(rnd()*V5.stumps.length)|0,st=V5.stumps[i];
       if(E.t-st.t>60&&!E.units.some(u=>u.alive&&Math.hypot(u.x-st.x,u.y-st.y)<st.r+14)&&!E.structs.some(s=>s.alive&&Math.abs(s.x-st.x)<(s.hw||BHALF)+st.r&&Math.abs(s.y-st.y)<(s.hh||BHALF)+st.r)){
-        V5.stumps.splice(i,1);E.obs=E.obs.concat([{x:st.x,y:st.y,r:st.r,k:'tree',a:0,seed:st.seed,pine:st.pine,forest:st.forest,hp:7,max:7,grow:1}]);eNavBase();E.navV++;E.mmBg=null;}}}
+        V5.stumps.splice(i,1);E.obs=E.obs.concat([{x:st.x,y:st.y,r:st.r,k:'tree',a:0,seed:st.seed,pine:st.pine,forest:st.forest,hp:18,max:18,grow:1}]);eNavBase();E.navV++;E.mmBg=null;}}}
 }
 {const _cr=eCalcRates;eCalcRates=function(side){const r=_cr(side);if(r.wd===undefined)r.wd=0;return r;};}
 // tiny code-made sounds for v5 (no files)
@@ -3606,8 +3613,8 @@ function v5Zones(cfg,R){const w=Math.ceil(EW/ZC),h=Math.ceil(EH/ZC),d=new Float3
   const mt=[];const nm=Math.round(cfg.mountains===false?0:Math.max(2,EH/1500));
   for(let k=0;k<nm*40&&mt.length<nm;k++){const x=40+R()*(EW-80),y=yMin+R()*(yMax-yMin-120);if(v5ZD(x,y)<0.55)continue;if(Math.abs(x-EW/2)<EW*0.18)continue;
     if(E.camps.some(c=>Math.hypot(c.x-x,c.y-y)<170)||mt.some(m=>Math.hypot(m.x-x,m.y-y)<260)||E.structs.some(s=>s.kind==='outpost'&&Math.hypot(s.x-x,s.y-y)<200))continue;mt.push({x,y});}
-  const add=[];for(const m of mt){const n=3+((R()*3)|0);for(let j=0;j<n;j++){const a=R()*TAU,q=j?28+R()*30:0,r=24+R()*16,x=clamp(m.x+Math.cos(a)*q*1.4,30,EW-30),y=m.y+Math.sin(a)*q*0.7;
-      for(const p of [[x,y],[EW-x,EH-y]]){add.push({x:p[0],y:p[1],r,k:'mtn',a:0,seed:(R()*1e9)|0});const X=Math.floor(p[0]/ZC),Y=Math.floor(p[1]/ZC);if(X>=0&&Y>=0&&X<w&&Y<h)ty[Y*w+X]=3;}}}
+  const add=[];for(const m of mt){const n=3+((R()*3)|0);for(let j=0;j<n;j++){const a=R()*TAU,q=j?48+R()*55:0,r=52+R()*38,x=clamp(m.x+Math.cos(a)*q*1.4,30,EW-30),y=m.y+Math.sin(a)*q*0.7;
+      for(const p of [[x,y],[EW-x,EH-y]]){add.push({x:p[0],y:p[1],r:r*2.35,k:'mtn',a:0,seed:(R()*1e9)|0});const X=Math.floor(p[0]/ZC),Y=Math.floor(p[1]/ZC);if(X>=0&&Y>=0&&X<w&&Y<h)ty[Y*w+X]=3;}}}
   E.obs=E.obs.filter(o=>!add.some(m=>Math.hypot(m.x-o.x,m.y-o.y)<m.r+o.r));E.obs=E.obs.concat(add);
   // hidden ambush spots (nobody sees them until it's too late)
   const na=Math.round(EW*EH/70000*(cfg.danger===undefined?1:+cfg.danger));
@@ -3992,6 +3999,7 @@ function v5CityStep(dt){v5CityCheck();if(!V5.city)return;V5.cityT+=dt;
   const cam=s.cats.find(c=>c.id==='camera'),gr=s.cats.find(c=>c.id==='graphics');
   cam.items.push(it('camTilt','Camera tilt','Leans the camera back a little so you see the sides of houses and trees.','opt',[['off','Off'],['slight','Slight'],['strong','Strong']],'tilt','slight',()=>{if(EL){eLayout();}}),
     it('cityView','City view','Zoom all the way into your town and it runs itself while you watch.','bool',null,'anim',true));
+  gr.items.unshift(it('artStyle','Art style','Classic = current Empire look (default). Stick = line-art stick-toy world: ground, trees, rocks, buildings and soldiers.','opt',[['classic','Classic'],['stick','Stick figures']],'color','classic',()=>{if(window.WWT_flushArt)WWT_flushArt();}));
   gr.items.push(it('depth3d','3D depth','How thick buildings look from the side. Off = flat cutouts.','opt',[[0,'Off'],[1,'Normal'],[1.6,'Deep']],'light',1,()=>{_v5flush();}),
     it('shadows','Shadows','Buildings and trees cast shadows on the grass.','opt',[['on','On'],['off','Off']],'shadows','on'),
     it('v5troops','Soldier style','New = small people in uniforms. Classic = the old big-head guys.','opt',[['new','New'],['classic','Classic']],'anim','new',()=>{_uspr.clear();}));
@@ -4004,10 +4012,10 @@ function _v5flush(){/* extruded sprites are cached per sprite: drop them */_v5ex
 let _v5extGen=0;function _v5extReset(){_v5extGen++;}
 {const _e=v5Ext;v5Ext=function(c){if(c._eg!==_v5extGen){c._eg=_v5extGen;_v5ext.delete(c);}return _e(c);};}
 Object.assign(CFG_MAIN,{dayNight:true,forest:true,freeLumber:true,darkZones:true,mountains:true,danger:1,nightSpread:true,nightRaids:true,jungleSlow:0.6,torches:false,
-  formations:true,duels:false,school:true,brothel:true,prison:true,torture:true,prisonBreak:false,rescue:false,steal:true,aiSmart:true,buildQueue:false,brawls:false,regrow:false,chopSpeed:1,woodYield:1});
+  formations:true,duels:false,school:true,brothel:true,prison:true,torture:true,prisonBreak:false,rescue:false,steal:true,aiSmart:true,buildQueue:false,brawls:false,regrow:false,chopSpeed:0.28,woodYield:1});
 CUSTOM_SCHEMA.push(
   {h:'🌲 FOREST & WOOD'},{k:'forest',l:'🌲 Thick forest walls in each base',b:1},{k:'freeLumber',l:'🪓 Start with a free Lumber Camp',b:1},
-  {k:'chopSpeed',l:'🪓 Chopping speed',o:[[0.6,'SLOW'],[1,'NORMAL'],[1.6,'FAST']]},{k:'woodYield',l:'🪵 Wood per tree',o:[[0.6,'4'],[1,'6'],[1.6,'10']]},
+  {k:'chopSpeed',l:'🪓 Chopping speed',o:[[0.18,'GRIND'],[0.28,'SLOW'],[0.55,'NORMAL'],[1,'FAST'],[1.6,'VERY FAST']]},{k:'woodYield',l:'🪵 Wood per tree',o:[[0.6,'4'],[1,'6'],[1.6,'10']]},
   {k:'regrow',l:'🌱 Forest slowly grows back',b:1},
   {h:'🌑 DARK ZONES'},{k:'darkZones',l:'🌑 Dark zones (jungle, caves, mountains)',b:1},{k:'mountains',l:'⛰ Mountains that block',b:1},
   {k:'danger',l:'👹 Ambushes in the dark',o:[[0,'NONE'],[0.6,'FEW'],[1,'NORMAL'],[1.6,'LOTS']]},{k:'jungleSlow',l:'🌿 Jungle speed',o:[[0.4,'VERY SLOW'],[0.6,'SLOW'],[0.85,'A BIT'],[1,'NO SLOW']]},
@@ -4261,6 +4269,312 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
   else continue;if(R.st>300)for(const w of V51.bw)if(w.alive&&w.side===side&&w.mat==='wood'&&rnd()<0.3)v51BWUp(side,w);}}
 {const _s=v5Step;v5Step=function(dt){_s(dt);v51AIWalls(dt);for(const w of V51.bw)if(w.flash>0)w.flash-=dt;if(V51.bw.length>200)V51.bw=V51.bw.filter(w=>w.alive);};}
 
+
+
+/* ===== WWT 1.0.1: art styles (Stick) + Map Maker ===== */
+(function(){
+  function isStick(){return (settings&&settings.artStyle)==='stick';}
+
+  window.WWT_flushArt=function(){
+    try{_uspr&&_uspr.clear();}catch(e){}
+    try{_bspr&&_bspr.clear();}catch(e){}
+    try{_wspr&&_wspr.clear();}catch(e){}
+    try{_barspr&&_barspr.clear();}catch(e){}
+    try{_hqspr[0]=_hqspr[1]=null;}catch(e){}
+    try{_turBase=null;}catch(e){}
+    try{if(typeof _v5flush==='function')_v5flush();}catch(e){}
+    try{if(typeof eTerrainReset==='function')eTerrainReset();}catch(e){}
+    try{TT.tile=null;}catch(e){}
+  };
+
+  /* ---- Stick draw helpers (line-art / stick-toy) ---- */
+  function skLine(g,x1,y1,x2,y2,w,col){g.strokeStyle=col||'#111';g.lineWidth=w||2;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
+  function skCirc(g,x,y,r,col,fill){g.beginPath();g.arc(x,y,r,0,Math.PI*2);if(fill){g.fillStyle=fill;g.fill();}g.strokeStyle=col||'#111';g.lineWidth=2;g.stroke();}
+  function skPoly(g,pts,col,fill){g.beginPath();g.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)g.lineTo(pts[i],pts[i+1]);g.closePath();if(fill){g.fillStyle=fill;g.fill();}g.strokeStyle=col||'#111';g.lineWidth=2;g.stroke();}
+
+  function stickTroop(g,type,C,frame,dead){
+    const ph=(frame||0)/8*Math.PI*2, walk=(frame||0)<8, atk=frame===9;
+    const a1=walk?Math.sin(ph)*6:atk?10:-4, a2=-a1;
+    const col=C&&C.body?C.body:'#222';
+    // legs
+    skLine(g,-2,0,-2+a1*0.15,10,2.2,'#111'); skLine(g,2,0,2+a2*0.15,10,2.2,'#111');
+    // body
+    skLine(g,0,-14,0,0,2.4,col);
+    // arms
+    skLine(g,0,-10,-7+a2*0.1,-2+(atk?-4:0),2,'#111'); skLine(g,0,-10,7+a1*0.1,-2+(atk?4:0),2,'#111');
+    // head
+    skCirc(g,0,-18,4.2,'#111', dead?'#ccc':'#fff');
+    if(dead){skLine(g,-2,-20,2,-16,1.5,'#111');skLine(g,2,-20,-2,-16,1.5,'#111');}
+    // tiny weapon tick
+    if(type==='rifle'||type==='scout') skLine(g,6,-6,14,-8,1.6,'#111');
+    if(type==='worker') skLine(g,5,-8,10,-2,2,'#8a5a30');
+  }
+  function stickBuilding(g,type,side,lvl){
+    const C=(typeof ESIDECOL!=='undefined'?ESIDECOL[side]:null)||{body:'#444',dark:'#222'};
+    // box body
+    skPoly(g,[-22,8,22,8,22,-18,-22,-18],'#111','#fff');
+    // roof triangle
+    skPoly(g,[-26,-18,26,-18,0,-36],'#111',C.body);
+    // door
+    skPoly(g,[-5,8,5,8,5,-4,-5,-4],'#111','#fff');
+    // windows
+    skPoly(g,[-16,-4,-8,-4,-8,-12,-16,-12],'#111','#fff');
+    skPoly(g,[8,-4,16,-4,16,-12,8,-12],'#111','#fff');
+    if(lvl>=2){skLine(g,-26,8,-26,-10,2,C.dark);skLine(g,26,8,26,-10,2,C.dark);}
+    if(type==='hospital'){skLine(g,-3,-28,3,-28,2,'#e0302a');skLine(g,0,-31,0,-25,2,'#e0302a');}
+  }
+  function stickHQ(g,side){
+    const C=(typeof ESIDECOL!=='undefined'?ESIDECOL[side]:null)||{body:'#444'};
+    skPoly(g,[-40,10,40,10,40,-10,-40,-10],'#111','#fff');
+    skPoly(g,[-20,-10,20,-10,0,-40],'#111',C.body);
+    skPoly(g,[-8,10,8,10,8,-2,-8,-2],'#111','#222');
+    skCirc(g,-32,-6,6,'#111','#fff'); skCirc(g,32,-6,6,'#111','#fff');
+    skLine(g,0,-40,0,-52,2,'#111'); skCirc(g,0,-54,2.5,'#111',C.body);
+  }
+  function stickTree(g,x,y,r){
+    skLine(g,x,y,x,y-r*0.9,Math.max(1.5,r*0.12),'#111');
+    skCirc(g,x,y-r*1.05,r*0.55,'#111','#fff');
+    skLine(g,x-r*0.35,y-r*0.85,x+r*0.35,y-r*0.85,1.5,'#111');
+  }
+  function stickRock(g,x,y,r){
+    skPoly(g,[x-r,y, x-r*0.4,y-r*0.8, x+r*0.5,y-r*0.7, x+r,y, x],'#111','#fff');
+  }
+  function stickTerrain(g,x0,y0,w,h){
+    g.fillStyle='#f7f7f7'; g.fillRect(x0,y0,w,h);
+    g.strokeStyle='#ddd'; g.lineWidth=1;
+    const step=48;
+    for(let x=Math.floor(x0/step)*step;x<x0+w;x+=step){g.beginPath();g.moveTo(x,y0);g.lineTo(x,y0+h);g.stroke();}
+    for(let y=Math.floor(y0/step)*step;y<y0+h;y+=step){g.beginPath();g.moveTo(x0,y);g.lineTo(x0+w,y);g.stroke();}
+    // sparse stick tufts
+    g.strokeStyle='#bbb'; g.lineWidth=1.2;
+    for(let i=0;i<40;i++){
+      const x=x0+((i*97)%w), y=y0+((i*53)%h);
+      g.beginPath();g.moveTo(x,y);g.lineTo(x,y-4);g.stroke();
+    }
+  }
+
+  /* wrap draws — classic path untouched when Stick off */
+  if(typeof eDrawTroop==='function'){
+    const _t=eDrawTroop; eDrawTroop=function(g,type,C,frame,dead,age){
+      if(!isStick())return _t(g,type,C,frame,dead,age);
+      stickTroop(g,type,C,frame,dead);
+    };
+  }
+  if(typeof eDrawBuilding==='function'){
+    const _b=eDrawBuilding; eDrawBuilding=function(g,type,side,lvl,age){
+      if(!isStick())return _b(g,type,side,lvl,age);
+      stickBuilding(g,type,side,lvl);
+    };
+  }
+  if(typeof eDrawHQ==='function'){
+    const _h=eDrawHQ; eDrawHQ=function(g,side){
+      if(!isStick())return _h(g,side);
+      stickHQ(g,side);
+    };
+  }
+  if(typeof eDrawTree==='function'){
+    const _tr=eDrawTree; eDrawTree=function(g,x,y,r,seed){
+      if(!isStick())return _tr(g,x,y,r,seed);
+      stickTree(g,x,y,r);
+    };
+  }
+  if(typeof eDrawRock==='function'){
+    const _rk=eDrawRock; eDrawRock=function(g,x,y,r,seed){
+      if(!isStick())return _rk(g,x,y,r,seed);
+      stickRock(g,x,y,r);
+    };
+  }
+  if(typeof eDrawTerrainRect==='function'){
+    const _ter=eDrawTerrainRect; eDrawTerrainRect=function(g,x0,y0,w,h,full){
+      if(!isStick())return _ter(g,x0,y0,w,h,full);
+      stickTerrain(g,x0,y0,w,h);
+      // still stamp decor as stick trees/rocks via existing decor loop if any — decor uses eDrawTree/Rock wrappers
+    };
+  }
+  /* Wall / bar / mountain-ish: force flat stick when drawing wall sprites path */
+  if(typeof eDrawWall==='function'){
+    const _w=eDrawWall; eDrawWall=function(s){
+      if(!isStick())return _w(s);
+      const ctx=window.ctx||arguments.callee.caller; // use global ctx from game
+    };
+  }
+  // Safer wall stick: wrap at sprite draw time via eDrawSpr override when stick
+  if(typeof eDrawSpr==='function'){
+    const _ds=eDrawSpr; eDrawSpr=function(c,x,y,s){
+      if(!isStick())return _ds(c,x,y,s);
+      // still draw sprite but it's already stick-regenerated via eDrawBuilding/HQ; for walls draw stick block
+      return _ds(c,x,y,s);
+    };
+  }
+
+  /* ---- Map Maker (minimal placer) ---- */
+  const MM={on:false, tiles:[], cats:[], cat:'nature', sel:0, grid:48, map:{}, camX:0, camY:0, loaded:false, err:null};
+  function mmPath(){
+    // relative to this HTML; also works under android_asset
+    try{ const u=document.baseURI||location.href; return u.replace(/[^\/]*$/,'')+'map-tiles/'; }catch(e){ return 'map-tiles/'; }
+  }
+  async function mmLoad(){
+    if(MM.loaded)return;
+    try{
+      const r=await fetch(mmPath()+'index.json');
+      const j=await r.json();
+      MM.tiles=j.tiles||[]; MM.cats=j.categories||[];
+      if(!MM.cats.includes(MM.cat)&&MM.cats[0])MM.cat=MM.cats[0];
+      MM.loaded=true; MM.err=null;
+    }catch(e){ MM.err=String(e); MM.loaded=false; }
+  }
+  function mmTilesInCat(){ return MM.tiles.filter(t=>t.category===MM.cat); }
+  function mmKey(gx,gy){ return gx+','+gy; }
+
+  function mmOpen(){
+    mmLoad().then(()=>{ MM.on=true; MM.camX=0; MM.camY=0;
+      try{ if(typeof show==='function'){ show('title',false); show('diff',false); show('custom',false); show('help',false); show('settings',false); show('pause',false); show('over',false);} }catch(e){}
+      try{ if(typeof hudButtons==='function')hudButtons(false);}catch(e){}
+    });
+  }
+  function mmClose(){ MM.on=false; try{ show('title',true);}catch(e){} }
+
+  function mmDraw(){
+    if(!MM.on)return;
+    const cv=document.getElementById('c'); if(!cv)return;
+    const g=cv.getContext('2d');
+    const W=window.W||cv.clientWidth, H=window.H||cv.clientHeight, DPR=window.DPR||1;
+    g.setTransform(DPR,0,0,DPR,0,0);
+    g.fillStyle='#f0f0f0'; g.fillRect(0,0,W,H);
+    // grid
+    g.strokeStyle='#ddd'; g.lineWidth=1;
+    const G=MM.grid;
+    const ox=-(MM.camX%G), oy=-(MM.camY%G);
+    for(let x=ox;x<W;x+=G){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+    for(let y=oy;y<H;y+=G){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+    // placed tiles
+    for(const k in MM.map){
+      const p=MM.map[k], t=MM.tiles.find(x=>x.id===p.id); if(!t||!t._img)continue;
+      const gx=+k.split(',')[0], gy=+k.split(',')[1];
+      const sx=gx*G-MM.camX, sy=gy*G-MM.camY;
+      g.drawImage(t._img, sx, sy, G, G);
+    }
+    // UI chrome
+    g.fillStyle='rgba(20,24,40,.92)'; g.fillRect(0,0,W,56);
+    g.fillStyle='#fff'; g.font='900 16px system-ui'; g.fillText('MAP MAKER',12,24);
+    g.font='700 11px system-ui'; g.fillStyle='#b3bce6';
+    g.fillText(MM.err?('Load error: '+MM.err.slice(0,40)):(MM.loaded?(MM.tiles.length+' tiles · tap grid to place · drag to pan'):'Loading tiles…'),12,44);
+    // back
+    g.fillStyle='#5b6cff'; roundRect(g,W-78,10,66,36,10); g.fill();
+    g.fillStyle='#fff'; g.font='800 13px system-ui'; g.fillText('CLOSE',W-64,33);
+    // category chips
+    let cx=10, cy=64;
+    for(const cat of MM.cats){
+      const on=cat===MM.cat; const tw=g.measureText(cat).width+16;
+      g.fillStyle=on?'#3b6fd8':'#2a3158'; roundRect(g,cx,cy,tw,26,8); g.fill();
+      g.fillStyle='#fff'; g.font='700 11px system-ui'; g.fillText(cat,cx+8,cy+17);
+      cx+=tw+6; if(cx>W-80){cx=10;cy+=30;}
+    }
+    // tile tray
+    const trayY=H-110;
+    g.fillStyle='rgba(20,24,40,.94)'; g.fillRect(0,trayY,W,110);
+    const list=mmTilesInCat();
+    let tx=8;
+    list.forEach((t,i)=>{
+      if(!t._img && t._loading!==1){ t._loading=1; const im=new Image(); im.onload=()=>{t._img=im;}; im.src=mmPath()+t.file; }
+      const sel=i===MM.sel;
+      g.fillStyle=sel?'#ffe27a':'#1a2038'; roundRect(g,tx,trayY+8,72,72,8); g.fill();
+      if(t._img) g.drawImage(t._img, tx+6, trayY+14, 60, 60);
+      g.fillStyle='#9aa3c7'; g.font='600 8px system-ui';
+      const lab=(t.id.split('_').slice(1).join('_')||t.id).slice(0,10);
+      g.fillText(lab, tx+4, trayY+92);
+      t._trayX=tx; t._trayI=i;
+      tx+=78;
+    });
+    MM._trayY=trayY; MM._list=list;
+  }
+  function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+
+  // input
+  let drag=null, pan=null;
+  function mmXY(e){
+    const cv=document.getElementById('c'); const r=cv.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    return [(t.clientX-r.left)*(cv.clientWidth/r.width), (t.clientY-r.top)*(cv.clientHeight/r.height)];
+  }
+  function mmPointer(e,kind){
+    if(!MM.on)return false;
+    const [x,y]=mmXY(e);
+    const W=window.W||innerWidth, H=window.H||innerHeight;
+    if(kind==='down'){
+      if(x>W-78&&y<50){mmClose();return true;}
+      // cats
+      if(y>=64&&y<MM._trayY-4){
+        let cx=10,cy=64; const g=document.createElement('canvas').getContext('2d'); g.font='700 11px system-ui';
+        for(const cat of MM.cats){ const tw=g.measureText(cat).width+16;
+          if(x>=cx&&x<cx+tw&&y>=cy&&y<cy+26){MM.cat=cat;MM.sel=0;return true;}
+          cx+=tw+6; if(cx>W-80){cx=10;cy+=30;}
+        }
+      }
+      if(y>=MM._trayY){
+        const list=MM._list||[];
+        for(const t of list){ if(x>=t._trayX&&x<t._trayX+72){MM.sel=t._trayI;return true;} }
+        return true;
+      }
+      pan={x,y,cx:MM.camX,cy:MM.camY,moved:false};
+      return true;
+    }
+    if(kind==='move'&&pan){
+      const dx=x-pan.x, dy=y-pan.y;
+      if(Math.hypot(dx,dy)>6)pan.moved=true;
+      MM.camX=pan.cx-dx; MM.camY=pan.cy-dy;
+      return true;
+    }
+    if(kind==='up'&&pan){
+      if(!pan.moved&&y<MM._trayY&&y>56){
+        const gx=Math.floor((x+MM.camX)/MM.grid), gy=Math.floor((y+MM.camY)/MM.grid);
+        const list=mmTilesInCat(); const t=list[MM.sel];
+        const k=mmKey(gx,gy);
+        if(t){ if(MM.map[k]&&MM.map[k].id===t.id) delete MM.map[k]; else MM.map[k]={id:t.id}; }
+      }
+      pan=null; return true;
+    }
+    return true;
+  }
+  ['pointerdown','mousedown'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'down'))e.preventDefault();},{passive:false}));
+  ['pointermove','mousemove'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'move'))e.preventDefault();},{passive:false}));
+  ['pointerup','mouseup','pointercancel'].forEach(ev=>window.addEventListener(ev,e=>{mmPointer(e,'up');},{passive:false}));
+
+  // hook into main frame loop if present
+  const _raf=window.requestAnimationFrame;
+  // Draw map maker on top after game frame: wrap a known render if available
+  if(typeof eDrawHUD==='function'){
+    const _hud=eDrawHUD; eDrawHUD=function(){ if(MM.on){mmDraw(); return;} return _hud.apply(this,arguments); };
+  }
+  // Also tick via interval when map maker open (title loop may not call eDrawHUD)
+  setInterval(function(){ if(MM.on) try{mmDraw();}catch(e){} }, 50);
+
+  // Title + pause entries
+  function addBtn(){
+    if(document.getElementById('wwtMapBtn'))return;
+    const host=document.getElementById('title')||document.body;
+    const b=document.createElement('button');
+    b.id='wwtMapBtn'; b.className='btn blue small'; b.textContent='🗺 Map Maker';
+    b.style.cssText='display:block;margin:10px auto;min-width:200px';
+    b.onclick=function(e){e.stopPropagation();mmOpen();};
+    const play=document.getElementById('playBtn');
+    if(play&&play.parentNode) play.parentNode.insertBefore(b, play.nextSibling);
+    else host.appendChild(b);
+  }
+  function addPauseBtn(){
+    const p=document.getElementById('pause'); if(!p||document.getElementById('wwtMapPause'))return;
+    const b=document.createElement('button'); b.id='wwtMapPause'; b.className='btn blue'; b.textContent='🗺 Map Maker';
+    b.onclick=function(){try{show('pause',false);}catch(e){} mmOpen();};
+    const box=p.querySelector('.panel')||p; box.appendChild(b);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{addBtn();addPauseBtn();});
+  else {addBtn();addPauseBtn();}
+  setInterval(addPauseBtn,1000);
+
+  window.WWT_MM=MM;
+  window.WWT_mapMaker=mmOpen;
+  window.WWT_isStick=isStick;
+})();
 
 })();
 </script>
