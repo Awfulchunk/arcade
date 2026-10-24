@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#4caf3c">
-<title>World War Tiny 1.0.1</title>
+<title>World War Tiny 1.0.2</title>
 <style>
 :root{--ink:#2b1d14;--f:"Arial Rounded MT Bold","Trebuchet MS","Segoe UI","Arial Black",system-ui,sans-serif}
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#3f8f34;color:#fff;
@@ -326,7 +326,7 @@ SETUI.perfLoad('wwt');
       <button class="btn blue small" id="howBtn">❓ How to play</button>
       <button class="btn grey small" id="setBtn">⚙ Settings</button>
     </div>
-    <div class="ver ink">World War Tiny 1.0.1 · WWT · offline</div>
+    <div class="ver ink">World War Tiny 1.0.2 · WWT · offline</div>
   </div>
 </div>
 
@@ -3999,7 +3999,7 @@ function v5CityStep(dt){v5CityCheck();if(!V5.city)return;V5.cityT+=dt;
   const cam=s.cats.find(c=>c.id==='camera'),gr=s.cats.find(c=>c.id==='graphics');
   cam.items.push(it('camTilt','Camera tilt','Leans the camera back a little so you see the sides of houses and trees.','opt',[['off','Off'],['slight','Slight'],['strong','Strong']],'tilt','slight',()=>{if(EL){eLayout();}}),
     it('cityView','City view','Zoom all the way into your town and it runs itself while you watch.','bool',null,'anim',true));
-  gr.items.unshift(it('artStyle','Art style','Classic = current Empire look (default). Stick = line-art stick-toy world: ground, trees, rocks, buildings and soldiers.','opt',[['classic','Classic'],['stick','Stick figures']],'color','classic',()=>{if(window.WWT_flushArt)WWT_flushArt();}));
+  gr.items.unshift(it('artStyle','Art style','Classic = current Empire look (default). Stick = whole stick-toy world: ground, trees, rocks, mountains, walls, buildings and soldiers.','opt',[['classic','Classic'],['stick','Stick figures']],'color','classic',()=>{if(window.WWT_flushArt)WWT_flushArt();}));
   gr.items.push(it('depth3d','3D depth','How thick buildings look from the side. Off = flat cutouts.','opt',[[0,'Off'],[1,'Normal'],[1.6,'Deep']],'light',1,()=>{_v5flush();}),
     it('shadows','Shadows','Buildings and trees cast shadows on the grass.','opt',[['on','On'],['off','Off']],'shadows','on'),
     it('v5troops','Soldier style','New = small people in uniforms. Classic = the old big-head guys.','opt',[['new','New'],['classic','Classic']],'anim','new',()=>{_uspr.clear();}));
@@ -4271,8 +4271,9 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
 
 
 
-/* ===== WWT 1.0.1: art styles (Stick) + Map Maker ===== */
+/* ===== WWT 1.0.2: Stick whole-look + Map Maker (fixed) ===== */
 (function(){
+  const WWT_MM_INDEX = {"tiles":[{"id":"destroyed_house","file":"destroyed/destroyed_house.png","category":"destroyed","source":"atlas_96","panel":25,"w":103,"h":114},{"id":"destroyed_house_ruin","file":"destroyed/destroyed_house_ruin.png","category":"destroyed","source":"atlas_96","panel":26,"w":104,"h":114},{"id":"destroyed_farm","file":"destroyed/destroyed_farm.png","category":"destroyed","source":"atlas_96","panel":27,"w":103,"h":114},{"id":"destroyed_church","file":"destroyed/destroyed_church.png","category":"destroyed","source":"atlas_96","panel":28,"w":104,"h":114},{"id":"destroyed_factory","file":"destroyed/destroyed_factory.png","category":"destroyed","source":"atlas_96","panel":29,"w":104,"h":114},{"id":"destroyed_warehouse","file":"destroyed/destroyed_warehouse.png","category":"destroyed","source":"atlas_96","panel":30,"w":103,"h":114},{"id":"destroyed_garage","file":"destroyed/destroyed_garage.png","category":"destroyed","source":"atlas_96","panel":31,"w":104,"h":114},{"id":"destroyed_town_ruin","file":"destroyed/destroyed_town_ruin.png","category":"destroyed","source":"atlas_96","panel":32,"w":103,"h":114},{"id":"walls_wood_fence","file":"walls/walls_wood_fence.png","category":"walls","source":"atlas_96","panel":33,"w":103,"h":114},{"id":"walls_stone_wall","file":"walls/walls_stone_wall.png","category":"walls","source":"atlas_96","panel":34,"w":104,"h":114},{"id":"walls_wood_wall","file":"walls/walls_wood_wall.png","category":"walls","source":"atlas_96","panel":35,"w":103,"h":114},{"id":"walls_stone_fence","file":"walls/walls_stone_fence.png","category":"walls","source":"atlas_96","panel":36,"w":104,"h":114},{"id":"barricades_sandbags","file":"barricades/barricades_sandbags.png","category":"barricades","source":"atlas_96","panel":37,"w":104,"h":114},{"id":"barricades_concrete_barrier","file":"barricades/barricades_concrete_barrier.png","category":"barricades","source":"atlas_96","panel":38,"w":103,"h":114},{"id":"barricades_hedge","file":"barricades/barricades_hedge.png","category":"barricades","source":"atlas_96","panel":39,"w":104,"h":114},{"id":"barricades_gate","file":"barricades/barricades_gate.png","category":"barricades","source":"atlas_96","panel":40,"w":103,"h":114},{"id":"trenches_trench_straight","file":"trenches/trenches_trench_straight.png","category":"trenches","source":"atlas_96","panel":41,"w":103,"h":114},{"id":"trenches_trench_corner","file":"trenches/trenches_trench_corner.png","category":"trenches","source":"atlas_96","panel":42,"w":104,"h":114},{"id":"trenches_trench_t","file":"trenches/trenches_trench_t.png","category":"trenches","source":"atlas_96","panel":43,"w":103,"h":114},{"id":"trenches_trench_cross","file":"trenches/trenches_trench_cross.png","category":"trenches","source":"atlas_96","panel":44,"w":104,"h":114},{"id":"trenches_foxhole","file":"trenches/trenches_foxhole.png","category":"trenches","source":"atlas_96","panel":45,"w":104,"h":114},{"id":"trenches_pillbox","file":"trenches/trenches_pillbox.png","category":"trenches","source":"atlas_96","panel":46,"w":103,"h":114},{"id":"trenches_tank_trap","file":"trenches/trenches_tank_trap.png","category":"trenches","source":"atlas_96","panel":47,"w":104,"h":114},{"id":"trenches_at_ditch","file":"trenches/trenches_at_ditch.png","category":"trenches","source":"atlas_96","panel":48,"w":103,"h":114},{"id":"terrain_cliff","file":"terrain/terrain_cliff.png","category":"terrain","source":"atlas_96","panel":65,"w":103,"h":114},{"id":"terrain_mountain","file":"terrain/terrain_mountain.png","category":"terrain","source":"atlas_96","panel":66,"w":104,"h":114},{"id":"terrain_cave","file":"terrain/terrain_cave.png","category":"terrain","source":"atlas_96","panel":67,"w":103,"h":114},{"id":"terrain_beach","file":"terrain/terrain_beach.png","category":"terrain","source":"atlas_96","panel":68,"w":104,"h":114},{"id":"terrain_snow","file":"terrain/terrain_snow.png","category":"terrain","source":"atlas_96","panel":69,"w":104,"h":114},{"id":"terrain_desert","file":"terrain/terrain_desert.png","category":"terrain","source":"atlas_96","panel":70,"w":103,"h":114},{"id":"terrain_map_edge","file":"terrain/terrain_map_edge.png","category":"terrain","source":"atlas_96","panel":71,"w":104,"h":114},{"id":"terrain_elevation","file":"terrain/terrain_elevation.png","category":"terrain","source":"atlas_96","panel":72,"w":103,"h":114},{"id":"nature_pine_trees","file":"nature/nature_pine_trees.png","category":"nature","source":"atlas_96","panel":73,"w":103,"h":114},{"id":"nature_broadleaf_trees","file":"nature/nature_broadleaf_trees.png","category":"nature","source":"atlas_96","panel":74,"w":104,"h":114},{"id":"nature_dead_trees","file":"nature/nature_dead_trees.png","category":"nature","source":"atlas_96","panel":75,"w":103,"h":114},{"id":"nature_bushes","file":"nature/nature_bushes.png","category":"nature","source":"atlas_96","panel":76,"w":104,"h":114},{"id":"nature_flowers","file":"nature/nature_flowers.png","category":"nature","source":"atlas_96","panel":77,"w":104,"h":114},{"id":"nature_rocks","file":"nature/nature_rocks.png","category":"nature","source":"atlas_96","panel":78,"w":103,"h":114},{"id":"nature_logs_stumps","file":"nature/nature_logs_stumps.png","category":"nature","source":"atlas_96","panel":79,"w":104,"h":114},{"id":"nature_grass_dirt","file":"nature/nature_grass_dirt.png","category":"nature","source":"atlas_96","panel":80,"w":103,"h":114},{"id":"rubble_crater_small","file":"rubble/rubble_crater_small.png","category":"rubble","source":"atlas_96","panel":81,"w":103,"h":114},{"id":"rubble_crater_large","file":"rubble/rubble_crater_large.png","category":"rubble","source":"atlas_96","panel":82,"w":104,"h":114},{"id":"rubble_burned_ground","file":"rubble/rubble_burned_ground.png","category":"rubble","source":"atlas_96","panel":83,"w":103,"h":114},{"id":"rubble_rubble_pile","file":"rubble/rubble_rubble_pile.png","category":"rubble","source":"atlas_96","panel":84,"w":104,"h":114},{"id":"destroyed_wreck_vehicle","file":"destroyed/destroyed_wreck_vehicle.png","category":"destroyed","source":"atlas_96","panel":85,"w":104,"h":114},{"id":"destroyed_destroyed_building","file":"destroyed/destroyed_destroyed_building.png","category":"destroyed","source":"atlas_96","panel":86,"w":103,"h":114},{"id":"rubble_fire_smoke","file":"rubble/rubble_fire_smoke.png","category":"rubble","source":"atlas_96","panel":87,"w":104,"h":114},{"id":"rubble_blood_decal","file":"rubble/rubble_blood_decal.png","category":"rubble","source":"atlas_96","panel":88,"w":103,"h":114},{"id":"clutter_barrels_crates","file":"clutter/clutter_barrels_crates.png","category":"clutter","source":"atlas_96","panel":89,"w":103,"h":114},{"id":"clutter_cart_wagon","file":"clutter/clutter_cart_wagon.png","category":"clutter","source":"atlas_96","panel":90,"w":104,"h":114},{"id":"clutter_civilian_props","file":"clutter/clutter_civilian_props.png","category":"clutter","source":"atlas_96","panel":91,"w":103,"h":114},{"id":"clutter_utility_pole","file":"clutter/clutter_utility_pole.png","category":"clutter","source":"atlas_96","panel":92,"w":104,"h":114},{"id":"clutter_signs_flags","file":"clutter/clutter_signs_flags.png","category":"clutter","source":"atlas_96","panel":93,"w":104,"h":114},{"id":"clutter_resource_node","file":"clutter/clutter_resource_node.png","category":"clutter","source":"atlas_96","panel":94,"w":103,"h":114},{"id":"clutter_spawn_markers","file":"clutter/clutter_spawn_markers.png","category":"clutter","source":"atlas_96","panel":95,"w":104,"h":114},{"id":"clutter_extra_props","file":"clutter/clutter_extra_props.png","category":"clutter","source":"atlas_96","panel":96,"w":103,"h":114},{"id":"walls_wooden_walls_b","file":"walls/walls_wooden_walls_b.png","category":"walls","source":"atlas_40","panel":25,"w":128,"h":119},{"id":"barricades_sandbag_walls_b","file":"barricades/barricades_sandbag_walls_b.png","category":"barricades","source":"atlas_40","panel":26,"w":128,"h":119},{"id":"barricades_wire_fence","file":"barricades/barricades_wire_fence.png","category":"barricades","source":"atlas_40","panel":27,"w":128,"h":119},{"id":"walls_gate_pillars","file":"walls/walls_gate_pillars.png","category":"walls","source":"atlas_40","panel":28,"w":128,"h":119},{"id":"trenches_bunker_small","file":"trenches/trenches_bunker_small.png","category":"trenches","source":"atlas_40","panel":29,"w":128,"h":119},{"id":"trenches_bunker_med","file":"trenches/trenches_bunker_med.png","category":"trenches","source":"atlas_40","panel":30,"w":128,"h":119},{"id":"trenches_trench_u","file":"trenches/trenches_trench_u.png","category":"trenches","source":"atlas_40","panel":31,"w":128,"h":119},{"id":"trenches_obs_post","file":"trenches/trenches_obs_post.png","category":"trenches","source":"atlas_40","panel":32,"w":128,"h":119},{"id":"nature_pines_b","file":"nature/nature_pines_b.png","category":"nature","source":"atlas_40","panel":33,"w":128,"h":119},{"id":"nature_broadleaf_b","file":"nature/nature_broadleaf_b.png","category":"nature","source":"atlas_40","panel":34,"w":128,"h":119},{"id":"nature_bushes_b","file":"nature/nature_bushes_b.png","category":"nature","source":"atlas_40","panel":35,"w":128,"h":119},{"id":"nature_rocks_b","file":"nature/nature_rocks_b.png","category":"nature","source":"atlas_40","panel":36,"w":128,"h":119},{"id":"nature_dead_trees_b","file":"nature/nature_dead_trees_b.png","category":"nature","source":"atlas_40","panel":37,"w":128,"h":119},{"id":"nature_grass_tufts","file":"nature/nature_grass_tufts.png","category":"nature","source":"atlas_40","panel":38,"w":128,"h":119},{"id":"nature_flowers_b","file":"nature/nature_flowers_b.png","category":"nature","source":"atlas_40","panel":39,"w":128,"h":119},{"id":"clutter_stumps_logs","file":"clutter/clutter_stumps_logs.png","category":"clutter","source":"atlas_40","panel":40,"w":128,"h":119}],"categories":["barricades","clutter","destroyed","nature","rubble","terrain","trenches","walls"]};
   function isStick(){return (settings&&settings.artStyle)==='stick';}
 
   window.WWT_flushArt=function(){
@@ -4282,46 +4283,43 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     try{_barspr&&_barspr.clear();}catch(e){}
     try{_hqspr[0]=_hqspr[1]=null;}catch(e){}
     try{_turBase=null;}catch(e){}
+    try{_v5obs&&_v5obs.clear();}catch(e){}
     try{if(typeof _v5flush==='function')_v5flush();}catch(e){}
     try{if(typeof eTerrainReset==='function')eTerrainReset();}catch(e){}
-    try{TT.tile=null;}catch(e){}
+    try{TT.tile=null;TT.logo=null;TT.logoW=0;}catch(e){}
   };
 
-  /* ---- Stick draw helpers (line-art / stick-toy) ---- */
+  /* ---- Stick draw helpers (line-art / stick-toy whole world) ---- */
   function skLine(g,x1,y1,x2,y2,w,col){g.strokeStyle=col||'#111';g.lineWidth=w||2;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
   function skCirc(g,x,y,r,col,fill){g.beginPath();g.arc(x,y,r,0,Math.PI*2);if(fill){g.fillStyle=fill;g.fill();}g.strokeStyle=col||'#111';g.lineWidth=2;g.stroke();}
   function skPoly(g,pts,col,fill){g.beginPath();g.moveTo(pts[0],pts[1]);for(let i=2;i<pts.length;i+=2)g.lineTo(pts[i],pts[i+1]);g.closePath();if(fill){g.fillStyle=fill;g.fill();}g.strokeStyle=col||'#111';g.lineWidth=2;g.stroke();}
 
   function stickTroop(g,type,C,frame,dead){
-    const ph=(frame||0)/8*Math.PI*2, walk=(frame||0)<8, atk=frame===9;
-    const a1=walk?Math.sin(ph)*6:atk?10:-4, a2=-a1;
+    const fr=frame|0, walk=fr>0&&fr<8, atk=fr===9||fr===8;
+    const ph=walk?(fr/8)*Math.PI*2:0;
+    const a1=walk?Math.sin(ph)*10:atk?14:-2, a2=-a1;
     const col=C&&C.body?C.body:'#222';
-    // legs
-    skLine(g,-2,0,-2+a1*0.15,10,2.2,'#111'); skLine(g,2,0,2+a2*0.15,10,2.2,'#111');
-    // body
-    skLine(g,0,-14,0,0,2.4,col);
-    // arms
-    skLine(g,0,-10,-7+a2*0.1,-2+(atk?-4:0),2,'#111'); skLine(g,0,-10,7+a1*0.1,-2+(atk?4:0),2,'#111');
-    // head
-    skCirc(g,0,-18,4.2,'#111', dead?'#ccc':'#fff');
-    if(dead){skLine(g,-2,-20,2,-16,1.5,'#111');skLine(g,2,-20,-2,-16,1.5,'#111');}
-    // tiny weapon tick
-    if(type==='rifle'||type==='scout') skLine(g,6,-6,14,-8,1.6,'#111');
-    if(type==='worker') skLine(g,5,-8,10,-2,2,'#8a5a30');
+    // legs swing visibly while walking
+    skLine(g,-3,0,-3+a1*0.35,11,2.4,'#111'); skLine(g,3,0,3+a2*0.35,11,2.4,'#111');
+    skLine(g,0,-14,0,0,2.6,col);
+    skLine(g,0,-10,-8+a2*0.15,-1+(atk?-5:0),2.2,'#111'); skLine(g,0,-10,8+a1*0.15,-1+(atk?5:0),2.2,'#111');
+    skCirc(g,0,-18,4.4,'#111', dead?'#ccc':'#fff');
+    if(dead){skLine(g,-2.5,-20.5,2.5,-15.5,1.6,'#111');skLine(g,2.5,-20.5,-2.5,-15.5,1.6,'#111');}
+    if(type==='rifle'||type==='scout'||type==='sniper') skLine(g,7,-7,16,-9,1.8,'#111');
+    if(type==='worker') skLine(g,5,-8,12,-1,2.2,'#8a5a30');
+    if(type==='brute'||type==='boss'){skLine(g,8,-4,18,6,3,'#555');skCirc(g,18,6,2.5,'#111','#888');}
   }
   function stickBuilding(g,type,side,lvl){
     const C=(typeof ESIDECOL!=='undefined'?ESIDECOL[side]:null)||{body:'#444',dark:'#222'};
-    // box body
     skPoly(g,[-22,8,22,8,22,-18,-22,-18],'#111','#fff');
-    // roof triangle
     skPoly(g,[-26,-18,26,-18,0,-36],'#111',C.body);
-    // door
     skPoly(g,[-5,8,5,8,5,-4,-5,-4],'#111','#fff');
-    // windows
     skPoly(g,[-16,-4,-8,-4,-8,-12,-16,-12],'#111','#fff');
     skPoly(g,[8,-4,16,-4,16,-12,8,-12],'#111','#fff');
-    if(lvl>=2){skLine(g,-26,8,-26,-10,2,C.dark);skLine(g,26,8,26,-10,2,C.dark);}
-    if(type==='hospital'){skLine(g,-3,-28,3,-28,2,'#e0302a');skLine(g,0,-31,0,-25,2,'#e0302a');}
+    if(lvl>=2){skLine(g,-26,8,-26,-10,2.2,C.dark);skLine(g,26,8,26,-10,2.2,C.dark);}
+    if(type==='hospital'){skLine(g,-3,-28,3,-28,2.2,'#e0302a');skLine(g,0,-31,0,-25,2.2,'#e0302a');}
+    if(type==='lumber'){skLine(g,18,6,30,6,2,'#8a5a30');skLine(g,18,10,30,10,2,'#8a5a30');}
+    if(type==='tower'){skPoly(g,[-10,8,10,8,10,-40,-10,-40],'#111','#fff');skPoly(g,[-14,-40,14,-40,0,-52],'#111',C.body);skCirc(g,0,-56,3,'#111',C.body);}
   }
   function stickHQ(g,side){
     const C=(typeof ESIDECOL!=='undefined'?ESIDECOL[side]:null)||{body:'#444'};
@@ -4337,7 +4335,13 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     skLine(g,x-r*0.35,y-r*0.85,x+r*0.35,y-r*0.85,1.5,'#111');
   }
   function stickRock(g,x,y,r){
-    skPoly(g,[x-r,y, x-r*0.4,y-r*0.8, x+r*0.5,y-r*0.7, x+r,y, x],'#111','#fff');
+    skPoly(g,[x-r,y, x-r*0.4,y-r*0.8, x+r*0.5,y-r*0.7, x+r,y],'#111','#fff');
+  }
+  function stickMountain(g,x,y,r){
+    const h=r*2.4;
+    skPoly(g,[x-r*1.1,y, x,y-h, x+r*1.1,y],'#111','#fff');
+    skLine(g,x-r*0.35,y-h*0.55,x+r*0.15,y-h*0.75,1.6,'#111');
+    skPoly(g,[x-r*0.25,y-h*0.72, x,y-h, x+r*0.35,y-h*0.78],'#111','#f4f4f4');
   }
   function stickTerrain(g,x0,y0,w,h){
     g.fillStyle='#f7f7f7'; g.fillRect(x0,y0,w,h);
@@ -4345,12 +4349,30 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     const step=48;
     for(let x=Math.floor(x0/step)*step;x<x0+w;x+=step){g.beginPath();g.moveTo(x,y0);g.lineTo(x,y0+h);g.stroke();}
     for(let y=Math.floor(y0/step)*step;y<y0+h;y+=step){g.beginPath();g.moveTo(x0,y);g.lineTo(x0+w,y);g.stroke();}
-    // sparse stick tufts
     g.strokeStyle='#bbb'; g.lineWidth=1.2;
     for(let i=0;i<40;i++){
       const x=x0+((i*97)%w), y=y0+((i*53)%h);
       g.beginPath();g.moveTo(x,y);g.lineTo(x,y-4);g.stroke();
     }
+  }
+  function stickWallAt(s){
+    const g=ctx, C=(typeof ESIDECOL!=='undefined'?ESIDECOL[s.side]:null)||{body:'#444'};
+    const x=s.x,y=s.y, main=s.line&&s.line.main;
+    g.save();
+    skPoly(g,[x-28,y+10,x+28,y+10,x+28,y-6,x-28,y-6],'#111','#fff');
+    if(main){skPoly(g,[x-6,y-6,x+6,y-6,x+6,y-18,x-6,y-18],'#111',C.body);}
+    const f=s.hp/s.max;
+    if(f<0.75){skLine(g,x-20,y-2,x-8,y+6,1.5,'#111');}
+    if(f<0.5){skLine(g,x+6,y-4,x+18,y+4,1.5,'#111');}
+    if(f<0.25){skLine(g,x-10,y+2,x+12,y-6,1.5,'#111');}
+    g.restore();
+  }
+  function stickBarAt(s){
+    const g=ctx,x=s.x,y=s.y,n=Math.max(2,Math.ceil(9*s.hp/s.max));
+    g.save();
+    skLine(g,x-22,y,x+22,y,2.4,'#111');
+    for(let i=0;i<n;i++){const px=x-20+i*5; skLine(g,px,y-6,px,y+6,1.8,'#111');}
+    g.restore();
   }
 
   /* wrap draws — classic path untouched when Stick off */
@@ -4388,51 +4410,94 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     const _ter=eDrawTerrainRect; eDrawTerrainRect=function(g,x0,y0,w,h,full){
       if(!isStick())return _ter(g,x0,y0,w,h,full);
       stickTerrain(g,x0,y0,w,h);
-      // still stamp decor as stick trees/rocks via existing decor loop if any — decor uses eDrawTree/Rock wrappers
+      // stick decor trees/rocks still go through eDrawTree/Rock wrappers when painted into chunks
+      if(full&&E&&E.decorG){const a=E.decorG.get(Math.floor(y0/TCH)*64+Math.floor(x0/TCH));if(a)for(const d of a){if(d.k==='bush')stickTree(g,d.x,d.y,8);}}
     };
   }
-  /* Wall / bar / mountain-ish: force flat stick when drawing wall sprites path */
+  // V5 live trees / rocks / mountains — these bypassed Stick in 1.0.1
+  if(typeof v5DrawObs==='function'){
+    const _vo=v5DrawObs; v5DrawObs=function(o){
+      if(!isStick())return _vo(o);
+      if(o.hp!==undefined&&o.hp<=0)return;
+      if(o.k==='folk')return _vo(o);
+      if(o.hot)return _vo(o);
+      ctx.save();
+      if(KY!==1){ctx.translate(0,o.y);ctx.scale(1,1/KY);ctx.translate(0,-o.y);}
+      if(o.k==='tree') stickTree(ctx,o.x,o.y,o.r);
+      else if(o.k==='mtn') stickMountain(ctx,o.x,o.y,o.r);
+      else stickRock(ctx,o.x,o.y,o.r);
+      if(o.hp!==undefined&&o.hp<o.max&&o.k==='tree')eBar(o.x,o.y+4,18,o.hp/o.max,'#e0a868');
+      ctx.restore();
+    };
+  }
   if(typeof eDrawWall==='function'){
     const _w=eDrawWall; eDrawWall=function(s){
       if(!isStick())return _w(s);
-      const ctx=window.ctx||arguments.callee.caller; // use global ctx from game
+      stickWallAt(s);
     };
   }
-  // Safer wall stick: wrap at sprite draw time via eDrawSpr override when stick
-  if(typeof eDrawSpr==='function'){
-    const _ds=eDrawSpr; eDrawSpr=function(c,x,y,s){
-      if(!isStick())return _ds(c,x,y,s);
-      // still draw sprite but it's already stick-regenerated via eDrawBuilding/HQ; for walls draw stick block
-      return _ds(c,x,y,s);
+  if(typeof eDrawBar==='function'){
+    const _bar=eDrawBar; eDrawBar=function(s){
+      if(!isStick())return _bar(s);
+      stickBarAt(s);
+    };
+  }
+  // Title meadow becomes stick paper when Stick is on
+  if(typeof titleTile==='function'){
+    const _tt=titleTile; titleTile=function(){
+      if(!isStick())return _tt();
+      const c=mkCanvas(360,360),g=c.getContext('2d');
+      stickTerrain(g,0,0,360,360);
+      for(let i=0;i<8;i++)stickTree(g,30+i*40,80+(i%3)*60,14+((i*5)%8));
+      for(let i=0;i<5;i++)stickRock(g,50+i*55,260,10+((i*3)%6));
+      return c;
     };
   }
 
-  /* ---- Map Maker (minimal placer) ---- */
-  const MM={on:false, tiles:[], cats:[], cat:'nature', sel:0, grid:48, map:{}, camX:0, camY:0, loaded:false, err:null};
-  function mmPath(){
-    // relative to this HTML; also works under android_asset
-    try{ const u=document.baseURI||location.href; return u.replace(/[^\/]*$/,'')+'map-tiles/'; }catch(e){ return 'map-tiles/'; }
-  }
-  async function mmLoad(){
-    if(MM.loaded)return;
+  /* ---- Map Maker ---- */
+  const MM={on:false, tiles:[], cats:[], cat:'nature', sel:0, grid:48, map:{}, camX:0, camY:0, loaded:false, err:null, from:'title'};
+  function mmBase(){
+    // Relative path works for file:///android_asset/ and http(s) hosting
     try{
-      const r=await fetch(mmPath()+'index.json');
-      const j=await r.json();
-      MM.tiles=j.tiles||[]; MM.cats=j.categories||[];
+      const u=document.baseURI||location.href;
+      if(/^file:\/\/\/android_asset\//i.test(u)) return 'map-tiles/';
+      return u.replace(/[^\/]*$/,'')+'map-tiles/';
+    }catch(e){ return 'map-tiles/'; }
+  }
+  function mmLoad(){
+    if(MM.loaded)return Promise.resolve(true);
+    try{
+      const j=WWT_MM_INDEX;
+      MM.tiles=(j.tiles||[]).map(t=>({...t})); MM.cats=j.categories||[];
       if(!MM.cats.includes(MM.cat)&&MM.cats[0])MM.cat=MM.cats[0];
       MM.loaded=true; MM.err=null;
-    }catch(e){ MM.err=String(e); MM.loaded=false; }
+      return Promise.resolve(true);
+    }catch(e){ MM.err=String(e); MM.loaded=false; return Promise.resolve(false); }
   }
   function mmTilesInCat(){ return MM.tiles.filter(t=>t.category===MM.cat); }
   function mmKey(gx,gy){ return gx+','+gy; }
+  function mmHideUI(){
+    try{ if(typeof show==='function'){ ['title','diff','custom','help','settings','pause','over'].forEach(id=>{try{show(id,false);}catch(e){}}); } }catch(e){}
+    try{ if(typeof hudButtons==='function')hudButtons(false);}catch(e){}
+  }
 
   function mmOpen(){
-    mmLoad().then(()=>{ MM.on=true; MM.camX=0; MM.camY=0;
-      try{ if(typeof show==='function'){ show('title',false); show('diff',false); show('custom',false); show('help',false); show('settings',false); show('pause',false); show('over',false);} }catch(e){}
-      try{ if(typeof hudButtons==='function')hudButtons(false);}catch(e){}
+    MM.from=(state==='playing'||state==='paused')?'game':'title';
+    if(state==='playing'){ try{state='paused';}catch(e){} }
+    mmHideUI();
+    mmLoad().then(()=>{
+      MM.on=true; MM.camX=0; MM.camY=0;
+      mmHideUI();
+      try{mmDraw();}catch(e){}
     });
   }
-  function mmClose(){ MM.on=false; try{ show('title',true);}catch(e){} }
+  function mmClose(){
+    MM.on=false;
+    try{
+      if(MM.from==='game'){ show('pause',true); }
+      else { show('title',true); if(state!=='title') state='title'; }
+    }catch(e){}
+  }
 
   function mmDraw(){
     if(!MM.on)return;
@@ -4440,58 +4505,60 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     const g=cv.getContext('2d');
     const W=window.W||cv.clientWidth, H=window.H||cv.clientHeight, DPR=window.DPR||1;
     g.setTransform(DPR,0,0,DPR,0,0);
-    g.fillStyle='#f0f0f0'; g.fillRect(0,0,W,H);
-    // grid
-    g.strokeStyle='#ddd'; g.lineWidth=1;
+    g.fillStyle='#e8eaf0'; g.fillRect(0,0,W,H);
+    g.strokeStyle='#c5cad8'; g.lineWidth=1;
     const G=MM.grid;
     const ox=-(MM.camX%G), oy=-(MM.camY%G);
     for(let x=ox;x<W;x+=G){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
     for(let y=oy;y<H;y+=G){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
-    // placed tiles
     for(const k in MM.map){
       const p=MM.map[k], t=MM.tiles.find(x=>x.id===p.id); if(!t||!t._img)continue;
       const gx=+k.split(',')[0], gy=+k.split(',')[1];
       const sx=gx*G-MM.camX, sy=gy*G-MM.camY;
-      g.drawImage(t._img, sx, sy, G, G);
+      try{g.drawImage(t._img, sx, sy, G, G);}catch(e){}
     }
-    // UI chrome
     g.fillStyle='rgba(20,24,40,.92)'; g.fillRect(0,0,W,56);
     g.fillStyle='#fff'; g.font='900 16px system-ui'; g.fillText('MAP MAKER',12,24);
     g.font='700 11px system-ui'; g.fillStyle='#b3bce6';
     g.fillText(MM.err?('Load error: '+MM.err.slice(0,40)):(MM.loaded?(MM.tiles.length+' tiles · tap grid to place · drag to pan'):'Loading tiles…'),12,44);
-    // back
     g.fillStyle='#5b6cff'; roundRect(g,W-78,10,66,36,10); g.fill();
     g.fillStyle='#fff'; g.font='800 13px system-ui'; g.fillText('CLOSE',W-64,33);
-    // category chips
     let cx=10, cy=64;
+    g.font='700 11px system-ui';
     for(const cat of MM.cats){
-      const on=cat===MM.cat; const tw=g.measureText(cat).width+16;
+      const on=cat===MM.cat; const tw=Math.max(48,g.measureText(cat).width+16);
       g.fillStyle=on?'#3b6fd8':'#2a3158'; roundRect(g,cx,cy,tw,26,8); g.fill();
-      g.fillStyle='#fff'; g.font='700 11px system-ui'; g.fillText(cat,cx+8,cy+17);
+      g.fillStyle='#fff'; g.fillText(cat,cx+8,cy+17);
       cx+=tw+6; if(cx>W-80){cx=10;cy+=30;}
     }
-    // tile tray
     const trayY=H-110;
     g.fillStyle='rgba(20,24,40,.94)'; g.fillRect(0,trayY,W,110);
     const list=mmTilesInCat();
     let tx=8;
+    const base=mmBase();
     list.forEach((t,i)=>{
-      if(!t._img && t._loading!==1){ t._loading=1; const im=new Image(); im.onload=()=>{t._img=im;}; im.src=mmPath()+t.file; }
+      if(!t._img && t._loading!==1){
+        t._loading=1; const im=new Image();
+        im.onload=()=>{t._img=im; t._loadOk=1;};
+        im.onerror=()=>{t._loadErr=1; t._loading=0;};
+        im.src=base+t.file;
+      }
       const sel=i===MM.sel;
       g.fillStyle=sel?'#ffe27a':'#1a2038'; roundRect(g,tx,trayY+8,72,72,8); g.fill();
-      if(t._img) g.drawImage(t._img, tx+6, trayY+14, 60, 60);
+      if(t._img) try{g.drawImage(t._img, tx+6, trayY+14, 60, 60);}catch(e){}
+      else if(t._loadErr){g.fillStyle='#f66';g.font='700 9px system-ui';g.fillText('ERR',tx+24,trayY+48);}
+      else {g.fillStyle='#9aa3c7';g.font='700 9px system-ui';g.fillText('…',tx+30,trayY+48);}
       g.fillStyle='#9aa3c7'; g.font='600 8px system-ui';
       const lab=(t.id.split('_').slice(1).join('_')||t.id).slice(0,10);
       g.fillText(lab, tx+4, trayY+92);
       t._trayX=tx; t._trayI=i;
       tx+=78;
     });
-    MM._trayY=trayY; MM._list=list;
+    MM._trayY=trayY; MM._list=list; MM._catsY1=cy+30;
   }
   function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
 
-  // input
-  let drag=null, pan=null;
+  let pan=null;
   function mmXY(e){
     const cv=document.getElementById('c'); const r=cv.getBoundingClientRect();
     const t=e.touches?e.touches[0]:e;
@@ -4503,15 +4570,14 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     const W=window.W||innerWidth, H=window.H||innerHeight;
     if(kind==='down'){
       if(x>W-78&&y<50){mmClose();return true;}
-      // cats
-      if(y>=64&&y<MM._trayY-4){
+      if(y>=64&&y<(MM._trayY||H)-4){
         let cx=10,cy=64; const g=document.createElement('canvas').getContext('2d'); g.font='700 11px system-ui';
-        for(const cat of MM.cats){ const tw=g.measureText(cat).width+16;
+        for(const cat of MM.cats){ const tw=Math.max(48,g.measureText(cat).width+16);
           if(x>=cx&&x<cx+tw&&y>=cy&&y<cy+26){MM.cat=cat;MM.sel=0;return true;}
           cx+=tw+6; if(cx>W-80){cx=10;cy+=30;}
         }
       }
-      if(y>=MM._trayY){
+      if(y>=(MM._trayY||H)){
         const list=MM._list||[];
         for(const t of list){ if(x>=t._trayX&&x<t._trayX+72){MM.sel=t._trayI;return true;} }
         return true;
@@ -4526,7 +4592,7 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
       return true;
     }
     if(kind==='up'&&pan){
-      if(!pan.moved&&y<MM._trayY&&y>56){
+      if(!pan.moved&&y<(MM._trayY||H)&&y>56){
         const gx=Math.floor((x+MM.camX)/MM.grid), gy=Math.floor((y+MM.camY)/MM.grid);
         const list=mmTilesInCat(); const t=list[MM.sel];
         const k=mmKey(gx,gy);
@@ -4536,27 +4602,32 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
     }
     return true;
   }
-  ['pointerdown','mousedown'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'down'))e.preventDefault();},{passive:false}));
-  ['pointermove','mousemove'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'move'))e.preventDefault();},{passive:false}));
-  ['pointerup','mouseup','pointercancel'].forEach(ev=>window.addEventListener(ev,e=>{mmPointer(e,'up');},{passive:false}));
+  ['pointerdown','mousedown','touchstart'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'down')){e.preventDefault();e.stopPropagation();}},{passive:false,capture:true}));
+  ['pointermove','mousemove','touchmove'].forEach(ev=>window.addEventListener(ev,e=>{if(mmPointer(e,'move')){e.preventDefault();e.stopPropagation();}},{passive:false,capture:true}));
+  ['pointerup','mouseup','pointercancel','touchend','touchcancel'].forEach(ev=>window.addEventListener(ev,e=>{if(MM.on){mmPointer(e,'up');e.preventDefault();}},{passive:false,capture:true}));
 
-  // hook into main frame loop if present
-  const _raf=window.requestAnimationFrame;
-  // Draw map maker on top after game frame: wrap a known render if available
-  if(typeof eDrawHUD==='function'){
-    const _hud=eDrawHUD; eDrawHUD=function(){ if(MM.on){mmDraw(); return;} return _hud.apply(this,arguments); };
+  // CRITICAL FIX: title frame() kept calling renderTitle() over Map Maker (blink → home).
+  // Take over the rAF loop while MM.on so Map Maker actually stays on screen.
+  if(typeof frame==='function'){
+    const _frame=frame;
+    frame=function(now){
+      if(MM.on){
+        requestAnimationFrame(frame);
+        let dt=(now-last)/1000; last=now; if(dt<=0)return; if(dt>0.05)dt=0.05;
+        try{mmDraw();}catch(e){}
+        return;
+      }
+      return _frame(now);
+    };
   }
-  // Also tick via interval when map maker open (title loop may not call eDrawHUD)
-  setInterval(function(){ if(MM.on) try{mmDraw();}catch(e){} }, 50);
 
-  // Title + pause entries
   function addBtn(){
     if(document.getElementById('wwtMapBtn'))return;
     const host=document.getElementById('title')||document.body;
     const b=document.createElement('button');
     b.id='wwtMapBtn'; b.className='btn blue small'; b.textContent='🗺 Map Maker';
     b.style.cssText='display:block;margin:10px auto;min-width:200px';
-    b.onclick=function(e){e.stopPropagation();mmOpen();};
+    b.onclick=function(e){e.stopPropagation();e.preventDefault();mmOpen();};
     const play=document.getElementById('playBtn');
     if(play&&play.parentNode) play.parentNode.insertBefore(b, play.nextSibling);
     else host.appendChild(b);
@@ -4571,10 +4642,53 @@ function v51AIWalls(dt){if(E.cfg.aiWalls===false||G.result)return;for(const side
   else {addBtn();addPauseBtn();}
   setInterval(addPauseBtn,1000);
 
+  // Update art-style description in settings if present
+  try{
+    const _sp=suEmpSpec;
+    if(typeof _sp==='function'){ /* already patched upstream with artStyle */ }
+  }catch(e){}
+
+
+  window.WWT_testArt=function(){
+    const R={};
+    function hash(spr){const id=spr.getContext('2d').getImageData(0,0,spr.width,spr.height).data; let h=0; for(let i=0;i<id.length;i+=17) h=(h*31+id[i])|0; return h;}
+    function frameSum(fr){const spr=eUnitSpr('rifle',0,fr,0,3); const id=spr.getContext('2d').getImageData(0,0,spr.width,spr.height).data; let s=0; for(let i=0;i<id.length;i+=4)s+=id[i]+id[i+1]+id[i+2]; return s;}
+    const prev=settings.artStyle;
+    settings.artStyle='classic'; WWT_flushArt();
+    const cUnit=hash(eUnitSpr('rifle',0,0,0,3)), cBld=hash(eBldSprite('barracks',0,1,3)), cHQ=hash(eHQSprite(0));
+    const cFrames=[0,2,4,6].map(frameSum);
+    settings.artStyle='stick'; WWT_flushArt();
+    const sUnit=hash(eUnitSpr('rifle',0,0,0,3)), sBld=hash(eBldSprite('barracks',0,1,3)), sHQ=hash(eHQSprite(0));
+    const sFrames=[0,2,4,6].map(frameSum);
+    const stickWalk=Math.abs(sFrames[0]-sFrames[1])+Math.abs(sFrames[1]-sFrames[2])+Math.abs(sFrames[2]-sFrames[3]);
+    // wall stick vs classic via offscreen eDrawWall needs E; skip if no match
+    // mountain helper
+    const mc=document.createElement('canvas'); mc.width=80; mc.height=100; const mg=mc.getContext('2d');
+    mg.fillStyle='#00ff00'; mg.fillRect(0,0,80,100); stickMountain(mg,40,90,20);
+    const mid=mg.getImageData(40,40,1,1).data;
+    // terrain
+    const tc=document.createElement('canvas'); tc.width=64; tc.height=64; const tg=tc.getContext('2d');
+    stickTerrain(tg,0,0,64,64); const tmid=tg.getImageData(32,32,1,1).data;
+    settings.artStyle=prev; WWT_flushArt();
+    R.unitDiff=cUnit!==sUnit; R.bldDiff=cBld!==sBld; R.hqDiff=cHQ!==sHQ;
+    R.stickWalk=stickWalk; R.stickFrames=sFrames; R.classicFrames=cFrames;
+    R.mountainDrew=!(mid[1]>200&&mid[0]<40); R.terrainGrey=tmid[0]>200&&Math.abs(tmid[0]-tmid[1])<20;
+    R.ok=R.unitDiff&&R.bldDiff&&R.hqDiff&&R.stickWalk>50&&R.mountainDrew&&R.terrainGrey;
+    return R;
+  };
+
   window.WWT_MM=MM;
+
   window.WWT_mapMaker=mmOpen;
+  window.WWT_mapMakerClose=mmClose;
+  window.WWT_mmDraw=mmDraw;
   window.WWT_isStick=isStick;
+  window.WWT_stickTroop=stickTroop;
+  window.WWT_stickTerrain=stickTerrain;
+  window.WWT_stickMountain=stickMountain;
 })();
+
+
 
 })();
 </script>

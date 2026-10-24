@@ -1,0 +1,703 @@
+{
+  "atlases": [
+    {
+      "file": "01M5PFSKF7VGQMZ3PC4D6SR6VG.png",
+      "grid": "8x12",
+      "panels": 96,
+      "note": "Main WWII map atlas; numbers 01-96 top-left to bottom-right. Used as primary slice source."
+    },
+    {
+      "file": "01M5PFT2E7Z9ZKPN1SRS4846E8.png",
+      "grid": "8x5",
+      "panels": 40,
+      "note": "Landscape unit/building/nature atlas; panels 25-40 sliced for defenses+nature."
+    },
+    {
+      "file": "01M5PFV06BTYECTYTGVJMK8K46.png",
+      "grid": "approx 4-5 cols reference sheet",
+      "panels": 38,
+      "note": "Labeled reference; nature 31-37. Duplicate of 53e551eb\u2026. Not auto-sliced (irregular labels)."
+    },
+    {
+      "file": "01M5PFSSCS83D4D8GXJB0YRAGD.png",
+      "grid": "8x12-like",
+      "note": "Variant atlas; reserved."
+    },
+    {
+      "file": "01M5PFSXG4PKKKSK3RWR7MEGPH.png",
+      "grid": "8x12-like",
+      "note": "Variant atlas; reserved."
+    },
+    {
+      "file": "01M5PFTJZTZ96T033TFTQSTHFB.png",
+      "grid": "portrait",
+      "note": "Reserved."
+    },
+    {
+      "file": "01M5PFTVQV1278XTRZ7AF6KMV1.png",
+      "grid": "landscape",
+      "note": "Reserved."
+    }
+  ],
+  "categories": [
+    "barricades",
+    "clutter",
+    "destroyed",
+    "nature",
+    "rubble",
+    "terrain",
+    "trenches",
+    "walls"
+  ],
+  "tiles": [
+    {
+      "id": "destroyed_house",
+      "file": "destroyed/destroyed_house.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 25,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "destroyed_house_ruin",
+      "file": "destroyed/destroyed_house_ruin.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 26,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "destroyed_farm",
+      "file": "destroyed/destroyed_farm.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 27,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "destroyed_church",
+      "file": "destroyed/destroyed_church.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 28,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "destroyed_factory",
+      "file": "destroyed/destroyed_factory.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 29,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "destroyed_warehouse",
+      "file": "destroyed/destroyed_warehouse.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 30,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "destroyed_garage",
+      "file": "destroyed/destroyed_garage.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 31,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "destroyed_town_ruin",
+      "file": "destroyed/destroyed_town_ruin.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 32,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "walls_wood_fence",
+      "file": "walls/walls_wood_fence.png",
+      "category": "walls",
+      "source": "atlas_96",
+      "panel": 33,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "walls_stone_wall",
+      "file": "walls/walls_stone_wall.png",
+      "category": "walls",
+      "source": "atlas_96",
+      "panel": 34,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "walls_wood_wall",
+      "file": "walls/walls_wood_wall.png",
+      "category": "walls",
+      "source": "atlas_96",
+      "panel": 35,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "walls_stone_fence",
+      "file": "walls/walls_stone_fence.png",
+      "category": "walls",
+      "source": "atlas_96",
+      "panel": 36,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "barricades_sandbags",
+      "file": "barricades/barricades_sandbags.png",
+      "category": "barricades",
+      "source": "atlas_96",
+      "panel": 37,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "barricades_concrete_barrier",
+      "file": "barricades/barricades_concrete_barrier.png",
+      "category": "barricades",
+      "source": "atlas_96",
+      "panel": 38,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "barricades_hedge",
+      "file": "barricades/barricades_hedge.png",
+      "category": "barricades",
+      "source": "atlas_96",
+      "panel": 39,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "barricades_gate",
+      "file": "barricades/barricades_gate.png",
+      "category": "barricades",
+      "source": "atlas_96",
+      "panel": 40,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "trenches_trench_straight",
+      "file": "trenches/trenches_trench_straight.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 41,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "trenches_trench_corner",
+      "file": "trenches/trenches_trench_corner.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 42,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "trenches_trench_t",
+      "file": "trenches/trenches_trench_t.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 43,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "trenches_trench_cross",
+      "file": "trenches/trenches_trench_cross.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 44,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "trenches_foxhole",
+      "file": "trenches/trenches_foxhole.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 45,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "trenches_pillbox",
+      "file": "trenches/trenches_pillbox.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 46,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "trenches_tank_trap",
+      "file": "trenches/trenches_tank_trap.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 47,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "trenches_at_ditch",
+      "file": "trenches/trenches_at_ditch.png",
+      "category": "trenches",
+      "source": "atlas_96",
+      "panel": 48,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "terrain_cliff",
+      "file": "terrain/terrain_cliff.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 65,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "terrain_mountain",
+      "file": "terrain/terrain_mountain.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 66,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "terrain_cave",
+      "file": "terrain/terrain_cave.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 67,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "terrain_beach",
+      "file": "terrain/terrain_beach.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 68,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "terrain_snow",
+      "file": "terrain/terrain_snow.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 69,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "terrain_desert",
+      "file": "terrain/terrain_desert.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 70,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "terrain_map_edge",
+      "file": "terrain/terrain_map_edge.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 71,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "terrain_elevation",
+      "file": "terrain/terrain_elevation.png",
+      "category": "terrain",
+      "source": "atlas_96",
+      "panel": 72,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "nature_pine_trees",
+      "file": "nature/nature_pine_trees.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 73,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "nature_broadleaf_trees",
+      "file": "nature/nature_broadleaf_trees.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 74,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "nature_dead_trees",
+      "file": "nature/nature_dead_trees.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 75,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "nature_bushes",
+      "file": "nature/nature_bushes.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 76,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "nature_flowers",
+      "file": "nature/nature_flowers.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 77,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "nature_rocks",
+      "file": "nature/nature_rocks.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 78,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "nature_logs_stumps",
+      "file": "nature/nature_logs_stumps.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 79,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "nature_grass_dirt",
+      "file": "nature/nature_grass_dirt.png",
+      "category": "nature",
+      "source": "atlas_96",
+      "panel": 80,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "rubble_crater_small",
+      "file": "rubble/rubble_crater_small.png",
+      "category": "rubble",
+      "source": "atlas_96",
+      "panel": 81,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "rubble_crater_large",
+      "file": "rubble/rubble_crater_large.png",
+      "category": "rubble",
+      "source": "atlas_96",
+      "panel": 82,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "rubble_burned_ground",
+      "file": "rubble/rubble_burned_ground.png",
+      "category": "rubble",
+      "source": "atlas_96",
+      "panel": 83,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "rubble_rubble_pile",
+      "file": "rubble/rubble_rubble_pile.png",
+      "category": "rubble",
+      "source": "atlas_96",
+      "panel": 84,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "destroyed_wreck_vehicle",
+      "file": "destroyed/destroyed_wreck_vehicle.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 85,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "destroyed_destroyed_building",
+      "file": "destroyed/destroyed_destroyed_building.png",
+      "category": "destroyed",
+      "source": "atlas_96",
+      "panel": 86,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "rubble_fire_smoke",
+      "file": "rubble/rubble_fire_smoke.png",
+      "category": "rubble",
+      "source": "atlas_96",
+      "panel": 87,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "rubble_blood_decal",
+      "file": "rubble/rubble_blood_decal.png",
+      "category": "rubble",
+      "source": "atlas_96",
+      "panel": 88,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "clutter_barrels_crates",
+      "file": "clutter/clutter_barrels_crates.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 89,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "clutter_cart_wagon",
+      "file": "clutter/clutter_cart_wagon.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 90,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "clutter_civilian_props",
+      "file": "clutter/clutter_civilian_props.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 91,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "clutter_utility_pole",
+      "file": "clutter/clutter_utility_pole.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 92,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "clutter_signs_flags",
+      "file": "clutter/clutter_signs_flags.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 93,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "clutter_resource_node",
+      "file": "clutter/clutter_resource_node.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 94,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "clutter_spawn_markers",
+      "file": "clutter/clutter_spawn_markers.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 95,
+      "w": 104,
+      "h": 114
+    },
+    {
+      "id": "clutter_extra_props",
+      "file": "clutter/clutter_extra_props.png",
+      "category": "clutter",
+      "source": "atlas_96",
+      "panel": 96,
+      "w": 103,
+      "h": 114
+    },
+    {
+      "id": "walls_wooden_walls_b",
+      "file": "walls/walls_wooden_walls_b.png",
+      "category": "walls",
+      "source": "atlas_40",
+      "panel": 25,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "barricades_sandbag_walls_b",
+      "file": "barricades/barricades_sandbag_walls_b.png",
+      "category": "barricades",
+      "source": "atlas_40",
+      "panel": 26,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "barricades_wire_fence",
+      "file": "barricades/barricades_wire_fence.png",
+      "category": "barricades",
+      "source": "atlas_40",
+      "panel": 27,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "walls_gate_pillars",
+      "file": "walls/walls_gate_pillars.png",
+      "category": "walls",
+      "source": "atlas_40",
+      "panel": 28,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "trenches_bunker_small",
+      "file": "trenches/trenches_bunker_small.png",
+      "category": "trenches",
+      "source": "atlas_40",
+      "panel": 29,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "trenches_bunker_med",
+      "file": "trenches/trenches_bunker_med.png",
+      "category": "trenches",
+      "source": "atlas_40",
+      "panel": 30,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "trenches_trench_u",
+      "file": "trenches/trenches_trench_u.png",
+      "category": "trenches",
+      "source": "atlas_40",
+      "panel": 31,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "trenches_obs_post",
+      "file": "trenches/trenches_obs_post.png",
+      "category": "trenches",
+      "source": "atlas_40",
+      "panel": 32,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_pines_b",
+      "file": "nature/nature_pines_b.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 33,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_broadleaf_b",
+      "file": "nature/nature_broadleaf_b.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 34,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_bushes_b",
+      "file": "nature/nature_bushes_b.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 35,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_rocks_b",
+      "file": "nature/nature_rocks_b.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 36,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_dead_trees_b",
+      "file": "nature/nature_dead_trees_b.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 37,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_grass_tufts",
+      "file": "nature/nature_grass_tufts.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 38,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "nature_flowers_b",
+      "file": "nature/nature_flowers_b.png",
+      "category": "nature",
+      "source": "atlas_40",
+      "panel": 39,
+      "w": 128,
+      "h": 119
+    },
+    {
+      "id": "clutter_stumps_logs",
+      "file": "clutter/clutter_stumps_logs.png",
+      "category": "clutter",
+      "source": "atlas_40",
+      "panel": 40,
+      "w": 128,
+      "h": 119
+    }
+  ],
+  "count": 72
+}
