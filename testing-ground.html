@@ -105,8 +105,9 @@ function fk(v){
 }
 
 /* Sizes: largest → tiny. Portrait grid. */
-const SCALES=[1.0,0.55,0.30,0.16,0.09,0.05];
-const COLS=2;
+/* one mid-size reference, then cascade to nearly a speck (~2px tall) */
+const SCALES=[0.70,0.35,0.16,0.07,0.032,0.014,0.006];
+const COLS=1; /* packed column; tiny ones share strip rows */
 
 const S={pi:0,t:0,blend:1,prevClip:null,prevT:0};
 function phase(){return PHASES[S.pi];}
@@ -155,21 +156,27 @@ function drawStick(pts,sc,lw){
  L(HD,NK);L(NK,PV);
  L(NK,EA);L(EA,HA);L(NK,EB);L(EB,HB);
  L(PV,KA);L(KA,FA);L(PV,KB);L(KB,FB);
- const hr=Math.max(1.2,9*sc);
+ const hr=Math.max(sc<0.5?0.55:1.0,9*sc);
  ctx.beginPath();ctx.arc(pts[HD][0]*sc,pts[HD][1]*sc,hr,0,TAU);ctx.fill();
 }
 
 function cellLayout(){
- const n=SCALES.length,cols=COLS,rows=Math.ceil(n/cols);
- const padX=10,padY=10,top=8,bot=8;
- const cellW=(W-padX*(cols+1))/cols;
- const cellH=(H-top-bot-padY*(rows-1))/rows;
+ /* Pack by scale weight so the speck really is a speck on the phone, not a small figure in a huge empty cell. */
+ const n=SCALES.length;
+ const padX=8,top=10,bot=10;
+ const sum=SCALES.reduce((a,b)=>a+b,0);
+ const usable=H-top-bot;
+ const gap=4;
  const cells=[];
+ let y=top;
  for(let i=0;i<n;i++){
-  const c=i%cols,r=(i/cols)|0;
-  const x=padX+c*(cellW+padX);
-  const y=top+r*(cellH+padY);
-  cells.push({x:x,y:y,w:cellW,h:cellH,sc:SCALES[i]});
+  const frac=SCALES[i]/sum;
+  let h=Math.max(SCALES[i]<0.02?10:14, usable*frac - gap);
+  /* last cell eats remainder */
+  if(i===n-1)h=Math.max(8,H-bot-y);
+  const w=W-padX*2;
+  cells.push({x:padX,y:y,w:w,h:h,sc:SCALES[i]});
+  y+=h+gap;
  }
  return cells;
 }
@@ -186,17 +193,17 @@ function render(){
  const pose=getPose();
  const bb=bbox(pose.pts);
  const cells=cellLayout();
- /* Base fit = how big scale-1.0 would be inside one cell. Smaller scales stay truly smaller. */
- const maxSc=SCALES[0];
- const baseFit=Math.min(cells[0].w/(bb.w+8),cells[0].h/(bb.h+8));
  for(const cell of cells){
-  const sc=baseFit*(cell.sc/maxSc);
+  /* Fit this stick into THIS cell — tiny cell ⇒ speck on the phone. */
+  const pad=cell.sc<0.02?1:3;
+  const sc=Math.min((cell.w-pad*2)/Math.max(8,bb.w),(cell.h-pad*2)/Math.max(8,bb.h));
   const cx=cell.x+cell.w*0.5;
   const cy=cell.y+cell.h*0.55;
   ctx.save();
-  ctx.beginPath();ctx.rect(cell.x+1,cell.y+1,cell.w-2,cell.h-2);ctx.clip();
+  ctx.beginPath();ctx.rect(cell.x,cell.y,cell.w,cell.h);ctx.clip();
   ctx.translate(cx-bb.cx*sc,cy-bb.cy*sc);
-  const lw=Math.max(0.65,Math.min(3.0,2.2*Math.sqrt(Math.max(0.04,cell.sc))));
+  /* Keep a hair of ink at speck size so limbs still read when moving */
+  const lw=Math.max(cell.sc<0.02?0.35:0.55, Math.min(2.8, 1.8*Math.sqrt(Math.max(sc,0.4))));
   drawStick(pose.pts,sc,lw);
   ctx.restore();
  }
