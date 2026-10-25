@@ -1,0 +1,225 @@
+{
+  "passed": 37,
+  "total": 37,
+  "failed": [],
+  "checks": [
+    {
+      "name": "title",
+      "pass": true,
+      "detail": "Empire Clash"
+    },
+    {
+      "name": "ver 1.0.1",
+      "pass": true,
+      "detail": "1.0.1"
+    },
+    {
+      "name": "fog off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "map mid",
+      "pass": true,
+      "detail": "mid"
+    },
+    {
+      "name": "gates",
+      "pass": true
+    },
+    {
+      "name": "outposts off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "no free lumber",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "houses",
+      "pass": true
+    },
+    {
+      "name": "popCap 200",
+      "pass": true,
+      "detail": 200
+    },
+    {
+      "name": "ages off",
+      "pass": true
+    },
+    {
+      "name": "capture off",
+      "pass": true
+    },
+    {
+      "name": "hero off",
+      "pass": true
+    },
+    {
+      "name": "HOUSE",
+      "pass": true
+    },
+    {
+      "name": "RAM",
+      "pass": true
+    },
+    {
+      "name": "HARD",
+      "pass": true
+    },
+    {
+      "name": "gore med",
+      "pass": true,
+      "detail": "med"
+    },
+    {
+      "name": "tilt strong",
+      "pass": true,
+      "detail": "strong"
+    },
+    {
+      "name": "moveScale",
+      "pass": true
+    },
+    {
+      "name": "autoPerf",
+      "pass": true
+    },
+    {
+      "name": "restart",
+      "pass": true
+    },
+    {
+      "name": "standalone",
+      "pass": true
+    },
+    {
+      "name": "no WWT",
+      "pass": true
+    },
+    {
+      "name": "match fog off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "match map mid",
+      "pass": true,
+      "detail": "mid"
+    },
+    {
+      "name": "EH ~11250",
+      "pass": true,
+      "detail": 11250
+    },
+    {
+      "name": "AI mem active",
+      "pass": true
+    },
+    {
+      "name": "AI mem wiped",
+      "pass": true
+    },
+    {
+      "name": "no outposts",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "no blotches",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "2 base workers",
+      "pass": true,
+      "detail": 2
+    },
+    {
+      "name": "forests",
+      "pass": true,
+      "detail": 2385
+    },
+    {
+      "name": "house place",
+      "pass": true,
+      "detail": "placed"
+    },
+    {
+      "name": "pop base",
+      "pass": true,
+      "detail": 100
+    },
+    {
+      "name": "gate buildable+toggle",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "n": 1,
+        "openPass": true,
+        "closedPass": false,
+        "isGate": true,
+        "walls": 3
+      }
+    },
+    {
+      "name": "built walls exist",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "n": 1,
+        "openPass": true,
+        "closedPass": false,
+        "isGate": true,
+        "walls": 3
+      }
+    },
+    {
+      "name": "no preset walls",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "no preset lumber",
+      "pass": true,
+      "detail": 0
+    }
+  ],
+  "logs": [
+    "[EC Fresh 1.0.1] systems online — ZERO WWT"
+  ],
+  "match": {
+    "fog": false,
+    "map": "mid",
+    "memBefore": true,
+    "memAfter": true,
+    "wallsPreset": 0,
+    "wallsBeforeGate": false,
+    "outposts": 0,
+    "blobs": 0,
+    "workers0": 2,
+    "trees": 2385,
+    "mtns": 60,
+    "houseErr": "placed",
+    "pop": 100,
+    "gateOk": false,
+    "gateDetail": "ReferenceError: EW is not defined",
+    "EH_est": 11250,
+    "wallsAfter": 0
+  },
+  "preset": {
+    "walls": 0,
+    "lumber": 0
+  },
+  "gateProbe": {
+    "ok": true,
+    "n": 1,
+    "openPass": true,
+    "closedPass": false,
+    "isGate": true,
+    "walls": 3
+  }
+}
