@@ -1,0 +1,89 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WWT / EC Bearing — Lock-In</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f5f7;margin:0;padding:16px;color:#1b1d22}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#444}
+.q{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#fff6dd;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#f7f8fa;font-size:15px}
+label:has(input:checked){background:#dcecff;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #ccc;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#666}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#111;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#fff;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+.warn{background:#ffe8e8;border-left:4px solid #c00;padding:8px;border-radius:8px;margin:10px 0;font-size:14px}
+</style></head><body>
+<h1>WWT / Empire Clash — Bearing Lock-In</h1>
+<div class="warn">NO BUILD until you COPY MY ANSWERS and paste them in chat. Tough will not start until GO is in your paste.</div>
+<div class="small">Tap your picks. <span class="tag">TOUGH'S PICK</span> = my opinion. Notes box under each Q. Hit <b>COPY MY ANSWERS</b> → paste to Tough.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"WHAT 1.0.6 GOT WRONG"},
+{id:"B1",t:"Main betrayal to fix first?",op:"Real unit types + real limb walk + scale that holds. Map Maker after that unless you want it first.",o:[
+["Real unit types (Rifleman≠PEW skins) + real limb walk + scale/zoom tree fix",1],
+["Map Maker back ON first",0],
+["Medics/jobs/trenches only",0],
+["Everything in one mega patch",0]]},
+{id:"B2",t:"Map Maker",op:"You locked it as next WWT then rage-killed it in 1.0.6. I won't touch it until you say.",o:[
+["Back ON next (free place, every cell a prop)",0],
+["Stays OFF until the live match is right",1],
+["OFF forever",0],
+["ON but separate APK / mode later",0]]},
+{s:"UNITS & MOVEMENT"},
+{id:"U1",t:"Unit identity",op:"Military names must be real types with own jobs — not skins on Hank/Bob/PEW.",o:[
+["Real types: Rifleman/Assault/Sniper/MG/Medic/Engineer/Flame/etc with real jobs",1],
+["Keep EC jobs, better skins only",0],
+["Hybrid: new types for infantry, keep old workers",0]]},
+{id:"U2",t:"Movement / animation",op:"1.0.6 sheet-cycled on old path = sideways waddle. Original EC has limb swing.",o:[
+["Restore original EC limb walk + attack wind-up; atlas poses layered on that",1],
+["Full new march from sheet frames only",0],
+["Keep current for now, fix jobs/scale first",0]]},
+{id:"U3",t:"Medics chopping trees",op:"Medics heal only. Never chop.",o:[
+["Medic = heal only, never gather/chop",1],
+["Medic can gather in peacetime",0]]},
+{s:"ART & SCALE"},
+{id:"A1",t:"Trees switching on zoom",op:"One design at all zoom levels — no swap to old trees.",o:[
+["Lock one tree art at all zoom; kill LOD swap",1],
+["Allow LOD but same style family",0]]},
+{id:"A2",t:"Scale rules",op:"Empire Clash live scale. Flowers < bushes < people < buildings. No sunflower giants.",o:[
+["Enforce EC scale ladder: flowers < bushes < people < buildings",1],
+["Manual per-prop size later",0]]},
+{id:"A3",t:"Stick S/M/L",op:"Stick is a separate style later; size slider only when Art = Stick.",o:[
+["Stick stays Settings option; S/M/L slider only when Stick is on",1],
+["Ship Stick S/M/L now",0],
+["Ignore Stick this pass",0]]},
+{s:"BUILDINGS & TRENCHES"},
+{id:"T1",t:"Named buildings",op:"If it says Medic/Hospital it IS a medic station — usable, not a reskin of School.",o:[
+["Every named building does its named job",1],
+["Looks only this pass, jobs next",0]]},
+{id:"T2",t:"Trenches",op:"Wider, units enter, cover works — not just painted dirt.",o:[
+["Wide trenches, units enter, real cover",1],
+["Look only for now",0]]},
+{s:"SCOPE & GO"},
+{id:"S1",t:"Where to ship",op:"WWT is the WWII fork. Arcade EC bump only if you want both.",o:[
+["WWT only this pass",1],
+["WWT + arcade Empire Clash both",0],
+["Arcade Empire Clash only",0]]},
+{id:"S2",t:"Build now?",op:"I will NOT build until your paste includes GO.",o:[
+["HOLD — more notes first",1],
+["GO after I paste these answers",0],
+["GO with Tough's picks above",0]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+(q.o||[]).forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="WWT / EC BEARING ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const we=document.getElementById('w'+q.id); const w=(we&&we.value||'').trim();
+s+=q.id+": "+(p.length?p.join(" | "):(q.o&&q.o.length?"(no pick)":""))+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
