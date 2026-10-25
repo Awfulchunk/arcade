@@ -1,0 +1,25 @@
+{
+  "empireMeta": {
+    "id": "empire",
+    "title": "EMPIRE CLASH",
+    "def": "v6 – Latest (mock-match art 1.0.2)"
+  },
+  "swarmMeta": {
+    "id": "swarm",
+    "title": "SWARM: LAST STAND",
+    "def": "v1 – Latest (1.0.0)"
+  },
+  "est": {
+    "inGame": true,
+    "title": "Empire Clash",
+    "hasTent": true,
+    "canvases": 1
+  },
+  "sst": {
+    "inGame": true,
+    "title": "Swarm: Last Stand",
+    "hasStart": true,
+    "canvases": 1
+  },
+  "errors": []
+}
