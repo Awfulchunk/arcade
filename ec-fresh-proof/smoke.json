@@ -1,0 +1,159 @@
+{
+  "passed": 31,
+  "total": 32,
+  "failed": [
+    {
+      "name": "house place",
+      "pass": false,
+      "detail": "OUTSIDE YOUR TERRITORY"
+    }
+  ],
+  "checks": [
+    {
+      "name": "title",
+      "pass": true,
+      "detail": "Empire Clash"
+    },
+    {
+      "name": "ver 1.0.0",
+      "pass": true,
+      "detail": "1.0.0"
+    },
+    {
+      "name": "fog off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "map mid",
+      "pass": true,
+      "detail": "mid"
+    },
+    {
+      "name": "gates cfg",
+      "pass": true
+    },
+    {
+      "name": "garrison cfg",
+      "pass": true
+    },
+    {
+      "name": "siegeRam cfg",
+      "pass": true
+    },
+    {
+      "name": "houses cfg",
+      "pass": true
+    },
+    {
+      "name": "popCap 200",
+      "pass": true,
+      "detail": 200
+    },
+    {
+      "name": "ages off",
+      "pass": true
+    },
+    {
+      "name": "capture off",
+      "pass": true
+    },
+    {
+      "name": "hero off",
+      "pass": true
+    },
+    {
+      "name": "upgrades on",
+      "pass": true
+    },
+    {
+      "name": "resCaps on",
+      "pass": true
+    },
+    {
+      "name": "HOUSE bld",
+      "pass": true
+    },
+    {
+      "name": "RAM unit",
+      "pass": true
+    },
+    {
+      "name": "cards ram",
+      "pass": true
+    },
+    {
+      "name": "HARD diff",
+      "pass": true
+    },
+    {
+      "name": "gore med",
+      "pass": true,
+      "detail": "med"
+    },
+    {
+      "name": "tilt strong",
+      "pass": true,
+      "detail": "strong"
+    },
+    {
+      "name": "restart btn",
+      "pass": true
+    },
+    {
+      "name": "standalone",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "no WWT",
+      "pass": true
+    },
+    {
+      "name": "match fog off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "match map mid",
+      "pass": true,
+      "detail": "mid"
+    },
+    {
+      "name": "AI mem active",
+      "pass": true
+    },
+    {
+      "name": "AI mem wiped",
+      "pass": true
+    },
+    {
+      "name": "gates made",
+      "pass": true,
+      "detail": 6
+    },
+    {
+      "name": "units alive",
+      "pass": true,
+      "detail": 42
+    },
+    {
+      "name": "walls",
+      "pass": true,
+      "detail": 30
+    },
+    {
+      "name": "house place",
+      "pass": false,
+      "detail": "OUTSIDE YOUR TERRITORY"
+    },
+    {
+      "name": "pop base 80",
+      "pass": true,
+      "detail": 80
+    }
+  ],
+  "logs": [
+    "[EC Fresh 1.0.0] systems online — ZERO WWT"
+  ]
+}
