@@ -1,25 +1,13 @@
 {
-  "empireMeta": {
-    "id": "empire",
-    "title": "EMPIRE CLASH",
-    "def": "v6 – Latest (mock-match art 1.0.2)"
-  },
+  "arcade": "2.7.16",
+  "apk_md5": "3b21428fee8d960f3b193ffcfbf6fe09",
+  "apk_sha256": "693ad045c7e7035b514336d7bd558a080f51b9c46ca6d6fc1e5109936d1f110f",
+  "apk_bytes": 21846420,
   "swarmMeta": {
     "id": "swarm",
     "title": "SWARM: LAST STAND",
-    "def": "v1 – Latest (1.0.0)"
+    "def": "v1.0.1 – Latest (mock-match)"
   },
-  "est": {
-    "inGame": true,
-    "title": "Empire Clash",
-    "hasTent": true,
-    "canvases": 1
-  },
-  "sst": {
-    "inGame": true,
-    "title": "Swarm: Last Stand",
-    "hasStart": true,
-    "canvases": 1
-  },
+  "proof": ["01-attract-mock.png","02-mock-match.png","03-combat.png","04-wave1.png"],
   "errors": []
 }

@@ -1,7 +1,7 @@
-# Swarm: Last Stand 1.0.0 + Arcade 2.7.15
+# Swarm: Last Stand 1.0.1 mock-match + Arcade 2.7.16
 
-- New arcade card SWARM: LAST STAND (auto-aim, gore, builds, endless waves)
-- Empire Clash Latest = mock-match art 1.0.2 (tent HQ); v5.1 kept as empire:v51
-- Old versions never deleted
+- REDO vs brief mock: dark metallic grid, dense zombie+mutant sprites, blue crates + red barrels, tiny single-barrel turret, heavy gore, always-on bottom upgrade bar, WAVE/CREDITS HUD
+- Auto-aim fire; player builds/upgrades between waves (quiz locked)
+- Placeholder 1.0.0 kept as swarm:v100 under Older versions
 - ZERO WWT
-- Smoke: shop reached, kills register, wave 2 starts; arcade launches both cards
+- Proof shots: 01-attract-mock, 02-mock-match, 03-combat, 04-wave1 must look like the PDF mock (not brown circle + red pills)
