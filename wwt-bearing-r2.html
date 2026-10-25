@@ -1,0 +1,169 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WWT / EC Bearing — Round 2</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f5f7;margin:0;padding:16px;color:#1b1d22}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#444}
+.q{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#fff6dd;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#f7f8fa;font-size:15px}
+label:has(input:checked){background:#dcecff;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #ccc;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#666}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#111;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#fff;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+.warn{background:#ffe8e8;border-left:4px solid #c00;padding:8px;border-radius:8px;margin:10px 0;font-size:14px}
+.lock{background:#e8f5e9;border-left:4px solid #2e7d32;padding:8px;border-radius:8px;margin:10px 0;font-size:13px}
+</style></head><body>
+<h1>WWT / Empire Clash — Bearing Round 2</h1>
+<div class="warn">NO BUILD until you COPY MY ANSWERS and paste them in chat. Tough will not start until GO is in your paste.</div>
+<div class="lock">Round 1 locked: mega-patch · MM OFF · real unit jobs · limb+sheet march both · medic heal-only · WHOLE NEW STYLE (no classic EC) · one tree art · EC scale ladder · stick keep-current · named buildings do jobs · wide trenches · WWT only.</div>
+<div class="small">Biggie round. Tap your picks. <span class="tag">TOUGH'S PICK</span> = my opinion. Notes box under each Q. Hit <b>COPY MY ANSWERS</b> → paste to Tough.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"WHOLE NEW ART STYLE"},
+{id:"N1",t:"Core look for the new style?",op:"Soft painted cartoon WWII — ChatGPT sheet vibe. Whole point is a NEW look, not classic EC dickhead art peeking through.",o:[
+["Soft painted cartoon WWII (ChatGPT sheet vibe)",1],
+["Sharp pixel / retro",0],
+["Clean vector / flat",0],
+["Gritty realistic tiny",0],
+["Jay paste own in notes",0]]},
+{id:"N2",t:"Color mood?",op:"Muted wartime greens/browns/mud. Bright candy kills the war feel.",o:[
+["Muted wartime greens/browns/mud",1],
+["Bright arcade candy",0],
+["Desaturated grey-green + red accents",0],
+["Per-faction color coded bold",0]]},
+{id:"N3",t:"Unit art source this pass?",op:"Rebuild walk/attack from ChatGPT atlas sheets as the NEW style only. No classic leftovers showing.",o:[
+["Rebuild walk/attack from ChatGPT atlas sheets as the NEW style only",1],
+["Keep sheet + redraw missing poses",0],
+["Wait for Jay uploads before shipping style",0]]},
+{id:"N4",t:"Terrain / ground look?",op:"Soft dirt + grass patches matching the sheet props so the world feels one piece.",o:[
+["Soft dirt + grass patches matching sheet props",1],
+["Hard tile grid",0],
+["Painted watercolor ground",0]]},
+{id:"N5",t:"How hard to kill leftover classic EC art?",op:"Purge. If it isn't new-style it doesn't show — temp placeholder ok. Whole point of this pass.",o:[
+["Purge: if it isn't new-style, it doesn't show (temp placeholder ok)",1],
+["Hide classic behind Settings 'Classic' only",0],
+["Gradual swap over versions",0]]},
+
+{s:"FACTIONS & UNITS"},
+{id:"F1",t:"Factions?",op:"Allies vs Axis. Clean WWII. Custom later.",o:[
+["Allies vs Axis (WWII)",1],
+["Generic Red vs Blue with WWII skins",0],
+["3+ nations (US/UK/USSR vs GER/JP)",0],
+["Custom factions later, 2 for now",0]]},
+{id:"F2",t:"Unit roster size this pass? (pick any)",m:1,op:"Core 8 locked from Round 1. Scout/Mortar are nice-to-haves; vehicles wait.",o:[
+["Core 8: Rifleman Assault Sniper MG Medic Engineer Flame Officer",1],
+["Add Scout / Runner",0],
+["Add Mortar / AT rifle",0],
+["Vehicles later only",1]]},
+{id:"F3",t:"Vehicles this pass?",op:"None. Infantry war first. Get the people right before the tracks.",o:[
+["None — infantry war first",1],
+["Jeeps + trucks only",0],
+["Light tank + halftrack",0],
+["Full tank/plane set",0]]},
+{id:"F4",t:"How do unit jobs differ in combat?",op:"Hard jobs. Sniper long range, MG suppress, flame short cone — not the same DPS with different icons.",o:[
+["Hard jobs: range/damage/role distinct (sniper long, MG suppress, flame short cone)",1],
+["Soft jobs: mostly same DPS, different icons",0]]},
+
+{s:"COMBAT & COVER"},
+{id:"C1",t:"Cover / trench feel?",op:"Real cover. Trenches + sandbags cut damage a lot, flanks matter. Not just a paint job.",o:[
+["Real: trenches + sandbags cut damage a lot, flanks matter",1],
+["Soft: small HP bonus in cover",0],
+["Look only",0]]},
+{id:"C2",t:"Firefight pace?",op:"Deliberate. Short bursts, reload matters. Arcade spray turns it into a clicker.",o:[
+["Deliberate: short bursts, reload matters",1],
+["Arcade spray",0],
+["Mixed: semi + spray weapons by type",0]]},
+{id:"C3",t:"Gore level default (universal settings still control)?",op:"Medium WWII-styled gore matching the art. Universal settings still own the slider.",o:[
+["Medium WWII-styled gore matching art",1],
+["High messy",0],
+["Low / off by default",0]]},
+{id:"C4",t:"Friendly fire / medic revive?",op:"No FF. Medic heals + downed revive. Medic stay heal-only on gather (Round 1 lock).",o:[
+["No FF; medic heals + downed revive",1],
+["FF on; medic heal only",0],
+["Downed bleed-out, no revive",0]]},
+
+{s:"BUILDINGS & ECONOMY"},
+{id:"E1",t:"Building list priority this pass? (pick any)",m:1,op:"HQ Barracks Field Hospital Supply Depot MG Nest Trench Watchtower. Every one does its named job.",o:[
+["HQ, Barracks, Field Hospital, Supply Depot, MG Nest, Trench, Watchtower",1],
+["Add Factory / Garage",0],
+["Add Airfield",0],
+["Add Bunker / Pillbox",0]]},
+{id:"E2",t:"Economy?",op:"Wood + Food + Ammo. WWII twist without reinventing the whole gather loop.",o:[
+["Wood + Food + Ammo (WWII twist)",1],
+["Keep EC Wood/Food/Gold/Stone renamed lightly",0],
+["Pure population + capture points, light gather",0]]},
+{id:"E3",t:"Workers?",op:"Separate unarmed Supply runners / Builders. Combat types never chop — same spirit as medic heal-only.",o:[
+["Separate unarmed Supply runners / Builders; combat types never chop",1],
+["Any idle unit can gather",0],
+["Auto-gather near depots only",0]]},
+
+{s:"MAP & CAMERA"},
+{id:"M1",t:"Map size feel?",op:"About EC size now but denser cover/trenches. Bigger later once the fight feels right.",o:[
+["~EC now but denser cover/trenches",1],
+["2x bigger with fog",0],
+["Small arena skirmish",0]]},
+{id:"M2",t:"Camera / zoom?",op:"Pinch zoom + locked EC scale ladder so people never look wrong at any zoom.",o:[
+["Pinch zoom + locked EC scale ladder (people never look wrong)",1],
+["Fixed zoom tiers",0],
+["Free zoom no lock",0]]},
+{id:"M3",t:"Day/night / weather this pass?",op:"Skip. Art + units first. Pretty sky later.",o:[
+["Skip — art + units first",1],
+["Day/night only",0],
+["Full weather",0]]},
+
+{s:"CONTROLS & HUD"},
+{id:"H1",t:"Selection / orders?",op:"Tap select, drag box, rally flags, attack-move. Real RTS feel on a phone.",o:[
+["Tap select, drag box, rally flags, attack-move",1],
+["Simple tap-target only",0],
+["Dual stick RTS hybrid",0]]},
+{id:"H2",t:"Pause / settings entry?",op:"Pause menu owns Settings — universal + WWT-specific. Standing rule.",o:[
+["Pause menu owns Settings (universal + WWT-specific)",1],
+["Separate gear button ok too",0]]},
+
+{s:"MODES"},
+{id:"P1",t:"Modes shipped this pass? (pick any)",m:1,op:"Skirmish vs AI first. Custom Game parks the option dump. Campaign later.",o:[
+["Skirmish vs AI",1],
+["Pass-and-play hotseat",0],
+["Custom Game (parked options dump)",0],
+["Campaign missions later",0]]},
+{id:"P2",t:"Win condition default?",op:"Destroy enemy HQ. Capture points as an option later.",o:[
+["Destroy enemy HQ",1],
+["Capture points / tickets",0],
+["Both as options",0]]},
+
+{s:"MAP MAKER — later, still OFF"},
+{id:"MM1",t:"When Map Maker returns, free-place rules?",op:"Every atlas cell a placeable prop + snap-off free place + readable UI. Prior lock — just confirming for when it comes back.",o:[
+["Every atlas cell a placeable prop + snap-off free place + readable UI",1],
+["Grid-only tiles",0],
+["Prefab brush kits",0]]},
+
+{s:"SCOPE & GO"},
+{id:"S1",t:"This Round 2 build target when GO?",op:"Live match art+units+jobs+trenches+buildings solid. Map Maker still OFF.",o:[
+["Live match art+units+jobs+trenches+buildings solid; MM still OFF",1],
+["Also sneak MM back",0],
+["Art-only pass first then units",0]]},
+{id:"S2",t:"Build now?",op:"I lean HOLD unless your paste says GO. Biggie round — get the answers right first.",o:[
+["HOLD — more notes / another round first",1],
+["GO after I paste these answers",0],
+["GO with Tough's picks",0]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+(q.o||[]).forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="WWT / EC BEARING ROUND 2 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const opts=q.o||[];
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>opts[+e.value]?opts[+e.value][0]:'').filter(Boolean);
+const we=document.getElementById('w'+q.id); const w=(we&&we.value||'').trim();
+s+=q.id+": "+(p.length?p.join(" | "):(opts.length?"(no pick)":""))+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
