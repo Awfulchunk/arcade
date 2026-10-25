@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empire Clash FRESH — Round 3</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f5f7;margin:0;padding:16px;color:#1b1d22}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#444}
+.q{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#fff6dd;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#f7f8fa;font-size:15px}
+label:has(input:checked){background:#dcecff;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #ccc;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#666}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#111;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#fff;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Empire Clash FRESH — Round 3</h1><div class="op" style="background:#ffe0e0;border-color:#d00"><b>⚠ NO BUILD until your paste includes GO (S3).</b> Rounds 1+2 are locked — not re-asked. Separate game. Nothing from WWT.</div>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"ECONOMY & GRIND"},
+{id:"N1",t:"Resource nodes",m:1,op:"Trees/berries/gold mines run dry. Forces expansion like Empire Earth.",o:[["Nodes deplete (finite)",1],["Gold scarce — few mines mid-map",1],["Farms rebuildable for endless food",1],["Infinite nodes",0]]},
+{id:"N2",t:"Storage",op:"No caps in core — drop-off buildings near nodes matter instead. Caps go to Custom.",o:[["No caps; drop-off distance matters",1],["Storage caps, raise with depots",0],["Caps in Custom only",0]]},
+{id:"N3",t:"Worker count / pop cap",op:"Houses raise pop, cap 200. Villagers count toward pop.",o:[["Houses raise pop, cap 200",1],["Cap 100",0],["Cap 300",0],["Scroller in Custom",0]]},
+{s:"TECH"},
+{id:"T2",t:"Upgrades",m:1,op:"Each building researches its own upgrades — that's the grind.",o:[["Blacksmith: attack/armor tiers",1],["Gather-rate upgrades at HQ/mill",1],["Unit upgrades (Spear → Pikeman)",1],["Wall/tower upgrades",1],["All tech in Custom only",0]]},
+{s:"WALLS & COMBAT"},
+{id:"W1",t:"Wall/gate feel",m:1,op:"Walls take real time to break; gates open for your units only; archers on towers.",o:[["Walls have HP, take time to chew",1],["Gates open for own units only",1],["Archers can garrison towers",1],["Siege unit (ram) to crack walls",1]]},
+{s:"MAP & SCOUTING"},
+{id:"F1",t:"Fog OFF confirmed — scouting?",op:"No fog in core. Fog toggle in Custom.",o:[["No fog, no scouting",1],["Fog in Custom toggle",1],["Scout unit anyway",0]]},
+{id:"F2",t:"Time pressure",op:"No day/night in core. Optional sudden-death timer in Custom.",o:[["None in core",1],["Day/night cycle",0],["Sudden-death timer in Custom",0]]},
+{s:"MODES"},
+{id:"P1",t:"Multiplayer",op:"Later. Skirmish vs AI first.",o:[["Later — not in first ship",1],["Local hotseat in Custom",0],["Online now",0]]},
+{id:"P2",t:"Tutorial / how-to",op:"Short tap-through tips on first match, skippable.",o:[["First-match tips, skippable",1],["Full tutorial mission",0],["How-to page in menu only",0],["None",0]]},
+{id:"P3",t:"Save/load mid-match",op:"Auto-save on pause/exit, resume from menu.",o:[["Auto-save + Resume",1],["Manual save slots",0],["No saving",0]]},
+{s:"VISUALS & CAMERA"},
+{id:"V1",t:"Icon art sharpness",op:"Redraw HUD/card icons at 2x so they're crisp on phone.",o:[["Redraw icons 2x crisp",1],["Keep arcade icons, upscale",0]]},
+{id:"V2",t:"Camera move",m:1,op:"One-finger drag pans. Edge scroll off on phone.",o:[["Drag to pan",1],["Minimap tap to jump",1],["Edge scroll toggle in settings",0]]},
+{s:"AI MEMORY"},
+{id:"A1",t:"What AI remembers during a match (wiped at end)",m:1,op:"Where you attacked from, what units beat it, where your walls are weak.",o:[["Your attack paths",1],["Unit counters that beat it",1],["Weak spots in your walls",1],["Your eco timing (when you boom)",1],["Strategies it already tried",1]]},
+{id:"A2",t:"Default difficulty",op:"Normal.",o:[["Easy",0],["Normal",1],["Hard",0]]},
+{s:"FIRST SHIP"},
+{id:"Z1",t:"First ship must include",m:1,op:"Everything core + tested. Custom toggles can be partial.",o:[["Full core match vs AI",1],["Tech upgrades",1],["Walls/gates/towers",1],["Pause/settings/speed",1],["SFX + music",1],["All Custom toggles working",0]]},
+{s:"SCOPE & GO"},
+{id:"S3",t:"GO or HOLD?",op:"NO BUILD until this says GO.",o:[["GO",0],["HOLD — more notes first",1]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="EC FRESH ROUND 3 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
