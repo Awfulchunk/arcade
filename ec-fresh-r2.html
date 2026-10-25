@@ -1,0 +1,61 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Empire Clash FRESH — Round 2</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f5f7;margin:0;padding:16px;color:#1b1d22}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:22px 0 8px;color:#444}
+.q{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q b{display:block;margin-bottom:6px;font-size:16px}
+.op{font-size:13px;background:#fff6dd;border-left:4px solid #f0b400;padding:6px 8px;border-radius:6px;margin:6px 0 10px}
+label{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:8px;margin:3px 0;background:#f7f8fa;font-size:15px}
+label:has(input:checked){background:#dcecff;outline:2px solid #3b82f6}
+.tag{font-size:11px;background:#f0b400;color:#000;border-radius:4px;padding:1px 5px;margin-left:4px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:44px;border-radius:8px;border:1px solid #ccc;padding:8px;font:inherit;margin-top:6px}
+.small{font-size:12px;color:#666}
+button{position:sticky;bottom:10px;width:100%;padding:16px;font-size:18px;font-weight:800;border:0;border-radius:14px;background:#111;color:#fff;margin-top:16px}
+#out{white-space:pre-wrap;background:#fff;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;display:none}
+</style></head><body>
+<h1>Empire Clash FRESH — Round 2</h1><div class="op" style="background:#ffe0e0;border-color:#d00"><b>⚠ NO BUILD until your paste includes GO (S3).</b> Round 1 is locked — not re-asked. Separate game. Nothing from WWT.</div>
+<div class="small">Tap your picks. The <span class="tag">TOUGH'S PICK</span> tag marks my opinion. Write in the box if you want something else. When you're done, hit <b>COPY MY ANSWERS</b> at the bottom and paste them back to me in chat.</div>
+<div id="f"></div>
+<button onclick="go()">COPY MY ANSWERS</button>
+<div id="out"></div>
+<script>
+const Q=[
+{s:"AI OPPONENT"},
+{id:"D1",t:"AI difficulty levels",op:"Easy / Normal / Hard picked before the match. Hard = smarter, not cheating.",o:[["Easy / Normal / Hard",1],["Easy / Normal / Hard / Brutal (resource bonus)",0],["Numeric scroller 1-10 in Custom",0],["One difficulty only",0]]},
+{id:"D2",t:"How the AI plays",m:1,op:"Builds a real economy, attacks in waves, defends its base.",o:[["Real economy (gathers, builds)",1],["Attack waves that grow",1],["Defends base / rebuilds",1],["Rushes early on Hard",0]]},
+{s:"MATCH"},
+{id:"L1",t:"Target match length",op:"~15-20 min on Normal. Long enough to build, short enough to finish.",o:[["~10 min",0],["~15-20 min",1],["~30+ min",0],["Scroller in Custom (match speed)",0]]},
+{id:"L2",t:"Win condition",op:"Destroy enemy HQ. Others into Custom.",o:[["Destroy enemy HQ",1],["Destroy everything",0],["Timer + score",0]]},
+{s:"BUILDINGS"},
+{id:"G1",t:"Building sizes vs units",op:"Houses ~3x a soldier tall, HQ ~5x. Locked to the scale ladder.",o:[["Keep arcade EC sizes exactly",0],["Bigger: house ~3x soldier, HQ ~5x",1],["Smaller / compact",0]]},
+{id:"G2",t:"Placement",op:"Grid snap + green/red ghost so you know where it fits.",o:[["Grid snap + green/red ghost",1],["Free place",0],["Both (toggle in settings)",0]]},
+{s:"CUSTOM GAME DUMPS (not in core)"},
+{id:"C1",t:"Which go into Custom Game as toggles (default OFF)?",m:1,op:"All three, OFF by default. Core stays clean.",o:[["Ages",1],["Capture points mid-map",1],["Hero unit",1],["Drop it entirely (type which below)",0]]},
+{s:"UI POLISH"},
+{id:"U1",t:"Pause menu",m:1,op:"Pause holds Resume / Settings / Restart / Quit. Settings live there and the main menu.",o:[["Resume / Settings / Restart / Quit",1],["Settings also on main menu",1],["Speed control (1x/2x)",0]]},
+{id:"U2",t:"Resource bar",op:"Top bar: icon + number for wood/food/gold + pop count. Clean, readable.",o:[["Top bar icons + numbers + pop",1],["Same as arcade EC",0],["Bottom bar",0]]},
+{id:"U3",t:"Bottom train/build bar",op:"Big tappable cards with cost on each.",o:[["Big cards with cost",1],["Same as arcade EC",0]]},
+{s:"GORE & SOUND"},
+{id:"R1",t:"Gore level",op:"Light blood puff + bodies fade. Scroller in settings.",o:[["None",0],["Light (puff + fade)",1],["Medium (bodies stay)",0],["Scroller in settings",0]]},
+{id:"R2",t:"Sound",m:1,op:"SFX for hits, building, gather + music. Separate volume sliders.",o:[["Combat/build/gather SFX",1],["Background music",1],["Separate SFX + music sliders",1],["No sound yet",0]]},
+{s:"MAP CLEANUP"},
+{id:"M1",t:"Grass blotches",op:"Gone. Smooth ground with small classic detail (flowers/bushes) only.",o:[["Kill all — smooth ground + small detail",1],["Kill all — plain ground, no detail",0]]},
+{s:"TESTING"},
+{id:"T1",t:"What must be proven before APK (pick all)",m:1,op:"Every line, with screenshots + a video clip.",o:[["Spawn + walk frames",1],["Attack frames + damage",1],["Gather all 3 resources",1],["Place every building + walls",1],["Train every unit",1],["AI plays a full match",1],["Win + lose screens",1],["Every setting works",1],["Pinch zoom / scale ladder",1],["Joystick + retreat + rally",1],["Performance / FPS on phone",1],["No WWT anything",1]]},
+{s:"SCOPE & GO"},
+{id:"S3",t:"GO or HOLD?",op:"NO BUILD until this says GO.",o:[["GO",0],["HOLD — more notes first",1]]},
+{id:"X",t:"Anything else?",o:[]}
+];
+const f=document.getElementById('f');
+Q.forEach(q=>{if(q.s){f.insertAdjacentHTML('beforeend','<h2>'+q.s+'</h2>');return}
+let h='<div class="q"><b>'+q.id+'. '+q.t+'</b>';if(q.op)h+='<div class="op">💬 Tough: '+q.op+'</div>';
+q.o.forEach((o,i)=>{h+='<label><input type="'+(q.m?'checkbox':'radio')+'" name="'+q.id+'" value="'+i+'"> <span>'+o[0]+(o[1]?'<span class="tag">TOUGH\'S PICK</span>':'')+'</span></label>'});
+h+='<textarea id="w'+q.id+'" placeholder="Your own idea or opinion (optional)"></textarea></div>';f.insertAdjacentHTML('beforeend',h)});
+function go(){let s="EC FRESH ROUND 2 ANSWERS\n";Q.forEach(q=>{if(q.s){s+="\n["+q.s+"]\n";return}
+const p=[...document.querySelectorAll('input[name="'+q.id+'"]:checked')].map(e=>q.o[+e.value][0]);
+const w=document.getElementById('w'+q.id).value.trim();
+s+=q.id+": "+(p.length?p.join(" | "):"(no pick)")+(w?"  || Jay: "+w:"")+"\n"});
+const o=document.getElementById('out');o.style.display='block';o.textContent=s;
+(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>alert("Copied! Paste it to Tough in chat.")).catch(()=>alert("Couldn't auto-copy. Long-press the text below, copy it, and paste it to Tough."))}
+</script></body></html>
