@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- EC Fresh 1.0.1 standalone | app.tj.empireclash | ZERO WWT -->
+<!-- EC Fresh 1.0.2 arcade | app.tj.empireclash | mock-match art | ZERO WWT -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -725,7 +725,7 @@ function eApplyCfg(cfg){
   EBASE=Math.round(470*Math.sqrt(EH/3000)/10)*10;
   BS=clamp((+cfg.bldSize||50)/100,0.3,1);GRID=Math.max(8,Math.round(20*BS));BFOOT=GRID*3;BHALF=BFOOT/2;BLD_HW=Math.round(BFOOT*28/60);
   HQS=Math.sqrt(BS);EHQPOS=[EW/2,Math.round(40+78*HQS)];
-  US=cfg.troopSize==='normal'?1.05:cfg.troopSize==='small'?0.92:0.7;
+  US=cfg.troopSize==='normal'?1.15:cfg.troopSize==='small'?1.05:0.85;
   MSPD=1+0.5*clamp((EH-3000)/9000,0,1);
   const ML=MATCH_LEN[cfg.matchLen]||MATCH_LEN[20];LF=ML.lf;ESUDDEN=ML.sudden;ETIMEUP=ML.up;TS=ML.ts||ESUDDEN/420;
   EUNIT_CAP=clamp(cfg.unitCap|0||80,30,300);
@@ -1978,6 +1978,16 @@ function eDrawBuilding(g,type,side,lvl,age){
     rr2(g,-24,21,48,4,2,roofD);
     if(lvl>=2){rr2(g,18,4,10,10,2,'#f6f2ea');rr2(g,21.5,5.5,3,7,0.6,'#e0302a');rr2(g,19.5,7.5,7,3,0.6,'#e0302a');}
     if(lvl>=3){poly(g,[-22,-18,22,-18,18,-22,-18,-22],'#ffd23a');circ(g,0,-42,2.6,'#ffd23a');}
+  }else if(type==='lumber'){
+    // 1.0.2: lumber camp = olive tent + crates (mock)
+    ell(g,1,18,34,10,'rgba(12,28,8,0.32)');
+    rr2(g,-34,10,14,12,2,'#5a3d24');rr2(g,-32,11,10,9,1.5,'#c98d52');
+    rr2(g,22,12,14,11,2,'#5a3d24');rr2(g,24,13,10,8,1.5,'#c98d52');
+    poly(g,[-24,20,24,20,18,-16,-18,-16],'#4a5a30');
+    poly(g,[-18,-14,0,-40,0,-6],'#7a8a4e');poly(g,[0,-40,18,-14,0,-6],'#3f4e28');
+    rr2(g,-7,2,14,16,5,'#1a1510');
+    rr2(g,-9,-22,18,12,2,'#f2f2f0');g.strokeStyle='#d22';g.lineWidth=2;g.beginPath();g.moveTo(-5,-19);g.lineTo(5,-13);g.moveTo(5,-19);g.lineTo(-5,-13);g.stroke();
+    rr2(g,-6,-28,12,4,1,C.body);
   }else{
     // body
     rr2(g,-25,-16,50,38,6,A.wall);rr2(g,-25,-16,50,6,4,shade(A.wall,0.18));
@@ -2023,25 +2033,46 @@ function eBldSprite(type,side,lvl,age){if(age===undefined)age=3;const key=type+s
   c=outlined(86,108,43,72,SS,1.4,g=>eDrawBuilding(g,type,side,lvl,age));c.ax=43;c.ay=72;c.w=86;c.h=108;_bspr.set(key,c);return c;}
 function eBldFlag(type){return type==='tower'?[0,-80]:type==='hospital'?[0,-58]:[22,-60];}
 function eDrawHQ(g,side){
+  // 1.0.2 mock-match: olive tent/camp HQ + crates (NOT grey castle). Grounded fake-3D depth.
   const C=ESIDECOL[side];
-  rr2(g,-52,-14,104,58,14,'#b9bec4');
-  // back keep
-  rr2(g,-26,-46,52,50,4,'#a3aab2');rr2(g,-26,-46,52,6,3,'#c7ccd2');
-  for(let i=0;i<6;i++)rr2(g,-26+i*9.4,-52,6,7,1.2,'#a3aab2');
-  poly(g,[-30,-46,30,-46,0,-74],C.body);poly(g,[-30,-46,30,-46,26,-42,-26,-42],C.dark);poly(g,[0,-74,30,-46,22,-46],shade(C.body,-0.15));
-  rr2(g,-5,-36,10,12,5,'#3e2a18');
-  // front wall
-  rr2(g,-48,-8,96,40,6,'#9aa1a8');rr2(g,-48,-8,96,6,4,'#c7ccd2');
-  g.strokeStyle='rgba(43,29,20,0.28)';g.lineWidth=1;for(let r=0;r<5;r++){const y=-2+r*7;g.beginPath();g.moveTo(-47,y);g.lineTo(47,y);g.stroke();for(let x=-47+(r%2)*7;x<47;x+=14){g.beginPath();g.moveTo(x,y);g.lineTo(x,y+7);g.stroke();}}
-  for(let i=0;i<10;i++)rr2(g,-48+i*10,-14,6.5,7,1.2,'#9aa1a8');
-  // gate
-  rr2(g,-12,6,24,26,11,'#5a3d24');rr2(g,-10,8,20,24,9,'#3e2a18');for(let x=-6;x<=6;x+=4)line(g,x,10,x,31,1,'#2b1d14');
-  rr2(g,-14,4,28,3,1.5,'#ffd23a');
-  // towers
-  for(const s of [-1,1]){const x=s*44;rr2(g,x-11,-22,22,52,8,'#a3aab2');rr2(g,x-11,-22,22,5,3,'#c7ccd2');rr2(g,x-3,-10,6,9,3,'#3e2a18');
-    poly(g,[x-14,-20,x+14,-20,x,-46],C.body);poly(g,[x-14,-20,x+14,-20,x+12,-17,x-12,-17],C.dark);poly(g,[x,-46,x+14,-20,x+7,-20],shade(C.body,-0.15));circ(g,x,-47,2,'#ffd23a');}
-  // banner pole
-  line(g,0,-74,0,-96,1.8,'#5a3d24');circ(g,0,-97,2.2,'#ffd23a');
+  const crate=(x,y,w,h)=>{
+    rr2(g,x+1,y+2,w,h,2,'rgba(20,30,10,0.28)');
+    rr2(g,x,y,w,h,2.2,'#5a3d24');rr2(g,x+1.5,y+1.2,w-3,h-2.5,1.6,'#c98d52');
+    rr2(g,x+2,y+h*0.38,w-4,2.4,0.6,'#6b4426');rr2(g,x+w*0.42,y+2,2.6,h-4,0.6,'#6b4426');
+    line(g,x+3,y+3,x+w-3,y+3,1,'rgba(255,230,180,0.35)');
+  };
+  // ground contact (shadow baked into sprite so it never floats)
+  ell(g,2,10,62,16,'rgba(12,28,8,0.38)');
+  // supply crates + barrel (camp aesthetic)
+  crate(-62,4,20,17);crate(-54,12,16,13);
+  rr2(g,48,2,15,20,5,'#3e4a50');rr2(g,50,4,11,16,4,'#7a8a92');
+  ell(g,55.5,3,6.5,2.4,'#9aa8b0');crate(40,14,22,15);
+  // leaning gear / sandbags
+  rr2(g,-40,18,18,8,3,'#8a7a4a');rr2(g,-38,19,14,5,2,'#b8a86a');
+  // tent back wall (darker depth)
+  poly(g,[-44,14,44,14,34,-34,-34,-34],'#3f4e28');
+  // canvas roof — lit left face + shaded right face (fake-3D like lumber-depth-ref)
+  poly(g,[-38,-30,0,-78,0,-18],'#7a8a4e');
+  poly(g,[0,-78,38,-30,0,-18],'#4a5a30');
+  poly(g,[-34,-32,34,-32,28,-40,-28,-40],'#5f7040'); // ridge band
+  // soft highlight on lit face
+  g.fillStyle='rgba(220,240,160,0.18)';g.beginPath();g.moveTo(-28,-34);g.lineTo(-4,-70);g.lineTo(-6,-22);g.closePath();g.fill();
+  // front apron / flaps
+  poly(g,[-28,16,28,16,20,-12,-20,-12],'#5a6a38');
+  poly(g,[-20,-12,20,-12,12,-28,-12,-28],'#6b7a42');
+  // dark doorway (recessed)
+  rr2(g,-11,-4,22,24,8,'#1a1510');rr2(g,-9,-2,18,20,6,'#2a2218');
+  // white square + red X (mock mark)
+  rr2(g,-12,-36,24,18,2.5,'#e8e6e0');rr2(g,-10,-34,20,14,1.5,'#f7f6f2');
+  g.strokeStyle='#d22a2a';g.lineWidth=2.8;g.lineCap='round';
+  g.beginPath();g.moveTo(-7,-31);g.lineTo(7,-23);g.moveTo(7,-31);g.lineTo(-7,-23);g.stroke();
+  // side color flash / team trim
+  rr2(g,-10,-44,20,5,1.5,C.body);rr2(g,-8,-43,16,3,1,C.light||shade(C.body,0.25));
+  // guy ropes + stakes (grounds the tent)
+  line(g,-40,-18,-58,16,1.4,'#5a3d24');line(g,40,-18,58,16,1.4,'#5a3d24');
+  circ(g,-58,16,2.2,'#3e2a18');circ(g,58,16,2.2,'#3e2a18');
+  // ridge pole tip
+  circ(g,0,-78,2.4,C.body);circ(g,0,-78,1.2,'#ffd23a');
 }
 const _hqspr=[null,null];
 function eHQSprite(side){return _hqspr[side]||(_hqspr[side]=Object.assign(outlined(124,146,62,100,SS,1.5,g=>eDrawHQ(g,side)),{ax:62,ay:100,w:124,h:146}));}
@@ -2270,8 +2301,8 @@ function eDrawBld(s){
   if(s.buildT>0){ctx.strokeStyle='#8a5a30';ctx.lineWidth=2*k;ctx.beginPath();ctx.moveTo(s.x-26*k,s.y+24*k);ctx.lineTo(s.x-26*k,s.y-30*k);ctx.moveTo(s.x+26*k,s.y+24*k);ctx.lineTo(s.x+26*k,s.y-30*k);ctx.moveTo(s.x-26*k,s.y-10*k);ctx.lineTo(s.x+26*k,s.y-10*k);ctx.stroke();}
 }
 function eDrawHQs(s){
-  const k=HQS,spr=eHQSprite(s.side);ctx.fillStyle='rgba(20,50,10,0.28)';ctx.beginPath();ctx.ellipse(s.x+5*k,s.y+38*k,58*k,12*k,0,0,TAU);ctx.fill();
-  eDrawSpr(spr,s.x,s.y,0.92*k);eFlag(s.x,s.y-96*0.92*k,ESIDECOL[s.side].body,20*k);
+  const k=HQS,spr=eHQSprite(s.side);ctx.fillStyle='rgba(12,28,8,0.4)';ctx.beginPath();ctx.ellipse(s.x+4*k,s.y+36*k,64*k,15*k,0,0,TAU);ctx.fill();
+  eDrawSpr(spr,s.x,s.y,0.98*k);eFlag(s.x,s.y-78*0.98*k,ESIDECOL[s.side].body,16*k);
   // HQ cannon
   const gx=s.x,gy=s.y-s.hh*1.6,a=s.ga===undefined?(s.side?Math.PI/2:-Math.PI/2):s.ga;
   ctx.save();ctx.translate(gx,gy);ctx.rotate(a);ctx.fillStyle=INK;rrect(ctx,-2,-3.2,15,6.4,2.5);ctx.fill();ctx.fillStyle='#4a4f57';rrect(ctx,-1,-2.2,13,4.4,2);ctx.fill();
@@ -3121,9 +3152,10 @@ window.addEventListener('resize',resize);window.addEventListener('orientationcha
 const TT={t:0,tile:null,walk:[],logo:null,logoW:0};
 function titleTile(){const c=mkCanvas(360,360),g=c.getContext('2d');eGrassInit();
   g.fillStyle=g.createPattern(GRASS[0],'repeat');g.fillRect(0,0,360,360);const R=mulberry32(5);
-  for(let i=0;i<4;i++){const x=R()*360,y=R()*360,r=20+R()*24;g.fillStyle='#c9a06a';g.beginPath();g.ellipse(x,y,r,r*0.6,0,0,TAU);g.fill();}
-  for(let i=0;i<160;i++)eDrawDecor(g,{k:R()<0.6?'tuft':R()<0.7?'flower':'pebble',x:R()*360,y:R()*360,s:R()<0.6?0.8+R()*0.6:R()*4|0,seed:(R()*1e9)|0});
-  for(let i=0;i<5;i++)eDrawDecor(g,{k:'bush',x:20+R()*320,y:20+R()*320,s:0.9,seed:i});
+  // 1.0.2: clean grass — no dirt blotches; soft tree band + flowers
+  for(let i=0;i<110;i++)eDrawDecor(g,{k:R()<0.55?'tuft':R()<0.75?'flower':'pebble',x:R()*360,y:R()*360,s:R()<0.6?0.7+R()*0.5:R()*3|0,seed:(R()*1e9)|0});
+  for(let i=0;i<8;i++){const o={k:'tree',x:30+R()*300,y:40+R()*80,r:14+R()*10,seed:(R()*1e9)|0,pine:R()<0.45,hp:5,max:5};const spr=v5ObsSpr(o);g.drawImage(spr,o.x-spr.ax,o.y-spr.ay);}
+  for(let i=0;i<6;i++){const o={k:'tree',x:20+R()*320,y:260+R()*70,r:12+R()*8,seed:(R()*1e9)|0,pine:R()<0.4,hp:5,max:5};const spr=v5ObsSpr(o);g.drawImage(spr,o.x-spr.ax,o.y-spr.ay);}
   return c;}
 function titleWalker(side,y){return{side,type:ECARDS[(rnd()*6)|0],x:rr(0.12,0.88),y,fight:0,dead:false,leg:rnd()*6,sp:rr(26,40)};}
 function updateTitle(dt){
@@ -3148,7 +3180,7 @@ function renderTitle(){
   for(let y=-tw+off;y<H;y+=tw)for(let x=0;x<W;x+=tw)ctx.drawImage(tl,x,y,tw,tw);
   // two little castles peeking in
   const hs=Math.min(W,H)/520;
-  for(const side of [0,1]){const s=eHQSprite(side),k=0.95*hs*1.4,y=side?H*0.06:H*0.98;ctx.drawImage(s,W/2-s.ax*k,y-s.ay*k,s.width/SS*k,s.height/SS*k);}
+  for(const side of [0,1]){const s=eHQSprite(side),k=1.05*hs*1.55,y=side?H*0.07:H*0.97;ctx.drawImage(s,W/2-s.ax*k,y-s.ay*k,s.width/SS*k,s.height/SS*k);}
   const ws=TT.walk.slice().sort((a,b)=>a.y-b.y);
   for(const w of ws){const x=w.x*W,fr=w.fight>0?((TT.t*6|0)%2?9:8):(Math.floor(w.leg)&7),spr=eUnitSpr(w.type,w.side,fr,0,3),s=0.95*Math.max(1,hs*1.2);
     ctx.fillStyle='rgba(20,50,10,0.3)';ctx.beginPath();ctx.ellipse(x,w.y+1,8*s,3.6*s,0,0,TAU);ctx.fill();
@@ -3453,22 +3485,41 @@ function v5Sil(c){let s=_v5sil.get(c);if(!s){s=v5Tint(c,'#0a1a08',1);_v5sil.set(
 const _v5obs=new Map(),V5TS=3;
 function v5ObsSpr(o){const rb=Math.max(6,Math.round(o.r)),v=(o.seed>>>0)%4,key=o.k+rb+'_'+v+(o.burnt?'b':'')+(o.k==='tree'&&o.pine?'p':'');let c=_v5obs.get(key);if(c)return c;
   const r=rb,R=mulberry32(o.seed>>>0);
-  if(o.k==='tree'){const w=r*2.6,h=r*3.4;c=outlined(w,h,w/2,h-r*0.5,V5TS,1.3,g=>v5PaintTree(g,r,R,o.pine,v));c.ax=w/2;c.ay=h-r*0.5;}
+  if(o.k==='tree'){const w=r*3.0,h=r*4.0;c=outlined(w,h,w/2,h-r*0.45,V5TS,1.35,g=>v5PaintTree(g,r,R,o.pine,v));c.ax=w/2;c.ay=h-r*0.45;}
   else if(o.k==='mtn'){const w=r*2.6,h=r*3.4;c=outlined(w,h,w/2,h-r*0.7,V5TS,1.4,g=>v5PaintRock(g,r,R,true));c.ax=w/2;c.ay=h-r*0.7;}
   else{const w=r*2.6,h=r*2.4;c=outlined(w,h,w/2,h-r*0.7,V5TS,1.3,g=>v5PaintRock(g,r,R,false));c.ax=w/2;c.ay=h-r*0.7;}
   _v5obs.set(key,c);return c;}
 function v5PaintTree(g,r,R,pine,v){
-  // trunk: lit left face + shaded right face
-  const tw=r*0.32,th=r*1.0;rr2(g,-tw/2,-th,tw,th+r*0.12,tw*0.3,'#7a5030');g.fillStyle='#53341c';g.fillRect(0,-th,tw/2,th+r*0.1);
-  const G=[['#2f7a2a','#46a83a','#74cf52'],['#2a6e33','#3f9c45','#6cc46a'],['#3a7a24','#58aa30','#8ad050'],['#2d6a2c','#3e8f3a','#62b85a']][v];
-  if(pine){for(let t=0;t<3;t++){const yb=-th*0.7-t*r*0.62,hw=r*(1.0-t*0.24),ht=r*0.95;
-      poly(g,[-hw,yb,hw,yb,0,yb-ht],G[1]);poly(g,[0,yb-ht,hw,yb,0,yb+r*0.06],G[0]);poly(g,[-hw*0.55,yb-ht*0.38,-hw*0.2,yb-ht*0.62,0,yb-ht,-hw*0.1,yb-ht*0.5],G[2]);}
+  // 1.0.2 mock-match: grounded depth, soft canopy blend, chop-ready trunk marks
+  ell(g,r*0.1,r*0.12,r*1.05,r*0.42,'rgba(12,30,8,0.42)'); // ground contact
+  const tw=r*0.36,th=r*1.15;
+  rr2(g,-tw/2,-th,tw,th+r*0.18,tw*0.35,'#8a5a30');
+  g.fillStyle='#53341c';g.fillRect(0,-th,tw/2,th+r*0.14);
+  // baked chop notches on trunk
+  g.strokeStyle='rgba(40,22,10,0.7)';g.lineWidth=Math.max(1,r*0.07);
+  for(let i=0;i<3;i++){const yy=-th*0.25-i*r*0.14;g.beginPath();g.moveTo(-tw*0.42,yy);g.lineTo(tw*0.2,yy+r*0.04);g.stroke();}
+  const G=[['#246a28','#3f9e36','#6ecf55','#1a4e1c'],['#1f5e2a','#389640','#62c868','#163f1c'],['#2e6e20','#52a82e','#7ed048','#1e4a16'],['#226028','#3a8f38','#5cb858','#18441c']][v];
+  if(pine){
+    for(let t=0;t<4;t++){
+      const yb=-th*0.55-t*r*0.55,hw=r*(1.15-t*0.2),ht=r*1.05;
+      // soft under-shade
+      ell(g,0,yb+ht*0.15,hw*0.85,r*0.22,'rgba(10,30,8,0.22)');
+      poly(g,[-hw,yb,hw,yb,0,yb-ht],G[1]);
+      poly(g,[0,yb-ht,hw,yb,hw*0.15,yb+r*0.08],G[0]);
+      poly(g,[-hw*0.6,yb-ht*0.35,-hw*0.15,yb-ht*0.7,0,yb-ht,-hw*0.05,yb-ht*0.45],G[2]);
+    }
     return;}
-  const cy=-th-r*0.55,B=[[0,cy,r*0.95],[-r*0.5,cy+r*0.3,r*0.66],[r*0.52,cy+r*0.28,r*0.66],[r*0.05,cy-r*0.55,r*0.62]];
-  for(const b of B)circ(g,b[0],b[1],b[2],G[0]); // shaded body (right/bottom faces)
-  g.save();g.beginPath();g.rect(-r*2,-r*4,r*2+r*0.18,r*5);g.clip();for(const b of B)circ(g,b[0]-r*0.06,b[1]-r*0.05,b[2]*0.96,G[1]);g.restore(); // lit left half
-  for(const b of B)circ(g,b[0]-b[2]*0.35,b[1]-b[2]*0.38,b[2]*0.38,G[2]);
-  if(R()<0.5)for(let i=0;i<3;i++)circ(g,(R()-0.5)*r*1.2,cy+(R()-0.4)*r,r*0.09,'#e84a4a'); // fruit
+  // deciduous: layered soft blobs that blend (not hard dots)
+  const cy=-th-r*0.7;
+  const B=[[0,cy,r*1.15],[-r*0.55,cy+r*0.35,r*0.8],[r*0.58,cy+r*0.32,r*0.78],[-r*0.15,cy-r*0.55,r*0.72],[r*0.25,cy-r*0.4,r*0.55],[-r*0.35,cy+r*0.55,r*0.5]];
+  for(const b of B){ell(g,b[0]+r*0.08,b[1]+r*0.12,b[2]*1.02,b[2]*0.85,'rgba(12,36,10,0.2)');}
+  for(const b of B)circ(g,b[0],b[1],b[2],G[0]);
+  g.save();g.beginPath();g.rect(-r*2.4,-r*5,r*2.5+r*0.22,r*6);g.clip();
+  for(const b of B)circ(g,b[0]-r*0.08,b[1]-r*0.06,b[2]*0.95,G[1]);g.restore();
+  for(const b of B)circ(g,b[0]-b[2]*0.38,b[1]-b[2]*0.4,b[2]*0.4,G[2]);
+  // soft edge blend ring
+  g.globalAlpha=0.22;for(const b of B)circ(g,b[0],b[1],b[2]*1.08,G[3]);g.globalAlpha=1;
+  if(R()<0.45)for(let i=0;i<3;i++)circ(g,(R()-0.5)*r*1.3,cy+(R()-0.35)*r,r*0.1,'#e84a4a');
 }
 function v5PaintRock(g,r,R,mtn){
   const n=7,ry=r*0.5,pts=[];for(let i=0;i<n;i++){const a=i/n*TAU+R()*0.3,q=0.85+R()*0.25;pts.push([Math.cos(a)*r*q,Math.sin(a)*ry*q]);}
@@ -3546,17 +3597,17 @@ function v5ForestGen(R){const fd=Math.round(clamp(EH*0.045,160,280)),out=[];
       const t=(y-yA)/Math.max(1,yB-yA),edge=t>0.72||t<0.12;
       // soft edge: skip more trees near grass so it feathers
       if(edge&&R()<0.45+t*0.15)continue;
-      const jx=x+(R()-0.5)*(edge?16:8),jy=y+(R()-0.5)*(edge?14:7),r=(edge?12:16)+R()*(edge?5:8);
+      const jx=x+(R()-0.5)*(edge?16:8),jy=y+(R()-0.5)*(edge?14:7),r=(edge?15:20)+R()*(edge?7:10);
       plant(jx,jy,r,R()<(edge?0.55:0.4),side,edge);}
     // feather clumps into the grass (scattered outward)
     for(let i=0;i<Math.round(18+EW/90);i++){
       const jx=20+R()*(EW-40),jy=yB+10+R()*90,r=11+R()*6;
-      if(R()<0.35)plant(jx,jy,r,R()<0.5,side,true);}
+      if(R()<0.4)plant(jx,jy,r*1.15,R()<0.55,side,true);}
   }
   // mid-map forest bands (fill where castles/outposts were)
   const midY0=EH*0.38,midY1=EH*0.45;
   for(let y=midY0;y<midY1;y+=16)for(let x=20+(((y/16)|0)%2)*12;x<EW-20;x+=24){
-    if(R()<0.22)continue;const jx=x+(R()-0.5)*10,jy=y+(R()-0.5)*8,r=14+R()*7;
+    if(R()<0.18)continue;const jx=x+(R()-0.5)*10,jy=y+(R()-0.5)*8,r=17+R()*9;
     out.push({x:jx,y:jy,r,k:'tree',a:0,seed:(R()*1e9)|0,pine:R()<0.5,forest:2,hp:4.5,max:5,edge:R()<0.3});
   }
   return out;}
@@ -4073,7 +4124,7 @@ function v5Step(dt){v5ForestStep(dt);if(typeof v5ZoneStep==='function')v5ZoneSte
 
 
 function ePopCap(side){try{if(typeof ecfSidePopCap==='function'&&E&&E.cfg&&E.cfg.houses)return ecfSidePopCap(side);}catch(e){}return typeof EUNIT_CAP!=='undefined'?EUNIT_CAP:80;}
-const ECF={ver:'1.0.1',mem:null,popBase:80,popPerHouse:20,popCap:200,lastSave:0,warnCd:0,musicGain:null,joy:{on:false,ax:0,ay:0},_asT:0,_ended:0,load:0,_fpsEma:60,_perfT:0,_wallSeen:null};
+const ECF={ver:'1.0.2',mem:null,popBase:80,popPerHouse:20,popCap:200,lastSave:0,warnCd:0,musicGain:null,joy:{on:false,ax:0,ay:0},_asT:0,_ended:0,load:0,_fpsEma:60,_perfT:0,_wallSeen:null};
 function ecfSidePopCap(side){if(!E||!E.cfg)return 80;if(!E.cfg.houses)return E.cfg.unitCap||160;const n=(E.blds[side]||[]).filter(b=>b.alive&&!b.site&&b.type==='house').length;return Math.min(E.cfg.popCap||ECF.popCap,(E.cfg.unitCap||ECF.popBase)+n*ECF.popPerHouse);}
 function ecfMemInit(){ECF.mem={attackPaths:[],counters:{},wallWeak:[],ecoTiming:{boomT:0,lastMp:[0,0]},tried:[],strat:'eco',stratT:0};ECF._ended=0;}
 function ecfMemWipe(){ECF.mem=null;}

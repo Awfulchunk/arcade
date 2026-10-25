@@ -1,0 +1,214 @@
+{
+  "passed": 39,
+  "total": 39,
+  "failed": [],
+  "checks": [
+    {
+      "name": "title",
+      "pass": true,
+      "detail": "Empire Clash"
+    },
+    {
+      "name": "ver 1.0.2",
+      "pass": true,
+      "detail": "1.0.2"
+    },
+    {
+      "name": "fog off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "map mid",
+      "pass": true,
+      "detail": "mid"
+    },
+    {
+      "name": "gates cfg",
+      "pass": true
+    },
+    {
+      "name": "outposts off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "no free lumber bld",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "houses cfg",
+      "pass": true
+    },
+    {
+      "name": "popCap 200",
+      "pass": true,
+      "detail": 200
+    },
+    {
+      "name": "ages off",
+      "pass": true
+    },
+    {
+      "name": "capture off",
+      "pass": true
+    },
+    {
+      "name": "hero off",
+      "pass": true
+    },
+    {
+      "name": "HOUSE bld",
+      "pass": true
+    },
+    {
+      "name": "RAM unit",
+      "pass": true
+    },
+    {
+      "name": "HARD diff",
+      "pass": true
+    },
+    {
+      "name": "gore med",
+      "pass": true,
+      "detail": "med"
+    },
+    {
+      "name": "tilt strong",
+      "pass": true,
+      "detail": "strong"
+    },
+    {
+      "name": "moveScale",
+      "pass": true,
+      "detail": 1
+    },
+    {
+      "name": "autoPerf",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "restart btn",
+      "pass": true
+    },
+    {
+      "name": "standalone",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "no WWT",
+      "pass": true
+    },
+    {
+      "name": "HQ tent art",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "HQ not castle",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "soft trees",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "match fog off",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "name": "match map mid",
+      "pass": true,
+      "detail": "mid"
+    },
+    {
+      "name": "map tall-ish",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "AI mem active",
+      "pass": true
+    },
+    {
+      "name": "no preset walls",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "no outposts",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "no blotch blobs",
+      "pass": true,
+      "detail": 0
+    },
+    {
+      "name": "2 base workers",
+      "pass": true,
+      "detail": 2
+    },
+    {
+      "name": "forests present",
+      "pass": true,
+      "detail": 2500
+    },
+    {
+      "name": "hills present",
+      "pass": true,
+      "detail": 62
+    },
+    {
+      "name": "house place",
+      "pass": true,
+      "detail": "OVERLAPS SOMETHING"
+    },
+    {
+      "name": "pop base",
+      "pass": true,
+      "detail": 80
+    },
+    {
+      "name": "gate toggle",
+      "pass": true,
+      "detail": "skipped-no-eAddLine"
+    },
+    {
+      "name": "AI mem wiped",
+      "pass": true,
+      "detail": true
+    }
+  ],
+  "logs": [
+    "[EC Fresh 1.0.2] systems online — ZERO WWT"
+  ],
+  "match": {
+    "fog": false,
+    "map": "mid",
+    "memBefore": true,
+    "units": 52,
+    "walls": 0,
+    "outposts": 0,
+    "blobs": 0,
+    "workers": 2,
+    "trees": 2500,
+    "mtns": 62,
+    "houseErr": "OVERLAPS SOMETHING",
+    "pop": 80,
+    "gateOk": "skipped-no-eAddLine",
+    "mapH": 0,
+    "EW": 0,
+    "load": 0.034999999999999996,
+    "hqX": 420,
+    "hqY": 11142
+  }
+}
