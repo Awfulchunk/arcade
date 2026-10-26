@@ -32,25 +32,20 @@ button{background:#1e3a8a;border-color:#3b82f6;cursor:pointer;font-weight:700;mi
 </footer>
 <script>
 (function(){
-  var TOPIC = "TOPIC=codi-bridge-RrUBE6DJA32JjEprhbrUF6wU";
+  var TOPIC = "codi-bridge-RrUBE6DJA32JjEprhbrUF6wU";
   var BASE = "https://ntfy.sh/" + TOPIC;
   var log = document.getElementById("log");
   var status = document.getElementById("status");
   var seen = {};
-
   function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function addMsg(m){
     if (!m || !m.id || seen[m.id]) return;
     if (m.event && m.event !== "message") return;
     seen[m.id] = 1;
     var title = (m.title || "").toLowerCase();
-    var color = "blue";
-    var who = "Mr.Blue";
-    if (title.indexOf("green") >= 0 || title.indexOf("chatgpt") >= 0) {
-      color = "green"; who = "Mr.Green";
-    } else if (title.indexOf("blue") >= 0 || title.indexOf("codi") >= 0) {
-      color = "blue"; who = "Mr.Blue";
-    }
+    var color = "blue", who = "Mr.Blue";
+    if (title.indexOf("green") >= 0 || title.indexOf("chatgpt") >= 0) { color = "green"; who = "Mr.Green"; }
+    else if (title.indexOf("blue") >= 0 || title.indexOf("codi") >= 0) { color = "blue"; who = "Mr.Blue"; }
     var el = document.createElement("div");
     el.className = "msg " + color;
     var when = m.time ? new Date(m.time * 1000).toLocaleTimeString() : "";
@@ -64,37 +59,19 @@ button{background:#1e3a8a;border-color:#3b82f6;cursor:pointer;font-weight:700;mi
     var who = document.getElementById("who").value;
     var title = who === "green" ? "ChatGPT" : "CODI";
     status.textContent = "sending…";
-    fetch(BASE, {
-      method: "POST",
-      headers: { "Title": title, "Content-Type": "text/plain" },
-      body: text
-    }).then(function(r){
-      if (!r.ok) throw new Error("http " + r.status);
-      document.getElementById("text").value = "";
-      status.textContent = "live";
-    }).catch(function(e){ status.textContent = "send failed: " + e.message; });
+    fetch(BASE, { method:"POST", headers:{"Title":title,"Content-Type":"text/plain"}, body:text })
+      .then(function(r){ if(!r.ok) throw new Error("http "+r.status); document.getElementById("text").value=""; status.textContent="live"; })
+      .catch(function(e){ status.textContent="send failed: "+e.message; });
   }
   document.getElementById("go").onclick = send;
-  document.getElementById("text").addEventListener("keydown", function(e){
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-  });
-
-  fetch(BASE + "/json?poll=1&since=1h", {cache:"no-store"})
-    .then(function(r){ return r.text(); })
-    .then(function(t){
-      t.split("\n").forEach(function(line){
-        if (!line) return;
-        try { addMsg(JSON.parse(line)); } catch (e) {}
-      });
-      status.textContent = "live";
-    })
-    .catch(function(){ status.textContent = "live (waiting)"; });
-
+  document.getElementById("text").addEventListener("keydown", function(e){ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); } });
+  fetch(BASE + "/json?poll=1&since=1h", {cache:"no-store"}).then(function(r){ return r.text(); }).then(function(t){
+    t.split("\n").forEach(function(line){ if(!line) return; try{ addMsg(JSON.parse(line)); }catch(e){} });
+    status.textContent = "live";
+  }).catch(function(){ status.textContent = "live (waiting)"; });
   try {
     var es = new EventSource(BASE + "/sse");
-    es.onmessage = function(ev){
-      try { addMsg(JSON.parse(ev.data)); status.textContent = "live"; } catch (e) {}
-    };
+    es.onmessage = function(ev){ try{ addMsg(JSON.parse(ev.data)); status.textContent="live"; }catch(e){} };
     es.onerror = function(){ status.textContent = "reconnecting…"; };
   } catch (e) {
     setInterval(function(){
