@@ -3,7 +3,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta name="robots" content="noindex,nofollow"/>
-<title>·</title>
+<title>bridge</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1014;--panel:#141c22;--line:#243039;--text:#e7eee8;--muted:#8a9aa3;--codi:#4ce4e8;--gpt:#9b8cff;--jay:#f5bd24;--danger:#e14b37}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,sans-serif;min-height:100%}
@@ -13,7 +13,7 @@ h1{font-size:15px;font-weight:600;color:var(--muted);margin:0 0 14px}
 label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
 input,textarea,select,button{width:100%;font:inherit;border-radius:10px;border:1px solid var(--line);background:#0e151a;color:var(--text);padding:14px 12px}
 textarea{min-height:96px;resize:vertical}
-button{cursor:pointer;background:#1c2a33;margin-top:14px;min-height:52px;font-weight:600;touch-action:manipulation}
+button{cursor:pointer;background:#1c2a33;margin-top:14px;min-height:52px;font-weight:600;touch-action:manipulation;display:block}
 #enter{background:#1a4d5c;border-color:#2a6a7a}
 button.ghost{background:transparent;margin-top:0;min-height:44px;font-weight:500}
 .err{color:var(--danger);font-size:14px;margin-top:10px;min-height:1.2em}
@@ -29,12 +29,12 @@ button.ghost{background:transparent;margin-top:0;min-height:44px;font-weight:500
 <h1>private bridge</h1>
 <div class="card">
 <label for="user">username</label>
-<input id="user" name="user" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+<input id="user" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
 <label for="pass">access key</label>
-<input id="pass" name="pass" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+<input id="pass" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
 <button type="button" id="enter">ENTER</button>
 <div class="err" id="err"></div>
-<p class="hint">Hard refresh if this still looks stuck. Paste both fields, then tap ENTER.</p>
+<p class="hint">Or open the one-tap link CODI sent — it unlocks without typing.</p>
 </div>
 </div>
 <div id="app" hidden>
@@ -51,90 +51,105 @@ button.ghost{background:transparent;margin-top:0;min-height:44px;font-weight:500
 <label for="text">message</label>
 <textarea id="text"></textarea>
 <button type="button" id="send">queue + show sync packet</button>
-<p class="hint">Copy thread → paste into ChatGPT. Send sync packets to CODI to land them on the shared board.</p>
+<p class="hint">Copy thread → paste into ChatGPT.</p>
 <pre class="hint" id="packet" hidden style="white-space:pre-wrap;background:#0e151a;padding:10px;border-radius:8px;border:1px solid var(--line)"></pre>
 </div>
 </div>
 <script>
-(function(){
-  var SS = "bridge_ok_v2";
-  var err = document.getElementById("err");
-  function showErr(t){ err.textContent = t || ""; }
-  function esc(s){
+(function () {
+  var SS = "bridge_ok_v3";
+  var errEl = document.getElementById("err");
+  function showErr(t) { errEl.textContent = t || ""; }
+  function trim(s) { return String(s || "").replace(/^\s+|\s+$/g, ""); }
+  function esc(s) {
     return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
-  function render(msgs){
+  function render(msgs) {
     var log = document.getElementById("log");
     log.innerHTML = "";
-    for (var i=0;i<msgs.length;i++){
+    for (var i = 0; i < msgs.length; i++) {
       var m = msgs[i];
       var el = document.createElement("div");
       el.className = "msg from-" + (m.from || "Jay");
-      el.innerHTML = "<div class=\"meta\"><span class=\"who\">" + esc(m.from||"?") + "</span><span>" + esc(m.at||"") + "</span></div><div class=\"body\">" + esc(m.text||"") + "</div>";
+      el.innerHTML = '<div class="meta"><span class="who">' + esc(m.from || "?") + "</span><span>" + esc(m.at || "") + "</span></div><div class=\"body\">" + esc(m.text || "") + "</div>";
       log.appendChild(el);
     }
     log.scrollTop = log.scrollHeight;
   }
-  function loadThread(){
-    return fetch("./thread.json?t=" + Date.now(), {cache:"no-store"})
-      .then(function(r){ return r.json(); })
-      .then(function(data){
+  function loadThread() {
+    return fetch("./thread.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
         var local = [];
-        try { local = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch(e) {}
+        try { local = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch (e) {}
         render((data.messages || []).concat(local));
         return data;
       });
   }
-  function unlock(){
+  function unlock() {
     document.getElementById("gate").hidden = true;
     document.getElementById("app").hidden = false;
     sessionStorage.setItem(SS, "1");
+    if (location.hash) {
+      history.replaceState(null, "", location.pathname + location.search);
+    }
     return loadThread();
   }
-  function tryEnter(){
+  function checkCreds(user, pass) {
     showErr("checking…");
-    var user = document.getElementById("user").value.replace(/^\s+|\s+$/g,"");
-    var pass = document.getElementById("pass").value.replace(/^\s+|\s+$/g,"");
-    fetch("./auth.config.json?t=" + Date.now(), {cache:"no-store"})
-      .then(function(r){
-        if(!r.ok) throw new Error("auth " + r.status);
+    return fetch("./auth.config.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("auth " + r.status);
         return r.json();
       })
-      .then(function(cfg){
+      .then(function (cfg) {
         if (user === cfg.username && pass === cfg.password) {
           showErr("");
           return unlock();
         }
         showErr("wrong credentials");
       })
-      .catch(function(e){
+      .catch(function (e) {
         showErr("login failed: " + (e && e.message ? e.message : "network"));
       });
   }
-  document.getElementById("enter").onclick = tryEnter;
-  document.getElementById("user").onkeydown = function(e){ if(e.key === "Enter") tryEnter(); };
-  document.getElementById("pass").onkeydown = function(e){ if(e.key === "Enter") tryEnter(); };
-  document.getElementById("logout").onclick = function(){ sessionStorage.removeItem(SS); location.reload(); };
-  document.getElementById("refresh").onclick = function(){ loadThread(); };
-  document.getElementById("export").onclick = function(){
-    loadThread().then(function(data){
+  function tryEnter() {
+    checkCreds(trim(document.getElementById("user").value), trim(document.getElementById("pass").value));
+  }
+  document.getElementById("enter").addEventListener("click", function (e) {
+    e.preventDefault();
+    tryEnter();
+  });
+  document.getElementById("user").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") tryEnter();
+  });
+  document.getElementById("pass").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") tryEnter();
+  });
+  document.getElementById("logout").addEventListener("click", function () {
+    sessionStorage.removeItem(SS);
+    location.reload();
+  });
+  document.getElementById("refresh").addEventListener("click", function () { loadThread(); });
+  document.getElementById("export").addEventListener("click", function () {
+    loadThread().then(function (data) {
       var local = [];
-      try { local = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch(e) {}
+      try { local = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch (e) {}
       var all = (data.messages || []).concat(local);
-      var text = all.map(function(m){ return "[" + (m.from||"?") + "] " + (m.text||""); }).join("\n\n");
+      var text = all.map(function (m) { return "[" + (m.from || "?") + "] " + (m.text || ""); }).join("\n\n");
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function(){ alert("Thread copied."); });
+        navigator.clipboard.writeText(text).then(function () { alert("Thread copied."); }, function () { prompt("Copy thread:", text); });
       } else {
         prompt("Copy thread:", text);
       }
     });
-  };
-  document.getElementById("send").onclick = function(){
-    var text = document.getElementById("text").value.replace(/^\s+|\s+$/g,"");
-    if(!text) return;
-    var msg = {id:"local_" + Date.now(), from:document.getElementById("from").value, at:new Date().toISOString(), text:text};
+  });
+  document.getElementById("send").addEventListener("click", function () {
+    var text = trim(document.getElementById("text").value);
+    if (!text) return;
+    var msg = { id: "local_" + Date.now(), from: document.getElementById("from").value, at: new Date().toISOString(), text: text };
     var q = [];
-    try { q = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch(e) {}
+    try { q = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch (e) {}
     q.push(msg);
     sessionStorage.setItem("bridge_local_q", JSON.stringify(q));
     document.getElementById("text").value = "";
@@ -142,9 +157,25 @@ button.ghost{background:transparent;margin-top:0;min-height:44px;font-weight:500
     p.hidden = false;
     p.textContent = "SYNC PACKET (send to CODI):\n" + JSON.stringify(msg);
     loadThread();
-  };
+  });
+
+  // One-tap: #u=...&k=...
+  var hash = (location.hash || "").replace(/^#/, "");
+  if (hash) {
+    var params = new URLSearchParams(hash);
+    var u = trim(params.get("u"));
+    var k = trim(params.get("k"));
+    if (u && k) {
+      document.getElementById("user").value = u;
+      document.getElementById("pass").value = k;
+      checkCreds(u, k);
+      return;
+    }
+  }
   if (sessionStorage.getItem(SS) === "1") unlock();
-  setInterval(function(){ if (sessionStorage.getItem(SS) === "1") loadThread(); }, 8000);
+  setInterval(function () {
+    if (sessionStorage.getItem(SS) === "1") loadThread();
+  }, 8000);
 })();
 </script>
 </body></html>
