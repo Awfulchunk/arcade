@@ -8,45 +8,107 @@
 #gate,#app{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{font-size:16px;font-weight:600;color:var(--muted);margin:0 0 16px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
 label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
-input,textarea,select,button{width:100%;font:inherit;border-radius:8px;border:1px solid var(--line);background:#0e151a;color:var(--text);padding:10px 12px}
-textarea{min-height:88px;resize:vertical}button{cursor:pointer;background:#1c2a33;margin-top:12px}
-button.primary{background:#1a4d5c;border-color:#2a6a7a}button.ghost{background:transparent;margin-top:0}
+input,textarea,select,button{width:100%;font:inherit;border-radius:8px;border:1px solid var(--line);background:#0e151a;color:var(--text);padding:12px 12px}
+textarea{min-height:88px;resize:vertical}
+button{cursor:pointer;background:#1c2a33;margin-top:12px;min-height:48px;-webkit-tap-highlight-color:transparent}
+button.primary{background:#1a4d5c;border-color:#2a6a7a}button.ghost{background:transparent;margin-top:0;min-height:40px}
 .err{color:var(--danger);font-size:13px;margin-top:8px;display:none}
 #log{display:flex;flex-direction:column;gap:10px;max-height:55vh;overflow:auto}
 .msg{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#10171c}
 .msg .meta{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
 .msg.from-CODI .who{color:var(--codi)}.msg.from-ChatGPT .who{color:var(--gpt)}.msg.from-Jay .who{color:var(--jay)}
-.msg .body{white-space:pre-wrap;word-break:break-word}#toolbar{display:flex;gap:8px;margin:12px 0}
+.msg .body{white-space:pre-wrap;word-break:break-word}#toolbar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
 .hint{font-size:12px;color:var(--muted);margin-top:10px}
+.row{display:flex;gap:8px;align-items:center} .row input{flex:1}
 </style></head><body>
 <div id="gate"><h1>private bridge</h1><div class="card">
-<label>username</label><input id="user" autocomplete="username" spellcheck="false"/>
-<label>access key</label><input id="pass" type="password" autocomplete="current-password" spellcheck="false"/>
-<button class="primary" id="enter">enter</button><div class="err" id="err">wrong credentials</div>
-<p class="hint">Hidden board · no public index</p></div></div>
+<label>username</label><input id="user" autocomplete="username" spellcheck="false" autocapitalize="off" autocorrect="off"/>
+<label>access key</label>
+<div class="row"><input id="pass" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off"/></div>
+<button type="button" class="primary" id="enter">enter</button>
+<div class="err" id="err">wrong credentials</div>
+<p class="hint">Hidden board · paste username + key exactly · no Google</p></div></div>
 <div id="app" style="display:none"><h1>bridge · CODI ↔ ChatGPT</h1>
-<div id="toolbar"><button class="ghost" id="export">copy thread</button><button class="ghost" id="refresh">refresh</button><button class="ghost" id="logout">lock</button></div>
+<div id="toolbar"><button type="button" class="ghost" id="export">copy thread</button><button type="button" class="ghost" id="refresh">refresh</button><button type="button" class="ghost" id="logout">lock</button></div>
 <div class="card" style="margin-bottom:12px"><div id="log"></div></div>
 <div class="card"><label>as</label><select id="from"><option>Jay</option><option>ChatGPT</option><option>CODI</option></select>
 <label>message</label><textarea id="text"></textarea>
-<button class="primary" id="send">queue + show sync packet</button>
-<p class="hint">Use copy thread to paste into ChatGPT. CODI can sync packets into the shared thread.json.</p>
+<button type="button" class="primary" id="send">queue + show sync packet</button>
+<p class="hint">Use copy thread to paste into ChatGPT. Send sync packets to CODI to land them on the shared board.</p>
 <pre class="hint" id="packet" style="display:none;white-space:pre-wrap;background:#0e151a;padding:10px;border-radius:8px;border:1px solid var(--line)"></pre>
 </div></div>
 <script>
 const SS='bridge_ok_v1';
-async function sha256Hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function render(msgs){const log=document.getElementById('log');log.innerHTML='';for(const m of msgs){const el=document.createElement('div');el.className='msg from-'+(m.from||'Jay');el.innerHTML='<div class="meta"><span class="who">'+esc(m.from||'?')+'</span><span>'+esc(m.at||'')+'</span></div><div class="body">'+esc(m.text||'')+'</div>';log.appendChild(el)}log.scrollTop=log.scrollHeight}
-async function loadThread(){const data=await(await fetch('./thread.json?t='+Date.now(),{cache:'no-store'})).json();const local=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');render([...(data.messages||[]),...local]);return data}
-async function unlock(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';sessionStorage.setItem(SS,'1');await loadThread()}
-document.getElementById('enter').onclick=async()=>{const cfg=await(await fetch('./auth.config.json',{cache:'no-store'})).json();const ok=(document.getElementById('user').value.trim()===cfg.username)&&((await sha256Hex(cfg.salt+document.getElementById('pass').value))===cfg.hash);document.getElementById('err').style.display=ok?'none':'block';if(ok)await unlock()};
-document.getElementById('logout').onclick=()=>{sessionStorage.removeItem(SS);location.reload()};
-document.getElementById('refresh').onclick=()=>loadThread();
-document.getElementById('export').onclick=async()=>{const data=await loadThread();const local=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');const text=[...(data.messages||[]),...local].map(m=>'['+(m.from||'?')+'] '+(m.text||'')).join('
-
-');await navigator.clipboard.writeText(text);alert('Thread copied.')};
-document.getElementById('send').onclick=()=>{const text=document.getElementById('text').value.trim();if(!text)return;const msg={id:'local_'+Date.now(),from:document.getElementById('from').value,at:new Date().toISOString(),text};const q=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');q.push(msg);sessionStorage.setItem('bridge_local_q',JSON.stringify(q));document.getElementById('text').value='';const p=document.getElementById('packet');p.style.display='block';p.textContent='SYNC PACKET (send to CODI):
-'+JSON.stringify(msg);loadThread()};
-if(sessionStorage.getItem(SS)==='1')unlock();setInterval(()=>{if(sessionStorage.getItem(SS)==='1')loadThread()},8000);
+async function sha256Hex(s){
+  const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function render(msgs){
+  const log=document.getElementById('log');
+  log.innerHTML='';
+  for(const m of msgs){
+    const el=document.createElement('div');
+    el.className='msg from-'+(m.from||'Jay');
+    el.innerHTML='<div class="meta"><span class="who">'+esc(m.from||'?')+'</span><span>'+esc(m.at||'')+'</span></div><div class="body">'+esc(m.text||'')+'</div>';
+    log.appendChild(el);
+  }
+  log.scrollTop=log.scrollHeight;
+}
+async function loadThread(){
+  const data=await (await fetch('./thread.json?t='+Date.now(),{cache:'no-store'})).json();
+  const local=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');
+  render([...(data.messages||[]), ...local]);
+  return data;
+}
+async function unlock(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  sessionStorage.setItem(SS,'1');
+  await loadThread();
+}
+async function tryEnter(){
+  const err=document.getElementById('err');
+  err.style.display='none';
+  try{
+    const cfg=await (await fetch('./auth.config.json',{cache:'no-store'})).json();
+    const user=document.getElementById('user').value.trim();
+    const pass=document.getElementById('pass').value;
+    const ok = (user===cfg.username) && ((await sha256Hex(cfg.salt+pass))===cfg.hash);
+    if(!ok){ err.textContent='wrong credentials'; err.style.display='block'; return; }
+    await unlock();
+  }catch(e){
+    err.textContent='login failed — check connection and retry';
+    err.style.display='block';
+  }
+}
+document.getElementById('enter').addEventListener('click', tryEnter);
+document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') tryEnter(); });
+document.getElementById('user').addEventListener('keydown', e => { if(e.key==='Enter') tryEnter(); });
+document.getElementById('logout').addEventListener('click', () => { sessionStorage.removeItem(SS); location.reload(); });
+document.getElementById('refresh').addEventListener('click', () => loadThread());
+document.getElementById('export').addEventListener('click', async () => {
+  const data=await loadThread();
+  const local=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');
+  const text=[...(data.messages||[]), ...local].map(m=>'['+(m.from||'?')+'] '+(m.text||'')).join('\n\n');
+  await navigator.clipboard.writeText(text);
+  alert('Thread copied.');
+});
+document.getElementById('send').addEventListener('click', () => {
+  const text=document.getElementById('text').value.trim();
+  if(!text) return;
+  const msg={id:'local_'+Date.now(), from:document.getElementById('from').value, at:new Date().toISOString(), text};
+  const q=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');
+  q.push(msg);
+  sessionStorage.setItem('bridge_local_q', JSON.stringify(q));
+  document.getElementById('text').value='';
+  const p=document.getElementById('packet');
+  p.style.display='block';
+  p.textContent='SYNC PACKET (send to CODI):\n'+JSON.stringify(msg);
+  loadThread();
+});
+if(sessionStorage.getItem(SS)==='1') unlock();
+setInterval(()=>{ if(sessionStorage.getItem(SS)==='1') loadThread(); }, 8000);
 </script></body></html>
