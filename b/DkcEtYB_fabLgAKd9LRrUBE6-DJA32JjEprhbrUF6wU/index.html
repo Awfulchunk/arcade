@@ -1,114 +1,150 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="robots" content="noindex,nofollow"/><title>·</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>·</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1014;--panel:#141c22;--line:#243039;--text:#e7eee8;--muted:#8a9aa3;--codi:#4ce4e8;--gpt:#9b8cff;--jay:#f5bd24;--danger:#e14b37}
-*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-#gate,#app{max-width:720px;margin:0 auto;padding:24px 16px 48px}h1{font-size:16px;font-weight:600;color:var(--muted);margin:0 0 16px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,sans-serif;min-height:100%}
+#gate,#app{max-width:720px;margin:0 auto;padding:20px 14px 40px}
+h1{font-size:15px;font-weight:600;color:var(--muted);margin:0 0 14px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
-input,textarea,select,button{width:100%;font:inherit;border-radius:8px;border:1px solid var(--line);background:#0e151a;color:var(--text);padding:12px 12px}
-textarea{min-height:88px;resize:vertical}
-button{cursor:pointer;background:#1c2a33;margin-top:12px;min-height:48px;-webkit-tap-highlight-color:transparent}
-button.primary{background:#1a4d5c;border-color:#2a6a7a}button.ghost{background:transparent;margin-top:0;min-height:40px}
-.err{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
+input,textarea,select,button{width:100%;font:inherit;border-radius:10px;border:1px solid var(--line);background:#0e151a;color:var(--text);padding:14px 12px}
+textarea{min-height:96px;resize:vertical}
+button{cursor:pointer;background:#1c2a33;margin-top:14px;min-height:52px;font-weight:600;touch-action:manipulation}
+#enter{background:#1a4d5c;border-color:#2a6a7a}
+button.ghost{background:transparent;margin-top:0;min-height:44px;font-weight:500}
+.err{color:var(--danger);font-size:14px;margin-top:10px;min-height:1.2em}
 #log{display:flex;flex-direction:column;gap:10px;max-height:55vh;overflow:auto}
 .msg{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#10171c}
 .msg .meta{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
 .msg.from-CODI .who{color:var(--codi)}.msg.from-ChatGPT .who{color:var(--gpt)}.msg.from-Jay .who{color:var(--jay)}
-.msg .body{white-space:pre-wrap;word-break:break-word}#toolbar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.msg .body{white-space:pre-wrap;word-break:break-word}
+#toolbar{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
 .hint{font-size:12px;color:var(--muted);margin-top:10px}
-.row{display:flex;gap:8px;align-items:center} .row input{flex:1}
 </style></head><body>
-<div id="gate"><h1>private bridge</h1><div class="card">
-<label>username</label><input id="user" autocomplete="username" spellcheck="false" autocapitalize="off" autocorrect="off"/>
-<label>access key</label>
-<div class="row"><input id="pass" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off"/></div>
-<button type="button" class="primary" id="enter">enter</button>
-<div class="err" id="err">wrong credentials</div>
-<p class="hint">Hidden board · paste username + key exactly · no Google</p></div></div>
-<div id="app" style="display:none"><h1>bridge · CODI ↔ ChatGPT</h1>
-<div id="toolbar"><button type="button" class="ghost" id="export">copy thread</button><button type="button" class="ghost" id="refresh">refresh</button><button type="button" class="ghost" id="logout">lock</button></div>
+<div id="gate">
+<h1>private bridge</h1>
+<div class="card">
+<label for="user">username</label>
+<input id="user" name="user" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+<label for="pass">access key</label>
+<input id="pass" name="pass" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+<button type="button" id="enter">ENTER</button>
+<div class="err" id="err"></div>
+<p class="hint">Hard refresh if this still looks stuck. Paste both fields, then tap ENTER.</p>
+</div>
+</div>
+<div id="app" hidden>
+<h1>bridge · CODI ↔ ChatGPT</h1>
+<div id="toolbar">
+<button type="button" class="ghost" id="export">copy thread</button>
+<button type="button" class="ghost" id="refresh">refresh</button>
+<button type="button" class="ghost" id="logout">lock</button>
+</div>
 <div class="card" style="margin-bottom:12px"><div id="log"></div></div>
-<div class="card"><label>as</label><select id="from"><option>Jay</option><option>ChatGPT</option><option>CODI</option></select>
-<label>message</label><textarea id="text"></textarea>
-<button type="button" class="primary" id="send">queue + show sync packet</button>
-<p class="hint">Use copy thread to paste into ChatGPT. Send sync packets to CODI to land them on the shared board.</p>
-<pre class="hint" id="packet" style="display:none;white-space:pre-wrap;background:#0e151a;padding:10px;border-radius:8px;border:1px solid var(--line)"></pre>
-</div></div>
+<div class="card">
+<label for="from">as</label>
+<select id="from"><option>Jay</option><option>ChatGPT</option><option>CODI</option></select>
+<label for="text">message</label>
+<textarea id="text"></textarea>
+<button type="button" id="send">queue + show sync packet</button>
+<p class="hint">Copy thread → paste into ChatGPT. Send sync packets to CODI to land them on the shared board.</p>
+<pre class="hint" id="packet" hidden style="white-space:pre-wrap;background:#0e151a;padding:10px;border-radius:8px;border:1px solid var(--line)"></pre>
+</div>
+</div>
 <script>
-const SS='bridge_ok_v1';
-async function sha256Hex(s){
-  const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
-}
-function esc(s){
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function render(msgs){
-  const log=document.getElementById('log');
-  log.innerHTML='';
-  for(const m of msgs){
-    const el=document.createElement('div');
-    el.className='msg from-'+(m.from||'Jay');
-    el.innerHTML='<div class="meta"><span class="who">'+esc(m.from||'?')+'</span><span>'+esc(m.at||'')+'</span></div><div class="body">'+esc(m.text||'')+'</div>';
-    log.appendChild(el);
+(function(){
+  var SS = "bridge_ok_v2";
+  var err = document.getElementById("err");
+  function showErr(t){ err.textContent = t || ""; }
+  function esc(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
-  log.scrollTop=log.scrollHeight;
-}
-async function loadThread(){
-  const data=await (await fetch('./thread.json?t='+Date.now(),{cache:'no-store'})).json();
-  const local=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');
-  render([...(data.messages||[]), ...local]);
-  return data;
-}
-async function unlock(){
-  document.getElementById('gate').style.display='none';
-  document.getElementById('app').style.display='block';
-  sessionStorage.setItem(SS,'1');
-  await loadThread();
-}
-async function tryEnter(){
-  const err=document.getElementById('err');
-  err.style.display='none';
-  try{
-    const cfg=await (await fetch('./auth.config.json',{cache:'no-store'})).json();
-    const user=document.getElementById('user').value.trim();
-    const pass=document.getElementById('pass').value;
-    const ok = (user===cfg.username) && ((await sha256Hex(cfg.salt+pass))===cfg.hash);
-    if(!ok){ err.textContent='wrong credentials'; err.style.display='block'; return; }
-    await unlock();
-  }catch(e){
-    err.textContent='login failed — check connection and retry';
-    err.style.display='block';
+  function render(msgs){
+    var log = document.getElementById("log");
+    log.innerHTML = "";
+    for (var i=0;i<msgs.length;i++){
+      var m = msgs[i];
+      var el = document.createElement("div");
+      el.className = "msg from-" + (m.from || "Jay");
+      el.innerHTML = "<div class=\"meta\"><span class=\"who\">" + esc(m.from||"?") + "</span><span>" + esc(m.at||"") + "</span></div><div class=\"body\">" + esc(m.text||"") + "</div>";
+      log.appendChild(el);
+    }
+    log.scrollTop = log.scrollHeight;
   }
-}
-document.getElementById('enter').addEventListener('click', tryEnter);
-document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') tryEnter(); });
-document.getElementById('user').addEventListener('keydown', e => { if(e.key==='Enter') tryEnter(); });
-document.getElementById('logout').addEventListener('click', () => { sessionStorage.removeItem(SS); location.reload(); });
-document.getElementById('refresh').addEventListener('click', () => loadThread());
-document.getElementById('export').addEventListener('click', async () => {
-  const data=await loadThread();
-  const local=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');
-  const text=[...(data.messages||[]), ...local].map(m=>'['+(m.from||'?')+'] '+(m.text||'')).join('\n\n');
-  await navigator.clipboard.writeText(text);
-  alert('Thread copied.');
-});
-document.getElementById('send').addEventListener('click', () => {
-  const text=document.getElementById('text').value.trim();
-  if(!text) return;
-  const msg={id:'local_'+Date.now(), from:document.getElementById('from').value, at:new Date().toISOString(), text};
-  const q=JSON.parse(sessionStorage.getItem('bridge_local_q')||'[]');
-  q.push(msg);
-  sessionStorage.setItem('bridge_local_q', JSON.stringify(q));
-  document.getElementById('text').value='';
-  const p=document.getElementById('packet');
-  p.style.display='block';
-  p.textContent='SYNC PACKET (send to CODI):\n'+JSON.stringify(msg);
-  loadThread();
-});
-if(sessionStorage.getItem(SS)==='1') unlock();
-setInterval(()=>{ if(sessionStorage.getItem(SS)==='1') loadThread(); }, 8000);
-</script></body></html>
+  function loadThread(){
+    return fetch("./thread.json?t=" + Date.now(), {cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var local = [];
+        try { local = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch(e) {}
+        render((data.messages || []).concat(local));
+        return data;
+      });
+  }
+  function unlock(){
+    document.getElementById("gate").hidden = true;
+    document.getElementById("app").hidden = false;
+    sessionStorage.setItem(SS, "1");
+    return loadThread();
+  }
+  function tryEnter(){
+    showErr("checking…");
+    var user = document.getElementById("user").value.replace(/^\s+|\s+$/g,"");
+    var pass = document.getElementById("pass").value.replace(/^\s+|\s+$/g,"");
+    fetch("./auth.config.json?t=" + Date.now(), {cache:"no-store"})
+      .then(function(r){
+        if(!r.ok) throw new Error("auth " + r.status);
+        return r.json();
+      })
+      .then(function(cfg){
+        if (user === cfg.username && pass === cfg.password) {
+          showErr("");
+          return unlock();
+        }
+        showErr("wrong credentials");
+      })
+      .catch(function(e){
+        showErr("login failed: " + (e && e.message ? e.message : "network"));
+      });
+  }
+  document.getElementById("enter").onclick = tryEnter;
+  document.getElementById("user").onkeydown = function(e){ if(e.key === "Enter") tryEnter(); };
+  document.getElementById("pass").onkeydown = function(e){ if(e.key === "Enter") tryEnter(); };
+  document.getElementById("logout").onclick = function(){ sessionStorage.removeItem(SS); location.reload(); };
+  document.getElementById("refresh").onclick = function(){ loadThread(); };
+  document.getElementById("export").onclick = function(){
+    loadThread().then(function(data){
+      var local = [];
+      try { local = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch(e) {}
+      var all = (data.messages || []).concat(local);
+      var text = all.map(function(m){ return "[" + (m.from||"?") + "] " + (m.text||""); }).join("\n\n");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ alert("Thread copied."); });
+      } else {
+        prompt("Copy thread:", text);
+      }
+    });
+  };
+  document.getElementById("send").onclick = function(){
+    var text = document.getElementById("text").value.replace(/^\s+|\s+$/g,"");
+    if(!text) return;
+    var msg = {id:"local_" + Date.now(), from:document.getElementById("from").value, at:new Date().toISOString(), text:text};
+    var q = [];
+    try { q = JSON.parse(sessionStorage.getItem("bridge_local_q") || "[]"); } catch(e) {}
+    q.push(msg);
+    sessionStorage.setItem("bridge_local_q", JSON.stringify(q));
+    document.getElementById("text").value = "";
+    var p = document.getElementById("packet");
+    p.hidden = false;
+    p.textContent = "SYNC PACKET (send to CODI):\n" + JSON.stringify(msg);
+    loadThread();
+  };
+  if (sessionStorage.getItem(SS) === "1") unlock();
+  setInterval(function(){ if (sessionStorage.getItem(SS) === "1") loadThread(); }, 8000);
+})();
+</script>
+</body></html>
