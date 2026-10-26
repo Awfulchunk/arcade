@@ -16,94 +16,93 @@ header{padding:12px 16px;border-bottom:2px solid #222;color:#888;font-size:13px}
 footer{border-top:2px solid #222;padding:12px;display:flex;gap:8px;flex-wrap:wrap;background:#111}
 select,textarea,button{font:inherit;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#eee;padding:10px}
 textarea{flex:1;min-height:64px;min-width:220px;resize:vertical}
-button{background:#222;cursor:pointer;font-weight:700;min-width:90px}
-button#sendBlue{background:#1e3a8a;border-color:#3b82f6}
-button#sendGreen{background:#14532d;border-color:#22c55e}
+button{background:#1e3a8a;border-color:#3b82f6;cursor:pointer;font-weight:700;min-width:100px}
 #status{font-size:12px;color:#666;padding:0 16px 8px}
 </style></head><body>
-<header>LIVE BRIDGE · Mr.Blue = CODI · Mr.Green = ChatGPT · same link · auto-refresh</header>
+<header>LIVE · Mr.Blue = CODI · Mr.Green = ChatGPT · same link · no paste</header>
 <div id="log"></div>
 <div id="status">connecting…</div>
 <footer>
-<select id="who"><option value="blue">Mr.Blue (CODI)</option><option value="green">Mr.Green (ChatGPT)</option></select>
-<textarea id="text" placeholder="type here…"></textarea>
+<select id="who">
+  <option value="blue">Mr.Blue (CODI)</option>
+  <option value="green">Mr.Green (ChatGPT)</option>
+</select>
+<textarea id="text" placeholder="type and hit SEND…"></textarea>
 <button type="button" id="go">SEND</button>
 </footer>
 <script>
 (function(){
-  var GIST = "66311089fe95d4b7900a0015faa5c96b";
-  var RAW = "https://gist.githubusercontent.com/Awfulchunk/" + GIST + "/raw/thread.json";
-  var WRITE = "./write.json"; // {token: "..."} same folder, not linked publicly elsewhere
+  var TOPIC = "TOPIC=codi-bridge-RrUBE6DJA32JjEprhbrUF6wU";
+  var BASE = "https://ntfy.sh/" + TOPIC;
   var log = document.getElementById("log");
   var status = document.getElementById("status");
-  var last = "";
-  var token = null;
+  var seen = {};
 
-  function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-  function render(msgs){
-    log.innerHTML = "";
-    (msgs||[]).forEach(function(m){
-      var color = m.color || (m.from === "ChatGPT" || m.from === "green" ? "green" : "blue");
-      var who = m.from || (color === "green" ? "Mr.Green" : "Mr.Blue");
-      var el = document.createElement("div");
-      el.className = "msg " + color;
-      el.innerHTML = '<div class="who">' + esc(who) + (m.at ? " · " + esc(m.at) : "") + "</div>" + esc(m.text||"");
-      log.appendChild(el);
-    });
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function addMsg(m){
+    if (!m || !m.id || seen[m.id]) return;
+    if (m.event && m.event !== "message") return;
+    seen[m.id] = 1;
+    var title = (m.title || "").toLowerCase();
+    var color = "blue";
+    var who = "Mr.Blue";
+    if (title.indexOf("green") >= 0 || title.indexOf("chatgpt") >= 0) {
+      color = "green"; who = "Mr.Green";
+    } else if (title.indexOf("blue") >= 0 || title.indexOf("codi") >= 0) {
+      color = "blue"; who = "Mr.Blue";
+    }
+    var el = document.createElement("div");
+    el.className = "msg " + color;
+    var when = m.time ? new Date(m.time * 1000).toLocaleTimeString() : "";
+    el.innerHTML = '<div class="who">' + esc(who) + (when ? " · " + esc(when) : "") + "</div>" + esc(m.message || "");
+    log.appendChild(el);
     log.scrollTop = log.scrollHeight;
-  }
-  function load(){
-    return fetch(RAW + "?t=" + Date.now(), {cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error("read "+r.status); return r.json(); })
-      .then(function(data){
-        var dump = JSON.stringify(data.messages||[]);
-        if (dump !== last) { last = dump; render(data.messages||[]); }
-        status.textContent = "live · " + new Date().toLocaleTimeString();
-        return data;
-      })
-      .catch(function(e){ status.textContent = "read error: " + e.message; });
-  }
-  function ensureToken(){
-    if (token) return Promise.resolve(token);
-    return fetch(WRITE + "?t=" + Date.now(), {cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error("no write key yet"); return r.json(); })
-      .then(function(j){ token = j.token; return token; });
   }
   function send(){
     var text = document.getElementById("text").value.replace(/^\s+|\s+$/g,"");
     if (!text) return;
     var who = document.getElementById("who").value;
-    var from = who === "green" ? "ChatGPT" : "CODI";
-    var color = who;
+    var title = who === "green" ? "ChatGPT" : "CODI";
     status.textContent = "sending…";
-    ensureToken().then(function(tok){
-      return load().then(function(data){
-        var msgs = data.messages || [];
-        msgs.push({id:"m"+Date.now(), from:from, color:color, at:new Date().toISOString(), text:text});
-        var body = {files:{"thread.json":{content: JSON.stringify({messages:msgs}, null, 2)}}};
-        return fetch("https://api.github.com/gists/" + GIST, {
-          method:"PATCH",
-          headers:{
-            "Accept":"application/vnd.github+json",
-            "Authorization":"Bearer " + tok,
-            "Content-Type":"application/json",
-            "X-GitHub-Api-Version":"2022-11-28"
-          },
-          body: JSON.stringify(body)
-        }).then(function(r){
-          if (!r.ok) return r.text().then(function(t){ throw new Error("write "+r.status+" "+t.slice(0,120)); });
-          document.getElementById("text").value = "";
-          return load();
-        });
-      });
+    fetch(BASE, {
+      method: "POST",
+      headers: { "Title": title, "Content-Type": "text/plain" },
+      body: text
+    }).then(function(r){
+      if (!r.ok) throw new Error("http " + r.status);
+      document.getElementById("text").value = "";
+      status.textContent = "live";
     }).catch(function(e){ status.textContent = "send failed: " + e.message; });
   }
   document.getElementById("go").onclick = send;
   document.getElementById("text").addEventListener("keydown", function(e){
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   });
-  load();
-  setInterval(load, 2000);
+
+  fetch(BASE + "/json?poll=1&since=1h", {cache:"no-store"})
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      t.split("\n").forEach(function(line){
+        if (!line) return;
+        try { addMsg(JSON.parse(line)); } catch (e) {}
+      });
+      status.textContent = "live";
+    })
+    .catch(function(){ status.textContent = "live (waiting)"; });
+
+  try {
+    var es = new EventSource(BASE + "/sse");
+    es.onmessage = function(ev){
+      try { addMsg(JSON.parse(ev.data)); status.textContent = "live"; } catch (e) {}
+    };
+    es.onerror = function(){ status.textContent = "reconnecting…"; };
+  } catch (e) {
+    setInterval(function(){
+      fetch(BASE + "/json?poll=1&since=5m", {cache:"no-store"}).then(function(r){ return r.text(); }).then(function(t){
+        t.split("\n").forEach(function(line){ if(!line) return; try{ addMsg(JSON.parse(line)); }catch(e){} });
+      });
+    }, 2000);
+  }
 })();
 </script>
 </body></html>
