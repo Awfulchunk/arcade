@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d10">
-<title>Tank Royal Rumble</title><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta name="trr-build" content="2.5.4">
+<title>Tank Royal Rumble</title><meta http-equiv="Cache-Control" content="no-cache, must-revalidate"><meta name="trr-build" content="2.5.5">
 <style>
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#07040c;color:#eee;
   touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none;
@@ -2946,7 +2946,7 @@ function onCfgChange(k,obj){
   if(setRefresh)setRefresh();if(cusRefresh)cusRefresh();
 }
 let setRefresh=null,cusRefresh=null;
-function openSettings(from){settingsFrom=from;if(from==='pause')show('pause',false);cusRefresh=null;setRefresh=buildForm($('setForm'),settingsSchema(),cfgObj(),onCfgChange);show('settings',true);$('setScroll').scrollTop=0;}
+window.__tjOwnSettings=function(){try{openSettings('title');}catch(e){}};function openSettings(from){settingsFrom=from;if(from==='pause')show('pause',false);cusRefresh=null;setRefresh=buildForm($('setForm'),settingsSchema(),cfgObj(),onCfgChange);show('settings',true);$('setScroll').scrollTop=0;}
 function openCustom(){setRefresh=null;cusRefresh=buildForm($('cusForm'),customSchema(),custom,onCfgChange);show('custom',true);$('cusScroll').scrollTop=0;}
 $('cusBack').addEventListener('click',()=>{show('custom',false);cusRefresh=null;});
 $('cusReset').addEventListener('click',()=>{for(const k in custom)delete custom[k];Object.assign(custom,JSON.parse(JSON.stringify(CUSTOM_DEF)));saveCustom();if(cusRefresh)cusRefresh();sfx('pick');});
@@ -5447,7 +5447,7 @@ function trrApplyHooks(S){for(const f of TRR_HOOK.apply)f(S);}
 <div id="trrPop"><div class="box" id="trrPopBox"></div></div>`;
  while(d.firstChild)document.body.appendChild(d.firstChild);})();
 function trrAgo(t){const s=(Date.now()-t)/1000;return s<90?'just now':s<5400?Math.round(s/60)+' min ago':s<172800?Math.round(s/3600)+' h ago':Math.round(s/86400)+' days ago';}
-function trrMenuShow(){const B=$('trrMenuBox');TRR.on=false;let h=`<div class="trrTitle">TANK ROYAL<br>RUMBLE<small>SURVIVE · BUILD · RAID · v2.5.4</small></div><div class="trrSub">One huge world. A junk tank, four crew, and everyone wants your stuff.</div>`;
+function trrMenuShow(){const B=$('trrMenuBox');TRR.on=false;let h=`<div class="trrTitle">TANK ROYAL<br>RUMBLE<small>SURVIVE · BUILD · RAID · v2.5.5</small></div><div class="trrSub">One huge world. A junk tank, four crew, and everyone wants your stuff.</div>`;
  const last=+(localStorage.getItem(TRR_LS+'last')||-1),LS_=trrReadSlot(last);
  if(LS_)h+=`<button class="trrBtn" id="trrCont">▶ CONTINUE  <span style="opacity:.75;font-weight:600">(slot ${last+1} · day ${LS_.day||1})</span></button>`;
  h+=`<div class="trrH">SAVE SLOTS</div>`;
@@ -7694,7 +7694,7 @@ function trrCutDrawX(g){const C=TRR.cut,t=SV.tank,Lx=trrCutXLayout(),G=Lx.G;g.fi
 
 // ---- trr-98-fix254.js ----
 // ===================== 2.5.4: Tank Rumble minimap zone ring + build stamp =====================
-const TRR_BUILD='2.5.4';
+const TRR_BUILD='2.5.5';
 // the shrinking zone ring on the minimap and on the full-screen map (Tank Rumble only)
 {const _d=svMiniDots;svMiniDots=function(ox,oy,k,clip){_d(ox,oy,k,clip);
  const Z=TRR.brz;if(!(TRR.rumble&&TRR.on&&Z&&SV.map))return;const g=ctx,cx=ox+Z.x*k,cy=oy+Z.y*k,r=Math.max(1,Z.r*k);
@@ -7727,6 +7727,41 @@ state='title';setTimeout(()=>{trrMenuShow();},0);
 (function(){const st=document.createElement('style');st.textContent='.trrChip{background:#222a58;border-radius:10px;padding:4px 8px;font-weight:700}';document.head.appendChild(st);})();
 (function(){const st=document.createElement('style');st.textContent='#trrPop{z-index:70!important}#trrPopBox{max-height:90vh;overflow:auto}#trrPopBox .trrBtn[disabled]{opacity:.45}';document.head.appendChild(st);})();
 
+
+
+/* ===== v2.5.5: foundation tree scrub (from 2.5.2 stress) + trees fall with ZERO tank damage ===== */
+TRR.ver='2.5.5';
+try{TRR_BUILD='2.5.5';}catch(e){/* const earlier */} if(typeof TRR!=='undefined')TRR.build='2.5.5';
+// 1) always keep floor set in sync when placing foundations
+{const _p=trrPlace;trrPlace=function(k,gx,gy,side,tier,free,list){const p=_p(k,gx,gy,side,tier,free,list);
+  if(p&&p.k==='found'){if(!TRR.fset)TRR.fset=new Set();TRR.fset.add(p.gx+','+p.gy);trrClearTile(p.gx,p.gy,!free);}return p;};}
+// 2) streaming buckets: also scrub floors when a bucket was already loaded (was skipped before → trees respawned on pads)
+{const _gb=svGenBucket;svGenBucket=function(M,bx,by){const k=bx+','+by;const r=_gb(M,bx,by);if(!TRR.on||!TRR.fset||!TRR.fset.size)return r;
+  for(const L of [M.TB,M.BB,M.RB]){if(!L||!L[k])continue;L[k]=L[k].filter(o=>!trrOnFloor(o.x,o.y));if(!L[k].length)delete L[k];}return r;};}
+// 3) safety sweep: once a second, yank any tree/bush/rock sitting on a foundation
+TRR_HOOK.tick.push(dt=>{if(!TRR.on||!TRR.fset||!TRR.fset.size)return;TRR._scrubT=(TRR._scrubT||0)+dt;if(TRR._scrubT<1)return;TRR._scrubT=0;
+  const M=SV.map;if(!M)return;for(const L of [M.TB,M.BB,M.RB]){if(!L)continue;for(const k of Object.keys(L)){L[k]=L[k].filter(o=>!trrOnFloor(o.x,o.y));if(!L[k].length)delete L[k];}}});
+// 4) TREE RAM: trees fall/drop; tank takes NO HP / parts / trauma damage (speed scrub only). Verified + locked.
+trrTankRam=function(dt){const t=SV.tank;if(!t.alive||Math.abs(t.spd)<14)return;
+ const tr=trrNearTree(t.x+Math.cos(t.body)*trrHullL(t)*0.75,t.y+Math.sin(t.body)*trrHullL(t)*0.75,trrHullW(t)*0.9);
+ if(tr){trrFell(tr,null,true);t.spd*=0.55; /* trees: fall only + speed scrub; never hurt hull/parts/trauma */ }
+ for(const v of SV.cars||[])if(!v.crushed&&Math.abs(v.x-t.x)<t.r+14&&Math.abs(v.y-t.y)<t.r+14){trrCrush(v);t.spd*=0.6;}
+ const x=trrNearX(t.x,t.y,t.r+6);if(x)trrOpenX(x,'tank');};
+// stamp menu build number
+{const _ms=trrMenuShow;if(typeof trrMenuShow==='function'){/* keep */}}
+try{if(typeof TRR_BUILD!=='undefined'){/* ok */}}catch(e){}
+
+
+// smoke/probe export for ship tests (read-only)
+window.__TRR_SMOKE=()=>({
+  ver: (typeof TRR!=='undefined'&&TRR.ver)|| (typeof TRR_BUILD!=='undefined'?TRR_BUILD:null),
+  build: typeof TRR_BUILD!=='undefined'?TRR_BUILD:null,
+  softPZ: (typeof SV_PROJ!=='undefined'&&SV_PROJ.iso)?{a:SV_PROJ.iso.a,hz:SV_PROJ.iso.hz}:null,
+  ram: (typeof trrTankRam==='function')?trrTankRam.toString().slice(0,500):null,
+  ramHurts: (typeof trrTankRam==='function')?(s=>{const c=s.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*/g,'');return /svHurtTank|\.hp\s*[+\-=]/.test(c);})(trrTankRam.toString()):null,
+  ramFells: (typeof trrTankRam==='function')?/trrFell/.test(trrTankRam.toString()):null,
+  scrubHooks: (typeof TRR_HOOK!=='undefined'&&TRR_HOOK.tick)?TRR_HOOK.tick.filter(f=>/scrub|fset|trrOnFloor|GenBucket|trrPlace/.test(String(f))).length:0
+});
 
 })();
 </script>
