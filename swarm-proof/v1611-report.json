@@ -1,0 +1,677 @@
+{
+  "version": "1.6.11",
+  "baselineSuckSec": 1.75,
+  "measured": {
+    "suck": {
+      "prepN": 398,
+      "waveBonus": 92,
+      "snap": 80.99999999999999,
+      "afterNan": {
+        "x": 0.8607352106119084,
+        "y": 29.33467605287055,
+        "finite": true
+      },
+      "creditsAfterNan": 92,
+      "cleared": {
+        "t": 3.5,
+        "gain": 28,
+        "events": 1,
+        "credits": 120,
+        "snap": 80.99999999999999
+      },
+      "laterEvents": 1,
+      "laterN": 0,
+      "laterCredits": 120,
+      "closest": {
+        "x": -266.1724843150374,
+        "y": -574.4481900807654,
+        "finite": true
+      }
+    },
+    "cam360": {
+      "VS": 0.4888888888888889,
+      "TY": 605.1422222222222,
+      "KY": 0.67,
+      "W": 360,
+      "H": 800,
+      "hx": 360,
+      "top": -700,
+      "ZM": 1,
+      "BARPX": 145,
+      "zbtns": 0,
+      "pts": {
+        "tl": [
+          4,
+          375.85333333333335
+        ],
+        "tr": [
+          356,
+          375.85333333333335
+        ],
+        "bl": [
+          4,
+          651
+        ],
+        "br": [
+          356,
+          651
+        ],
+        "gun": [
+          180,
+          605.1422222222222
+        ]
+      }
+    },
+    "cam720": {
+      "VS": 0.9888888888888889,
+      "TY": 1358.2422222222222,
+      "KY": 0.67,
+      "W": 720,
+      "H": 1600,
+      "hx": 360,
+      "top": -700,
+      "ZM": 1,
+      "BARPX": 145,
+      "zbtns": 0,
+      "pts": {
+        "tl": [
+          4,
+          894.4533333333331
+        ],
+        "tr": [
+          716,
+          894.4533333333331
+        ],
+        "bl": [
+          4,
+          1451
+        ],
+        "br": [
+          716,
+          1451
+        ],
+        "gun": [
+          360,
+          1358.2422222222222
+        ]
+      }
+    },
+    "cam320": {
+      "VS": 0.43333333333333335,
+      "TY": 378.35333333333335,
+      "KY": 0.67,
+      "W": 320,
+      "H": 568,
+      "hx": 360,
+      "top": -700,
+      "ZM": 1,
+      "BARPX": 145,
+      "zbtns": 0,
+      "pts": {
+        "tl": [
+          4,
+          175.11999999999998
+        ],
+        "tr": [
+          316,
+          175.11999999999998
+        ],
+        "bl": [
+          4,
+          419
+        ],
+        "br": [
+          316,
+          419
+        ],
+        "gun": [
+          160,
+          378.35333333333335
+        ]
+      }
+    },
+    "cap": {
+      "max": 180,
+      "cap": 180,
+      "n": 180,
+      "steps": 136
+    },
+    "guns": {
+      "store": {
+        "80,30": "shotgun"
+      },
+      "picker": [
+        "basic",
+        "shotgun",
+        "laser",
+        "sniper",
+        "TARGET: NEAREST",
+        "CLOSE"
+      ]
+    }
+  },
+  "results": [
+    {
+      "name": "version",
+      "ok": true,
+      "detail": "1.6.11"
+    },
+    {
+      "name": "no zoom buttons",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "name": "KY remains 0.67",
+      "ok": true,
+      "detail": 0.67
+    },
+    {
+      "name": "playfield half-width stays 360",
+      "ok": true,
+      "detail": 360
+    },
+    {
+      "name": "playfield top stays -700",
+      "ok": true,
+      "detail": -700
+    },
+    {
+      "name": "360x800 whole field on screen",
+      "ok": true,
+      "detail": {
+        "tl": [
+          4,
+          375.85333333333335
+        ],
+        "tr": [
+          356,
+          375.85333333333335
+        ],
+        "bl": [
+          4,
+          651
+        ],
+        "br": [
+          356,
+          651
+        ],
+        "gun": [
+          180,
+          605.1422222222222
+        ]
+      }
+    },
+    {
+      "name": "360x800 field meets the sides",
+      "ok": true,
+      "detail": 4
+    },
+    {
+      "name": "zoom path cannot change scale",
+      "ok": true,
+      "detail": {
+        "before": 0.4888888888888889,
+        "after": 0.4888888888888889,
+        "ZM": 1,
+        "zbtns": 0
+      }
+    },
+    {
+      "name": "wheel does not zoom",
+      "ok": true,
+      "detail": {
+        "before": 0.4888888888888889,
+        "after": 0.4888888888888889
+      }
+    },
+    {
+      "name": "settled limb sorts under the closer walker",
+      "ok": true,
+      "detail": "blood@-30,limb@40,e@40"
+    },
+    {
+      "name": "farther blood sorts behind",
+      "ok": true,
+      "detail": "blood@-30,limb@40,e@40"
+    },
+    {
+      "name": "airborne gib is not in the ground pass",
+      "ok": true,
+      "detail": [
+        {
+          "k": "gib",
+          "y": 10,
+          "air": 12
+        }
+      ]
+    },
+    {
+      "name": "CAP live count measured 180",
+      "ok": true,
+      "detail": {
+        "max": 180,
+        "cap": 180,
+        "n": 180,
+        "steps": 136
+      }
+    },
+    {
+      "name": "suck keeps every gore piece until it arrives",
+      "ok": true,
+      "detail": {
+        "t": 3.5,
+        "gain": 28,
+        "events": 1,
+        "credits": 120,
+        "snap": 80.99999999999999
+      }
+    },
+    {
+      "name": "suck duration about 2x the 1.75s baseline",
+      "ok": true,
+      "detail": 3.5
+    },
+    {
+      "name": "wave bonus only until the suck finishes",
+      "ok": true,
+      "detail": {
+        "waveBonus": 92,
+        "early": 92
+      }
+    },
+    {
+      "name": "gore reward is 35% once",
+      "ok": true,
+      "detail": {
+        "expectedGain": 28,
+        "suck": {
+          "prepN": 398,
+          "waveBonus": 92,
+          "snap": 80.99999999999999,
+          "afterNan": {
+            "x": 0.8607352106119084,
+            "y": 29.33467605287055,
+            "finite": true
+          },
+          "creditsAfterNan": 92,
+          "cleared": {
+            "t": 3.5,
+            "gain": 28,
+            "events": 1,
+            "credits": 120,
+            "snap": 80.99999999999999
+          },
+          "laterEvents": 1,
+          "laterN": 0,
+          "laterCredits": 120,
+          "closest": {
+            "x": -266.1724843150374,
+            "y": -574.4481900807654,
+            "finite": true
+          }
+        }
+      }
+    },
+    {
+      "name": "NaN gore stays finite and is not deleted on the spot",
+      "ok": true,
+      "detail": {
+        "x": 0.8607352106119084,
+        "y": 29.33467605287055,
+        "finite": true
+      }
+    },
+    {
+      "name": "sniper is a thin white hitscan beam",
+      "ok": true,
+      "detail": {
+        "fx": [
+          {
+            "k": "beam",
+            "c": "#ffffff",
+            "wd": 1,
+            "x": 0,
+            "y": 0,
+            "x2": 3.6739403974420595e-14,
+            "y2": -600
+          }
+        ],
+        "bullets": []
+      }
+    },
+    {
+      "name": "laser is a pink straight beam",
+      "ok": true,
+      "detail": [
+        {
+          "k": "beam",
+          "c": "#ff4a9a",
+          "wd": 2,
+          "x": 0,
+          "y": 0,
+          "x2": 2.5717582782094416e-14,
+          "y2": -420
+        }
+      ]
+    },
+    {
+      "name": "laser beam is straight up the aim",
+      "ok": true,
+      "detail": [
+        {
+          "k": "beam",
+          "c": "#ff4a9a",
+          "wd": 2,
+          "x": 0,
+          "y": 0,
+          "x2": 2.5717582782094416e-14,
+          "y2": -420
+        }
+      ]
+    },
+    {
+      "name": "unlinked side gun fires the picked shotgun",
+      "ok": true,
+      "detail": {
+        "fx": [
+          {
+            "k": "cone",
+            "c": "#ffe0a0",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          }
+        ],
+        "bullets": [
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.07268614140833,
+            "y": 20.000264167246858
+          }
+        ]
+      }
+    },
+    {
+      "name": "side gun does not follow a main weapon change",
+      "ok": true,
+      "detail": {
+        "fx": [
+          {
+            "k": "cone",
+            "c": "#ffe0a0",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          }
+        ],
+        "bullets": [
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          },
+          {
+            "wid": "shotgun",
+            "col": "#ffd080",
+            "x": 80.13435533707852,
+            "y": 20.000902608565184
+          }
+        ]
+      }
+    },
+    {
+      "name": "linked gun ignores its own weapon override",
+      "ok": true,
+      "detail": {
+        "shots": {
+          "fx": [
+            {
+              "k": "beam",
+              "c": "#ffffff",
+              "wd": 1,
+              "x": 44.66845250919338,
+              "y": -8.843390253144213,
+              "x2": 324.7756030607961,
+              "y2": -539.446805441797
+            }
+          ],
+          "bullets": []
+        },
+        "wepId": null,
+        "linked": true
+      }
+    },
+    {
+      "name": "linked gun updates when the main weapon changes",
+      "ok": true,
+      "detail": {
+        "fx": [
+          {
+            "k": "beam",
+            "c": "#ff4a9a",
+            "wd": 2,
+            "x": 40,
+            "y": -10,
+            "x2": 40.00000000000003,
+            "y2": -430
+          }
+        ],
+        "bullets": []
+      }
+    },
+    {
+      "name": "picker lists purchased guns only",
+      "ok": true,
+      "detail": [
+        "basic",
+        "shotgun",
+        "laser",
+        "sniper",
+        "TARGET: NEAREST",
+        "CLOSE"
+      ]
+    },
+    {
+      "name": "picker touch targets are at least 44px",
+      "ok": true,
+      "detail": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    {
+      "name": "sell and picker do not overlap",
+      "ok": true,
+      "detail": {
+        "pick": {
+          "top": 92,
+          "left": 8,
+          "right": 228,
+          "bottom": 426,
+          "w": 220,
+          "h": 334
+        },
+        "sell": {
+          "display": "block",
+          "top": 540,
+          "left": 188.71875,
+          "right": 352,
+          "bottom": 584,
+          "w": 163.28125,
+          "h": 44
+        }
+      }
+    },
+    {
+      "name": "sell touch target is at least 44px",
+      "ok": true,
+      "detail": {
+        "display": "block",
+        "top": 540,
+        "left": 188.71875,
+        "right": 352,
+        "bottom": 584,
+        "w": 163.28125,
+        "h": 44
+      }
+    },
+    {
+      "name": "side gun screen hit is about 44px and not the whole field",
+      "ok": true,
+      "detail": {
+        "near": true,
+        "far": false
+      }
+    },
+    {
+      "name": "side gun choice is stored",
+      "ok": true,
+      "detail": {
+        "80,30": "shotgun"
+      }
+    },
+    {
+      "name": "side gun choice survives reload",
+      "ok": true,
+      "detail": {
+        "id": "shotgun",
+        "store": {
+          "80,30": "shotgun"
+        }
+      }
+    },
+    {
+      "name": "720x1600 whole field on screen",
+      "ok": true,
+      "detail": {
+        "gap720": 4,
+        "pts": {
+          "tl": [
+            4,
+            894.4533333333331
+          ],
+          "tr": [
+            716,
+            894.4533333333331
+          ],
+          "bl": [
+            4,
+            1451
+          ],
+          "br": [
+            716,
+            1451
+          ],
+          "gun": [
+            360,
+            1358.2422222222222
+          ]
+        },
+        "VS": 0.9888888888888889,
+        "hx": 360
+      }
+    },
+    {
+      "name": "320x568 whole field on screen",
+      "ok": true,
+      "detail": {
+        "pts": {
+          "tl": [
+            4,
+            175.11999999999998
+          ],
+          "tr": [
+            316,
+            175.11999999999998
+          ],
+          "bl": [
+            4,
+            419
+          ],
+          "br": [
+            316,
+            419
+          ],
+          "gun": [
+            160,
+            378.35333333333335
+          ]
+        },
+        "VS": 0.43333333333333335,
+        "BAR": 145
+      }
+    },
+    {
+      "name": "no JavaScript page errors",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "stress180": {
+    "max": 180,
+    "n": 180,
+    "cap": 180,
+    "nan": 0,
+    "steps": 80
+  },
+  "jsErrorsDuringStress": []
+}
