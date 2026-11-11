@@ -1,14 +1,47 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000080"><title>FunMotion 0.2.4 · COMP 1</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000080"><title>FunMotion 0.2.5 · COMP 1</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#008080;font:14px Arial,sans-serif;color:#151515}button,input,select{font:inherit}button{color:#111;background:#d4d0c8;border:2px solid;border-color:#fff #444 #444 #fff;min-width:44px;min-height:44px;padding:5px 8px;touch-action:manipulation;cursor:pointer}button:active,button.active{border-color:#444 #fff #fff #444;background:#c7d8fa}button:disabled{color:#777;cursor:default}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #b35000;outline-offset:-4px}input[type=checkbox]{width:24px;height:24px;flex:none}input[type=color]{width:48px;height:44px;padding:2px}input[type=range]{min-height:44px;width:100%;accent-color:#000080}select{min-height:44px;max-width:100%}label{display:flex;gap:8px;align-items:center;min-height:44px}small{font-size:12px;line-height:1.35;display:block;color:#444}h2,h3,p{margin:8px 0}h2{font-size:18px}h3{font-size:15px}#app{height:100vh;height:100dvh;height:100svh;max-width:800px;margin:auto;background:#c0c0c0;padding:4px;display:flex;flex-direction:column;gap:3px;border:3px solid;border-color:#eee #555 #555 #eee;overflow:hidden;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}header{background:#000080;color:white;display:flex;align-items:center;justify-content:space-between;min-height:26px;padding:2px 6px;font-weight:bold}header span{font-size:12px;font-weight:normal}nav,.tabs,.row{display:flex;gap:3px;align-items:center}nav>button,.tabs>button{flex:1}.tabs>button{font-weight:bold}.tabs button.active{background:#fff}#hint{background:#ffffd2;border:1px solid #777;padding:4px 7px;min-height:36px;font-size:13px;line-height:1.25}#stage{position:relative;flex:1;min-height:60px;overflow:hidden;background:#808080;border:2px solid;border-color:#444 #fff #fff #444;touch-action:none}#stage canvas{position:absolute;transform-origin:0 0;background:white;touch-action:none}#viewbar{display:flex;gap:3px;align-items:center;flex:none}#viewbar button{flex:1}#viewbar output{font-size:12px;min-width:36px;text-align:center}#context{display:flex;gap:3px;align-items:center}#context button{flex:1;font-size:13px;padding:4px}#timeline{display:flex;align-items:center;gap:3px;min-height:44px}#timeline button{padding:3px}#frameLabel{flex:1;text-align:center;font-size:13px}#primary{display:flex;gap:4px}#next{background:#ffb535;flex:1;font-weight:bold;min-height:52px;font-size:15px}#next small{font-size:11px;color:#512d00;font-weight:normal}#play{min-width:70px}#toast{position:fixed;bottom:20%;left:50%;transform:translateX(-50%);z-index:20;background:#ffffd2;border:2px solid #000080;max-width:92vw;padding:12px;box-shadow:3px 3px #333;pointer-events:none;display:none;font-size:14px}dialog{padding:0;border:3px solid;border-color:#fff #444 #444 #fff;background:#d4d0c8;width:min(96vw,600px);max-height:calc(100vh - 16px);max-height:calc(100svh - 16px);color:#111;box-shadow:5px 5px #222;overflow:hidden}dialog::backdrop{background:#0006}.title{background:#000080;color:white;padding:4px 8px;display:flex;align-items:center;justify-content:space-between;font-weight:bold}.title button{min-width:44px;background:#d4d0c8}.body{padding:8px;overflow:auto;max-height:calc(100vh - 90px);max-height:calc(100svh - 90px);overscroll-behavior:contain}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.grid button{min-height:60px;overflow-wrap:anywhere}.grid button small{font-size:11px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.settings label{border-bottom:1px solid #aaa;padding:3px}.settings label span{flex:1}.swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.swatches button{min-width:0;padding:0;height:44px}.swatches button.active{outline:3px solid #000080;outline-offset:-4px}#palette .body{display:flex;flex-direction:column;gap:7px}.field{display:flex;gap:8px;align-items:center}.field label{flex:1}.field input[type=number]{width:80px;min-height:44px}.notice{background:#ffffd2;padding:8px;font-size:13px;border:1px solid #888}#navgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-width:270px;margin:8px auto}#navgrid button{min-height:52px}.muted{color:#555;font-size:12px}#fileIn,#loadIn{display:none}
 #connections .notice{margin:4px 0;padding:6px;font-size:12px}#connections small{font-size:11px}
-#viewport{flex:1;min-height:90px;display:flex;gap:3px;overflow:hidden}#stage{min-width:0}#vRail{width:44px;display:flex;flex-direction:column;align-items:center;flex:none;background:#c0c0c0}#vRail button{width:44px;flex:none}#vRail input{writing-mode:vertical-lr;direction:rtl;width:44px;min-height:44px;flex:1;cursor:ns-resize}#vRail output{font-size:11px;line-height:18px}#viewbar input{min-width:20px;flex:1;margin:0}#viewbar button{flex:none;width:44px}#hint.warn{background:#ffe0b0;color:#6c2500}#hint.attached{background:#dff0dc}#hint{font-size:12px;min-height:38px}.tabs button{font-size:13px;padding:3px}
+#viewport{flex:1;min-height:90px;display:flex;gap:3px;overflow:hidden}#stage{min-width:0}#vRail{width:44px;display:flex;flex-direction:column;align-items:center;flex:none;background:#c0c0c0}#vRail button{width:44px;flex:none}#vRail input{writing-mode:vertical-lr;direction:ltr;width:44px;min-height:44px;flex:1;cursor:ns-resize}#vRail output{font-size:11px;line-height:18px}#viewbar input{min-width:20px;flex:1;margin:0}#viewbar button{flex:none;width:44px}#hint.warn{background:#ffe0b0;color:#6c2500}#hint.attached{background:#dff0dc}#hint{font-size:12px;min-height:38px}.tabs button{font-size:13px;padding:3px}
 @media(max-height:620px){#app{gap:2px;padding:2px}header{min-height:22px;font-size:13px}#hint{font-size:12px;min-height:32px}#next{min-height:48px}#next small{font-size:10px}#context button{font-size:12px;padding:2px}.body{padding:6px}.grid button{min-height:52px}}
+/* FunMotion 0.2.5 Tutorial + hold-tip · COMP 1. No page scroll. */
+#tutorialDlg{width:min(96vw,420px);max-width:96vw;height:min(calc(100svh - 10px),760px);max-height:calc(100svh - 10px);padding:0;overflow:hidden;display:none;flex-direction:column}
+#tutorialDlg[open]{display:flex}
+#tutorialDlg .tutBody{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding:6px;gap:4px}
+#tutorialTabs{flex:none}
+#tutWatch,#tutTools{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;gap:4px}
+#tutWatch[hidden],#tutTools[hidden]{display:none}
+#tutStage{flex:1;min-height:110px;position:relative;background:#000;border:2px solid;border-color:#444 #fff #fff #444;overflow:hidden}
+#tutVideo{width:100%;height:100%;object-fit:contain;background:#000;display:block}
+#tutVideoMsg{position:absolute;left:8px;right:8px;bottom:8px;color:#ffffd2;font-size:12px;display:none;background:#000080cc;padding:6px}
+#tutControls,#tutChapters,#tutToolPager{display:flex;gap:4px;align-items:center;flex:none}
+#tutControls button,#tutChapters button,#tutToolPager button{flex:none}
+#tutScrub{flex:1;min-width:40px}
+#tutTime{font-size:12px;min-width:58px;text-align:right}
+#tutChapter{flex:1;min-width:0;font-size:13px}
+#tutToolGrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:5px;overflow:hidden}
+#tutToolGrid .tutCard{display:flex;flex-direction:column;gap:2px;min-width:0;min-height:0;padding:4px;border:2px solid;border-color:#fff #444 #444 #fff;background:#d4d0c8;text-align:left}
+#tutToolGrid .tutCard strong{font-size:12px;line-height:1.2}
+#tutToolGrid .tutCard small{font-size:10px;line-height:1.25;color:#333;display:block}
+#tutToolGrid canvas,#tutToolGrid img{width:100%;height:auto;max-height:120px;background:#fff;border:1px solid #555;flex:1;min-height:70px;object-fit:contain}
+#tutToolPage{flex:1;text-align:center;font-size:12px}
+#holdTip{position:fixed;z-index:80;left:50%;bottom:10px;transform:translateX(-50%);width:min(92vw,340px);background:#d4d0c8;border:3px solid;border-color:#fff #444 #444 #fff;box-shadow:5px 5px #222;display:none;overflow:hidden}
+#holdTip.show{display:block}
+#holdTip .holdBody{padding:6px;display:flex;flex-direction:column;gap:4px}
+#holdTip canvas{width:100%;height:auto;background:#fff;border:1px solid #555;max-height:180px}
+#holdTip p{margin:0;font-size:12px;line-height:1.3}
+@media(max-height:620px){
+  #tutorialDlg{height:calc(100svh - 6px);max-height:calc(100svh - 6px)}
+  #tutToolGrid canvas,#tutToolGrid img{max-height:88px;min-height:56px}
+  #holdTip canvas{max-height:130px}
+  #tutChapter{font-size:12px}
+}
+
 </style></head><body>
 <main id="app">
-<header>▣ FUNMOTION <span>COMP 1 · 0.2.4</span></header>
-<nav aria-label="Project and history"><button id="file">File</button><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="settings">Settings</button></nav>
+<header>▣ FUNMOTION <span>COMP 1 · 0.2.5</span></header>
+<nav aria-label="Project and history"><button id="file">File</button><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="settings">Settings</button><button id="tutorial">Tutorial</button></nav>
 <div class="tabs" aria-label="Workspace"><button data-tab="draw" class="active">Draw</button><button data-tab="joints">Joints</button><button data-tab="pose">Pose</button><button data-tab="frames">Frames</button></div>
 <div id="hint" role="status" aria-live="polite"></div>
 <div id="viewport"><div id="stage" aria-label="Drawing stage"><canvas id="canvas" width="720" height="1100" aria-label="Editable animation canvas"></canvas></div><div id="vRail"><button id="plus" aria-label="Zoom in">+</button><input id="vertical" type="range" min="0" max="1000" value="500" step="1" aria-label="Vertical paper scrollbar"><button id="minus" aria-label="Zoom out">−</button><output id="zoomText">Fit</output></div></div>
@@ -34,6 +67,25 @@
 <dialog id="files"><div class="title">File · local project<button data-close aria-label="Close file">×</button></div><div class="body grid two"><button id="saveProject">Save project<small>Editable .funmotion.json</small></button><button id="loadProject">Open project<small>Load saved JSON</small></button><button id="imageUpload">Trace image<small>Import underlay; draw by hand</small></button><button id="imageRemove">Remove underlay<small>Keep drawings</small></button><button id="png">Export PNG<small>Current frame, no ghost/joints</small></button><button id="gif">Export GIF<small>Real animated GIF</small></button><button id="video">Export video<small>MP4 if supported, else WebM</small></button><button id="newProject">New project<small>Start blank · confirm first</small></button></div></dialog>
 <dialog id="question"><div class="title">Confirm<button data-close aria-label="Cancel">×</button></div><div class="body"><p id="questionText"></p><div class="row"><button id="yes">Continue</button><button data-close>Cancel</button></div></div></dialog>
 <input id="fileIn" type="file" accept="image/*"><input id="loadIn" type="file" accept=".json,application/json">
+<dialog id="tutorialDlg">
+  <div class="title">Tutorial · stick figure walkthrough<button id="tutorialClose" data-close aria-label="Close tutorial">×</button></div>
+  <div class="tutBody">
+    <div class="tabs" id="tutorialTabs" aria-label="Tutorial sections"><button type="button" data-tuttab="watch" class="active">Watch</button><button type="button" data-tuttab="tools">Tools</button></div>
+    <div id="tutWatch">
+      <div id="tutStage"><video id="tutVideo" playsinline webkit-playsinline preload="metadata" muted></video><div id="tutVideoMsg" role="status"></div></div>
+      <div id="tutControls"><button id="tutPlay" aria-label="Play or pause">▶</button><input id="tutScrub" type="range" min="0" max="1000" value="0" aria-label="Video position"><output id="tutTime">0:00</output></div>
+      <div id="tutChapters"><button id="tutChPrev" aria-label="Previous chapter">◀</button><select id="tutChapter" aria-label="Chapter"></select><button id="tutChNext" aria-label="Next chapter">▶</button></div>
+    </div>
+    <div id="tutTools" hidden>
+      <div id="tutToolGrid"></div>
+      <div id="tutToolPager"><button id="tutToolPrev">◀ Prev</button><output id="tutToolPage"></output><button id="tutToolNext">Next ▶</button></div>
+    </div>
+  </div>
+</dialog>
+<div id="holdTip">
+  <div class="title"><span id="holdTipTitle">Tool</span><button id="holdTipClose" type="button" aria-label="Close tip">×</button></div>
+  <div class="holdBody"><canvas id="holdTipCanvas" width="240" height="200" aria-label="Tool demo"></canvas><p id="holdTipText"></p></div>
+</div>
 <script>
 'use strict';
 // Pure document mechanics, shared by the UI and standalone Node VM tests.
@@ -85,7 +137,8 @@ function ink(o){return (o.kind==='path'||o.kind==='line')&&!o.erase}
 function projectSegment(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));const q={x:a.x+dx*t,y:a.y+dy*t};return {...q,d:Math.hypot(p.x-q.x,p.y-q.y)}}
 function closestInk(frame,p,tolerance){let best=null;for(let oi=0;oi<frame.objects.length;oi++){const o=frame.objects[oi];if(!ink(o)&&o.kind!=='rig')continue;const edges=o.kind==='rig'?o.bones:o.points.slice(1).map((_,j)=>[j,j+1]);for(const edge of edges){const q=projectSegment(p,o.points[edge[0]],o.points[edge[1]]);if(q.d<=tolerance&&(!best||q.d<best.d))best={...q,oi,edge}}}return best}
 function bakeSkin(frame){for(const o of frame.objects){if(o.skin)delete o.skin;if(o.binding){o.binding.restX=o.points[0].x;o.binding.restY=o.points[0].y}}}
-function applySkin(frame){const controls=new Map(frame.objects.filter(o=>o.binding).map(o=>[o.id,o]));for(const o of frame.objects){if(!o.skin)continue;o.points=o.skin.rest.map((p,i)=>{let x=p.x,y=p.y;for(const [id,w]of o.skin.weights[i]||[]){const c=controls.get(id);if(c&&!c.binding.pinned){x+=(c.points[0].x-c.binding.restX)*w;y+=(c.points[0].y-c.binding.restY)*w}}return{x,y}})}}
+function rigidSkinMap(pathControls){const cs=pathControls.filter(c=>c&&c.binding);if(cs.length<2)return null;const items=cs.map(c=>({rest:{x:c.binding.restX,y:c.binding.restY},cur:{x:c.points[0].x,y:c.points[0].y}}));const eps=0.0005;const d0={dx:items[0].cur.x-items[0].rest.x,dy:items[0].cur.y-items[0].rest.y};if(items.every(it=>Math.hypot((it.cur.x-it.rest.x)-d0.dx,(it.cur.y-it.rest.y)-d0.dy)<eps))return p=>({x:p.x+d0.dx,y:p.y+d0.dy});let a=items[0],b=items.find(it=>Math.hypot(it.rest.x-a.rest.x,it.rest.y-a.rest.y)>0.5);if(!b)return null;const ang=Math.atan2(b.cur.y-a.cur.y,b.cur.x-a.cur.x)-Math.atan2(b.rest.y-a.rest.y,b.rest.x-a.rest.x),cos=Math.cos(ang),sin=Math.sin(ang);const map=p=>({x:a.cur.x+(p.x-a.rest.x)*cos-(p.y-a.rest.y)*sin,y:a.cur.y+(p.x-a.rest.x)*sin+(p.y-a.rest.y)*cos});for(const it of items){const q=map(it.rest);if(Math.hypot(q.x-it.cur.x,q.y-it.cur.y)>0.5)return null}return map}
+function applySkin(frame){const controls=new Map(frame.objects.filter(o=>o.binding).map(o=>[o.id,o]));for(const o of frame.objects){if(!o.skin)continue;const pathControls=frame.objects.filter(c=>c.binding&&c.binding.pathId===o.id);const rigid=rigidSkinMap(pathControls);if(rigid){o.points=o.skin.rest.map(p=>rigid(p));continue}o.points=o.skin.rest.map((p,i)=>{let x=p.x,y=p.y;for(const [id,w]of o.skin.weights[i]||[]){const c=controls.get(id);if(c&&!c.binding.pinned){x+=(c.points[0].x-c.binding.restX)*w;y+=(c.points[0].y-c.binding.restY)*w}}return{x,y}})}}
 function rebuildSkin(frame){
  ensureArtIds(frame);const paths=frame.objects.filter(ink),controls=frame.objects.filter(o=>o.kind==='dot'&&o.binding);
  const ids=new Set(paths.map(o=>o.id));for(const c of controls)if(!ids.has(c.binding.pathId))delete c.binding;
@@ -297,7 +350,7 @@ $('file').onclick=()=>open('files');$('settings').onclick=setup;$('undo').onclic
 $('horizontal').oninput=()=>{const r=stage.getBoundingClientRect();pan.x=(.5-Number($('horizontal').value)/1000)*Math.max(0,W*scale-r.width);fit()};$('vertical').oninput=()=>{const r=stage.getBoundingClientRect();pan.y=(.5-Number($('vertical').value)/1000)*Math.max(0,H*scale-r.height);fit()};$('panLeft').onclick=()=>{pan=panView(pan,'left',12);fit()};$('panRight').onclick=()=>{pan=panView(pan,'right',12);fit()};
 const colors=['#111111','#ffffff','#808080','#d52b28','#f0a020','#fff037','#199348','#008080','#254cd9','#800080','#e778b2','#8c4c24'];function swatches(){let row=$('swatches');row.replaceChildren();for(let hex of colors){let b=document.createElement('button');b.style.background=hex;b.setAttribute('aria-label','Color '+hex);b.classList.toggle('active',hex===color);b.onclick=()=>{color=hex;$('color').value=hex;swatches()};row.appendChild(b)}}swatches();$('color').oninput=e=>{color=e.target.value;swatches()};$('width').oninput=e=>{width=+e.target.value;$('widthText').textContent=width+' px'};$('opacity').oninput=e=>{opacity=+e.target.value/100;$('opacityText').textContent=e.target.value+'%'};$('shapeFill').onchange=e=>shapeFill=e.target.checked;
 function download(blob,name){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
-$('saveProject').onclick=()=>{download(new Blob([project.serialize()],{type:'application/json'}),'funmotion-0.2.4.funmotion.json');toast('Editable project downloaded')};$('loadProject').onclick=()=>$('loadIn').click();$('loadIn').onchange=async e=>{let f=e.target.files[0];e.target.value='';if(!f)return;if(f.size>50*1024*1024)return toast('Project too large (50 MB maximum)');try{let text=await f.text();let check=new MotionProject();check.load(text);ask('Replace current project with '+f.name+'? Save current work first if needed.',()=>{try{project.load(text);images.clear();resetView();changed();toast('Project opened')}catch(err){toast(err.message)}})}catch(err){toast('Open failed: '+err.message)}};
+$('saveProject').onclick=()=>{download(new Blob([project.serialize()],{type:'application/json'}),'funmotion-0.2.5.funmotion.json');toast('Editable project downloaded')};$('loadProject').onclick=()=>$('loadIn').click();$('loadIn').onchange=async e=>{let f=e.target.files[0];e.target.value='';if(!f)return;if(f.size>50*1024*1024)return toast('Project too large (50 MB maximum)');try{let text=await f.text();let check=new MotionProject();check.load(text);ask('Replace current project with '+f.name+'? Save current work first if needed.',()=>{try{project.load(text);images.clear();resetView();changed();toast('Project opened')}catch(err){toast(err.message)}})}catch(err){toast('Open failed: '+err.message)}};
 $('newProject').onclick=()=>ask('Start blank? Download your current project first if you want to keep it.',()=>{project=new MotionProject();images.clear();resetView();changed()});
 $('imageUpload').onclick=()=>$('fileIn').click();$('fileIn').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(!f.type.startsWith('image/'))return toast('Choose an image file');if(f.size>15*1024*1024)return toast('Choose an image smaller than 15 MB');const reader=new FileReader();reader.onload=()=>{let im=new Image();im.onload=()=>{let c=document.createElement('canvas');let s=Math.min(1,1600/Math.max(im.width,im.height));c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);commit();project.underlay={src:c.toDataURL('image/png')};close();render();ui();toast('Trace by hand · underlay excluded from export')};im.onerror=()=>toast('Unsupported or damaged image');im.src=reader.result};reader.onerror=()=>toast('Image read failed');reader.readAsDataURL(f)};
 $('imageRemove').onclick=()=>{commit();project.underlay=null;render();ui();toast('Underlay removed')};
@@ -361,6 +414,858 @@ if(new URLSearchParams(location.search).get('proof')==='rigging'){
 }
 addEventListener('resize',fit);if(typeof ResizeObserver!=='undefined')new ResizeObserver(fit).observe(stage);document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();cancelGesture()}});document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea')||document.querySelector('dialog[open]')||busy)return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();cancelGesture();e.shiftKey?project.redo():project.undo();changed()}if(e.key==='Delete'&&selection.size){try{project.remove([...selection]);changed()}catch(err){toast(err.message)}}if(e.key==='Escape'){cancelGesture();selection.clear();dotSelection.clear();render()}});
 // Read-only diagnostics; no hidden mutation / fake test renderer.
-window.__FM=()=>({ver:'0.2.4',style:'COMP 1',frames:project.frames.length,index:project.index,objects:project.frame.objects.length,boundJoints:project.frame.objects.filter(o=>o.binding).length,boundPoints:project.frame.objects.reduce((n,o)=>n+(o.skin?.rest.length||0),0),connections:(project.frame.links||[]).length,lockedConnections:(project.frame.links||[]).filter(l=>l.locked).length,tool,zoom,pan:{...pan},settings:{...project.settings},playing,busy});render();fit();ui();
+window.__FM=()=>({ver:'0.2.5',style:'COMP 1',frames:project.frames.length,index:project.index,objects:project.frame.objects.length,boundJoints:project.frame.objects.filter(o=>o.binding).length,boundPoints:project.frame.objects.reduce((n,o)=>n+(o.skin?.rest.length||0),0),connections:(project.frame.links||[]).length,lockedConnections:(project.frame.links||[]).filter(l=>l.locked).length,tool,zoom,pan:{...pan},settings:{...project.settings},playing,busy});render();fit();ui();
+
+window.renderObject=renderObject;window.artCanvas=artCanvas;window.frameCanvas=frameCanvas;window.project=project;window.setTool=setTool;window.addShape=addShape;window.toolDrawer=toolDrawer;window.render=render;window.ui=ui;window.setFollowFlag=function(v){follow=v};window.selectDotKeys=function(keys){dotSelection=new Set(keys)};
+/* FunMotion 0.2.5 — Tutorial player, Tools tab, hold-tip looping demos.
+   Demos use the real renderObject / stick rig when a bitmap loop is not loaded.
+   Asset paths are resolved for standalone file:// and APK srcdoc (parent fetch of android_asset). */
+(function(){
+var $id=function(i){return document.getElementById(i)};
+var qsa=function(root,sel){ if(!root||typeof root.querySelectorAll!=='function') return []; try{ return Array.prototype.slice.call(root.querySelectorAll(sel)||[]); }catch(e){ return []; } };
+var CHAPTERS=[
+  {id:'open',title:'Opening · COMP 1',start:0},
+  {id:'figures',title:'Stick figure + red dots',start:18},
+  {id:'draw',title:'Drawing tools',start:36},
+  {id:'rig',title:'Rigging · attach, locks, dots',start:88},
+  {id:'frames',title:'Onion, frames, posing',start:140},
+  {id:'play',title:'Playback',start:180},
+  {id:'view',title:'Pan and zoom',start:198},
+  {id:'file',title:'Save and open',start:216},
+  {id:'export',title:'GIF and MP4 export',start:234}
+];
+/* Every user-facing tool. chapter is a CHAPTERS id. */
+var TOOLS=[
+  {id:'pencil',name:'Pencil',blurb:'Drag a crisp freehand line.',ch:'draw',group:'Draw'},
+  {id:'brush',name:'Brush',blurb:'Drag a smooth, rounded stroke.',ch:'draw',group:'Draw'},
+  {id:'eraser',name:'Eraser',blurb:'Drag to erase art. The trace image stays.',ch:'draw',group:'Draw'},
+  {id:'fill',name:'Fill',blurb:'Tap an enclosed area to flood it with color.',ch:'draw',group:'Draw'},
+  {id:'eyedrop',name:'Eyedropper',blurb:'Tap art to pick its visible color.',ch:'draw',group:'Draw'},
+  {id:'line',name:'Line',blurb:'Drag start to end for a straight line.',ch:'draw',group:'Draw'},
+  {id:'rect',name:'Rectangle',blurb:'Drag opposite corners. Fill is in Color / Size.',ch:'draw',group:'Draw'},
+  {id:'ellipse',name:'Ellipse',blurb:'Drag a box to draw an oval.',ch:'draw',group:'Draw'},
+  {id:'select',name:'Select',blurb:'Tap art or drag a box, then Move / Resize / Rotate.',ch:'draw',group:'Draw'},
+  {id:'move',name:'Move',blurb:'Drag selected art to a new place.',ch:'draw',group:'Draw'},
+  {id:'resize',name:'Resize',blurb:'Drag selected art outward or inward to scale.',ch:'draw',group:'Draw'},
+  {id:'rotate',name:'Rotate',blurb:'Drag around the selection center to turn it.',ch:'draw',group:'Draw'},
+  {id:'palette',name:'Color / Size',blurb:'Thickness, color, opacity, and filled shapes.',ch:'draw',group:'Draw'},
+  {id:'delete',name:'Delete',blurb:'Remove the selected art.',ch:'draw',group:'Draw'},
+  {id:'clearFrame',name:'Clear frame',blurb:'Erase all art in this frame. Undo can restore it.',ch:'draw',group:'Draw'},
+  {id:'allObjects',name:'All objects',blurb:'Select everything in the current frame.',ch:'draw',group:'Draw'},
+  {id:'rotateArt15',name:'Rotate +15° (art)',blurb:'Turn the selected drawings 15 degrees.',ch:'draw',group:'Draw'},
+  {id:'grow10',name:'Grow 10%',blurb:'Enlarge the selected art.',ch:'draw',group:'Draw'},
+  {id:'shrink10',name:'Shrink 10%',blurb:'Reduce the selected art.',ch:'draw',group:'Draw'},
+  {id:'stick',name:'Stick',blurb:'Add the default poseable stick figure.',ch:'figures',group:'Figures'},
+  {id:'circle',name:'Circle',blurb:'Add a poseable circle figure.',ch:'figures',group:'Figures'},
+  {id:'square',name:'Square',blurb:'Add a poseable square figure.',ch:'figures',group:'Figures'},
+  {id:'triangle',name:'Triangle',blurb:'Add a poseable triangle figure.',ch:'figures',group:'Figures'},
+  {id:'star',name:'Star',blurb:'Add a poseable star figure.',ch:'figures',group:'Figures'},
+  {id:'figures',name:'Figures',blurb:'Open Stick / Circle / Square / Triangle / Star.',ch:'figures',group:'Pose'},
+  {id:'jointTools',name:'Joint tools',blurb:'Place, select, attach, detach, and pin joints.',ch:'rig',group:'Joints'},
+  {id:'dot',name:'Place dots',blurb:'Tap exact paper. Auto-attaches when you land on ink.',ch:'rig',group:'Joints'},
+  {id:'joints',name:'Select joint',blurb:'Tap a red dot, then drag to pose it.',ch:'figures',group:'Joints'},
+  {id:'multi',name:'Multi-joint',blurb:'Tap several dots for Follow or Links / Lock.',ch:'rig',group:'Joints'},
+  {id:'linksLock',name:'Links / Lock',blurb:'Connect two dots and lock or adjust the length.',ch:'rig',group:'Joints'},
+  {id:'attach',name:'Attach selected',blurb:'Bind the selected joint to ink so posing bends it.',ch:'rig',group:'Joints'},
+  {id:'detach',name:'Detach selected',blurb:'Unbind a joint from ink.',ch:'rig',group:'Joints'},
+  {id:'pin',name:'Pin / Unpin',blurb:'Hold a joint still while neighbors pose.',ch:'rig',group:'Joints'},
+  {id:'follow',name:'Follow',blurb:'When ON, selected joints move together.',ch:'rig',group:'Pose'},
+  {id:'rotateJoints15',name:'Rotate +15° (joints)',blurb:'Turn the selected joints 15 degrees.',ch:'figures',group:'Pose'},
+  {id:'freeDots',name:'Free dots',blurb:'ON lets you place dots anywhere, not only on figures.',ch:'rig',group:'Joints'},
+  {id:'nextFrame',name:'Save Pose + Next Frame',blurb:'Copy the pose to a new animation step.',ch:'frames',group:'Frames'},
+  {id:'duplicate',name:'Duplicate',blurb:'Copy this animation frame, art and all.',ch:'frames',group:'Frames'},
+  {id:'blankFrame',name:'Blank frame',blurb:'Insert an empty animation step.',ch:'frames',group:'Frames'},
+  {id:'deleteFrame',name:'Delete frame',blurb:'Remove this animation step. Undo can restore it.',ch:'frames',group:'Frames'},
+  {id:'earlier',name:'Earlier',blurb:'Move this frame earlier in the timeline.',ch:'frames',group:'Frames'},
+  {id:'later',name:'Later',blurb:'Move this frame later in the timeline.',ch:'frames',group:'Frames'},
+  {id:'prevFrame',name:'Previous frame',blurb:'Go to the previous existing frame.',ch:'frames',group:'Frames'},
+  {id:'nextExisting',name:'Next existing',blurb:'Go to the next existing frame.',ch:'frames',group:'Frames'},
+  {id:'onion',name:'Ghost',blurb:'Show the previous pose faintly while you edit.',ch:'frames',group:'Frames'},
+  {id:'play',name:'Play',blurb:'Flip through the frames at the project FPS.',ch:'play',group:'Frames'},
+  {id:'plus',name:'Zoom in',blurb:'Magnify the paper. Place dots stay exact.',ch:'view',group:'View'},
+  {id:'minus',name:'Zoom out',blurb:'See more of the paper.',ch:'view',group:'View'},
+  {id:'fit',name:'Fit',blurb:'Reset zoom and pan to the full page.',ch:'view',group:'View'},
+  {id:'panLeft',name:'Scroll left',blurb:'Nudge the paper left 12 screen pixels.',ch:'view',group:'View'},
+  {id:'panRight',name:'Scroll right',blurb:'Nudge the paper right 12 screen pixels.',ch:'view',group:'View'},
+  {id:'hand',name:'Hand',blurb:'Drag the paper to pan at any zoom.',ch:'view',group:'View'},
+  {id:'pan',name:'Pan arrows',blurb:'Up / Down / Left / Right move the view 12 px.',ch:'view',group:'View'},
+  {id:'undo',name:'Undo',blurb:'Step back one edit.',ch:'open',group:'Project'},
+  {id:'redo',name:'Redo',blurb:'Step forward one undone edit.',ch:'open',group:'Project'},
+  {id:'settings',name:'Settings',blurb:'Onion, FPS, free dots, snap, labels, and tint.',ch:'open',group:'Project'},
+  {id:'file',name:'File',blurb:'Save, open, trace, and export.',ch:'file',group:'Project'},
+  {id:'saveProject',name:'Save project',blurb:'Download an editable .funmotion.json.',ch:'file',group:'Project'},
+  {id:'loadProject',name:'Open project',blurb:'Load a saved JSON project.',ch:'file',group:'Project'},
+  {id:'imageUpload',name:'Trace image',blurb:'Import an underlay and draw over it by hand.',ch:'file',group:'Project'},
+  {id:'imageRemove',name:'Remove underlay',blurb:'Drop the trace image; keep your drawings.',ch:'file',group:'Project'},
+  {id:'png',name:'Export PNG',blurb:'Current frame only, no ghosts or red dots.',ch:'export',group:'Project'},
+  {id:'gif',name:'Export GIF',blurb:'A real animated GIF of the frames.',ch:'export',group:'Project'},
+  {id:'video',name:'Export video',blurb:'MP4 if the browser can, otherwise WebM.',ch:'export',group:'Project'},
+  {id:'newProject',name:'New project',blurb:'Start blank after a confirm.',ch:'file',group:'Project'}
+];
+var TOOL_BY_ID={}; for(var ti=0;ti<TOOLS.length;ti++) TOOL_BY_ID[TOOLS[ti].id]=TOOLS[ti];
+var LABEL_ID={
+  'Pencil':'pencil','Brush':'brush','Eraser':'eraser','Fill':'fill','Eyedropper':'eyedrop','Line':'line',
+  'Rectangle':'rect','Ellipse':'ellipse','Select':'select','Move':'move','Resize':'resize','Rotate':'rotate',
+  'Color / Size':'palette','Delete':'delete','Clear frame':'clearFrame','All objects':'allObjects',
+  'Rotate +15°':'rotateArt15','Grow 10%':'grow10','Shrink 10%':'shrink10',
+  'Stick':'stick','Circle':'circle','Square':'square','Triangle':'triangle','Star':'star',
+  'Figures':'figures','Joint tools':'jointTools','Place dots':'dot','Select dots':'joints','Select joint':'joints',
+  'Multi-joint':'multi','Links / Lock':'linksLock','Attach selected':'attach','Detach selected':'detach',
+  'Pin / Unpin':'pin','Paint size':'palette','Delete art':'delete','Pose / Links':'figures',
+  'Select / Edit':'select','Frames':'nextFrame','Export':'gif','Setup':'settings',
+  'Next Frame':'nextFrame','Duplicate':'duplicate','Blank frame':'blankFrame','Delete frame':'deleteFrame',
+  'Earlier':'earlier','Later':'later','File':'file','↶ Undo':'undo','Undo':'undo','↷ Redo':'redo','Redo':'redo',
+  'Settings':'settings','Tutorial':'tutorial','Fit':'fit','+':'+plus','−':'minus','Use Hand tool · drag the paper':'hand',
+  '▲ Up':'pan','◀ Left':'pan','Right ▶':'pan','▼ Down':'pan','Pan the view':'pan','Pan arrows / Hand':'pan',
+  'Save project':'saveProject','Open project':'loadProject','Trace image':'imageUpload','Remove underlay':'imageRemove',
+  'Export PNG':'png','Export GIF':'gif','Export video':'video','New project':'newProject',
+  'Save Pose + Next Frame ▶':'nextFrame'
+};
+function idFromLabel(txt){
+  txt=String(txt||'').replace(/▾/g,'').replace(/\s+/g,' ').trim();
+  if(!txt) return null;
+  if(/^Follow/.test(txt)) return 'follow';
+  if(/^Free dots/.test(txt)) return 'freeDots';
+  if(/^Ghost/.test(txt)) return 'onion';
+  if(/^▶ Play|^■ Stop|^Play$/.test(txt)) return 'play';
+  if(/^Rotate \+15/.test(txt)){
+    if(/art/i.test(txt)) return 'rotateArt15';
+    /* pose context vs edit context is distinguished by later bind overrides */
+    return 'rotateJoints15';
+  }
+  if(LABEL_ID[txt]) return LABEL_ID[txt]==='+plus'?'plus':LABEL_ID[txt];
+  var base=txt.split('·')[0].trim();
+  if(LABEL_ID[base]) return LABEL_ID[base];
+  if(/^Frame \d+/.test(txt)) return null;
+  return TOOL_BY_ID[txt]?txt:null;
+}
+
+/* ---------- real stick + renderObject demos (no fake tools) ---------- */
+var DW=240, DH=200;
+function stickPts(cx,cy){
+  return [{x:cx,y:cy-100},{x:cx,y:cy-65},{x:cx,y:cy+10},{x:cx-60,y:cy-10},{x:cx+60,y:cy-10},{x:cx-40,y:cy+110},{x:cx+40,y:cy+110}];
+}
+function stickBones(){return [[0,1],[1,2],[1,3],[1,4],[2,5],[2,6]];}
+function copyPts(p){var o=[];for(var i=0;i<p.length;i++)o.push({x:p[i].x,y:p[i].y});return o;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function poseWalk(pts,t){
+  var s=Math.sin(t*Math.PI*2), c=Math.cos(t*Math.PI*2);
+  pts[3].x-=18*s; pts[3].y+=8*c;
+  pts[4].x+=18*s; pts[4].y-=8*c;
+  pts[5].x-=16*s; pts[5].y+=6*Math.abs(s);
+  pts[6].x+=16*s; pts[6].y+=6*Math.abs(c);
+  pts[0].x+=4*s; pts[2].y+=3*Math.abs(s);
+}
+function poseWave(pts,t){
+  var s=Math.sin(t*Math.PI*2);
+  pts[4].x+=10; pts[4].y-=50+18*s;
+}
+function makeRig(pts,color){
+  return {kind:'rig',points:pts,bones:stickBones(),head:0,color:color||'#111111',width:5,opacity:1,filled:false};
+}
+function makePath(pts,opt){
+  opt=opt||{};
+  return {kind:'path',points:pts,color:opt.color||'#111111',width:opt.width||5,opacity:opt.opacity||1,brush:!!opt.brush,erase:!!opt.erase,filled:false};
+}
+function makeShape(kind,pts,opt){
+  opt=opt||{};
+  return {kind:kind,points:pts,color:opt.color||'#254cd9',width:opt.width||4,opacity:1,filled:!!opt.filled};
+}
+function paintDemo(g,frame,opts){
+  opts=opts||{};
+  g.fillStyle='#ffffff'; g.fillRect(0,0,g.canvas.width,g.canvas.height);
+  var scaleX=g.canvas.width/720, scaleY=g.canvas.height/1100;
+  /* Crop around the default stick: x 180-540, y 360-780 */
+  var sx=180, sy=360, sw=360, sh=420;
+  if(opts.full){sx=0;sy=0;sw=720;sh=1100;}
+  g.save();
+  g.translate(-sx* (g.canvas.width/sw), -sy*(g.canvas.height/sh));
+  g.scale(g.canvas.width/sw, g.canvas.height/sh);
+  var i,o;
+  if(opts.onion && opts.onionFrame){
+    g.save(); g.globalAlpha=0.22;
+    for(i=0;i<opts.onionFrame.objects.length;i++) window.renderObject(g, opts.onionFrame.objects[i]);
+    g.restore();
+  }
+  for(i=0;i<frame.objects.length;i++) window.renderObject(g, frame.objects[i]);
+  if(frame.links){
+    for(i=0;i<frame.links.length;i++){
+      var l=frame.links[i], a=frame.objects[l.a[0]] && frame.objects[l.a[0]].points[l.a[1]], b=frame.objects[l.b[0]] && frame.objects[l.b[0]].points[l.b[1]];
+      if(!a||!b) continue;
+      g.save(); g.strokeStyle=l.locked?'#000080':(l.color||'#111'); g.lineWidth=l.width||4; g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(b.x,b.y); g.stroke(); g.restore();
+    }
+  }
+  if(opts.dots){
+    for(i=0;i<frame.objects.length;i++){
+      o=frame.objects[i];
+      if(o.kind!=='rig' && o.kind!=='dot') continue;
+      for(var j=0;j<o.points.length;j++){
+        var p=o.points[j];
+        g.beginPath(); g.arc(p.x,p.y,8,0,Math.PI*2);
+        g.fillStyle=(opts.sel && opts.sel[i+':'+j])?'#0040ff':'#e32828'; g.fill();
+        if(opts.pin && o.binding && o.binding.pinned && j===0){ g.strokeStyle='#000'; g.lineWidth=2; g.stroke(); }
+      }
+    }
+  }
+  if(opts.box){
+    g.save(); g.strokeStyle='#000080'; g.lineWidth=3; g.setLineDash([8,6]);
+    g.strokeRect(opts.box.x,opts.box.y,opts.box.w,opts.box.h); g.restore();
+  }
+  if(opts.cursor){
+    drawFinger(g, opts.cursor.x, opts.cursor.y, !!opts.cursor.down);
+  }
+  g.restore();
+}
+function drawFinger(g,x,y,down){
+  g.save();
+  g.beginPath(); g.arc(x,y, down?16:14, 0, Math.PI*2);
+  g.fillStyle=down?'rgba(0,0,128,0.35)':'rgba(0,0,128,0.18)'; g.fill();
+  g.beginPath(); g.arc(x,y,6,0,Math.PI*2); g.fillStyle='#000080'; g.fill();
+  g.restore();
+}
+function pathLine(x0,y0,x1,y1,n){
+  var p=[],i; for(i=0;i<=n;i++){var t=i/n;p.push({x:lerp(x0,x1,t),y:lerp(y0,y1,t)});} return p;
+}
+function hatchHat(t){
+  /* short stroke that grows over the stick head */
+  var n=Math.max(2, Math.round(18*Math.min(1,t)));
+  var p=[], i;
+  for(i=0;i<n;i++){
+    var u=i/18;
+    p.push({x:330+Math.sin(u*6)*18+u*50, y:420-Math.cos(u*5)*12});
+  }
+  return p;
+}
+
+function engineFrame(id, t){
+  /* t is 0..1 loop. Returns {frame, opts} for paintDemo. Uses real object kinds. */
+  var cx=360, cy=550, pts=stickPts(cx,cy), frame={objects:[]}, opts={dots:true}, cur=null;
+  var s=Math.sin(t*Math.PI*2);
+  function addStick(posed){ frame.objects.unshift(makeRig(posed||copyPts(pts))); }
+  switch(id){
+    case 'stick':
+    case 'figures':
+      addStick(); opts.dots=t>0.15; cur={x:cx,y:cy-100,down:t<0.2}; break;
+    case 'circle': case 'square': case 'triangle': case 'star': {
+      addStick();
+      var n=id==='circle'?12:id==='square'?4:id==='triangle'?3:10, i, sh=[];
+      for(i=0;i<n;i++){
+        var a=-Math.PI/2+2*Math.PI*i/n+(id==='square'?Math.PI/4:0), r=id==='star'&&i%2?45:80;
+        sh.push({x:cx+90+Math.cos(a)*r, y:cy+Math.sin(a)*r});
+      }
+      var bones=[]; for(i=0;i<n;i++) bones.push([i,(i+1)%n]);
+      frame.objects.push({kind:'rig',points:sh,bones:bones,color:'#000080',width:4,opacity:1,filled:false});
+      opts.dots=true; break;
+    }
+    case 'pencil': {
+      var p=hatchHat(t); addStick();
+      if(p.length>1) frame.objects.push(makePath(p,{width:3}));
+      cur={x:(p[p.length-1]||pts[0]).x,y:(p[p.length-1]||pts[0]).y,down:t<0.9}; break;
+    }
+    case 'brush': {
+      addStick();
+      var bp=hatchHat(t).map(function(q){return {x:q.x,y:q.y+30};});
+      if(bp.length>1) frame.objects.push(makePath(bp,{width:14,brush:true,color:'#d52b28'}));
+      cur={x:(bp[bp.length-1]||pts[0]).x,y:(bp[bp.length-1]||pts[0]).y,down:t<0.9}; break;
+    }
+    case 'eraser': {
+      addStick();
+      var ep=[{x:300,y:500},{x:420,y:500},{x:420,y:620},{x:300,y:620}];
+      if(t<0.55) frame.objects.push(makeShape('rect', ep, {color:'#254cd9',filled:true}));
+      else {
+        /* remaining sliver after erase */
+        frame.objects.push(makeShape('rect', [{x:300,y:500},{x:420,y:500},{x:420,y:560},{x:300,y:560}], {color:'#254cd9',filled:true}));
+      }
+      cur={x:360,y:lerp(500,640,Math.min(1,t*1.1)),down:t>0.15&&t<0.9}; break;
+    }
+    case 'line': {
+      addStick();
+      var lt=Math.min(1,t*1.2);
+      frame.objects.push(makePath([{x:250,y:700},{x:250+lt*260,y:700+lt*20}],{width:6,color:'#199348'}));
+      cur={x:250+lt*260,y:700+lt*20,down:t<0.85}; break;
+    }
+    case 'rect': {
+      addStick();
+      var rt=Math.min(1,t*1.3);
+      frame.objects.push(makeShape('rect',[{x:250,y:700},{x:250+rt*200,y:700},{x:250+rt*200,y:700+rt*80},{x:250,y:700+rt*80}],{color:'#254cd9',filled:false}));
+      cur={x:250+rt*200,y:700+rt*80,down:t<0.85}; break;
+    }
+    case 'ellipse': {
+      addStick();
+      var et=Math.min(1,t*1.3);
+      frame.objects.push(makeShape('ellipse',[{x:280,y:700},{x:280+et*180,y:700},{x:280+et*180,y:700+et*70},{x:280,y:700+et*70}],{color:'#800080',filled:true}));
+      cur={x:280+et*180,y:700+et*70,down:t<0.85}; break;
+    }
+    case 'fill': {
+      addStick();
+      frame.objects.push(makeShape('rect',[{x:250,y:680},{x:470,y:680},{x:470,y:780},{x:250,y:780}],{color:'#111111',filled:false}));
+      if(t>0.35) frame.objects.push(makeShape('rect',[{x:252,y:682},{x:468,y:682},{x:468,y:778},{x:252,y:778}],{color:'#f0a020',filled:true}));
+      cur={x:360,y:730,down:t>0.3&&t<0.5}; break;
+    }
+    case 'eyedrop': {
+      addStick();
+      frame.objects.push(makeShape('rect',[{x:280,y:700},{x:440,y:700},{x:440,y:780},{x:280,y:780}],{color:'#d52b28',filled:true}));
+      cur={x:360,y:740,down:t>0.3&&t<0.7}; opts.palette=t>0.45?'#d52b28':null; break;
+    }
+    case 'select': case 'allObjects': {
+      addStick();
+      frame.objects.push(makeShape('rect',[{x:260,y:700},{x:460,y:700},{x:460,y:780},{x:260,y:780}],{color:'#254cd9',filled:true}));
+      var bt=Math.min(1,t*1.4);
+      opts.box={x:240,y:430,w:bt*250,h:bt*370}; opts.dots=false;
+      cur={x:240+bt*250,y:430+bt*370,down:t<0.8}; break;
+    }
+    case 'move': {
+      var dx=40*Math.sin(t*Math.PI*2);
+      var mp=stickPts(cx+dx,cy); addStick(mp);
+      opts.box={x:260+dx,y:430,w:200,h:360}; opts.dots=false;
+      cur={x:cx+dx,y:cy,down:true}; break;
+    }
+    case 'resize': {
+      var k=1+0.18*Math.sin(t*Math.PI*2);
+      var rp=stickPts(cx,cy).map(function(p){return {x:cx+(p.x-cx)*k,y:cy+(p.y-cy)*k};});
+      addStick(rp); opts.box={x:cx-80*k,y:cy-130*k,w:160*k,h:280*k}; opts.dots=false;
+      cur={x:cx+80*k,y:cy+140*k,down:true}; break;
+    }
+    case 'rotate': case 'rotateArt15': {
+      var ang=(id==='rotateArt15'? (Math.PI/12)*(t<0.5?0:1) : t*Math.PI*2*0.25);
+      var tp=stickPts(cx,cy).map(function(p){
+        var dx=p.x-cx,dy=p.y-cy; return {x:cx+dx*Math.cos(ang)-dy*Math.sin(ang), y:cy+dx*Math.sin(ang)+dy*Math.cos(ang)};
+      });
+      addStick(tp); opts.box={x:260,y:430,w:200,h:360}; opts.dots=false;
+      cur={x:cx+90*Math.cos(ang),y:cy+90*Math.sin(ang),down:true}; break;
+    }
+    case 'delete': case 'clearFrame': {
+      if(t<0.55) addStick();
+      cur={x:cx,y:cy,down:t>0.5&&t<0.7}; opts.dots=t<0.55; break;
+    }
+    case 'grow10': {
+      var gk=t<0.5?1:1.1; var gp=stickPts(cx,cy).map(function(p){return {x:cx+(p.x-cx)*gk,y:cy+(p.y-cy)*gk};});
+      addStick(gp); opts.dots=false; break;
+    }
+    case 'shrink10': {
+      var sk=t<0.5?1:0.9; var sp=stickPts(cx,cy).map(function(p){return {x:cx+(p.x-cx)*sk,y:cy+(p.y-cy)*sk};});
+      addStick(sp); opts.dots=false; break;
+    }
+    case 'joints': case 'rotateJoints15': {
+      var jp=stickPts(cx,cy); if(id==='rotateJoints15' && t>0.4){
+        var a2=Math.PI/12; jp=jp.map(function(p){var dx=p.x-cx,dy=p.y-cy;return {x:cx+dx*Math.cos(a2)-dy*Math.sin(a2),y:cy+dx*Math.sin(a2)+dy*Math.cos(a2)};});
+      } else poseWave(jp, t);
+      addStick(jp); opts.sel={'0:4':1}; cur={x:jp[4].x,y:jp[4].y,down:true}; break;
+    }
+    case 'follow': case 'multi': {
+      var fp=stickPts(cx,cy); var slide=30*Math.sin(t*Math.PI*2);
+      fp[3].x+=slide; fp[4].x+=slide;
+      addStick(fp); opts.sel={'0:3':1,'0:4':1}; cur={x:fp[4].x,y:fp[4].y,down:true}; break;
+    }
+    case 'dot': case 'freeDots': case 'jointTools': {
+      addStick();
+      if(t>0.25) frame.objects.push({kind:'dot',points:[{x:300,y:500}],color:'#e32828',width:4,opacity:1,filled:true});
+      if(t>0.55) frame.objects.push({kind:'dot',points:[{x:420,y:620}],color:'#e32828',width:4,opacity:1,filled:true});
+      cur={x:t<0.4?300:420,y:t<0.4?500:620,down: (t>0.2&&t<0.35)||(t>0.5&&t<0.65)}; break;
+    }
+    case 'linksLock': {
+      var lp=stickPts(cx,cy); addStick(lp);
+      frame.objects.push({kind:'dot',points:[{x:lp[3].x-10,y:lp[3].y}],color:'#111',width:4,opacity:1});
+      frame.links=[{a:[0,3],b:[0,4],length:120,locked:t>0.45,color:'#000080',width:4}];
+      opts.sel={'0:3':1,'0:4':1}; break;
+    }
+    case 'attach': case 'detach': case 'pin': case 'rig': {
+      var ap=stickPts(cx,cy); poseWave(ap, id==='pin'?0:t);
+      if(id==='pin'){ ap[1].x=cx; /* neck stays */ ap[4].y-=40+10*s; }
+      addStick(ap);
+      var cape=[{x:cx,y:cy-60},{x:cx-20,y:cy},{x:cx-10,y:cy+80}];
+      if(id!=='detach' || t<0.5){
+        /* deform cape with the neck/hand when attached */
+        if(id!=='detach'){ cape[0].x=ap[1].x; cape[2].x=ap[3].x-10; cape[2].y=ap[3].y+40; }
+        frame.objects.push(makePath(cape,{width:8,color:'#800080'}));
+      } else {
+        frame.objects.push(makePath([{x:cx,y:cy-60},{x:cx-20,y:cy},{x:cx-10,y:cy+80}],{width:8,color:'#800080'}));
+      }
+      opts.sel={'0:3':1}; opts.dots=true;
+      if(id==='pin') opts.sel={'0:1':1};
+      cur={x:ap[id==='pin'?1:3].x,y:ap[id==='pin'?1:3].y,down:true}; break;
+    }
+    case 'nextFrame': case 'duplicate': case 'prevFrame': case 'nextExisting': case 'earlier': case 'later': case 'frames': {
+      var a=stickPts(cx,cy), b=stickPts(cx,cy); poseWalk(b,0.35);
+      var show=t<0.5?a:b;
+      var ghost=t>=0.5?a:null;
+      addStick(show);
+      if(ghost){ opts.onion=true; opts.onionFrame={objects:[makeRig(ghost)]}; }
+      break;
+    }
+    case 'blankFrame': case 'deleteFrame': {
+      if(t<0.5) addStick();
+      opts.dots=t<0.5; break;
+    }
+    case 'onion': {
+      var o1=stickPts(cx,cy), o2=stickPts(cx,cy); poseWalk(o2,0.4);
+      addStick(o2); opts.onion=true; opts.onionFrame={objects:[makeRig(o1)]}; opts.dots=true; break;
+    }
+    case 'play': {
+      var pp=stickPts(cx,cy); poseWalk(pp,t); addStick(pp); opts.dots=false; break;
+    }
+    case 'plus': case 'minus': case 'fit': case 'view': {
+      opts.full=true; addStick();
+      /* simulate zoom by changing crop via a custom scale drawn as a growing window */
+      opts.full=false;
+      if(id==='plus' || (id==='view' && t<0.5)){
+        /* tighter crop = zoom in */
+        /* paintDemo crop is fixed; scale stick by drawing later? tweak crop through opts */
+      }
+      var zp=stickPts(cx,cy); addStick(zp); opts.dots=true; break;
+    }
+    case 'panLeft': case 'panRight': case 'hand': case 'pan': {
+      var off=(id==='panLeft'?-40:id==='panRight'?40: 50*Math.sin(t*Math.PI*2));
+      addStick(stickPts(cx+off,cy)); opts.dots=true; break;
+    }
+    case 'undo': {
+      if(t<0.5){ var u=stickPts(cx,cy); poseWave(u,0.3); addStick(u); }
+      else addStick(); break;
+    }
+    case 'redo': {
+      if(t<0.5) addStick();
+      else { var r=stickPts(cx,cy); poseWave(r,0.3); addStick(r); } break;
+    }
+    case 'palette': case 'settings': case 'file':
+    case 'saveProject': case 'loadProject': case 'imageUpload': case 'imageRemove':
+    case 'png': case 'gif': case 'video': case 'newProject': {
+      var wp=stickPts(cx,cy); poseWalk(wp,t); addStick(wp); opts.dots=id==='settings';
+      opts.chrome=id; break;
+    }
+    default: {
+      var dp=stickPts(cx,cy); poseWalk(dp,t); addStick(dp); opts.dots=true; break;
+    }
+  }
+  if(cur) opts.cursor=cur;
+  return {frame:frame, opts:opts};
+}
+
+function drawChrome(g, id, t){
+  /* Real COMP 1 chrome labels from the actual File / Settings / Palette windows, painted beside the stick. Not a substitute when a recorded loop exists. */
+  var W=g.canvas.width, H=g.canvas.height;
+  var x=8, y=8, w=W-16, h=Math.min(84, H*0.42);
+  g.save();
+  g.fillStyle='#d4d0c8'; g.strokeStyle='#444'; g.fillRect(x,y,w,h);
+  g.strokeStyle='#fff'; g.beginPath(); g.moveTo(x,y+h); g.lineTo(x,y); g.lineTo(x+w,y); g.stroke();
+  g.strokeStyle='#444'; g.beginPath(); g.moveTo(x+w,y); g.lineTo(x+w,y+h); g.lineTo(x,y+h); g.stroke();
+  g.fillStyle='#000080'; g.fillRect(x+2,y+2,w-4,16);
+  var title='File · local project';
+  if(id==='settings') title='Settings · Animation & drawing';
+  if(id==='palette') title='Paint properties';
+  g.fillStyle='#fff'; g.font='11px Arial'; g.fillText(title, x+8, y+14);
+  var labels=[];
+  if(id==='palette') labels=['Thickness','Color','Filled'];
+  else if(id==='settings') labels=['Onion','FPS','Free dots'];
+  else if(id==='saveProject') labels=['Save project'];
+  else if(id==='loadProject') labels=['Open project'];
+  else if(id==='imageUpload') labels=['Trace image'];
+  else if(id==='imageRemove') labels=['Remove underlay'];
+  else if(id==='png') labels=['Export PNG'];
+  else if(id==='gif') labels=['Export GIF'];
+  else if(id==='video') labels=['Export video'];
+  else if(id==='newProject') labels=['New project'];
+  else labels=['Save project','Open project','Export GIF'];
+  g.font='11px Arial'; g.fillStyle='#111';
+  for(var i=0;i<labels.length;i++){
+    var bx=x+6+i*70, by=y+24, bw=66, bh=28;
+    var on=Math.floor(t*labels.length)%labels.length===i;
+    g.fillStyle=on?'#c7d8fa':'#d4d0c8';
+    g.fillRect(bx,by,bw,bh);
+    g.strokeStyle='#fff'; g.strokeRect(bx,by,bw,bh);
+    g.fillStyle='#111'; g.fillText(labels[i], bx+4, by+18);
+  }
+  g.restore();
+}
+
+/* Optional recorded filmstrips: window.__FM_DEMO_BITS[id] = {img, n, fw, fh, fps} */
+function drawTool(canvas, id, now){
+  if(!canvas) return;
+  var g=canvas.getContext('2d');
+  try{
+  var bits=(window.__FM_DEMO_BITS||{})[id];
+  var loop=2200;
+  var t=((now||0)%loop)/loop;
+  if(bits && bits.img && bits.img.complete && bits.img.naturalWidth){
+    var fi=Math.floor(((now||0)/1000)* (bits.fps||8)) % bits.n;
+    var cols=Math.floor(bits.img.naturalWidth/bits.fw)||1;
+    var sx=(fi%cols)*bits.fw, sy=Math.floor(fi/cols)*bits.fh;
+    g.fillStyle='#fff'; g.fillRect(0,0,canvas.width,canvas.height);
+    g.drawImage(bits.img,sx,sy,bits.fw,bits.fh,0,0,canvas.width,canvas.height);
+    return;
+  }
+  var pack=engineFrame(id, t);
+  paintDemo(g, pack.frame, pack.opts);
+  if(pack.opts.chrome) drawChrome(g, pack.opts.chrome, t);
+  }catch(err){
+    g.fillStyle='#ffffd2'; g.fillRect(0,0,canvas.width,canvas.height);
+    g.fillStyle='#000'; g.font='11px Arial'; g.fillText('demo', 8, 20);
+  }
+}
+
+/* ---------- asset loader (video + optional chapters + filmstrips) ---------- */
+function fetchBlob(url){
+  return new Promise(function(resolve,reject){
+    var f=window.fetch;
+    try{ if(parent && parent!==window && parent.fetch) f=parent.fetch.bind(parent); }catch(e){}
+    if(!f){ reject(new Error('no fetch')); return; }
+    f(url).then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.blob(); }).then(resolve).catch(reject);
+  });
+}
+function candidateUrls(name){
+  var list=[name, './'+name, 'file:///android_asset/'+name];
+  try{
+    if(parent && parent!==window && parent.location && parent.location.href){
+      var base=parent.location.href.replace(/[^\/]+$/, '');
+      list.push(base+name);
+    }
+  }catch(e){}
+  return list;
+}
+function loadFirst(name){
+  var urls=candidateUrls(name), i=0;
+  function next(){
+    if(i>=urls.length) return Promise.reject(new Error('missing '+name));
+    var u=urls[i++];
+    return fetchBlob(u).catch(next);
+  }
+  return next();
+}
+
+var tutState={tab:'watch', page:0, perPage:2, open:false, hold:null, videoUrl:null, ready:false, chapters:CHAPTERS, raf:0};
+
+function fillChapters(){
+  var sel=$id('tutChapter'); if(!sel) return;
+  sel.innerHTML='';
+  for(var i=0;i<tutState.chapters.length;i++){
+    var o=document.createElement('option');
+    o.value=String(i); o.textContent=tutState.chapters[i].title;
+    sel.appendChild(o);
+  }
+}
+function chapterIndexAt(t){
+  var ch=tutState.chapters, i, idx=0;
+  for(i=0;i<ch.length;i++) if(t+0.01>=ch[i].start) idx=i;
+  return idx;
+}
+function seekChapter(i){
+  var ch=tutState.chapters;
+  if(i<0) i=0; if(i>ch.length-1) i=ch.length-1;
+  var v=$id('tutVideo');
+  if(v && isFinite(ch[i].start)) { try{ v.currentTime=ch[i].start; }catch(e){} }
+  var sel=$id('tutChapter'); if(sel) sel.value=String(i);
+}
+
+function formatTime(s){
+  s=Math.max(0, Math.floor(s||0));
+  return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);
+}
+function syncControls(){
+  var v=$id('tutVideo'), play=$id('tutPlay'), scrub=$id('tutScrub'), time=$id('tutTime');
+  if(!v) return;
+  if(play) play.textContent=v.paused?'▶':'❚❚';
+  if(time) time.textContent=formatTime(v.currentTime)+' / '+formatTime(v.duration||0);
+  if(scrub && v.duration && isFinite(v.duration) && !scrub._drag){
+    scrub.max=1000; scrub.value=String(Math.round(1000*v.currentTime/v.duration));
+  }
+  var sel=$id('tutChapter');
+  if(sel && document.activeElement!==sel) sel.value=String(chapterIndexAt(v.currentTime||0));
+}
+
+function setTutTab(tab){
+  tutState.tab=tab;
+  var w=$id('tutWatch'), t=$id('tutTools');
+  if(w) w.hidden=tab!=='watch';
+  if(t) t.hidden=tab!=='tools';
+  qsa(document,'[data-tuttab]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tuttab')===tab); });
+  if(tab==='tools'){ renderToolPage(); startDemoLoop(); } else { /* keep hold/tools canvases ticking only if visible */ }
+  var v=$id('tutVideo');
+  if(v && tab!=='watch'){ try{ v.pause(); }catch(e){} }
+}
+
+function perPageNow(){
+  var h=window.innerHeight||600;
+  if(h>=740) return 6;
+  if(h>=620) return 4;
+  return 2;
+}
+function renderToolPage(){
+  var grid=$id('tutToolGrid'); if(!grid) return;
+  tutState.perPage=perPageNow();
+  var n=TOOLS.length, per=tutState.perPage, pages=Math.max(1, Math.ceil(n/per));
+  if(tutState.page<0) tutState.page=0;
+  if(tutState.page>pages-1) tutState.page=pages-1;
+  var start=tutState.page*per, end=Math.min(n, start+per);
+  grid.innerHTML='';
+  for(var i=start;i<end;i++){
+    var tool=TOOLS[i];
+    var b=document.createElement('button');
+    b.className='tutCard'; b.type='button'; b.setAttribute('data-demo', tool.id);
+    var c=document.createElement('canvas'); c.width=DW; c.height=DH; c.setAttribute('aria-hidden','true');
+    var strong=document.createElement('strong'); strong.textContent=tool.name;
+    var small=document.createElement('small'); small.textContent=tool.blurb;
+    b.appendChild(c); b.appendChild(strong); b.appendChild(small);
+    b.addEventListener('click', (function(id){ return function(){ jumpTool(id); }; })(tool.id));
+    grid.appendChild(b);
+    drawTool(c, tool.id, performance.now());
+  }
+  var lab=$id('tutToolPage');
+  if(lab) lab.textContent='Page '+(tutState.page+1)+' / '+pages+' · '+n+' tools';
+  var prev=$id('tutToolPrev'), next=$id('tutToolNext');
+  if(prev) prev.disabled=tutState.page<=0;
+  if(next) next.disabled=tutState.page>=pages-1;
+}
+function jumpTool(id){
+  var tool=TOOL_BY_ID[id]; if(!tool) return;
+  var idx=-1, i;
+  for(i=0;i<tutState.chapters.length;i++) if(tutState.chapters[i].id===tool.ch) idx=i;
+  setTutTab('watch');
+  if(idx>=0) seekChapter(idx);
+  var v=$id('tutVideo'); if(v && v.paused && tutState.ready) v.play().catch(function(){});
+}
+
+function startDemoLoop(){
+  if(tutState.raf) return;
+  var tick=function(now){
+    tutState.raf=requestAnimationFrame(tick);
+    var hold=$id('holdTip');
+    if(hold && hold.classList.contains('show') && tutState.hold){
+      drawTool($id('holdTipCanvas'), tutState.hold, now);
+    }
+    if(tutState.open && tutState.tab==='tools'){
+      var cs=qsa(document,'#tutToolGrid canvas');
+      for(var i=0;i<cs.length;i++){
+        var id=cs[i].parentNode && cs[i].parentNode.getAttribute('data-demo');
+        if(id) drawTool(cs[i], id, now);
+      }
+    }
+    if(!(tutState.open && tutState.tab==='tools') && !(hold && hold.classList.contains('show'))){
+      /* nothing visible — keep a cheap idle only if needed; leave raf on while dialog/tip may reopen soon? stop. */
+      if(!tutState.open && !(hold && hold.classList.contains('show'))){
+        cancelAnimationFrame(tutState.raf); tutState.raf=0;
+      }
+    }
+  };
+  tutState.raf=requestAnimationFrame(tick);
+}
+
+function openTutorial(){
+  if(typeof stop==='function') stop();
+  if(typeof cancelGesture==='function') cancelGesture();
+  if(typeof close==='function') close();
+  var dlg=$id('tutorialDlg');
+  if(!dlg) return;
+  dlg.showModal();
+  tutState.open=true;
+  setTutTab('watch');
+  fillChapters();
+  startDemoLoop();
+  var v=$id('tutVideo');
+  if(v && tutState.videoUrl && !v.src){ v.src=tutState.videoUrl; }
+  if(v && tutState.ready){ v.play().catch(function(){}); }
+  syncControls();
+}
+function closeTutorial(){
+  var v=$id('tutVideo'); if(v){ try{ v.pause(); }catch(e){} }
+  tutState.open=false;
+  hideHold();
+}
+function hideHold(){
+  var el=$id('holdTip'); if(el) el.classList.remove('show');
+  tutState.hold=null;
+}
+function showHold(id, anchor){
+  var tool=TOOL_BY_ID[id]; if(!tool) return;
+  var el=$id('holdTip'), title=$id('holdTipTitle'), text=$id('holdTipText'), c=$id('holdTipCanvas');
+  if(!el) return;
+  if(title) title.textContent=tool.name;
+  if(text) text.textContent=tool.blurb+(tool.ch?'  ·  Hold-tip demo. In Tutorial → Tools, tap to jump to this part of the video.':'');
+  el.classList.add('show');
+  tutState.hold=id;
+  if(c) drawTool(c, id, performance.now());
+  startDemoLoop();
+  /* keep on screen; pin near bottom so 320×568 never overflows the page */
+  el.style.left='50%'; el.style.bottom='8px'; el.style.top='auto'; el.style.transform='translateX(-50%)';
+}
+
+function bindHold(el, id){
+  if(!el || !id || !TOOL_BY_ID[id] || el.__fmHold) return;
+  el.__fmHold=id;
+  var timer=0, fired=false;
+  el.addEventListener('pointerdown', function(e){
+    if(e.button && e.button!==0) return;
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    fired=false;
+    if(timer) clearTimeout(timer);
+    timer=setTimeout(function(){ fired=true; showHold(id, el); }, 520);
+  });
+  var clear=function(){ if(timer){ clearTimeout(timer); timer=0; } };
+  el.addEventListener('pointerup', clear);
+  el.addEventListener('pointercancel', clear);
+  el.addEventListener('lostpointercapture', clear);
+  el.addEventListener('click', function(e){
+    if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; }
+  }, true);
+}
+
+function hookChrome(){
+  var pairs=[['file','file'],['undo','undo'],['redo','redo'],['settings','settings'],['tutorial','tutorial'],
+    ['presetFigures','joints'],['freeDotTool','dot'],['dotSettings','jointTools'],
+    ['plus','plus'],['minus','minus'],['fit','fit'],['panLeft','panLeft'],['panRight','panRight'],
+    ['prevFrame','prevFrame'],['nextExisting','nextExisting'],['onion','onion'],['next','nextFrame'],['play','play'],
+    ['saveProject','saveProject'],['loadProject','loadProject'],['imageUpload','imageUpload'],['imageRemove','imageRemove'],
+    ['png','png'],['gif','gif'],['video','video'],['newProject','newProject'],['hand','hand'],['centerView','fit']];
+  for(var i=0;i<pairs.length;i++){
+    var el=$id(pairs[i][0]); if(el) bindHold(el, pairs[i][1]);
+  }
+  qsa(document,'[data-pan]').forEach(function(b){ bindHold(b,'pan'); });
+  /* tabs themselves are not tools */
+}
+
+function hookDynamicButton(b, hintedId){
+  var id=hintedId || idFromLabel((b.querySelector('strong')&&b.querySelector('strong').textContent)||b.textContent);
+  /* Pose Rotate +15° vs art Rotate +15°: if parent is context and tab pose */
+  if(id==='rotateArt15' || id==='rotateJoints15'){
+    try{ if(typeof tab==='string' && tab==='pose') id='rotateJoints15'; }catch(e){}
+  }
+  if(id) bindHold(b, id);
+}
+
+var _origToolButton=typeof toolButton==='function'?toolButton:null;
+if(_origToolButton){
+  toolButton=function(name,desc,fn){
+    _origToolButton(name,desc,fn);
+    var grid=$id('toolGrid');
+    var b=grid && grid.lastElementChild;
+    if(b) hookDynamicButton(b, idFromLabel(name));
+  };
+}
+
+function attachContextHolds(){
+  var c=$id('context'); if(!c) return;
+  var buttons=qsa(c,'button');
+  for(var i=0;i<buttons.length;i++) hookDynamicButton(buttons[i]);
+}
+var _origUi=typeof ui==='function'?ui:null;
+if(_origUi){
+  ui=function(){ _origUi(); attachContextHolds(); };
+}
+
+function wirePlayer(){
+  var btn=$id('tutorial'); if(btn) btn.addEventListener('click', function(){ openTutorial(); });
+  var closeBtn=$id('tutorialClose');
+  if(closeBtn) closeBtn.addEventListener('click', function(){ closeTutorial(); });
+  var dlg=$id('tutorialDlg');
+  if(dlg){ dlg.addEventListener('close', closeTutorial); }
+  qsa(document,'[data-tuttab]').forEach(function(b){
+    b.addEventListener('click', function(){ setTutTab(b.getAttribute('data-tuttab')); });
+  });
+  var play=$id('tutPlay'); if(play) play.addEventListener('click', function(){
+    var v=$id('tutVideo'); if(!v) return;
+    if(v.paused) v.play().catch(function(){}); else v.pause();
+    syncControls();
+  });
+  var scrub=$id('tutScrub');
+  if(scrub){
+    scrub.addEventListener('pointerdown', function(){ scrub._drag=true; });
+    scrub.addEventListener('pointerup', function(){ scrub._drag=false; });
+    scrub.addEventListener('input', function(){
+      var v=$id('tutVideo'); if(!v||!v.duration) return;
+      try{ v.currentTime=v.duration*(Number(scrub.value)/1000); }catch(e){}
+      syncControls();
+    });
+  }
+  var v=$id('tutVideo');
+  if(v){
+    v.addEventListener('timeupdate', syncControls);
+    v.addEventListener('loadedmetadata', function(){ tutState.ready=true; syncControls(); });
+    v.addEventListener('play', syncControls);
+    v.addEventListener('pause', syncControls);
+    v.addEventListener('ended', syncControls);
+    v.addEventListener('error', function(){
+      var m=$id('tutVideoMsg'); if(m){ m.style.display='block'; m.textContent='Tutorial video could not be loaded offline. Check that funmotion-tutorial.mp4 is next to the page or in the APK assets.'; }
+    });
+  }
+  $id('tutChPrev') && $id('tutChPrev').addEventListener('click', function(){ seekChapter(chapterIndexAt(($id('tutVideo')&&$id('tutVideo').currentTime)||0)-1); });
+  $id('tutChNext') && $id('tutChNext').addEventListener('click', function(){ seekChapter(chapterIndexAt(($id('tutVideo')&&$id('tutVideo').currentTime)||0)+1); });
+  $id('tutChapter') && $id('tutChapter').addEventListener('change', function(){ seekChapter(Number($id('tutChapter').value)||0); });
+  $id('tutToolPrev') && $id('tutToolPrev').addEventListener('click', function(){ tutState.page--; renderToolPage(); });
+  $id('tutToolNext') && $id('tutToolNext').addEventListener('click', function(){ tutState.page++; renderToolPage(); });
+  $id('holdTipClose') && $id('holdTipClose').addEventListener('click', hideHold);
+  fillChapters();
+}
+
+function attachVideoSrc(url){
+  var v=$id('tutVideo'); if(!v) return;
+  tutState.videoUrl=url;
+  try{ v.src=url; }catch(e){}
+}
+function initialVideoSrc(){
+  try{
+    if(parent && parent!==window && parent.location){
+      var href=parent.location.href||'';
+      if(/android_asset/i.test(href)) return 'file:///android_asset/funmotion-tutorial.mp4';
+      if(parent.location.protocol==='file:') return href.replace(/[^\/]+$/, '')+'funmotion-tutorial.mp4';
+    }
+  }catch(e){}
+  if(location.protocol==='file:') return 'funmotion-tutorial.mp4';
+  return candidateUrls('funmotion-tutorial.mp4')[0];
+}
+function loadAssets(){
+  var v=$id('tutVideo');
+  /* Direct src first — file:// sibling, APK srcdoc via file:///android_asset/, http via relative. Avoid fetch on file:// (CORS origin null). */
+  if(v){
+    var start=initialVideoSrc();
+    attachVideoSrc(start);
+    v.addEventListener('error', function onE(){
+      v.removeEventListener('error', onE);
+      if(location.protocol==='file:'){
+        var m=$id('tutVideoMsg'); if(m && !tutState.ready){ /* file missing during recording is ok; keep quiet unless Tutorial is open */ }
+        return;
+      }
+      loadFirst('funmotion-tutorial.mp4').then(function(blob){
+        attachVideoSrc(URL.createObjectURL(blob));
+      }).catch(function(){
+        var m=$id('tutVideoMsg'); if(m){ m.style.display='block'; m.textContent='Tutorial video could not be loaded offline. Check that funmotion-tutorial.mp4 is next to the page or in the APK assets.'; }
+      });
+    });
+  }
+  if(location.protocol!=='file:'){
+    loadFirst('funmotion-tutorial-chapters.json').then(function(blob){ return blob.text(); }).then(function(txt){
+      var data=JSON.parse(txt);
+      if(data && data.chapters && data.chapters.length){ tutState.chapters=data.chapters; fillChapters(); }
+    }).catch(function(){});
+  } else {
+    /* file:// — try a script-free relative load via <video> only; keep baked-in chapters, then optional XHR isn't used. */
+  }
+}
+
+hookChrome();
+wirePlayer();
+loadAssets();
+attachContextHolds();
+
+/* test hook — extend __FM without dropping existing fields */
+var _fm=window.__FM;
+window.__FM=function(){
+  var s=_fm?_fm():{};
+  s.ver='0.2.5';
+  s.tutorialOpen=!!( $id('tutorialDlg') && $id('tutorialDlg').open );
+  s.tutorialTab=tutState.tab;
+  s.tutorialPage=tutState.page;
+  s.toolCount=TOOLS.length;
+  s.holdTip=tutState.hold;
+  s.holdOpen=!!( $id('holdTip') && $id('holdTip').classList.contains('show') );
+  s.videoReady=!!tutState.ready;
+  s.videoSrc=!!(tutState.videoUrl || ($id('tutVideo')&&$id('tutVideo').src));
+  s.chapters=tutState.chapters.map(function(c){return c.id;});
+  var v=$id('tutVideo');
+  s.videoTime=v? (v.currentTime||0):0;
+  s.videoPaused=v? !!v.paused:true;
+  return s;
+};
+window.__FMHold={ show:showHold, hide:hideHold, bind:bindHold, idFromLabel:idFromLabel, tools:TOOLS, draw:drawTool, open:openTutorial, close:closeTutorial, jump:jumpTool, setTab:setTutTab, page:function(n){ tutState.page=n; renderToolPage(); } };
+window.__FMChapters=function(){return tutState.chapters;};
+})();
+
 })();
 </script></body></html>

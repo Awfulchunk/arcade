@@ -1,0 +1,49 @@
+{
+  "chapters": [
+    {
+      "id": "open",
+      "title": "Opening · COMP 1",
+      "start": 0
+    },
+    {
+      "id": "figures",
+      "title": "Stick figure + red dots",
+      "start": 18
+    },
+    {
+      "id": "draw",
+      "title": "Drawing tools",
+      "start": 36.001
+    },
+    {
+      "id": "rig",
+      "title": "Rigging · attach, locks, dots",
+      "start": 88.001
+    },
+    {
+      "id": "frames",
+      "title": "Onion, frames, posing",
+      "start": 140.001
+    },
+    {
+      "id": "play",
+      "title": "Playback",
+      "start": 180
+    },
+    {
+      "id": "view",
+      "title": "Pan and zoom",
+      "start": 198
+    },
+    {
+      "id": "file",
+      "title": "Save and open",
+      "start": 216
+    },
+    {
+      "id": "export",
+      "title": "GIF and MP4 export",
+      "start": 233.999
+    }
+  ]
+}
