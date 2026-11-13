@@ -2,21 +2,25 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Papa Potato 0.4</title>
+<title>Papa Potato 0.4.1</title>
 <style>
-/* Papa Potato 0.4 (Tough & J's Arcade). Art lock: 0.3.1 Papa (sleep locked) + 0.4 machines/decor. Swarm DPR. */
+/* Papa Potato 0.4.1 (Tough & J's Arcade). Art lock: 0.3.1 Papa (sleep locked) + 0.4 machines/decor. Swarm DPR. */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;font-family:"Courier New",Courier,monospace;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-:root{--hud-w:100px;--rail-w:48px;--cmd-pad:6px;--gap:4px;--tap:44px;--box-h:48px;--buy-h:44px;
+:root{--hud-w:100px;--rail-w:48px;--cmd-pad:6px;--gap:4px;--tap:44px;--box-h:48px;--buy-h:44px;--tray-h:0px;
   --cmd-h:calc(var(--cmd-pad)*2 + var(--buy-h) + var(--gap) + var(--box-h)*3 + var(--gap)*2)}
 @media (min-height:700px){:root{--hud-w:108px}}
-#app{position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) var(--hud-w);grid-template-rows:minmax(0,1fr) var(--cmd-h);
-  grid-template-areas:"stage hud" "cmd cmd";background:#0c1220}
-#stage{grid-area:stage;display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr) var(--rail-w);grid-template-rows:minmax(0,1fr);grid-template-areas:"lrail play rrail";min-width:0;min-height:0;background:#0c1220}
+#app{position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) var(--hud-w);grid-template-rows:minmax(0,1fr) var(--tray-h) var(--cmd-h);
+  grid-template-areas:"stage hud" "tray hud" "cmd cmd";background:#0c1220}
+#app.editing{--tray-h:92px}
+/* 0.4.1: pan/zoom rails hidden (not deleted). The room uses the full stage width and always fits the screen. */
+#stage{grid-area:stage;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"play";min-width:0;min-height:0;background:#0c1220}
 #play{grid-area:play;position:relative;overflow:hidden;background:#8a846c;min-width:0;min-height:0;touch-action:none}
 #play canvas{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:auto;display:block}
 .tag{transition:opacity .35s;position:absolute;z-index:2;font:700 10px/1 "Courier New",monospace;color:#ffe066;background:rgba(0,0,0,.8);border:1px solid #6a5020;border-radius:4px;padding:3px 6px;letter-spacing:.08em;pointer-events:none;white-space:nowrap}
 #play .tag.off{opacity:0}
+/* t1072: in-game name labels are hidden (not deleted). They did not follow objects in the editor. */
+#play .tag{display:none!important}
 #hint{position:absolute;z-index:3;left:8px;right:8px;top:8px;font:700 10px/1.3 "Courier New",monospace;color:#fff3c0;background:rgba(10,14,24,.88);border:1px solid #6a5020;border-radius:4px;padding:5px 7px;pointer-events:none;transition:opacity .4s;text-align:center}
 #hint.off{opacity:0}
 .pop{position:absolute;z-index:3;font:700 11px/1 "Courier New",monospace;color:#ffe066;text-shadow:1px 1px 0 #000;pointer-events:none;white-space:nowrap}
@@ -168,7 +172,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
   .tag{font-size:9px;padding:2px 5px}
 }
 
-/* Side rails sit OUTSIDE the room viewport (Jay t1065). The room shrinks to fit between them. */
+/* Side rails sit OUTSIDE the room viewport (Jay t1065). Hidden in 0.4.1 (not deleted): pan/arrows removed, view always fits. */
+#leftRail,#rightRail,#panPad,#zoomRail{display:none!important}
 .rail{display:flex;flex-direction:column;align-items:center;background:#0c1220;min-width:0;min-height:0;z-index:5;pointer-events:auto;padding:4px 0}
 #leftRail{grid-area:lrail;border-right:2px solid #2a3a58;justify-content:flex-end}
 #rightRail{grid-area:rrail;border-left:2px solid #2a3a58;justify-content:flex-start}
@@ -188,6 +193,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 }
 @media (max-width:340px){:root{--rail-w:44px}}
 .stat .lv{color:#9fc0ff;font:700 12px/1 monospace}
+
+#invTray{grid-area:tray;display:none;flex-direction:column;min-width:0;min-height:0;background:#0c1220;border-top:3px solid #3a5080;padding:4px 6px 4px;overflow:hidden}
+#app.editing #invTray{display:flex}
+#invTray .th{font:700 9px/1 monospace;color:#7f93ad;letter-spacing:.1em;margin:1px 2px 4px;flex:0 0 auto}
+#invChips{flex:1 1 auto;min-height:0;display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:6px;align-items:stretch;scrollbar-width:none;touch-action:none}
+#invChips::-webkit-scrollbar{display:none}
+.invchip{flex:0 0 auto;min-width:86px;max-width:120px;height:64px;background:#1a2840;border:2px solid #2e4060;border-radius:5px;padding:5px 6px;color:#e8eef4;font:700 10px/1.15 monospace;letter-spacing:.04em;display:flex;flex-direction:column;justify-content:center;touch-action:none}
+.invchip b{color:#ffe066;font-size:8px;letter-spacing:.08em;margin-top:3px}
+.invchip.empty{color:#7f93ad;border-style:dashed;min-width:140px}
+#editBtn.hud{width:100%;height:auto;min-height:44px;margin:0;font-size:11px;letter-spacing:.08em;color:#ffd060;border:3px solid #6a5020;background:#2a1e08;box-shadow:inset 0 -3px #140e04;border-radius:4px;padding:6px 0;touch-action:none}
+#editBtn.hud.on{border-color:#ffe066;color:#ffe066;background:#3a2c10}
+#bar #invBtn{flex:0 0 28%;margin-right:6px;border-color:#3a5080;background:#14203a;color:#9fc0ff;box-shadow:inset 0 -4px #0a1226}
+#bar #invBtn.press{background:#1f3150;border-color:#b3d5ff;color:#fff}
+#bar #shopBtn{flex:1 1 auto;margin-right:6px}
+#bar #helpBtn{flex:0 0 26%}
+#putAway{flex:0 0 auto;height:36px;min-width:86px;margin-left:6px;border:3px solid #6a5020;border-radius:4px;background:#2a1e08;color:#ffd060;font:700 10px/1 monospace;letter-spacing:.06em;padding:0 8px;box-shadow:inset 0 -3px #140e04;touch-action:none;display:none}
+#putAway.on{display:block}
+#putAway.press{background:#3a2c10;border-color:#ffe066}
+#trayRow{display:flex;align-items:stretch;min-height:0;flex:1 1 auto}
 </style>
 </head>
 <body>
@@ -223,11 +247,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
         <div id="zoomLabel">FIT</div>
         <button type="button" data-act="zoom:out" aria-label="Zoom out">&minus;</button>
       </div>
-      <button id="editBtn" type="button" data-act="editor">EDIT</button>
+      <button id="editBtnRail" type="button" data-act="editor">EDIT</button>
     </aside>
   </div>
   <aside id="hud">
-    <div class="brand"><b>PAPA<br>POTATO</b><span>v0.4</span></div>
+    <div class="brand"><b>PAPA<br>POTATO</b><span>v0.4.1</span></div>
     <div class="stat"><span class="k">LEVEL</span><div class="lv" id="level">1 / 5</div></div>
     <div class="stat"><span class="k">COINS</span><div class="coins"><canvas id="coinIco" width="14" height="14"></canvas><span id="coins">0</span></div></div>
     <div class="two">
@@ -248,15 +272,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
       <div class="st lazy" data-s="AUTO-LAZY">AUTO-LAZY</div>
       <div id="doing"></div>
     </div>
+    <button id="editBtn" class="hud" type="button" data-act="editor">EDIT</button>
   </aside>
+  <div id="invTray" aria-label="Inventory tray">
+    <div class="th">INVENTORY — drag into the room, or select a placed item and PUT AWAY</div>
+    <div id="trayRow">
+      <div id="invChips"></div>
+      <button id="putAway" type="button" data-act="putaway">PUT AWAY</button>
+    </div>
+  </div>
   <section id="cmd">
     <div id="boxes"></div>
-    <div id="bar"><button id="shopBtn" type="button" data-act="shop">SHOP</button><button id="helpBtn" type="button" data-act="help">? HELP</button></div>
+    <div id="bar"><button id="invBtn" type="button" data-act="inv">INV</button><button id="shopBtn" type="button" data-act="shop">SHOP</button><button id="helpBtn" type="button" data-act="help">? HELP</button></div>
   </section>
   <div id="ovl"><div id="ovlHead"><span class="tt" id="ovlTitle"></span><span class="cn" id="ovlCoins"></span><button class="x" id="ovlClose" type="button" data-act="close" aria-label="Close">X</button></div><div id="ovlBody"></div></div>
 </div>
 <script>
-/* ===== Papa Potato 0.4 — simulation (no DOM; runs headless for tests). Built on 0.3.1 mechanics + levels, shop items, the work line and decor. ===== */
+/* ===== Papa Potato 0.4.1 — simulation (no DOM; runs headless for tests). Built on 0.4 + inventory, solid furniture, peel clusters, table children. Save v4. ===== */
 var PPSim=(function(){
   var RW=108,RH=280;                    /* 0.4: longer and slightly wider. x,y in the save are fractions of this */
   var PACE=["CHILL","EASY","STEADY","BRISK","GRIND"];
@@ -282,48 +314,72 @@ var PPSim=(function(){
   var POTS=[4,8,12,16,24,32,48,64,96,128,160,200,250,300,400,500,650,800];
   var POT_MAX=POTS.length-1;
   /* ---- room geometry (units; room = 100 wide x 240 tall). The renderer draws from these; the router avoids OBST. ---- */
-  var GEO={WALL:7,INFL:7,
+  var GEO={WALL:7,INFL:9,
     ship:{x:54,lip:22,top:2,mouth:18},                 /* FIXED: shipping chute hangs from the top wall */
-    table:{x0:48,y0:88,x1:82,y1:106},
-    cooler:{x0:86,y0:58,x1:100,y1:68},
-    stool:{x:93,y:78},
-    mat:{x:82,y:210,w:32,h:18},
+    /* 0.4.1 default layout: work loop uses the mid-room so a fitted view is not a long empty hallway */
+    table:{x0:36,y0:112,x1:70,y1:130},
+    cooler:{x0:80,y0:108,x1:94,y1:118},
+    stool:{x:87,y:130},
+    mat:{x:74,y:200,w:32,h:18},
     pile:{cx:54,base:258,rx:45,rz:14},                 /* FIXED */
     ret:{wallX:101,mouthX:86,y:244,w:9},               /* FIXED: return chute */
-    mess:{cx:54,cy:128,rx:26,rz:15},
-    peeler:{x:24,y:42},
-    beltX:24,beltY0:56,beltY1:246,
-    outBeltY:42,outBeltX0:33,outBeltX1:59.4,
+    mess:{cx:53,cy:146,rx:22,rz:14},
+    peeler:{x:22,y:52},
+    beltX:22,beltY0:66,beltY1:246,
+    outBeltY:52,outBeltX0:31,outBeltX1:59.4,
     shipBeltX:54,shipBeltY0:28.5,shipBeltY1:36.6,
-    suction:{x:24,y:255},
-    spill:{x:38,y:60},
-    sink:{x:44,y:130},
-    broom:{x:98,y:100},
-    bag:{x:40,y:250},
-    cot:{x:82,y:232},
-    rug:{x:78,y:168},
-    tv:{x:78,y:164},
-    lamp:{x:99,y:148},
-    radio:{x:99,y:134},
-    plant:{x:58,y:166},
-    betterPeeler:{x:72,y:97},
-    smallCooler:{x:96,y:90}};
+    suction:{x:22,y:255},
+    spill:{x:34,y:68},
+    sink:{x:26,y:150},
+    broom:{x:96,y:150},
+    bag:{x:40,y:248},
+    cot:{x:74,y:222},
+    rug:{x:68,y:168},
+    tv:{x:68,y:164},
+    lamp:{x:96,y:154},
+    radio:{x:96,y:142},
+    plant:{x:50,y:170},
+    betterPeeler:{x:60,y:121},
+    smallCooler:{x:92,y:90}};
+  var GEO0=JSON.parse(JSON.stringify(GEO));
   var FIXED=["pile","ret","ship"]; /* editor must never move these */
+  var TOOLS=["betterPeeler","carryBag","broomDustpan"];
+  var PLACEABLES=["sink","smallCooler","basicCot","conveyor","suction","plant","lamp","autoPeeler","outConveyor","radio","rug","tvArmchair"];
+  var STARTER=["table","cooler","stool","mat"];
+  function isTool(id){return TOOLS.indexOf(id)>=0;}
+  function isPlaceable(id){return PLACEABLES.indexOf(id)>=0;}
+  function tableKids(){
+    var T=GEO.table,cx=(T.x0+T.x1)/2,cy=(T.y0+T.y1)/2,tw=T.x1-T.x0,th=T.y1-T.y0;
+    var bw=Math.min(18,tw-12),bh=Math.min(11,th-6);
+    var board={x0:T.x0+4,y0:T.y0+3.5,x1:T.x0+4+bw,y1:T.y0+3.5+bh};
+    return {
+      cx:cx,cy:cy,
+      board:board,
+      knife:{x:board.x1+3,y:cy,ok:board.x1+6<T.x1-1},
+      peelSpawn:{x:cx,y:T.y1+2},
+      stand:{x:cx,y:T.y1+12,dir:0}
+    };
+  }
+  function bedside(){
+    var m=GEO.mat;return {x:m.x,y:m.y+m.h/2+GEO.INFL+3,dir:0};
+  }
   var OBST=[{id:"table",x0:GEO.table.x0,y0:GEO.table.y0,x1:GEO.table.x1,y1:GEO.table.y1},{id:"cooler",x0:GEO.cooler.x0,y0:GEO.cooler.y0,x1:GEO.cooler.x1,y1:GEO.cooler.y1}];
   var SPOT={
-    ship:{x:66,y:33,dir:3},
-    table:{x:65,y:113,dir:0},
-    food:{x:93,y:78,dir:0},
-    mat:{x:82,y:210,dir:1},
-    sweep:{x:39,y:70,dir:0},
+    ship:{x:60,y:40,dir:3},
+    table:{x:53,y:142,dir:0},
+    food:{x:87,y:130,dir:0},
+    mat:{x:74,y:221,dir:0},
+    sweep:{x:53,y:146,dir:0},
     pile:{y:233,x0:28,x1:80},
-    sink:{x:44,y:142,dir:0},
-    tv:{x:70,y:164,dir:1},
-    radio:{x:91,y:134,dir:1},
-    plant:{x:58,y:178,dir:0},
-    lamp:{x:91,y:148,dir:1},
-    cot:{x:82,y:232,dir:1},
+    sink:{x:26,y:162,dir:0},
+    tv:{x:60,y:176,dir:1},
+    radio:{x:88,y:142,dir:1},
+    plant:{x:50,y:182,dir:0},
+    lamp:{x:88,y:154,dir:1},
+    cot:{x:74,y:234,dir:0},
     bag:{x:40,y:242,dir:2}};
+  var SPOT0=JSON.parse(JSON.stringify(SPOT));
+  function copyBox(a,b){var k;for(k in b){if(b[k]&&typeof b[k]==="object"){if(!a[k])a[k]={};copyBox(a[k],b[k]);}else a[k]=b[k];}}
   /* ---- the command table: ONE source for the panel, the sim's BOX limits and the HELP screen ---- */
   var COMMANDS=[
     {id:"pace",does:"How fast he walks and works.",affects:"Speed x0.6 up to x1.5. Faster drains hunger and energy faster (x0.55 up to x2.0).",hi:"GRIND",lo:"CHILL",name:"WORK PACE",min:0,max:4,step:1,def:2,
@@ -415,21 +471,21 @@ var PPSim=(function(){
 
   /* ---- 0.4 shop items (unlocked by level, then bought). Unused stay in the table, hidden in the shop until unlocked. ---- */
   var ITEMS=[
-    {id:"betterPeeler",name:"BETTER PEELER",lv:1,price:20,group:"starter",fx:"A sharper hand peeler on the table. Peeling is 10% faster once bought."},
-    {id:"carryBag",name:"SMALL CARRY BAG",lv:1,price:18,group:"starter",fx:"He can carry 2 potatoes at a time (3 / 4 with upgrades)."},
-    {id:"sink",name:"SINK",lv:1,price:25,group:"starter",fx:"Holds a few potatoes. WASH BEFORE PEEL sends him here for a +1c clean potato."},
-    {id:"broomDustpan",name:"SMALL BROOM + DUSTPAN",lv:1,price:16,group:"starter",fx:"A starter broom. He sweeps at the peel mess (and the peeler spill). Stiff Broom still upgrades speed."},
-    {id:"smallCooler",name:"SMALL COOLER",lv:1,price:22,group:"starter",fx:"A little extra cooler (adds 2 food slots). Hums when stocked."},
-    {id:"basicCot",name:"BASIC COT",lv:1,price:28,group:"starter",fx:"A second bed. If you have it, he can nap here as well as on the soft bed."},
-    {id:"conveyor",name:"CONVEYOR",lv:2,price:70,group:"machine",fx:"Inbound belt from the pile toward the auto-peeler. 4-frame looped slats."},
-    {id:"suction",name:"AUTO SUCTION",lv:2,price:55,group:"machine",fx:"Swarm-style intake on the pile. Pulls potatoes onto the inbound belt."},
-    {id:"plant",name:"PLANT",lv:2,price:15,group:"decor",fx:"A potted plant. Waters when you set WATER WHEN DRY. Droops if you ignore it."},
-    {id:"lamp",name:"LAMP",lv:2,price:14,group:"decor",fx:"A floor lamp for the living nook. On/off command, looped glow."},
-    {id:"autoPeeler",name:"AUTO-PEELER",lv:3,price:120,group:"machine",fx:"X-ray-style peeler. Peels feed the out-conveyor; peels shoot onto the floor inside the room."},
-    {id:"outConveyor",name:"OUT-CONVEYOR",lv:3,price:80,group:"machine",fx:"Belt from the auto-peeler that butts the shipping intake. Peeled potatoes ride in and get sucked through."},
-    {id:"radio",name:"RADIO",lv:3,price:22,group:"decor",fx:"On/off with looped notes. He walks over to tune it now and then."},
-    {id:"rug",name:"RUG",lv:3,price:18,group:"decor",fx:"A rug under the TV nook. Looks nice. He will stand on it."},
-    {id:"tvArmchair",name:"TV + ARMCHAIR",lv:4,price:90,group:"decor",fx:"He sits in the chair facing the glowing TV when you set WATCH WHEN ENERGY <."}
+    {id:"betterPeeler",name:"BETTER PEELER",lv:1,price:20,group:"starter",kind:"tool",fx:"Goes to your inventory. Equip it on Papa. Peeling is 10% faster while equipped."},
+    {id:"carryBag",name:"SMALL CARRY BAG",lv:1,price:18,group:"starter",kind:"tool",fx:"Goes to your inventory. Equip it on Papa to carry 2 potatoes at a time (3 / 4 with upgrades)."},
+    {id:"sink",name:"SINK",lv:1,price:25,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. WASH BEFORE PEEL sends him here for a +1c clean potato."},
+    {id:"broomDustpan",name:"SMALL BROOM + DUSTPAN",lv:1,price:16,group:"starter",kind:"tool",fx:"Goes to your inventory. Equip it on Papa. He sweeps at the peel mess, broom on the peels. Stiff Broom still upgrades speed."},
+    {id:"smallCooler",name:"SMALL COOLER",lv:1,price:22,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Adds 2 food slots. Hums when stocked."},
+    {id:"basicCot",name:"BASIC COT",lv:1,price:28,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. A second bed he can nap on (enters from the side)."},
+    {id:"conveyor",name:"CONVEYOR",lv:2,price:70,group:"machine",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Inbound belt from the pile toward the auto-peeler."},
+    {id:"suction",name:"AUTO SUCTION",lv:2,price:55,group:"machine",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Swarm-style intake on the pile."},
+    {id:"plant",name:"PLANT",lv:2,price:15,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Waters when you set WATER WHEN DRY."},
+    {id:"lamp",name:"LAMP",lv:2,price:14,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. On/off command, looped glow."},
+    {id:"autoPeeler",name:"AUTO-PEELER",lv:3,price:120,group:"machine",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Peels shoot onto the floor inside the room."},
+    {id:"outConveyor",name:"OUT-CONVEYOR",lv:3,price:80,group:"machine",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Belt into the shipping intake."},
+    {id:"radio",name:"RADIO",lv:3,price:22,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. He walks over to tune it now and then."},
+    {id:"rug",name:"RUG",lv:3,price:18,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. A rug he will stand on."},
+    {id:"tvArmchair",name:"TV + ARMCHAIR",lv:4,price:90,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. He sits in the chair when you set WATCH WHEN ENERGY <."}
   ];
   var ITEMI={};for(var ii=0;ii<ITEMS.length;ii++)ITEMI[ITEMS[ii].id]=ITEMS[ii];
   var LEVEL_PRICE=[0,0,80,160,280,450]; /* cost to BUY that level (reach Lv N). Max 5. */
@@ -464,7 +520,14 @@ var PPSim=(function(){
     for(var it=0;it<n;it++){var u=-1;for(i2=0;i2<n;i2++)if(!U[i2]&&(u<0||D[i2]<D[u]))u=i2;if(u<0||D[u]>=1e9)break;U[u]=true;if(u===1)break;
       for(j2=0;j2<n;j2++){if(U[j2])continue;if(!clearSeg(N[u][0],N[u][1],N[j2][0],N[j2][1]))continue;
         var d=D[u]+Math.sqrt((N[u][0]-N[j2][0])*(N[u][0]-N[j2][0])+(N[u][1]-N[j2][1])*(N[u][1]-N[j2][1]));if(d<D[j2]){D[j2]=d;P[j2]=u;}}}
-    if(P[1]<0)return pre.concat([[tx,ty]]);
+    if(P[1]<0){
+      /* no full path: still refuse a straight cut through furniture; walk to the closest reachable node toward the target */
+      var best=-1,bd=1e9,bi;
+      for(bi=2;bi<n;bi++){if(D[bi]>=1e9)continue;var dd=D[bi]+Math.sqrt((N[bi][0]-tx)*(N[bi][0]-tx)+(N[bi][1]-ty)*(N[bi][1]-ty));if(dd<bd){bd=dd;best=bi;}}
+      if(best<0)return pre.concat([[sx,sy]]);
+      var path2=[],cur2=best;while(cur2>0){path2.unshift(N[cur2]);cur2=P[cur2];}
+      return pre.concat(path2);
+    }
     var path=[],cur=1;while(cur>0){path.unshift(N[cur]);cur=P[cur];}
     return pre.concat(path);}
   function lineFresh(){return {beltIn:[],peeler:null,beltOut:[],shipQ:0,emitted:0,shipped:0};}
@@ -484,9 +547,9 @@ var PPSim=(function(){
     return {v:4,seed:seed,rs:0,rr:seed|0,t:0,level:1,
       coins:C.startCoins,food:C.startFood,hunger:100,energy:100,
       box:b,potCap:C.potBase,up:upsFresh(),
-      owned:{},place:{},line:lineFresh(),
+      owned:{},place:{},equipped:{},line:lineFresh(),
       decor:{lamp:0,radio:0,tv:0,plant:0,plantT:0,radioTune:0},
-      pile:POTS[BOX.pot.def],chute:0,suck:null,peels:0,
+      pile:POTS[BOX.pot.def],chute:0,suck:null,peels:0,mess:[],
       stats:{peeled:0,earned:0,meals:0,naps:0,lazyNaps:0,bought:0,spent:0,lazyTime:0,eatTime:0,napTime:0,firstBuyT:-1,
         sucks:0,swept:0,sweeps:0,peelsMade:0,maxPeels:0,cleanTime:0,waitTime:0,boughtPot:0,boughtUp:0,autoBuys:0},
       g:{x:0.5,y:0.20,dir:2,hold:null,held:0,washed:false,job:"pile",peel:0,pgot:0,sloppy:false,lazy:false,act:null,walkPh:0},
@@ -494,6 +557,10 @@ var PPSim=(function(){
   }
   function Sim(st){
     this.s=st||fresh();if(typeof this.s.rr!=="number")this.s.rr=this.s.seed|0;
+    if(!this.s.equipped||typeof this.s.equipped!=="object")this.s.equipped={};
+    if(!this.s.place||typeof this.s.place!=="object")this.s.place={};
+    if(!this.s.mess)this.s.mess=[];
+    this.syncGeom();this.rebuildObst();
     if(!this.s.g.act)this.decide();
   }
   var P=Sim.prototype;
@@ -504,9 +571,9 @@ var PPSim=(function(){
   P.messF=function(){return 1-C.messMax*Math.min(1,this.s.peels/C.messFull);};
   P.wspd=function(){return this.spd()*this.messF();};
   P.price=function(){var b=this.s.stats.bought;return Math.min(C.priceCap,Math.round(C.foodPrice*Math.pow(C.priceGrow,b))+Math.floor(this.s.t/C.priceEvery));};
-  P.foodMax=function(){return C.foodMax+3*this.up("pantry")+(this.owned("smallCooler")?2:0);};
+  P.foodMax=function(){return C.foodMax+3*this.up("pantry")+(this.placed("smallCooler")?2:0);};
   P.chuteCap=function(){return C.chuteCap+2*this.up("chute");};
-  P.peelTime=function(){return C.peel*Math.pow(0.85,this.up("peeler"))*(this.owned("betterPeeler")?0.90:1)/STYLE[this.s.box.style].sp;};
+  P.peelTime=function(){return C.peel*Math.pow(0.85,this.up("peeler"))*(this.equipped("betterPeeler")?0.90:1)/STYLE[this.s.box.style].sp;};
   P.dropTime=function(){return C.drop*Math.pow(0.7,this.up("chute"));};
   P.walkMul=function(){return 1+0.10*this.up("boots");};
   P.sweepRate=function(){return C.sweepRate*(1+0.5*this.up("broom"));};
@@ -529,13 +596,14 @@ var PPSim=(function(){
     var hungerUnmet=(eatThr>0)?(s.hunger<eatThr&&s.food<=0):(s.hunger<C.lazyLow);
     var energyUnmet=napThr>0?false:(s.energy<C.lazyLow);
     var lazy=(hungerUnmet||energyUnmet);
-    var wantWatch=this.owned("tvArmchair")&&b.tv>0&&b.watch>0&&s.energy<b.watch&&!s.g.hold;
-    var wantWater=this.owned("plant")&&b.water>0&&(s.decor&&s.decor.plant>=b.water)&&!s.g.hold;
+    var wantWatch=this.placed("tvArmchair")&&b.tv>0&&b.watch>0&&s.energy<b.watch&&!s.g.hold;
+    var wantWater=this.placed("plant")&&b.water>0&&(s.decor&&s.decor.plant>=b.water)&&!s.g.hold;
     return {wantEat:wantEat,wantNap:wantNap,lazy:lazy,hungerUnmet:hungerUnmet,energyUnmet:energyUnmet,
       wantClean:b.clean>0&&s.peels>b.clean&&!lazy&&!s.g.hold,
       wantWatch:wantWatch&&!lazy,wantWater:wantWater&&!lazy};
   };
-  P.walkTo=function(xu,yu,dir,then,label){var g=this.s.g,r=route(g.x*RW,g.y*RH,xu,yu),wp=[];for(var i=0;i<r.length-1;i++)wp.push([r[i][0]/RW,r[i][1]/RH]);
+  P.walkTo=function(xu,yu,dir,then,label){var g=this.s.g,dest=this.standBeside(xu,yu);xu=dest.x;yu=dest.y;
+    var r=route(g.x*RW,g.y*RH,xu,yu),wp=[];for(var i=0;i<r.length-1;i++)wp.push([r[i][0]/RW,r[i][1]/RH]);
     g.act={t:"walk",x:xu/RW,y:yu/RH,dir:dir,then:then,label:label,wp:wp};};
   P.decide=function(){
     var s=this.s,g=s.g,n=this.needState();
@@ -552,7 +620,7 @@ var PPSim=(function(){
     }
     /* if the full work line is running, leave the peeling to the machines and do a little living */
     if(this.lineRunning()&&!g.hold){
-      if(this.owned("radio")&&s.box.radio>0&&this.rand()<0.08){var rd=this.placeOf("radio");this.walkTo(rd.x-7.5,rd.y,1,"tune","to tune the radio");return;}
+      if(this.placed("radio")&&s.box.radio>0&&this.rand()<0.08){var rd=this.placeOf("radio");this.walkTo(rd.x-7.5,rd.y,1,"tune","to tune the radio");return;}
       g.act={t:"idle",d:1.2+this.rand()*2.0,e:0,label:"watching the line"};return;
     }
     if(g.job==="pile"){var px=SPOT.pile.x0+this.rand()*(SPOT.pile.x1-SPOT.pile.x0);this.walkTo(px,SPOT.pile.y,2,"grab","to the pile");}
@@ -571,9 +639,34 @@ var PPSim=(function(){
     else if(kind==="drop")g.act={t:"drop",e:0,label:this.heldN()>1?"shipping them":"shipping it"};
     else if(kind==="eat")g.act={t:"eat",e:0,label:"eating"};
     else if(kind==="sweep")g.act={t:"sweep",e:0,acc:0,label:"sweeping up the peels"};
-    else if(kind==="nap"){g.act={t:"nap",label:"napping on the bed"};this.s.stats.naps++;this.emit({k:"nap"});}
+    else if(kind==="nap"){g.x=GEO.mat.x/RW;g.y=GEO.mat.y/RH;g.dir=1;g.act={t:"nap",label:"napping on the bed"};this.s.stats.naps++;this.emit({k:"nap"});}
   };
-  P.peelEmit=function(n){var s=this.s;for(var i=0;i<n;i++){if(s.peels>=C.peelMax)break;s.peels++;s.stats.peelsMade++;if(s.peels>s.stats.maxPeels)s.stats.maxPeels=s.peels;this.emit({k:"peel",slot:s.peels-1});}};
+  P.peelEmit=function(n,src){var s=this.s;if(!s.mess)s.mess=[];src=src||"table";
+    for(var i=0;i<n;i++){if(s.mess.length>=C.peelMax)break;
+      var pos=this.spawnPeelPos(src,s.mess.length);
+      s.mess.push(pos);s.peels=s.mess.length;s.stats.peelsMade++;if(s.peels>s.stats.maxPeels)s.stats.maxPeels=s.peels;
+      this.emit({k:"peel",slot:s.mess.length-1,x:pos.x,y:pos.y,src:src});}};
+  P.spawnPeelPos=function(src,i){
+    var x,y,h=hash(this.s.seed||1,i*11+7);
+    if(src==="peeler"&&this.placed("autoPeeler")){
+      var p=this.placeOf("autoPeeler");
+      var ang=h*6.283,r=6+hash(this.s.seed||1,i*13+3)*10;
+      x=p.x+8+Math.cos(ang)*r*0.4;y=p.y+14+Math.sin(ang)*r*0.55;
+    }else{
+      var k=tableKids(),sp=k.peelSpawn;
+      var ang=h*6.283,r=4+hash(this.s.seed||1,i*17+5)*16;
+      x=sp.x+Math.cos(ang)*r*0.85;y=sp.y+2+Math.abs(Math.sin(ang))*r;
+    }
+    x=Math.max(GEO.WALL+4,Math.min(RW-GEO.WALL-4,x));
+    y=Math.max(GEO.WALL+4,Math.min(GEO.pile.base-GEO.pile.rz-8,y));
+    /* keep peels off the table, bed and cooler tops */
+    var T=GEO.table,M=GEO.mat,C=GEO.cooler;
+    if(x>T.x0-1&&x<T.x1+1&&y>T.y0-1&&y<T.y1+2)y=T.y1+4;
+    if(Math.abs(x-M.x)<M.w/2+2&&Math.abs(y-M.y)<M.h/2+2)y=M.y+M.h/2+4;
+    if(x>C.x0-1&&x<C.x1+1&&y>C.y0-1&&y<C.y1+2)y=C.y1+4;
+    return {x:x,y:y,src:src||"table"};
+  };
+  P.syncPeelCount=function(){var s=this.s;if(!s.mess)s.mess=[];s.peels=s.mess.length;};
   P.step=function(dt){
     var s=this.s,g=s.g,a=g.act,sp=this.spd(),dr=this.drn(),wsp=sp*this.messF();
     s.t+=dt;
@@ -625,21 +718,23 @@ var PPSim=(function(){
       case "eat":a.e+=dt;if(a.e>=C.eat){
           if(s.food>0){s.food--;s.hunger=Math.min(100,s.hunger+C.meal);s.stats.meals++;this.emit({k:"ate"});}
           var n=this.needState();if(n.wantEat){a.e=0;}else this.decide();}break;
-      case "nap":{s.energy=Math.min(100,s.energy+this.napRegen()*dt);var wk=s.box.wake>=100?C.napWake:s.box.wake;if(s.energy>=wk)this.decide();break;}
+      case "nap":{s.energy=Math.min(100,s.energy+this.napRegen()*dt);var wk=s.box.wake>=100?C.napWake:s.box.wake;if(s.energy>=wk){var bs=bedside();g.x=bs.x/RW;g.y=bs.y/RH;g.dir=bs.dir;this.decide();}break;}
       case "lazynap":s.energy=Math.min(100,s.energy+C.lazyNapRegen*dt);if(s.energy>=a.until)this.decide();break;
       case "idle":a.e+=dt;if(a.e>=a.d)this.decide();break;
       case "sweep":{
         var nn=this.needState();
         if(s.box.clean<=0||nn.wantEat||nn.wantNap||nn.lazy){this.decide();break;}
         a.e+=dt*sp;
-        if(a.e>C.sweepWind){a.acc+=dt*sp*this.sweepRate();var kk=Math.floor(a.acc);if(kk>0){a.acc-=kk;var rm=Math.min(kk,s.peels);s.peels-=rm;s.stats.swept+=rm;}}
-        if(s.peels<=Math.floor(s.box.clean*C.sweepTidy)){if(s.peels>0){s.stats.swept+=s.peels;s.peels=0;}s.stats.sweeps++;this.emit({k:"swept"});this.decide();}
+        if(a.e>C.sweepWind){a.acc+=dt*sp*this.sweepRate();var kk=Math.floor(a.acc);if(kk>0){a.acc-=kk;var got=this.sweepNear(g.x*RW,g.y*RH,kk);
+          var tidy=Math.floor(s.box.clean*C.sweepTidy);
+          if(got===0&&s.peels>tidy){this.decide();break;}}}
+        if(s.peels<=Math.floor(s.box.clean*C.sweepTidy)){s.stats.sweeps++;this.emit({k:"swept"});this.decide();}
         break;}
       case "wash":{
         a.e+=dt*sp;if(a.e>=2.2){g.washed=true;g.job="table";this.decide();}break;}
       case "watch":{
         var nn=this.needState();
-        if(!this.owned("tvArmchair")||s.box.tv<=0||nn.wantEat||nn.wantNap){this.decide();break;}
+        if(!this.placed("tvArmchair")||s.box.tv<=0||nn.wantEat||nn.wantNap){this.decide();break;}
         s.energy=Math.min(100,s.energy+1.8*dt);
         a.e+=dt;if(s.energy>=(s.box.watch>0?Math.min(100,s.box.watch+25):80)||a.e>12)this.decide();
         break;}
@@ -677,14 +772,95 @@ var PPSim=(function(){
 
   P.owned=function(id){return !!(this.s.owned&&this.s.owned[id]);};
   P.unlocked=function(id){var it=ITEMI[id];return !!(it&&this.s.level>=it.lv);};
+  P.placed=function(id){return this.owned(id)&&!!(this.s.place&&this.s.place[id]);};
+  P.equipped=function(id){return this.owned(id)&&!!(this.s.equipped&&this.s.equipped[id]);};
+  P.inInv=function(id){if(!this.owned(id))return false;if(isTool(id))return !this.equipped(id);if(isPlaceable(id))return !this.placed(id);return false;};
   P.placeOf=function(id){var p=(this.s.place&&this.s.place[id])||defaultPlace(id);return p;};
-  P.sweepSpot=function(){if(this.owned("autoPeeler")&&this.s.peels>0)return {x:GEO.spill.x,y:GEO.spill.y+10,dir:0};return {x:SPOT.sweep.x,y:SPOT.sweep.y,dir:SPOT.sweep.dir};};
+  P.equip=function(id){if(!isTool(id)||!this.owned(id))return "bad";if(!this.s.equipped)this.s.equipped={};this.s.equipped[id]=1;this.poke();return "ok";};
+  P.unequip=function(id){if(!isTool(id)||!this.owned(id))return "bad";if(this.s.equipped)this.s.equipped[id]=0;this.poke();return "ok";};
+  P.placeItem=function(id,x,y){if(!isPlaceable(id)||!this.owned(id))return "bad";
+    if(x==null||y==null){var d=defaultPlace(id);x=d.x;y=d.y;}
+    if(!sanePlace(id,x,y))return "blocked";
+    if(!this.s.place)this.s.place={};this.s.place[id]={x:x,y:y};this.syncGeom();this.rebuildObst();this.poke();return "ok";};
+  P.unplace=function(id){if(!isPlaceable(id)||!this.placed(id))return "bad";
+    delete this.s.place[id];this.syncGeom();this.rebuildObst();this.poke();return "ok";};
+  P.invList=function(){var out=[],i,it;
+    for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(!this.owned(it.id))continue;
+      out.push({id:it.id,name:it.name,kind:isTool(it.id)?"tool":"place",equipped:this.equipped(it.id),placed:this.placed(it.id),inInv:this.inInv(it.id)});
+    }return out;};
+  P.trayList=function(){var out=[],i,it;
+    for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(isPlaceable(it.id)&&this.owned(it.id)&&!this.placed(it.id))out.push({id:it.id,name:it.name});}
+    return out;};
+  P.standBeside=function(x,y){
+    var pads=[[0,10],[0,14],[10,0],[-10,0],[0,-10],[8,8],[-8,8],[8,-8],[-8,-8]];
+    var lo=GEO.WALL+4,hx=RW-GEO.WALL-4,hy=RH-GEO.WALL-4,i,px,py,ok,j,b;
+    for(i=0;i<pads.length;i++){
+      px=Math.max(lo,Math.min(hx,x+pads[i][0]));py=Math.max(lo,Math.min(hy,y+pads[i][1]));
+      ok=true;for(j=0;j<INF.length;j++){b=INF[j];if(px>b.x0+EPS&&px<b.x1-EPS&&py>b.y0+EPS&&py<b.y1-EPS){ok=false;break;}}
+      if(ok)return {x:px,y:py,dir:0};
+    }
+    return {x:Math.max(lo,Math.min(hx,x)),y:Math.max(lo,Math.min(hy,y)),dir:0};
+  };
+  P.nearestMess=function(){
+    var s=this.s,mess=s.mess||[],gx=s.g.x*RW,gy=s.g.y*RH;
+    if(!mess.length)return null;
+    var used={},clusters=[],i,j,k,p,q,c;
+    for(i=0;i<mess.length;i++){
+      if(used[i])continue;
+      c={x:0,y:0,n:0,ps:[]};q=[i];used[i]=1;
+      while(q.length){
+        k=q.pop();p=mess[k];c.ps.push(p);c.x+=p.x;c.y+=p.y;c.n++;
+        for(j=0;j<mess.length;j++)if(!used[j]&&Math.hypot(mess[j].x-p.x,mess[j].y-p.y)<16){used[j]=1;q.push(j);}
+      }
+      c.x/=c.n;c.y/=c.n;clusters.push(c);
+    }
+    clusters.sort(function(a,b){return Math.hypot(a.x-gx,a.y-gy)-Math.hypot(b.x-gx,b.y-gy);});
+    return clusters[0];
+  };
+  P.sweepSpot=function(){
+    var c=this.nearestMess();
+    if(!c){var k=tableKids();return {x:k.stand.x,y:k.stand.y,dir:0};}
+    var pt=this.standBeside(c.x,c.y);
+    return {x:pt.x,y:pt.y,dir:0,cx:c.x,cy:c.y,n:c.n};
+  };
+  P.sweepNear=function(x,y,n){
+    var s=this.s;if(!s.mess)s.mess=[];
+    var reach=16,near=[],far=[],i,d,p,take,left;
+    for(i=0;i<s.mess.length;i++){p=s.mess[i];d=Math.hypot(p.x-x,p.y-y);if(d<=reach)near.push({d:d,p:p});else far.push(p);}
+    near.sort(function(a,b){return a.d-b.d;});
+    take=near.slice(0,n);left=near.slice(n);
+    for(i=0;i<left.length;i++)far.push(left[i].p);
+    s.mess=far;s.peels=s.mess.length;
+    var removed=[];for(i=0;i<take.length;i++)removed.push({x:take[i].p.x,y:take[i].p.y,d:take[i].d});
+    if(removed.length)s.stats.swept+=removed.length;
+    this.lastSweep={x:x,y:y,removed:removed};
+    return removed.length;
+  };
+  P.syncGeom=function(){
+    var s=this.s,pl=s.place||{},k,bs,tv,sk,rd,lp,pn,ct;
+    copyBox(GEO,GEO0);copyBox(SPOT,SPOT0);
+    if(pl.table){GEO.table.x0=pl.table.x-17;GEO.table.x1=pl.table.x+17;GEO.table.y0=pl.table.y-9;GEO.table.y1=pl.table.y+9;}
+    k=tableKids();SPOT.table.x=k.stand.x;SPOT.table.y=k.stand.y;SPOT.table.dir=0;
+    GEO.mess.cx=k.cx;GEO.mess.cy=GEO.table.y1+16;
+    if(pl.cooler){GEO.cooler.x0=pl.cooler.x-7;GEO.cooler.x1=pl.cooler.x+7;GEO.cooler.y0=pl.cooler.y-5;GEO.cooler.y1=pl.cooler.y+5;}
+    if(pl.stool){GEO.stool.x=pl.stool.x;GEO.stool.y=pl.stool.y;}
+    else{GEO.stool.x=(GEO.cooler.x0+GEO.cooler.x1)/2;GEO.stool.y=GEO.cooler.y1+12;}
+    SPOT.food.x=GEO.stool.x;SPOT.food.y=GEO.stool.y+8;SPOT.food.dir=0;
+    if(pl.mat||pl.bed){var m=pl.mat||pl.bed;GEO.mat.x=m.x;GEO.mat.y=m.y;}
+    bs=bedside();SPOT.mat.x=bs.x;SPOT.mat.y=bs.y;SPOT.mat.dir=bs.dir;
+    if(this.placed("sink")){sk=this.placeOf("sink");SPOT.sink.x=sk.x;SPOT.sink.y=sk.y+12;}
+    if(this.placed("tvArmchair")){tv=this.placeOf("tvArmchair");SPOT.tv.x=tv.x-8;SPOT.tv.y=tv.y+12;}
+    if(this.placed("radio")){rd=this.placeOf("radio");SPOT.radio.x=rd.x-8;SPOT.radio.y=rd.y;}
+    if(this.placed("lamp")){lp=this.placeOf("lamp");SPOT.lamp.x=lp.x-8;SPOT.lamp.y=lp.y;}
+    if(this.placed("plant")){pn=this.placeOf("plant");SPOT.plant.x=pn.x;SPOT.plant.y=pn.y+12;}
+    if(this.placed("basicCot")){ct=this.placeOf("basicCot");SPOT.cot.x=ct.x;SPOT.cot.y=ct.y+14;}
+  };
   P.lineOn=function(which){
     var b=this.s.box;
-    if(which==="suction")return this.owned("suction")&&b.suction>0&&this.owned("conveyor")&&b.conveyor>0;
-    if(which==="conveyor")return this.owned("conveyor")&&b.conveyor>0;
-    if(which==="peeler")return this.owned("autoPeeler")&&b.apeeler>0;
-    if(which==="outbelt")return this.owned("outConveyor")&&b.outbelt>0;
+    if(which==="suction")return this.placed("suction")&&b.suction>0&&this.placed("conveyor")&&b.conveyor>0;
+    if(which==="conveyor")return this.placed("conveyor")&&b.conveyor>0;
+    if(which==="peeler")return this.placed("autoPeeler")&&b.apeeler>0;
+    if(which==="outbelt")return this.placed("outConveyor")&&b.outbelt>0;
     return false;
   };
   P.lineRunning=function(){return this.lineOn("suction")&&this.lineOn("conveyor")&&this.lineOn("peeler")&&this.lineOn("outbelt");};
@@ -693,29 +869,37 @@ var PPSim=(function(){
   P.peelSpd=function(){return (BELT_SPD[this.s.box.apeeler]||0)*Math.pow(1.20,this.up("apeeler"));};
   P.beltMul=function(){return Math.pow(1.15,this.up("belts"));};
   P.peelCap=function(){return 1+this.up("apeeler");};
-  P.carryCap=function(){return this.owned("carryBag")?(2+this.up("bag")):1;};
+  P.carryCap=function(){return this.equipped("carryBag")?(2+this.up("bag")):1;};
   P.heldN=function(){var g=this.s.g;if(!g.hold)return 0;var n=g.held|0;return n>0?n:1;};
   P.sitSpot=function(){var tv=this.placeOf("tvArmchair");return {x:tv.x-8.2+2.6,y:tv.y+0.4,dir:1};};
   P.levelPrice=function(){var n=this.s.level+1;if(n>5)return null;return LEVEL_PRICE[n];};
   P.buyLevel=function(){var s=this.s,pr=this.levelPrice();if(pr===null)return "max";if(s.coins<pr)return "poor";s.coins-=pr;s.level++;s.stats.spent+=pr;s.stats.boughtUp++;this.emit({k:"level",lv:s.level});return "ok";};
   P.itemPrice=function(id){var it=ITEMI[id];if(!it)return null;if(this.owned(id))return null;return it.price;};
   P.buyItem=function(id){var s=this.s,it=ITEMI[id];if(!it)return "bad";if(!this.unlocked(id))return "locked";if(this.owned(id))return "have";if(s.coins<it.price)return "poor";
-    s.coins-=it.price;s.owned[id]=1;if(!s.place)s.place={};s.place[id]=defaultPlace(id);s.stats.spent+=it.price;s.stats.boughtUp++;this.rebuildObst();this.poke();this.emit({k:"item",id:id});return "ok";};
+    s.coins-=it.price;s.owned[id]=1;if(!s.place)s.place={};if(!s.equipped)s.equipped={};
+    /* 0.4.1: bought items go to the inventory first, not auto-placed / auto-equipped */
+    s.stats.spent+=it.price;s.stats.boughtUp++;this.poke();this.emit({k:"item",id:id});return "ok";};
   P.moveItem=function(id,x,y){
     if(FIXED.indexOf(id)>=0)return false;
     if(id==="pile"||id==="ret"||id==="ship"||id==="return"||id==="shipping")return false;
-    if(!this.owned(id)&&id!=="table"&&id!=="cooler"&&id!=="stool"&&id!=="mat"&&id!=="bed")return false;
+    if(isPlaceable(id)&&!this.placed(id)&&!this.owned(id))return false;
+    if(isTool(id))return false;
+    if(!this.owned(id)&&STARTER.indexOf(id)<0&&id!=="bed")return false;
     var pad=8;
     x=Math.max(GEO.WALL+pad,Math.min(RW-GEO.WALL-pad,x));
     y=Math.max(GEO.WALL+pad,Math.min(RH-GEO.WALL-pad,y));
     if(!sanePlace(id,x,y))return false;
     if(!this.s.place)this.s.place={};
+    /* cooler move carries the seat (stool) with it, unless the stool was already independently placed after this cooler move — we always carry it by the same delta */
+    if(id==="cooler"){
+      var ocx=(GEO.cooler.x0+GEO.cooler.x1)/2,ocy=(GEO.cooler.y0+GEO.cooler.y1)/2;
+      var dx=x-ocx,dy=y-ocy;
+      GEO.stool.x+=dx;GEO.stool.y+=dy;
+      this.s.place.stool={x:GEO.stool.x,y:GEO.stool.y};
+    }
     this.s.place[id]={x:x,y:y};
-    if(id==="table"){GEO.table.x0=x-17;GEO.table.x1=x+17;GEO.table.y0=y-9;GEO.table.y1=y+9;SPOT.table.x=x;SPOT.table.y=y+13;}
-    if(id==="cooler"){GEO.cooler.x0=x-7;GEO.cooler.x1=x+7;GEO.cooler.y0=y-5;GEO.cooler.y1=y+5;SPOT.food.x=x;SPOT.food.y=y+12;}
-    if(id==="stool"){GEO.stool.x=x;GEO.stool.y=y;}
-    if(id==="mat"||id==="bed"){GEO.mat.x=x;GEO.mat.y=y;SPOT.mat.x=x;SPOT.mat.y=y;}
-    this.rebuildObst();return true;
+    if(id==="bed")this.s.place.mat={x:x,y:y};
+    this.syncGeom();this.rebuildObst();return true;
   };
   function sanePlace(id,x,y){
     /* may not cover the fixed pile, return mouth, or shipping unit */
@@ -724,16 +908,32 @@ var PPSim=(function(){
     var ret={x0:GEO.ret.mouthX-2,y0:GEO.ret.y-8,x1:RW-GEO.WALL,y1:GEO.ret.y+8};
     var box={x0:x-6,y0:y-6,x1:x+6,y1:y+6};
     function hit(a,b){return a.x0<b.x1&&a.x1>b.x0&&a.y0<b.y1&&a.y1>b.y0;}
-    if(hit(box,ship)||hit(box,pile)||hit(box,ret))return false;
+    if(hit(box,ship)||hit(box,ret))return false;
+    /* suction is built to sit on the pile; other items may not cover it */
+    if(id!=="suction"&&hit(box,pile))return false;
     return true;
   }
   P.rebuildObst=function(){
-    var list=[{id:"table",x0:GEO.table.x0,y0:GEO.table.y0,x1:GEO.table.x1,y1:GEO.table.y1},{id:"cooler",x0:GEO.cooler.x0,y0:GEO.cooler.y0,x1:GEO.cooler.x1,y1:GEO.cooler.y1}];
-    if(this.owned("autoPeeler")){var p=this.placeOf("autoPeeler");list.push({id:"autoPeeler",x0:p.x-12,y0:p.y-12,x1:p.x+12,y1:p.y+12});}
-    if(this.owned("sink")){var sk=this.placeOf("sink");list.push({id:"sink",x0:sk.x-8,y0:sk.y-8,x1:sk.x+8,y1:sk.y+8});}
-    if(this.owned("basicCot")){var c=this.placeOf("basicCot");list.push({id:"cot",x0:c.x-14,y0:c.y-8,x1:c.x+14,y1:c.y+8});}
-    if(this.owned("tvArmchair")){var tv=this.placeOf("tvArmchair");list.push({id:"tv",x0:tv.x-16,y0:tv.y-8,x1:tv.x+16,y1:tv.y+8});}
-    OBST=list;INF=inflated();
+    var list=[],p,m=GEO.mat,sh=GEO.ship,rt=GEO.ret;
+    list.push({id:"table",x0:GEO.table.x0,y0:GEO.table.y0,x1:GEO.table.x1,y1:GEO.table.y1});
+    list.push({id:"cooler",x0:GEO.cooler.x0,y0:GEO.cooler.y0,x1:GEO.cooler.x1,y1:GEO.cooler.y1});
+    list.push({id:"stool",x0:GEO.stool.x-5,y0:GEO.stool.y-5,x1:GEO.stool.x+5,y1:GEO.stool.y+5});
+    list.push({id:"bed",x0:m.x-m.w/2,y0:m.y-m.h/2,x1:m.x+m.w/2,y1:m.y+m.h/2});
+    list.push({id:"ship",x0:sh.x-10,y0:GEO.WALL,x1:sh.x+12,y1:sh.lip+6});
+    list.push({id:"ret",x0:rt.mouthX,y0:rt.y-rt.w/2-1,x1:RW-GEO.WALL,y1:rt.y+rt.w/2+1});
+    function add(id,hx,hy){if(!this.placed(id))return;p=this.placeOf(id);list.push({id:id,x0:p.x-hx,y0:p.y-hy,x1:p.x+hx,y1:p.y+hy});}
+    add.call(this,"autoPeeler",12,12);
+    add.call(this,"sink",8,8);
+    add.call(this,"basicCot",14,8);
+    add.call(this,"tvArmchair",16,8);
+    add.call(this,"smallCooler",7,6);
+    add.call(this,"plant",6,6);
+    add.call(this,"lamp",5,6);
+    add.call(this,"radio",5,5);
+    add.call(this,"suction",8,8);
+    add.call(this,"conveyor",6,18);
+    add.call(this,"outConveyor",14,6);
+    OBST=list;INF=inflated();Sim.OBST=OBST;
   };
   P.lineStep=function(dt){
     var s=this.s;if(!s.line)s.line=lineFresh();
@@ -757,7 +957,7 @@ var PPSim=(function(){
     if(L.peeler){
       if(this.lineOn("peeler")){
         L.peeler.t+=dt*this.peelSpd()*0.55;
-        if(!L.peeler.emitted&&L.peeler.t>=0.45){L.peeler.emitted=true;this.peelEmit(3);L.emitted=(L.emitted||0)+3;}
+        if(!L.peeler.emitted&&L.peeler.t>=0.45){L.peeler.emitted=true;this.peelEmit(3,"peeler");L.emitted=(L.emitted||0)+3;}
         if(L.peeler.t>=1)L.peeler.done=true;
       }
       if(L.peeler.done){
@@ -780,8 +980,8 @@ var PPSim=(function(){
   };
   P.decorStep=function(dt){
     var s=this.s;if(!s.decor)s.decor={lamp:0,radio:0,tv:0,plant:0,plantT:0,radioTune:0};
-    if(this.owned("plant"))s.decor.plant=Math.min(100,s.decor.plant+dt*0.15);
-    if(this.owned("radio")&&s.box.radio>0)s.energy=Math.min(100,s.energy+0.15*dt);
+    if(this.placed("plant"))s.decor.plant=Math.min(100,s.decor.plant+dt*0.15);
+    if(this.placed("radio")&&s.box.radio>0)s.energy=Math.min(100,s.energy+0.15*dt);
   };
   P.lineTotals=function(){
     var s=this.s,L=s.line||lineFresh(),k=s.suck;
@@ -800,6 +1000,19 @@ var PPSim=(function(){
 
   P.serialize=function(){var s=this.s;var o=JSON.parse(JSON.stringify(s));o.ev=[];o.v=4;return JSON.stringify(o);};
 
+  function synthMess(n,seed){
+    var out=[],i,k,sp,ang,r,x,y;
+    if(!n)return out;
+    k=tableKids();sp=k.peelSpawn;
+    for(i=0;i<n&&i<C.peelMax;i++){
+      ang=hash(seed||1,i*17+5)*6.283;r=4+hash(seed||1,i*11+3)*16;
+      x=sp.x+Math.cos(ang)*r*0.85;y=sp.y+2+Math.abs(Math.sin(ang))*r;
+      x=Math.max(GEO.WALL+4,Math.min(RW-GEO.WALL-4,x));
+      y=Math.max(GEO.table.y1+3,Math.min(GEO.pile.base-GEO.pile.rz-8,y));
+      out.push({x:x,y:y,src:"table"});
+    }
+    return out;
+  }
   function ensure04(o){
     o.v=4;
     if(typeof o.level!=="number"||o.level<1)o.level=1;
@@ -812,6 +1025,18 @@ var PPSim=(function(){
     if(typeof o.g.washed!=="boolean")o.g.washed=false;
     var id;
     for(id in BOX)if(typeof o.box[id]!=="number")o.box[id]=BOX[id].def;
+    /* 0.4.1 inventory: missing equipped means this is a pre-inventory v4 (or v1-v3) save.
+       Migrate owned items as already placed / tools already equipped. */
+    if(!o.equipped||typeof o.equipped!=="object"){
+      o.equipped={};
+      for(id in o.owned){
+        if(!o.owned[id])continue;
+        if(isTool(id))o.equipped[id]=1;
+        if(isPlaceable(id)&&!o.place[id])o.place[id]=defaultPlace(id);
+      }
+    }
+    if(!Array.isArray(o.mess))o.mess=synthMess(Math.max(0,o.peels|0),o.seed||1);
+    o.peels=o.mess.length;
   }
   /* accepts a 0.4 save (v:4), a 0.3 save (v:3), a 0.2 save (v:2) or a 0.1 save (v:1). Older saves are migrated in memory; the old keys are never written. */
   Sim.load=function(str){try{var o=JSON.parse(str);if(!o||(o.v!==1&&o.v!==2&&o.v!==3&&o.v!==4)||typeof o.coins!=="number"||!o.g||typeof o.g!=="object"||!o.box||typeof o.box!=="object")return null;
@@ -854,7 +1079,7 @@ var PPSim=(function(){
       return sim;}catch(e){return null;}};
   Sim.fresh=function(seed){return new Sim(fresh(seed));};
   Sim.C=C;Sim.POTS=POTS;Sim.BOX=BOX;Sim.PACE=PACE;Sim.SPOT=SPOT;Sim.SPD=SPD;Sim.DRN=DRN;Sim.GEO=GEO;Sim.OBST=OBST;Sim.RW=RW;Sim.RH=RH;
-  Sim.COMMANDS=COMMANDS;Sim.UPS=UPS;Sim.STYLE=STYLE;Sim.ITEMS=ITEMS;Sim.ITEMI=ITEMI;Sim.LEVEL_PRICE=LEVEL_PRICE;Sim.SPEED_NAME=SPEED_NAME;Sim.FIXED=FIXED;Sim.spill=spill;Sim.route=route;Sim.INFL=function(){return INF;};Sim.defaultPlace=defaultPlace;
+  Sim.COMMANDS=COMMANDS;Sim.UPS=UPS;Sim.STYLE=STYLE;Sim.ITEMS=ITEMS;Sim.ITEMI=ITEMI;Sim.LEVEL_PRICE=LEVEL_PRICE;Sim.SPEED_NAME=SPEED_NAME;Sim.FIXED=FIXED;Sim.TOOLS=TOOLS;Sim.PLACEABLES=PLACEABLES;Sim.STARTER=STARTER;Sim.isTool=isTool;Sim.isPlaceable=isPlaceable;Sim.tableKids=tableKids;Sim.bedside=bedside;Sim.spill=spill;Sim.route=route;Sim.INFL=function(){return INF;};Sim.defaultPlace=defaultPlace;
   return Sim;
 })();
 if(typeof module!=="undefined")module.exports=PPSim;
@@ -1848,7 +2073,7 @@ if(typeof module!=="undefined")module.exports=PPSim;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
 
-/* ===== Papa Potato 0.4 — renderer, HUD, zoom/pan, room editor, shop + help, save v4 (migrates v3) ===== */
+/* ===== Papa Potato 0.4.1 — renderer, HUD, fit-to-screen (pan/zoom hidden), room editor + inventory, shop + help, save v4 ===== */
 (function(){
 "use strict";
 var SAVE_KEY="papaPotato.save.v4",KEY_V3="papaPotato.save.v3",KEY_V2="papaPotato.save.v2",KEY_V1="papaPotato.save.v1";   /* older keys are only ever READ */
@@ -1901,27 +2126,28 @@ var TAGDEF=[
   {id:"tagLine",x:GEO.outBeltX0+10,y:GEO.outBeltY-8,al:"c"},
   {id:"tagSink",x:GEO.sink.x,y:GEO.sink.y-10,al:"c"},
   {id:"tagTV",x:GEO.tv.x,y:GEO.tv.y-12,al:"c"}];
-function fitK(){return Math.min(W/RW,H/RH)*0.985;}
+function fitK(){return Math.min(W/RW,H/RH)*0.98;}
 function clampPan(){
   var maxX=Math.max(0,(RW*k-W)/(2*k)+10), maxY=Math.max(0,(RH*k-H)/(2*k)+10);
   panX=Math.max(-maxX,Math.min(maxX,panX));
   panY=Math.max(-maxY,Math.min(maxY,panY));
 }
 function applyCam(){
-  k=fitK()*ZOOM_STEPS[zoomI];
-  clampPan();
-  offX=(W-RW*k)/2-panX*k;offY=(H-RH*k)/2-panY*k;
+  /* 0.4.1: pan and zoom stay in the code but are hidden and locked. The whole room always fits the screen. */
+  zoomI=1;panX=0;panY=0;
+  k=fitK();
+  offX=(W-RW*k)/2;offY=(H-RH*k)/2;
   camX=-offX/k;camY=-offY/k;
 }
 function syncZoomLabel(){
   var el=document.getElementById("zoomLabel");
-  if(el)el.textContent=zoomI===1&&Math.abs(panX)<0.01&&Math.abs(panY)<0.01?"FIT":Math.round(ZOOM_STEPS[zoomI]*100)+"%";
+  if(el)el.textContent="FIT";
 }
 function zoomBy(d){
-  zoomI=Math.max(0,Math.min(ZOOM_STEPS.length-1,zoomI+d));
-  applyCam();staticLayer=null;pileLayer=null;messLayer=null;if(playRect)placeTags();syncZoomLabel();
+  /* hidden: zoom is locked to a fitted view (t1069) */
+  zoomI=1;applyCam();staticLayer=null;pileLayer=null;messLayer=null;if(playRect)placeTags();syncZoomLabel();
 }
-function panBy(dx,dy){panX+=dx;panY+=dy;applyCam();if(playRect)placeTags();syncZoomLabel();}
+function panBy(dx,dy){/* hidden: panning is off (t1069) */resetView();}
 function resetView(){zoomI=1;panX=0;panY=0;applyCam();staticLayer=null;pileLayer=null;messLayer=null;if(playRect)placeTags();syncZoomLabel();}
 function layout(){
   var r=document.getElementById("play").getBoundingClientRect();playRect=r;
@@ -2150,9 +2376,12 @@ function drawReturnRattle(){
   var jx=[ -1.2, 1.1, 0.2, -0.6 ][ANIM_F], jy=[ 0.2, -0.9, 1.2, -0.3 ][ANIM_F];
   if(!retLight){jx*=0.45;jy*=0.45;}
   var mx=wx(x0+jx),my=wy(y+jy);
-  oval(mx,my,ws(2.7),ws(hh+0.7),"#9aa49a");oval(mx,my,Math.max(1,ws(2.2)),ws(hh+0.2),"#5a6058");
-  oval(mx,my,Math.max(1,ws(2.0)),ws(hh-0.2),"#12141a");oval(mx+1,my,Math.max(1,ws(1.2)),ws(hh-1.2),"#06070a");
-  oval(mx-1,my-1,Math.max(1,ws(0.7)),Math.max(1,ws(0.5)),"#3a4038");
+  /* pipe mouth: rim + receding tunnel (not a flat black dot, t1069) */
+  oval(mx,my,ws(2.9),ws(hh+0.9),"#8a9088");
+  oval(mx,my,ws(2.4),ws(hh+0.35),"#5a6258");
+  oval(mx,my,Math.max(1,ws(1.7)),ws(hh-0.4),"#2a322c");
+  oval(mx+ws(0.35),my,Math.max(1,ws(1.05)),ws(hh-1.0),"#1e2622");
+  oval(mx-ws(0.7),my-ws(0.7),Math.max(1,ws(0.8)),Math.max(1,ws(0.55)),"#7a8478");
   /* rattling bolts */
   var bx=wx(x0+3+jx), by1=wy(y-hh-0.4+jy), by2=wy(y+hh-0.6+jy);
   oval(bx,by1,ws(0.55),ws(0.55),"#c0c8c0");oval(bx,by2,ws(0.55),ws(0.55),"#c0c8c0");
@@ -2186,13 +2415,16 @@ function drawTable2(){var G=GEO.table,x=wx(G.x0),y=wy(G.y0),w=ws(G.x1-G.x0),h=ws
   var lg=Math.max(2,ws(2.2));
   R(x-1,y-1,lg,lg,"#3a200c");R(x+w-lg+1,y-1,lg,lg,"#3a200c");R(x-1,y+h-lg+1,lg,lg,"#2a1408");R(x+w-lg+1,y+h-lg+1,lg,lg,"#2a1408");
   R(x,y,3,3,"#5a4030");R(x+w-3,y,3,3,"#5a4030");R(x,y+h-3,3,3,"#3a200c");R(x+w-3,y+h-3,3,3,"#3a200c");
-  /* cutting board with a juice groove and knife marks */
-  var bx=wx(40),by=wy(G.y0+4),bw=ws(20),bh=ws(12);
+  /* cutting board + knife are children of the table (t1073): always fully on the slab, follow it in the editor */
+  var kids=PPSim.tableKids(),B=kids.board,K=kids.knife;
+  var bx=wx(B.x0),by=wy(B.y0),bw=Math.max(2,wx(B.x1)-wx(B.x0)),bh=Math.max(2,wy(B.y1)-wy(B.y0));
   R(bx+1,by+1,bw,bh,"rgba(0,0,0,0.25)");R(bx,by,bw,bh,"#8a6a30");R(bx+1,by+1,bw-2,bh-2,"#d8b878");R(bx+1,by+1,bw-2,1,"#ecd29a");
   R(bx+2,by+2,bw-4,1,"#b8985c");R(bx+2,by+bh-3,bw-4,1,"#b8985c");R(bx+2,by+2,1,bh-4,"#b8985c");R(bx+bw-3,by+2,1,bh-4,"#b8985c");
   for(var j=0;j<5;j++)R(bx+3+j*Math.max(2,Math.round(bw/6)),by+3+(j%2)*2,Math.max(2,Math.round(bw/9)),1,"#b8985c");
-  /* knife resting beside the board (handle + bolster + blade highlight) */
-  var kx=wx(62),ky=wy(G.y0+9),kw=Math.max(3,ws(3.4)),kh=Math.max(2,ws(1.8)),blw=Math.max(5,ws(5.5));
+  var kx=wx(K.x),ky=wy(K.y-0.8),kw=Math.max(3,ws(3.2)),kh=Math.max(2,ws(1.6)),blw=Math.max(5,ws(5.0));
+  /* keep the knife inside the table's east margin */
+  if(kx+kw>wx(G.x1)-1)kx=wx(G.x1)-1-kw;
+  if(kx-blw<wx(B.x1)+1){/* sits just east of the board, still on the table */}
   R(kx,ky,kw,kh,"#3a2a20");R(kx+1,ky,kw-2,1,"#6a4a30");R(kx-1,ky,1,kh,"#2a1c14");
   R(kx-blw,ky,blw,Math.max(2,ws(1.5)),"#c8d0d8");R(kx-blw,ky,blw,1,"#f0f4f8");R(kx-blw,ky+Math.max(1,ws(1.5))-1,blw,1,"#8a9098");}
 function drawBed(){var cx=GEO.mat.x,cy=GEO.mat.y,mw=GEO.mat.w,mh=GEO.mat.h;var x=wx(cx-mw/2),y=wy(cy-mh/2),w=ws(mw),h=ws(mh);
@@ -2270,20 +2502,17 @@ function buildSprites(){SPR=[];SPRS=[];var sizes=[2.9,3.3,3.7];
   var pats=[[".XX.","X..X","...X"],["XX..",".XXX","...."],[".X.","X.X",".XX"],["XXX.","...X",".XX."]];
   var pw=Math.max(10,Math.round(4.4*k)),ph=Math.max(8,Math.round(3.4*k)),psc=pw/6;
   for(var q=0;q<12;q++){var pc=pcol[q%3],pt=pats[q%4];PEELSPR[q]=mkSprite(pw,ph,function(){for(var yy=0;yy<pt.length;yy++)for(var xx=0;xx<pt[yy].length;xx++)if(pt[yy][xx]==="X"){R((1+xx)*psc,(1+yy+1)*psc,psc,psc,pc[2]);R((1+xx)*psc,(1+yy)*psc,psc,psc,pc[(xx+yy)%2]);}});PEELSPR[q].cx=pw/2;PEELSPR[q].cy=ph/2;}}
-/* mess slots: the first peels land right where he works (south of the table), later ones spread out; sorted by distance so the heap grows from his feet */
-function buildMess(){MESSPOS=[];var G=GEO.mess,T=GEO.table;
-  for(var i=0,tries=0;i<MESSVIS&&tries<6000;tries++){var r=Math.sqrt((i+0.5)/MESSVIS),th2=(i+tries)*2.39996,x=G.cx+G.rx*r*Math.cos(th2)+(srng(tries*3+1)-0.5)*3,y=G.cy+G.rz*r*Math.sin(th2)+(srng(tries*7+3)-0.5)*3;
-    if(x<WALL+3||x>RW-WALL-3||y<T.y1+3||y>GEO.pile.base-GEO.pile.rz-8)continue;
-    if(Math.abs(x-GEO.mat.x)<GEO.mat.w/2+6&&Math.abs(y-GEO.mat.y)<GEO.mat.h/2+6)continue;
-    MESSPOS.push({x:x,y:y,q:(i*5+tries)%12});i++;}}
+/* peels live in sim.s.mess (real positions). MESSPOS mirrors them for the renderer and tests. */
+function buildMess(){MESSPOS=[];var mess=sim&&sim.s&&sim.s.mess?sim.s.mess:[];
+  for(var i=0;i<mess.length;i++)MESSPOS.push({x:mess[i].x,y:mess[i].y,q:(i*5+3)%12,src:mess[i].src});}
 function renderPile(n){if(!pileLayer||pileLayer.width!==cv.width||pileLayer.height!==cv.height){pileLayer=document.createElement("canvas");pileLayer.width=cv.width;pileLayer.height=cv.height;pileKey=-1;}
   if(pileKey===n)return;pileKey=n;renders.pile++;var c=pileLayer.getContext("2d");c.imageSmoothingEnabled=false;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);
   /* 0.3 shading: a fixed, gentle light ramp by tier (never relative to the heap height) and a soft shadow only under the bottom tier, so a big pile stays readable */
   for(var q=0;q<ORDER.length;q++){var i=ORDER[q];if(i>=n)continue;var p=POS[i],lv=Math.min(4,2+Math.floor(p.t/3)),sp=(p.t===0?SPRS:SPR)[(p.vi*6+lv)*2+p.fl];c.drawImage(sp,Math.round((wx(p.x)-sp.cx)*DPR),Math.round((wy(p.y)-sp.cy)*DPR));}}
 var flying={},messVer=0;
-function renderMess(n){if(!messLayer||messLayer.width!==cv.width||messLayer.height!==cv.height){messLayer=document.createElement("canvas");messLayer.width=cv.width;messLayer.height=cv.height;messKey="";}
-  var key=n+"|"+messVer;if(messKey===key)return;messKey=key;renders.mess++;var c=messLayer.getContext("2d");c.imageSmoothingEnabled=false;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);
-  for(var i=0;i<n&&i<MESSPOS.length;i++){if(flying[i])continue;var p=MESSPOS[i];c.drawImage(PEELSPR[p.q],Math.round((wx(p.x)-PEELSPR[p.q].cx)*DPR),Math.round((wy(p.y)-PEELSPR[p.q].cy)*DPR));}}
+function renderMess(n){buildMess();if(!messLayer||messLayer.width!==cv.width||messLayer.height!==cv.height){messLayer=document.createElement("canvas");messLayer.width=cv.width;messLayer.height=cv.height;messKey="";}
+  var key=(sim&&sim.s?sim.s.peels:n)+"|"+messVer+"|"+MESSPOS.length;if(messKey===key)return;messKey=key;renders.mess++;var c=messLayer.getContext("2d");c.imageSmoothingEnabled=false;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);
+  for(var i=0;i<MESSPOS.length;i++){if(flying[i])continue;var p=MESSPOS[i],spr=PEELSPR[p.q];if(!spr)continue;c.drawImage(spr,Math.round((wx(p.x)-spr.cx)*DPR),Math.round((wy(p.y)-spr.cy)*DPR));}}
 function drawStatic(){drawFloor();drawWalls();
   /* hidden props (0.2.1 t1027, still hidden): drawPipes drawShelf drawToolRack drawMachinePad x3 drawDrain drawPeelBin drawBucket drawSack x4 drawCrate x3 drawLamp; 0.3 also hides drawCentreStripe and the old drawChuteBase/drawCooler/drawMat/drawTable */
   drawPileBay();drawPileShadow();drawBed();drawTable2();drawCooler2();drawStool();drawDoor();drawReturnChute();}
@@ -2528,10 +2757,10 @@ function itemXY(id){return sim.placeOf(id);}
 function drawWorkLine04(){
   var S=bindSprites();if(!S)return;
   var stC=sim.lineOn("conveyor")?"on":"off";
-  if(sim.owned("conveyor"))S.drawConveyorRun(GEO.beltX,GEO.beltY0,GEO.beltY1,stC);
-  if(sim.owned("suction"))S.draw("suction",sim.lineOn("suction")?"on":"off",GEO.suction.x,GEO.suction.y);
-  if(sim.owned("autoPeeler")){var p=itemXY("autoPeeler");S.draw("autoPeeler",sim.lineOn("peeler")?"on":"off",p.x,p.y,{bounds:{x0:GEO.WALL+1,y0:GEO.WALL+1,x1:RW-GEO.WALL-1,y1:RH-GEO.WALL-1}});}
-  if(sim.owned("outConveyor")){
+  if(sim.placed("conveyor"))S.drawConveyorRun(GEO.beltX,GEO.beltY0,GEO.beltY1,stC);
+  if(sim.placed("suction"))S.draw("suction",sim.lineOn("suction")?"on":"off",GEO.suction.x,GEO.suction.y);
+  if(sim.placed("autoPeeler")){var p=itemXY("autoPeeler");S.draw("autoPeeler",sim.lineOn("peeler")?"on":"off",p.x,p.y,{bounds:{x0:GEO.WALL+1,y0:GEO.WALL+1,x1:RW-GEO.WALL-1,y1:RH-GEO.WALL-1}});}
+  if(sim.placed("outConveyor")){
     var st=sim.lineOn("outbelt")?"on":"off";
     S.drawConveyorRunH(GEO.outBeltY,GEO.outBeltX0,GEO.outBeltX1,st,{peeled:true,cap1:false,maxP:0.70});
     S.drawConveyorRun(GEO.shipBeltX,GEO.shipBeltY0,GEO.shipBeltY1,st,{peeled:true,cap0:false,cap1:false,minP:0.16,maxP:0.90});
@@ -2545,25 +2774,26 @@ function drawItems04(){
   var sweeping=a&&(a.t==="sweep"||(a.t==="walk"&&a.then==="sweep"));
   var washing=a&&(a.t==="wash"||(a.t==="walk"&&a.then==="wash"));
   function st(id,onId){return sim.owned(id)?(sim.s.box[onId||id]>0?"on":"off"):null;}
-  if(sim.owned("rug")){var r=itemXY("rug");S.draw("rug","on",r.x,r.y);}
-  if(sim.owned("lamp")){var lp=itemXY("lamp");S.draw("lamp",sim.s.box.lamp>0?"on":"off",lp.x,lp.y);}
-  if(sim.owned("radio")){var rd=itemXY("radio");S.draw("radio",tuning?"on":(sim.s.box.radio>0?"on":"off"),rd.x,rd.y);}
-  if(sim.owned("plant")){var pl=itemXY("plant");var dry=sim.s.decor&&sim.s.decor.plant>=70;S.draw("plant",dry?"off":"on",pl.x,pl.y);}
-  if(sim.owned("tvArmchair")){var tv=itemXY("tvArmchair");S.draw("tvArmchair",sim.s.box.tv>0?"on":"off",tv.x,tv.y);}
-  if(sim.owned("sink")){var sk=itemXY("sink");S.draw("sink",washing?"on":"on",sk.x,sk.y);}
-  if(sim.owned("betterPeeler")){var bp=itemXY("betterPeeler");S.draw("betterPeeler",a&&a.t==="peel"?"on":"off",bp.x,bp.y);}
-  if(sim.owned("smallCooler")){var sc=itemXY("smallCooler");S.draw("smallCooler",sim.s.food>0?"on":"off",sc.x,sc.y);}
-  if(sim.owned("basicCot")){var ct=itemXY("basicCot");S.draw("basicCot","off",ct.x,ct.y);}
-  if(sim.owned("carryBag")&&!sim.s.g.hold){var bg=itemXY("carryBag");S.draw("carryBag","off",bg.x,bg.y);}
-  if(sim.owned("broomDustpan")){
-    var br=itemXY("broomDustpan");
-    if(sweeping)S.draw("broomDustpan","on",GEO.spill.x,GEO.spill.y+8);
-    else S.draw("broomDustpan","off",br.x,br.y);
+  if(sim.placed("rug")){var r=itemXY("rug");S.draw("rug","on",r.x,r.y);}
+  if(sim.placed("lamp")){var lp=itemXY("lamp");S.draw("lamp",sim.s.box.lamp>0?"on":"off",lp.x,lp.y);}
+  if(sim.placed("radio")){var rd=itemXY("radio");S.draw("radio",tuning?"on":(sim.s.box.radio>0?"on":"off"),rd.x,rd.y);}
+  if(sim.placed("plant")){var pl=itemXY("plant");var dry=sim.s.decor&&sim.s.decor.plant>=70;S.draw("plant",dry?"off":"on",pl.x,pl.y);}
+  if(sim.placed("tvArmchair")){var tv=itemXY("tvArmchair");S.draw("tvArmchair",sim.s.box.tv>0?"on":"off",tv.x,tv.y);}
+  if(sim.placed("sink")){var sk=itemXY("sink");S.draw("sink",washing?"on":"on",sk.x,sk.y);}
+  if(sim.equipped("betterPeeler")){var kids=PPSim.tableKids();S.draw("betterPeeler",a&&a.t==="peel"?"on":"off",kids.board.x1-2,kids.cy);}
+  if(sim.placed("smallCooler")){var sc=itemXY("smallCooler");S.draw("smallCooler",sim.s.food>0?"on":"off",sc.x,sc.y);}
+  if(sim.placed("basicCot")){var ct=itemXY("basicCot");S.draw("basicCot","off",ct.x,ct.y);}
+  /* carry bag is equipped on Papa (drawn with him when he holds potatoes); no leftover bag on the floor */
+  if(sim.equipped("broomDustpan")&&sweeping){
+    var sx=g.x*RW,sy=g.y*RH,ls=sim.lastSweep,tx=sx,ty=sy+6;
+    if(ls&&ls.removed&&ls.removed[0]){tx=ls.removed[0].x;ty=ls.removed[0].y;}
+    else{var cl=sim.nearestMess&&sim.nearestMess();if(cl){tx=cl.x;ty=cl.y;}}
+    S.draw("broomDustpan","on",tx,ty);
   }
   if(editMode)drawEditOverlay();
 }
 function drawPeelerPeels(){
-  var S=bindSprites();if(!S||!sim.owned("autoPeeler")||!sim.s.line)return;
+  var S=bindSprites();if(!S||!sim.placed("autoPeeler")||!sim.s.line)return;
   var b={x0:GEO.WALL+1,y0:GEO.WALL+1,x1:RW-GEO.WALL-1,y1:RH-GEO.WALL-1};
   var p=itemXY("autoPeeler");
   var peels=S.peelerPeelWorld(p.x,p.y,ANIM_F,b);
@@ -2574,7 +2804,7 @@ function drawEditOverlay(){
   ctx.save();ctx.globalAlpha=0.9;
   for(var i=0;i<ids.length;i++){
     var id=ids[i];
-    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.owned(id))continue;
+    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
     var p=id==="table"?{x:(GEO.table.x0+GEO.table.x1)/2,y:(GEO.table.y0+GEO.table.y1)/2}:id==="cooler"?{x:(GEO.cooler.x0+GEO.cooler.x1)/2,y:(GEO.cooler.y0+GEO.cooler.y1)/2}:id==="stool"?{x:GEO.stool.x,y:GEO.stool.y}:id==="mat"?{x:GEO.mat.x,y:GEO.mat.y}:id==="conveyor"?{x:GEO.beltX,y:(GEO.beltY0+GEO.beltY1)/2}:id==="suction"?{x:GEO.suction.x,y:GEO.suction.y}:id==="outConveyor"?{x:(GEO.outBeltX0+GEO.outBeltX1)/2,y:GEO.outBeltY}:itemXY(id);
     var x=wx(p.x),y=wy(p.y);
     ctx.strokeStyle=dragId===id?"#ffe066":"#9fc0ff";ctx.lineWidth=1;
@@ -2594,7 +2824,7 @@ function hitEditItem(wx0,wy0){
   var best=null,bestD=999;
   for(var i=0;i<ids.length;i++){
     var id=ids[i];
-    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.owned(id))continue;
+    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
     var p=id==="table"?{x:(GEO.table.x0+GEO.table.x1)/2,y:(GEO.table.y0+GEO.table.y1)/2}:id==="cooler"?{x:(GEO.cooler.x0+GEO.cooler.x1)/2,y:(GEO.cooler.y0+GEO.cooler.y1)/2}:id==="stool"?{x:GEO.stool.x,y:GEO.stool.y}:id==="mat"?{x:GEO.mat.x,y:GEO.mat.y}:itemXY(id);
     var d=Math.abs(wx0-p.x)+Math.abs(wy0-p.y);
     if(d<12&&d<bestD){best=id;bestD=d;}
@@ -2699,20 +2929,39 @@ function valFromX(id,trk,clientX){var r=trk.getBoundingClientRect(),b=BOX[id];va
 var G=null; /* the active gesture */
 var SLOP=8;
 function doAct(a){
-  if(a==="shop")openOvl("shop");else if(a==="help")openOvl("help");else if(a==="close")closeOvl();
+  if(a==="shop")openOvl("shop");else if(a==="help")openOvl("help");else if(a==="inv")openOvl("inv");else if(a==="close")closeOvl();
   else if(a==="book:next")flipBook(1);else if(a==="book:prev")flipBook(-1);
   else if(a==="editor")toggleEditor();
+  else if(a==="putaway")putAwaySelected();
   else if(a==="zoom:in")zoomBy(1);else if(a==="zoom:out")zoomBy(-1);
   else if(a==="pan:up")panBy(0,-18);else if(a==="pan:down")panBy(0,18);
   else if(a==="pan:left")panBy(-14,0);else if(a==="pan:right")panBy(14,0);
   else if(a==="pan:reset")resetView();
-  else if(a&&a.indexOf("buy:")===0)shopBuy(a.slice(4));}
+  else if(a&&a.indexOf("buy:")===0)shopBuy(a.slice(4));
+  else if(a&&a.indexOf("equip:")===0){sim.equip(a.slice(6));if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();}
+  else if(a&&a.indexOf("unequip:")===0){sim.unequip(a.slice(8));if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();}
+  else if(a&&a.indexOf("return:")===0){sim.unplace(a.slice(7));staticLayer=null;if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();layout();}
+  else if(a&&a.indexOf("toedit:")===0){closeOvl();if(!editMode)toggleEditor();}}
 function toggleEditor(){
   editMode=!editMode;dragId=null;
-  var b=$("editBtn"),pl=$("play");
+  var b=$("editBtn"),pl=$("play"),app=$("app");
   if(b)b.classList.toggle("on",editMode);
   if(pl)pl.classList.toggle("editing",editMode);
-  showLabels(editMode?60000:8000,!!editMode);
+  if(app)app.classList.toggle("editing",editMode);
+  rebuildTray();
+  layout();
+}
+function rebuildTray(){
+  var el=$("invChips"),away=$("putAway");if(!el)return;
+  var list=sim.trayList(),h="",i;
+  if(!list.length)h='<div class="invchip empty">No unplaced items. Buy in the SHOP, or PUT AWAY something already in the room.</div>';
+  for(i=0;i<list.length;i++)h+='<button class="invchip" type="button" data-place="'+list[i].id+'">'+esc(list[i].name)+'<b>DRAG IN</b></button>';
+  el.innerHTML=h;
+  if(away)away.className=dragId&&PPSim.isPlaceable(dragId)&&sim.placed(dragId)?"on":"";
+}
+function putAwaySelected(){
+  if(!dragId||!PPSim.isPlaceable(dragId)||!sim.placed(dragId))return;
+  sim.unplace(dragId);dragId=null;staticLayer=null;messLayer=null;changed();rebuildTray();layout();
 }
 
 cmd.addEventListener("pointerdown",function(e){if(G&&G.id!==e.pointerId)return;
@@ -2751,17 +3000,17 @@ $("play").addEventListener("pointerdown",function(e){
   if(focusId)setFocus(null);showLabels(8000);
   if(editMode){
     var w=worldFromEvent(e),hit=hitEditItem(w.x,w.y);
-    if(hit){dragId=hit;PE={id:e.pointerId,act:"drag",item:hit};try{e.currentTarget.setPointerCapture(e.pointerId);}catch(x){}e.preventDefault();}
+    if(hit){dragId=hit;PE={id:e.pointerId,act:"drag",item:hit,keepSel:true};try{e.currentTarget.setPointerCapture(e.pointerId);}catch(x){}e.preventDefault();rebuildTray();}
   }
 });
 $("play").addEventListener("pointermove",function(e){
   if(!PE||PE.id!==e.pointerId)return;
-  if(PE.act==="drag"&&dragId){var w=worldFromEvent(e);if(sim.moveItem(dragId,w.x,w.y)){staticLayer=null;if(playRect)placeTags();}}
+  if(PE.act==="drag"&&dragId){var w=worldFromEvent(e);if(sim.moveItem(dragId,w.x,w.y)){staticLayer=null;messLayer=null;messVer++;if(playRect)placeTags();}}
 });
 function endPE(e){
   if(!PE||PE.id!==e.pointerId)return;
   if(PE.btn&&PE.btn.classList)PE.btn.classList.remove("press");
-  if(PE.act==="drag"){dragId=null;saveGame();}
+  if(PE.act==="drag"){if(!(PE.keepSel))dragId=null;saveGame();rebuildTray();}
   PE=null;
 }
 $("play").addEventListener("pointerup",endPE);
@@ -2776,13 +3025,60 @@ function bindRail(el){if(!el)return;
   el.addEventListener("pointerup",endPE);
   el.addEventListener("pointercancel",endPE);
 }
-bindRail($("leftRail"));bindRail($("rightRail"));
+bindRail($("leftRail"));bindRail($("rightRail"));bindRail($("editBtn"));bindRail($("putAway"));
+/* drag an unplaced item from the editor tray into the room */
+(function(){
+  var tray=$("invChips"),TD=null;
+  if(!tray)return;
+  tray.addEventListener("pointerdown",function(e){
+    var chip=e.target.closest?e.target.closest("[data-place]"):null;if(!chip)return;
+    TD={id:e.pointerId,item:chip.getAttribute("data-place"),x0:e.clientX,y0:e.clientY};
+    chip.classList.add("press");
+    try{tray.setPointerCapture(e.pointerId);}catch(x){}
+    e.preventDefault();
+  });
+  function endTD(e,cancel){
+    if(!TD||TD.id!==e.pointerId)return;
+    var item=TD.item,pr=$("play").getBoundingClientRect();TD=null;
+    var chips=tray.querySelectorAll(".invchip");for(var i=0;i<chips.length;i++)chips[i].classList.remove("press");
+    if(cancel)return;
+    if(e.clientX>=pr.left&&e.clientX<=pr.right&&e.clientY>=pr.top&&e.clientY<=pr.bottom){
+      var w=worldFromEvent(e);
+      if(sim.placeItem(item,w.x,w.y)==="ok"){staticLayer=null;messLayer=null;changed();rebuildTray();layout();}
+    }
+  }
+  tray.addEventListener("pointerup",function(e){endTD(e,false);});
+  tray.addEventListener("pointercancel",function(e){endTD(e,true);});
+})();
+
 
 /* ---------- shop + help screens (same scroll-safe rule: a tap is judged where the finger lifts; drags scroll) ---------- */
 var ovl=$("ovl"),ovlBody=$("ovlBody"),ovlMode=null,ovlDirty=false,OG=null;
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function goBtn(act,price,state){var cls="go"+(state==="poor"?" poor":"")+(state==="done"?" done":"");
   return '<button class="'+cls+'" type="button" data-act="'+act+'">'+(state==="done"?"MAXED":price+"c<br>BUY")+'</button>';}
+function buildInv(){
+  var s=sim.s,h="",list=sim.invList(),i,it,btn;
+  h+='<div class="sec">TOOLS — EQUIP ON PAPA</div>';
+  var tools=0;
+  for(i=0;i<list.length;i++){
+    it=list[i];if(it.kind!=="tool")continue;tools++;
+    btn=it.equipped?'<button class="go done" type="button" data-act="unequip:'+it.id+'">UNEQUIP</button>':'<button class="go" type="button" data-act="equip:'+it.id+'">EQUIP</button>';
+    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(it.equipped?"ON PAPA":"IN INV")+'</b></div><div class="fx">Equip it on Papa to use it. Unequip sends it back to the inventory.</div></div>'+btn+'</div>';
+  }
+  if(!tools)h+='<div class="row"><div class="tx"><div class="nm">NO TOOLS YET</div><div class="fx">Buy the better peeler, carry bag or broom in the SHOP. They land here first.</div></div></div>';
+  h+='<div class="sec">FURNITURE, MACHINES AND DECOR</div>';
+  var places=0;
+  for(i=0;i<list.length;i++){
+    it=list[i];if(it.kind!=="place")continue;places++;
+    if(it.placed)btn='<button class="go done" type="button" data-act="return:'+it.id+'">PUT AWAY</button>';
+    else btn='<button class="go" type="button" data-act="toedit:'+it.id+'">EDIT TO PLACE</button>';
+    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(it.placed?"IN ROOM":"IN INV")+'</b></div><div class="fx">'+(it.placed?"In the room. PUT AWAY sends it back to the inventory.":"In your inventory. Open EDIT and drag it into the room.")+'</div></div>'+btn+'</div>';
+  }
+  if(!places)h+='<div class="row"><div class="tx"><div class="nm">NOTHING TO PLACE</div><div class="fx">Buy machines, a sink, a cot or decorations in the SHOP. They wait here until you place them.</div></div></div>';
+  if(!list.length)h='<div class="sec">INVENTORY</div><div class="row"><div class="tx"><div class="nm">EMPTY</div><div class="fx">Buy items in the SHOP. They come here first. Tools get equipped on Papa. Everything else is placed from EDIT.</div></div></div>';
+  ovlBody.innerHTML=h;
+}
 function buildShop(){var s=sim.s,h="",pr=sim.price(),fm=sim.foodMax(),i,it,st,lp;
   h+='<div class="sec">LEVEL</div>';
   lp=sim.levelPrice();
@@ -2806,7 +3102,7 @@ function buildShop(){var s=sim.s,h="",pr=sim.price(),fm=sim.foodMax(),i,it,st,lp
   ovlBody.innerHTML=h;}
 /* ---- the HELP booklet: cover, one page per command (generated from PPSim.COMMANDS), a last page on the loop. Flip with PREV / NEXT or a sideways swipe. ---- */
 var bookPage=0;
-function bookPages(){return CMDS.length+6;}      /* cover + every command + levels + line + editor/zoom + decor + loop */
+function bookPages(){return CMDS.length+7;}      /* cover + every command + levels + line + editor + inventory + decor + loop */
 function icoDraw(cv2,id){var g=cv2.getContext("2d"),r=function(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h);};g.clearRect(0,0,16,16);
   if(id==="cover"){r(2,2,12,12,"#8a5a28");r(3,3,10,10,"#c48a48");r(4,4,8,2,"#e8c070");r(5,8,2,2,"#6a4020");r(9,9,2,2,"#6a4020");r(6,11,2,1,"#6a4020");}
   else if(id==="pace"){r(1,6,3,1,"#8a6a40");r(0,9,4,1,"#8a6a40");r(2,12,3,1,"#8a6a40");r(5,3,3,10,"#c0361e");r(8,5,2,6,"#c0361e");r(10,6,2,4,"#c0361e");r(12,7,2,2,"#c0361e");}
@@ -2822,12 +3118,13 @@ function miniSlider(c,v){var mx=c.id==="pot"?Math.max(1,sim.potMax()):c.max,p=(v
   for(var i=0;i<=tn;i++)tk+='<i class="tk" style="left:'+(i/tn*100)+'%"></i>';
   return '<div class="mini"><span class="e">'+esc(c.hi)+'</span><div class="mt"><div class="ln"></div><div class="mf" style="width:'+(p*100)+'%"></div>'+tk+'<div class="mk" style="left:'+((1-p)*100)+'%"></div></div><span class="e r">'+esc(c.lo)+'</span></div>';}
 function pageHtml(pg){var s=sim.s,N=bookPages(),pn='<span class="pn">'+(pg+1)+' / '+N+'</span>';
-  if(pg===0)return '<div id="pg" class="cover"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><div class="t1">PAPA POTATO</div><div class="t2">HANDBOOK</div><button class="go2" type="button" data-act="book:next">OPEN THE BOOK</button><div class="note" style="margin-top:12px;color:#d8b878">'+CMDS.length+' commands, plus levels, the line, the editor and decor</div></div>';
-  if(pg===N-1)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE LOOP</b></div><div class="lb">WHAT HE DOES</div><div class="chips"><span>PILE</span><span>&gt; PEEL TABLE</span><span>&gt; SHIP IN</span><span>&gt; RETURN</span><span>&gt; PILE</span></div><div class="tx">Or buy the work line: pile &gt; suction &gt; conveyor &gt; auto-peeler &gt; out-conveyor &gt; shipping. Peels land on the floor inside the room. CLEAN sends him to sweep them.</div><div class="lb">YOUR COINS GO TO</div><div class="chips"><span>LEVELS</span><span>ITEMS</span><span>FOOD</span><span>POTATOES</span><span>UPGRADES</span></div><div class="tx">Open the SHOP. Tap the room to see object names. +/− zoom and scroll arrows sit in the side rails (never over the room). EDIT moves furniture (not the pile, return or shipping).</div></div>';
-  if(pg===N-5)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>LEVELS</b></div><div class="lb">PAY TO LEVEL UP</div><div class="tx">You start at Level 1. Pay coins in the SHOP to reach the next level (up to 5). Each level UNLOCKS items; you still BUY them in the shop. Lv1 is the six starters (better peeler, carry bag, sink, broom, small cooler, cot).</div><div class="lb">UPGRADES</div><div class="tx">Old upgrades (sharp peeler, boots, chute, cooler, broom, soft bed) stay. New ones speed the auto-peeler and belts and grow the carry bag. Unused items stay in the game, just hidden until unlocked.</div></div>';
-  if(pg===N-4)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE WORK LINE</b></div><div class="lb">MACHINES</div><div class="tx">CONVEYOR, AUTO SUCTION, AUTO-PEELER and OUT-CONVEYOR. Each has an on/off or speed slider once bought. The out-conveyor butts the shipping intake and is drawn under it. Peeled potatoes ride in and get sucked through. Peels always land inside the room.</div><div class="lb">COMMANDS</div><div class="tx">SUCTION, CONVEYOR SPEED, AUTO-PEELER SPEED, OUT-CONVEYOR SPEED. Faster belts and peelers come from the BETTER BELTS / FASTER AUTO-PEELER upgrades.</div></div>';
-  if(pg===N-3)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="wake" width="16" height="16"></canvas><b>EDITOR AND ZOOM</b></div><div class="lb">EDITOR</div><div class="tx">Tap EDITOR, then drag any item except the potato pile, the return chute and the shipping chute. Those three stay put. Your layout is saved with the game.</div><div class="lb">ZOOM AND SCROLL</div><div class="tx">The zoom +/− and scroll arrows live in the side rails, outside the room — the room shrinks to fit between them, and nothing draws over the play area. +/− zoom like FunMotion (75% to 300%). Arrow buttons scroll the room. The centre dot resets to a fitted view.</div></div>';
-  if(pg===N-2)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="nap" width="16" height="16"></canvas><b>DECORATIONS</b></div><div class="lb">WHAT HE DOES</div><div class="tx">LAMP on/off. RADIO on/off — he walks over to tune it. PLANT dries out; WATER WHEN DRY sends him to water it. TV + ARMCHAIR: turn the TV on and set WATCH WHEN ENERGY &lt; so he sits and watches (slow energy, not a nap). Sleep is still the 0.3.1 bed, unchanged.</div></div>';
+  if(pg===0)return '<div id="pg" class="cover"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><div class="t1">PAPA POTATO</div><div class="t2">HANDBOOK</div><button class="go2" type="button" data-act="book:next">OPEN THE BOOK</button><div class="note" style="margin-top:12px;color:#d8b878">'+CMDS.length+' commands, plus levels, the line, the editor, inventory and decor</div></div>';
+  if(pg===N-1)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE LOOP</b></div><div class="lb">WHAT HE DOES</div><div class="chips"><span>PILE</span><span>&gt; PEEL TABLE</span><span>&gt; SHIP IN</span><span>&gt; RETURN</span><span>&gt; PILE</span></div><div class="tx">Or buy the work line: pile &gt; suction &gt; conveyor &gt; auto-peeler &gt; out-conveyor &gt; shipping. Peels land on the floor inside the room. CLEAN sends him to the peels (nearest pile first) and he sweeps them there.</div><div class="lb">YOUR COINS GO TO</div><div class="chips"><span>LEVELS</span><span>ITEMS</span><span>FOOD</span><span>POTATOES</span><span>UPGRADES</span></div><div class="tx">Open the SHOP to buy. New items go to your INVENTORY. Equip tools on Papa, or open EDIT and drag furniture and machines into the room. The view always fits the whole room. EDIT moves furniture (not the pile, return or shipping).</div></div>';
+  if(pg===N-6)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>LEVELS</b></div><div class="lb">PAY TO LEVEL UP</div><div class="tx">You start at Level 1. Pay coins in the SHOP to reach the next level (up to 5). Each level UNLOCKS items; you still BUY them in the shop. Bought items go to your inventory first. Lv1 is the six starters (better peeler, carry bag, sink, broom, small cooler, cot).</div><div class="lb">UPGRADES</div><div class="tx">Old upgrades (sharp peeler, boots, chute, cooler, broom, soft bed) stay. New ones speed the auto-peeler and belts and grow the carry bag. Unused items stay in the game, just hidden until unlocked.</div></div>';
+  if(pg===N-5)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE WORK LINE</b></div><div class="lb">MACHINES</div><div class="tx">CONVEYOR, AUTO SUCTION, AUTO-PEELER and OUT-CONVEYOR. Buy them, then place them from EDIT. Each has an on/off or speed slider once bought. The out-conveyor butts the shipping intake and is drawn under it. Peels always land inside the room.</div><div class="lb">COMMANDS</div><div class="tx">SUCTION, CONVEYOR SPEED, AUTO-PEELER SPEED, OUT-CONVEYOR SPEED. Faster belts and peelers come from the BETTER BELTS / FASTER AUTO-PEELER upgrades.</div></div>';
+  if(pg===N-4)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="wake" width="16" height="16"></canvas><b>EDITOR</b></div><div class="lb">EDITOR</div><div class="tx">Tap EDIT. The room always fits the screen (no zoom or scroll arrows). Drag any item except the potato pile, the return chute and the shipping chute. Those three stay put. The cutting board, knife, peel stand and the seat move with their objects. Your layout is saved with the game.</div><div class="lb">THE TRAY</div><div class="tx">EDIT opens an inventory tray under the room (never over it). Drag an unplaced item from the tray into the room. Select a placed item and tap PUT AWAY to send it back to the inventory.</div></div>';
+  if(pg===N-3)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>INVENTORY</b></div><div class="lb">BUY, THEN USE</div><div class="tx">Bought items go to your inventory first, not straight into the room. Open INV (same style as the shop). Tools (better peeler, carry bag, broom) can be equipped or unequipped on Papa. Furniture, machines and decorations are placed in the room from the EDIT tray.</div><div class="lb">OLD SAVES</div><div class="tx">If you already owned items before inventory, they stay in the room (and tools stay equipped). Nothing is lost.</div></div>';
+  if(pg===N-2)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="nap" width="16" height="16"></canvas><b>DECORATIONS</b></div><div class="lb">WHAT HE DOES</div><div class="tx">LAMP on/off. RADIO on/off — he walks over to tune it. PLANT dries out; WATER WHEN DRY sends him to water it. TV + ARMCHAIR: turn the TV on and set WATCH WHEN ENERGY &lt; so he sits and watches (slow energy, not a nap). He walks around furniture and only gets in the bed for a nap, through the side. Sleep is still the 0.3.1 bed, unchanged.</div></div>';
   if(pg-1>=CMDS.length)return '<div id="pg">'+pn+'<div class="tx">Missing page.</div></div>';
   var c=CMDS[pg-1],v=s.box[c.id];
   return '<div id="pg" data-cmd="'+c.id+'">'+pn+'<div class="hd"><canvas class="ic" data-ic="'+c.id+'" width="16" height="16"></canvas><b>'+esc(c.name)+'</b></div><div class="lb">DOES</div><div class="tx">'+esc(c.does)+'</div><div class="lb">SLIDER</div>'+miniSlider(c,v)+'<div class="now">NOW: '+esc(fmt(c.id,v))+'</div><div class="lb">AFFECTS</div><div class="tx">'+esc(c.affects)+'</div><div class="lb">RANGE</div><div class="rg">'+esc(c.range)+'</div></div>';}
@@ -2836,15 +3133,15 @@ function buildBook(dir){var N=bookPages(),h='<div id="book">'+pageHtml(bookPage)
   ovlBody.innerHTML=h;var cs=ovlBody.querySelectorAll("canvas.ic");for(var j=0;j<cs.length;j++)icoDraw(cs[j],cs[j].getAttribute("data-ic"));
   if(dir){var pg=$("pg");pg.className=(pg.className?pg.className+" ":"")+(dir>0?"flipn":"flipp");}}
 function flipBook(d){d=+d;d=d>0?1:(d<0?-1:0);var n=Math.max(0,Math.min(bookPages()-1,bookPage+d));if(n===bookPage)return false;bookPage=n;buildBook(d);return true;}
-function buildOvl(){var st=ovlBody.scrollTop;ovlBody.className=ovlMode==="help"?"book":"";if(ovlMode==="shop")buildShop();else if(ovlMode==="help")buildBook(0);ovlBody.scrollTop=ovlMode==="shop"?st:0;$("ovlCoins").textContent=ovlMode==="shop"?sim.s.coins+"c":"";}
-function openOvl(mode){ovlMode=mode;ovl.className="on";$("ovlTitle").textContent=mode==="shop"?"SHOP":"HELP BOOKLET";ovlBody.scrollTop=0;if(mode==="help")bookPage=0;buildOvl();if(focusId)setFocus(null);}
+function buildOvl(){var st=ovlBody.scrollTop;ovlBody.className=ovlMode==="help"?"book":"";if(ovlMode==="shop")buildShop();else if(ovlMode==="help")buildBook(0);else if(ovlMode==="inv")buildInv();ovlBody.scrollTop=(ovlMode==="shop"||ovlMode==="inv")?st:0;$("ovlCoins").textContent=(ovlMode==="shop"||ovlMode==="inv")?sim.s.coins+"c":"";}
+function openOvl(mode){ovlMode=mode;ovl.className="on";$("ovlTitle").textContent=mode==="shop"?"SHOP":(mode==="inv"?"INVENTORY":"HELP BOOKLET");ovlBody.scrollTop=0;if(mode==="help")bookPage=0;buildOvl();if(focusId)setFocus(null);}
 function closeOvl(){ovlMode=null;ovl.className="";OG=null;}
 function flash(btn,txt){if(!btn)return;var old=btn.innerHTML;btn.innerHTML=txt;setTimeout(function(){if(ovlMode)ovlDirty=true;},700);}
 function shopBuy(what){var r,btn=ovl.querySelector('[data-act="buy:'+what+'"]'),pr;
   if(what==="food"){pr=sim.price();r=sim.buyFood();}
   else if(what==="pot"){pr=sim.potPrice();r=sim.buyPotatoes();}
   else if(what==="lv"){pr=sim.levelPrice();r=sim.buyLevel();}
-  else if(what.indexOf("item:")===0){var iid=what.slice(5);pr=sim.itemPrice(iid);r=sim.buyItem(iid);if(r==="ok")rebuildPanel();}
+  else if(what.indexOf("item:")===0){var iid=what.slice(5);pr=sim.itemPrice(iid);r=sim.buyItem(iid);if(r==="ok"){rebuildPanel();rebuildTray();}}
   else if(what.indexOf("up:")===0){var id=what.slice(3);pr=sim.upPrice(id);r=sim.buyUp(id);}
   else return "bad";
   if(r==="ok"){if(btn)btn.innerHTML="BOUGHT!";setTimeout(function(){ovlDirty=true;},600);changed();}
@@ -2903,19 +3200,33 @@ var OBJECTS=[
   {id:"lamp",name:"LAMP",use:"On/off light in the living nook.",gameplay:true},
   {id:"rug",name:"RUG",use:"Decoration under the TV nook. Movable in the editor.",gameplay:false},
   {id:"cot",name:"BASIC COT",use:"Extra furniture. Naps still use the 0.3.1 soft bed (sleep locked).",gameplay:false}];
-coinIcon();layout();rebuildPanel();syncZoomLabel();updateHud();migUntil=performance.now()+9000;RT=sim.s.t;showLabels(30000);drawScene(performance.now());
+coinIcon();layout();rebuildPanel();rebuildTray();syncZoomLabel();updateHud();migUntil=performance.now()+9000;RT=sim.s.t;showLabels(30000);drawScene(performance.now());
 requestAnimationFrame(frame);
 /* test + debug hooks */
-window.PP={get sim(){return sim;},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:function(seed){sim=PPSim.fresh(seed);focusId=null;hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];rebuildPanel();updateHud();saveGame();},
+window.PP={get sim(){return sim;},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:function(seed){sim=PPSim.fresh(seed);focusId=null;hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;if(editMode)toggleEditor();rebuildPanel();rebuildTray();updateHud();saveGame();layout();},
   reload:function(){sim=loadGame();hud={};flights=[];flying={};messVer++;renderAll();updateHud();},focus:function(){return focusId;},
-  pause:function(p){paused=!!p;},layout:function(){return {W:W,H:H,k:k,roomW:roomW,roomH:roomH,offX:offX,offY:offY,detail:DETAIL,fitW:RW*k,fitH:RH*k,dpr:DPR,SC:SC};},version:"0.4",zoom:function(){return {i:zoomI,k:ZOOM_STEPS[zoomI],panX:panX,panY:panY};},setZoom:function(i){zoomI=Math.max(0,Math.min(ZOOM_STEPS.length-1,i|0));applyCam();staticLayer=null;syncZoomLabel();},edit:function(on){if(on==null)return editMode;editMode=!!on;var b=$("editBtn");if(b)b.classList.toggle("on",editMode);},move:function(id,x,y){var r=sim.moveItem(id,x,y);if(r){staticLayer=null;saveGame();}return r;},
+  pause:function(p){paused=!!p;},layout:function(){return {W:W,H:H,k:k,roomW:roomW,roomH:roomH,offX:offX,offY:offY,detail:DETAIL,fitW:RW*k,fitH:RH*k,dpr:DPR,SC:SC};},version:"0.4.1",zoom:function(){return {i:1,k:1,panX:0,panY:0,fit:true};},setZoom:function(i){resetView();},edit:function(on){if(on==null)return editMode;if(!!on!==editMode)toggleEditor();return editMode;},move:function(id,x,y){var r=sim.moveItem(id,x,y);if(r){staticLayer=null;messLayer=null;messVer++;saveGame();}return r;},
   drawAt:function(t){drawScene(t);},animF:function(){return ANIM_F;},sitWorld:sitWorld,setPan:function(x,y){panX=+x||0;panY=+y||0;applyCam();if(playRect)placeTags();syncZoomLabel();},seedSucks:function(arr){sucks=arr||[];},
   setPileMax:function(n){PILEMAX=n;buildPile();pileLayer=null;pileKey=-1;},forcePile:function(n){sim.s.pile=n;},get migrated(){return migrated;},
   stats:function(){return {pileRenders:renders.pile,messRenders:renders.mess,maxVis:MAXVIS,tiers:TIER.slice(),messVis:MESSPOS.length,flights:flights.length,sucks:sucks.length};},
-  giveAll:function(){var s=sim.s,i;s.level=5;s.coins=Math.max(s.coins,999);for(i=0;i<PPSim.ITEMS.length;i++){var it=PPSim.ITEMS[i];if(!s.owned[it.id]){s.owned[it.id]=1;s.place[it.id]=PPSim.defaultPlace(it.id);}}s.box.suction=1;s.box.conveyor=2;s.box.apeeler=2;s.box.outbelt=2;s.box.lamp=1;s.box.radio=1;s.box.tv=1;s.box.watch=30;s.box.water=40;s.box.wash=1;s.box.clean=20;s.box.eat=40;s.box.nap=35;sim.rebuildObst();rebuildPanel();changed();},
+  giveAll:function(){var s=sim.s,i;s.level=5;s.coins=Math.max(s.coins,999);if(!s.owned)s.owned={};if(!s.place)s.place={};if(!s.equipped)s.equipped={};for(i=0;i<PPSim.ITEMS.length;i++){var it=PPSim.ITEMS[i];s.owned[it.id]=1;if(PPSim.isTool(it.id))s.equipped[it.id]=1;if(PPSim.isPlaceable(it.id))s.place[it.id]=PPSim.defaultPlace(it.id);}s.box.suction=1;s.box.conveyor=2;s.box.apeeler=2;s.box.outbelt=2;s.box.lamp=1;s.box.radio=1;s.box.tv=1;s.box.watch=30;s.box.water=40;s.box.wash=1;s.box.clean=20;s.box.eat=40;s.box.nap=35;sim.syncGeom();sim.rebuildObst();rebuildPanel();rebuildTray();changed();},
   objects:function(){return OBJECTS;},labels:function(ms,force){showLabels(ms||8000,force);updateLabels();if(playRect)placeTags();},placeTags:function(){if(playRect)placeTags();},ovl:function(){return ovlMode;},book:function(){return {page:bookPage,pages:bookPages()};},flip:flipBook,open:openOvl,close:closeOvl,buy:shopBuy,
   retView:function(){var s=sim.s,kk=s.suck;if(!kk)return [];var sc=PPSim.spill(kk.t0,kk.n),o=[];for(var j=kk.landed;j<kk.n;j++){var q=retPos(kk,sc,j,RT);o.push(q?{j:j,x:q.x,y:q.y,z:q.z,p:q.p,inPipe:q.inPipe,mouthX:q.mouthX,tx:q.tx,ty:q.ty}:{j:j,p:-1});}return o;},spillView:function(){var s=sim.s,kk=s.suck;if(!kk)return [];var sc=PPSim.spill(kk.t0,kk.n),o=[];for(var j=kk.landed;j<kk.n;j++)o.push({j:j,ex:sc.ex[j],ld:sc.ld[j],rt:RT});return o;},
-  posOf:function(i){return POS[i];},messPos:function(i){return MESSPOS[i];},tagRects:function(){var o={};for(var i=0;i<TAGDEF.length;i++){var r=$(TAGDEF[i].id).getBoundingClientRect();o[TAGDEF[i].id]={x:r.left,y:r.top,w:r.width,h:r.height,on:$(TAGDEF[i].id).className.indexOf("off")<0};}return o;},
+  posOf:function(i){return POS[i];},messPos:function(i){buildMess();return MESSPOS[i];},messAll:function(){buildMess();return MESSPOS.slice();},
+  tableKids:function(){return PPSim.tableKids();},bedside:function(){return PPSim.bedside();},
+  lastSweep:function(){return sim.lastSweep||null;},
+  labelsHidden:function(){var el=$("tagTable");if(!el)return true;var cs=getComputedStyle(el);return cs.display==="none"||cs.visibility==="hidden"||+cs.opacity===0;},
+  follow:function(id){var k=PPSim.tableKids(),T=PPSim.GEO.table,S=PPSim.SPOT,o={id:id};
+    o.table={x0:T.x0,y0:T.y0,x1:T.x1,y1:T.y1};
+    o.board=k.board;o.knife=k.knife;o.peelSpawn=k.peelSpawn;o.stand=k.stand;
+    o.boardOnTable=k.board.x0>=T.x0-0.05&&k.board.y0>=T.y0-0.05&&k.board.x1<=T.x1+0.05&&k.board.y1<=T.y1+0.05;
+    o.standBeside=o.stand.y>=T.y1+4&&o.stand.x>=T.x0&&o.stand.x<=T.x1;
+    o.stool={x:PPSim.GEO.stool.x,y:PPSim.GEO.stool.y};o.food=S.food;o.mat=S.mat;o.bed=PPSim.GEO.mat;
+    o.obst=PPSim.OBST.map(function(b){return {id:b.id,x0:b.x0,y0:b.y0,x1:b.x1,y1:b.y1};});
+    return o;},
+  tray:function(){var tr=$("invTray");return {edit:editMode,chips:sim.trayList(),open:editMode&&!!tr&&getComputedStyle(tr).display!=="none"};},
+  tagRects:function(){var o={};for(var i=0;i<TAGDEF.length;i++){var r=$(TAGDEF[i].id).getBoundingClientRect();o[TAGDEF[i].id]={x:r.left,y:r.top,w:r.width,h:r.height,on:$(TAGDEF[i].id).className.indexOf("off")<0,display:getComputedStyle($(TAGDEF[i].id)).display};}return o;},
+
   flightsNow:function(){return flights.map(function(f){return {slot:f.slot,t:f.t,dur:f.dur,x0:f.x0,y0:f.y0,tx:f.tx,ty:f.ty,h:f.h};});},cv:function(){return cv;}};
 window.__PP_READY=true;
 })();
