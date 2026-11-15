@@ -1,15 +1,26 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>PIXEL WAR 0.4.1</title>
+<title>PIXEL WAR 0.4.2</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d1c;color:#dfe3ff;font:600 13px/1.2 system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 #app{display:flex;flex-direction:column;height:100%}
 #top{display:flex;align-items:center;flex:none;height:48px;box-sizing:border-box;padding:2px 6px;background:#131632;border-bottom:2px solid #2c3270}
-#status{flex:1;min-width:0;font-size:12px;line-height:1.15;white-space:normal;margin-right:6px;max-height:44px;overflow:hidden}
+#status{flex:1;min-width:0;font-size:12px;line-height:1.1;white-space:normal;margin-right:6px;max-height:44px;overflow:visible}
 #top button{margin-left:5px;min-width:46px}
 #stage{flex:1;position:relative;min-height:0;background:#0b0d1c}
 canvas{display:block;position:absolute;left:0;top:0;touch-action:none}
-#panel{flex:none;height:236px;box-sizing:border-box;padding:2px 6px 2px;background:#131632;border-top:2px solid #2c3270}
+#panel{flex:none;height:calc(142px + clamp(92px,19vh,224px));min-height:236px;box-sizing:border-box;padding:2px 6px 2px;background:#131632;border-top:2px solid #2c3270}
+#sl{height:clamp(92px,19vh,224px);overflow-y:auto;touch-action:pan-y}
+#slh{height:16px;font-size:11px;line-height:16px;font-weight:800;white-space:nowrap;overflow:hidden}
+.box{display:flex;align-items:center;height:46px;margin:0 0 2px;background:#1a1f4a;border:1px solid #2c3270;border-radius:5px;box-sizing:border-box;padding:0 2px}
+.lab2{flex:none;width:72px;font-size:10px;line-height:12px;font-weight:700;white-space:pre-line;overflow:hidden;margin-right:2px}
+.pm{flex:none;width:44px;min-width:44px;height:44px;margin:0;font-size:22px;line-height:22px;padding:0}
+.box input{flex:1;min-width:0;height:44px;margin:0 2px}
+#chips{flex:1;margin-left:0}
+.chip{position:relative;overflow:hidden;flex:1;margin:0 0 0 3px;min-width:0;font-size:10.5px;border-width:3px}.chip i{position:absolute;left:0;bottom:0;height:5px;width:0;background:currentColor;opacity:.9}
+.trow button{white-space:normal;line-height:11px}
+button.wait{background:#3a3a55;border-color:#7a7a99;color:#c8c8dd}
+#r2 #tStart{margin:0}
 button{min-width:44px;min-height:44px;font:700 12px system-ui,sans-serif;color:#dfe3ff;background:#23285a;border:2px solid #4a52a8;border-radius:4px;padding:0 3px;box-sizing:border-box}
 button.on{background:#3a44c8;border-color:#9aa4ff;color:#fff}
 button.go{background:#1d7a43;border-color:#6be39a;color:#fff}
@@ -18,7 +29,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 .cell{flex:1;min-width:0;display:flex;align-items:center;box-sizing:border-box}
 .cell+.cell{margin-left:8px}
 .mrow{height:21px}
-.lab{flex:none;width:72px;font-size:10px;white-space:nowrap;overflow:hidden}
+.lab{flex:none;width:72px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar{flex:1;min-width:0;height:10px;background:#0b0d1c;border:1px solid #4a52a8;box-sizing:border-box}
 .bar i{display:block;height:100%;width:0}
 #mP i,#mW i{background:#e8e8f0}
@@ -71,35 +82,36 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 .cgrp{padding:8px 2px 2px;font-size:11px;color:#9aa4ff;letter-spacing:.5px}
 </style></head><body>
 <div id="app">
- <div id="top"><div id="status">PIXEL WAR</div><button id="btnPause">PAUSE</button><button id="btnRestart">NEW</button><button id="btnMenu">MENU</button></div>
+ <div id="top"><div id="status">PIXEL WAR</div><button id="btnPause">PAUSE</button><button id="btnStep" style="display:none">STEP</button><button id="btnRestart">NEW</button><button id="btnMenu">MENU</button></div>
  <div id="stage"><canvas id="c"></canvas></div>
  <div id="panel">
   <div id="main">
    <div class="row mrow"><div class="cell"><span class="lab" id="tP">PATH</span><div class="bar" id="mP"><i></i></div></div><div class="cell"><span class="lab" id="tW">WALL</span><div class="bar" id="mW"><i></i></div></div></div>
-   <div class="row mrow"><div class="cell"><span class="lab" id="tY">YOU</span><div class="bar" id="hY"><i></i></div></div><div class="cell"><span class="lab" id="tF">FOE</span><div class="bar" id="hF"><i></i></div></div></div>
-   <div class="row" id="tabs"><button class="tab" id="tabD">DRAW</button><button class="tab" id="tabS">SHAPE</button><button class="tab" id="tabF">FLOW</button></div>
-   <div class="tabc" id="pD">
-    <div class="row trow" id="tools"><button id="tCircle">CIRCLE</button><button id="tMain">PATH</button><button id="tBranch">BRANCH</button><button id="tWall">WALL</button><button id="tGate">GATE</button><button id="tErase">ERASE</button></div>
-    <div class="row trow"><button id="tStart" class="go" style="flex:2">START</button><button id="tSwap" style="display:none">P1/P2</button><button id="tLane" style="flex:2;margin-left:3px">LANE</button></div>
-    <div class="row" style="height:44px"><div class="info" id="info"></div></div>
+   <div class="row mrow"><div class="cell"><span class="lab" id="tY">YOU</span><div class="bar" id="hY"><i></i></div></div><div class="cell"><span class="lab" id="tF">ENEMY</span><div class="bar" id="hF"><i></i></div></div></div>
+   <div class="row trow" id="tools"><button id="tCircle">MOVE CIRCLE</button><button id="tMain">ATTACK PATH</button><button id="tBranch">BRANCH</button><button id="tWall">DEFENSE LINE</button><button id="tGate">GATE</button><button id="tErase">ERASE</button></div>
+   <div class="row trow" id="r2"><button id="tStart" class="go" style="flex:2">START</button><button id="tSwap" style="display:none">SIDE</button><button id="tRefill" style="display:none">REFILL</button><div class="row" id="chips"></div></div>
+   <div id="sl">
+    <div id="slh"></div>
+    <div class="box"><span class="lab2" id="lSp"></span><button class="pm" data-d="-1" data-for="sSp" aria-label="pace down">&minus;</button><input id="sSp" type="range" min="1" max="10" step="1" value="5" aria-label="pace"><button class="pm" data-d="1" data-for="sSp" aria-label="pace up">+</button></div>
+    <div class="box"><span class="lab2" id="lDe"></span><button class="pm" data-d="-1" data-for="sDe" aria-label="density down">&minus;</button><input id="sDe" type="range" min="1" max="10" step="1" value="7" aria-label="density"><button class="pm" data-d="1" data-for="sDe" aria-label="density up">+</button></div>
+    <div class="box"><span class="lab2" id="lSpc"></span><button class="pm" data-d="-1" data-for="sSpc" aria-label="spacing down">&minus;</button><input id="sSpc" type="range" min="1" max="10" step="1" value="5" aria-label="spacing"><button class="pm" data-d="1" data-for="sSpc" aria-label="spacing up">+</button></div>
+    <div class="box"><span class="lab2" id="lWd"></span><button class="pm" data-d="-1" data-for="sWd" aria-label="lane width down">&minus;</button><input id="sWd" type="range" min="1" max="10" step="1" value="5" aria-label="lane width"><button class="pm" data-d="1" data-for="sWd" aria-label="lane width up">+</button></div>
+    <div class="box"><span class="lab2" id="lRe"></span><button class="pm" data-d="-1" data-for="sRe" aria-label="flow down">&minus;</button><input id="sRe" type="range" min="1" max="10" step="1" value="9" aria-label="flow"><button class="pm" data-d="1" data-for="sRe" aria-label="flow up">+</button></div>
+    <div class="box"><span class="lab2" id="lLn">LANE SHAPE</span><button id="tLane" style="flex:1;margin:0 0 0 4px">NORMAL</button></div>
+    <div id="legacy" style="display:none">
+     <div class="row" id="chipsL"></div><div class="row" id="shbtns"></div>
+     <div class="row srow"><div class="cell"><span class="lab" id="lSh">SHARE</span><input id="sSh" type="range" min="0" max="100" step="5" value="40" aria-label="branch share"></div><div class="cell"><span class="lab" id="lAt">FORM AT</span><input id="sAt" type="range" min="0" max="100" step="5" value="0" aria-label="form at"></div></div>
+     <div class="row srow"><div class="cell"><span class="lab" id="lSD">SHAPE DENS</span><input id="sSD" type="range" min="1" max="10" step="1" value="7" aria-label="shape density"></div><div class="cell"><span class="lab" id="lCo">COMPACT</span><input id="sCo" type="range" min="1" max="10" step="1" value="6" aria-label="compactness"></div></div>
+     <div class="row srow"><div class="cell"><span class="lab" id="lCa">OUT</span><input id="sCa" type="range" min="250" max="10000" step="250" value="4000" aria-label="active count"></div><div class="cell"><span class="lab" id="lPu">PULL</span><input id="sPu" type="range" min="0" max="100" step="5" value="90" aria-label="shape pull"></div></div>
+    </div>
    </div>
-   <div class="tabc" id="pS">
-    <div class="row trow" id="chips"></div>
-    <div class="row" id="shbtns"></div>
-    <div class="row srow"><div class="cell"><span class="lab" id="lSh">SHARE</span><input id="sSh" type="range" min="0" max="100" step="5" value="40" aria-label="branch share"></div><div class="cell"><span class="lab" id="lAt">FORM AT</span><input id="sAt" type="range" min="0" max="100" step="5" value="0" aria-label="form at"></div></div>
-    <div style="display:none"><button id="shPrev">&lt;</button><span id="shn">LINE</span><button id="shNext">&gt;</button><span id="lPu">PULL</span><input id="sPu" type="range" min="0" max="100" step="5" value="90" aria-label="shape pull"></div>
-   </div>
-   <div class="tabc" id="pF">
-    <div class="row srow"><div class="cell"><span class="lab" id="lSp">PACE</span><input id="sSp" type="range" min="1" max="10" step="1" value="5" aria-label="speed"></div><div class="cell"><span class="lab" id="lDe">DENSITY</span><input id="sDe" type="range" min="1" max="10" step="1" value="7" aria-label="lane density"></div></div>
-    <div class="row srow"><div class="cell"><span class="lab" id="lRe">FLOW</span><input id="sRe" type="range" min="1" max="10" step="1" value="9" aria-label="release rate"></div><div class="cell"><span class="lab" id="lCa">OUT</span><input id="sCa" type="range" min="250" max="10000" step="250" value="4000" aria-label="active count" style="display:none"></div></div>
-    <div class="row srow"><div class="cell"><span class="lab" id="lSD">SHAPE DENS</span><input id="sSD" type="range" min="1" max="10" step="1" value="7" aria-label="shape density"></div><div class="cell"><span class="lab" id="lCo">COMPACT</span><input id="sCo" type="range" min="1" max="10" step="1" value="6" aria-label="compactness"></div></div>
-   </div>
+   <div id="info" style="display:none"></div><div style="display:none"><button id="shPrev">&lt;</button><span id="shn">LINE</span><button id="shNext">&gt;</button></div>
   </div>
   <div id="result"><h2 id="rTitle">-</h2><div id="rBody"></div><div class="rb"><button id="btnRev">AI REVIEW</button><button id="btnAgain" class="go">PLAY AGAIN</button></div></div>
  </div>
 </div>
-<div class="view" id="menu"><h1>PIXEL WAR 0.4.1</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
- <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mDiff">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button></div></div>
+<div class="view" id="menu"><h1>PIXEL WAR 0.4.2</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
+ <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button></div></div>
 <div class="view" id="stages"><h1>STAGES</h1><p class="sub">Four stages unlock the mechanics one step at a time. QUICK MATCH and CUSTOM GAME have everything.</p><div class="btns" id="stlist" style="flex:1;overflow-y:auto"></div><div class="btns" style="padding-top:0"><button id="stBack">BACK</button></div></div>
 <div class="view" id="editor"><h1>SHAPE EDITOR</h1><p class="sub">Draw ONE closed outline with your finger; the top edge is the FRONT. The outline is the shape's yellow hitbox: its pixels wander freely inside it. Saved shapes are abilities in the SHAPE tab (the AI designs its own).</p><div id="edwrap"><canvas id="edc"></canvas></div><div id="edmsg"></div><div id="edlist"></div>
  <div class="edrow"><button id="edClear">CLEAR</button><button id="edSave" class="go">SAVE</button><button id="edDel">DELETE</button></div><div class="btns" style="padding:4px 10px 6px"><button id="edBack" style="margin:0">BACK</button></div></div>
@@ -110,40 +122,43 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 'use strict';
 (function(){
 /* =====================================================================
-   PIXEL WAR 0.4.1 — full game on the 0.1.1 density engine (0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
+   PIXEL WAR 0.4.2 — full game on the 0.1.1 density engine (0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
    Layers: CONFIG/CUSTOM · RNG · STATE (struct-of-arrays) · SIDE API (shared by player + AI)
    · SHAPES (squads) · AI (plan + live learning, memory wiped at match end) · MATCH · PIXELS · COLLISION · RENDER · VIEWS/HUD · INPUT · __tt hook
    Pixel states: 1 exit, 2 follow path, 3 end (straight + drift, leash), 4 area member (wanders inside its shape's soft hitbox), 5 knocked out of the area (comes back, or is recalled past the leash).
    ===================================================================== */
 const W=360,H=500,STEP=1/60,CELL=4,GW=Math.ceil(W/CELL)+2,GH=Math.ceil(H/CELL)+2,WCELL=8,WGW=Math.ceil(W/WCELL)+2,WGH=Math.ceil(H/WCELL)+2;
 const POOL=10000,CAPMAX=POOL,NP=POOL*2,CAPMIN=250,CAPSTEP=250,PERFCAP=4000,MAXP=6,MAXSQ=40,PSP=4,LGX=9,LGY=12;
-const WALL_HALF=2,MAX_STROKES=12,CONTACT=3.5,LOOK=14,EXIT_T=14,STUN=24,CD_HIT=10,CD_WALL=8;
-const KEY='pixelwar.v41',KEYC='pixelwar.v41.custom',KEYF='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
+const WST=3,WALL_HALF=2,MAX_STROKES=12,CONTACT=3.5,LOOK=14,EXIT_T=14,STUN=24,CD_HIT=10,CD_WALL=8;
+const KEY='pixelwar.v42',KEYC='pixelwar.v42.custom',KEYF='pixelwar.v42.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
 const MAXCUS=6,NSH=7+MAXCUS,POLYMAX=24,MX=22,MY=18;
 const SHAPES=['LINE','ARROW','WEDGE','RING','DIAMOND','DOUBLE','SPIRAL','C1','C2','C3','C4','C5','C6'];
 const LANES=['NORMAL','WIDE','NARROW','TAPERED','ARROW'],LMAX=[1,2.0,0.4,2.0,1.2];
 // ---------- CONFIG: every constant a rule (quick match uses DEFCFG; CUSTOM GAME edits a copy)
-const DEFCFG={poolSize:POOL,lives:20,burn:20,circleDmg:1,circleR:22,pixHP:2,pixDmg:1,missP:20,ricoP:35,ricoMode:3,leash:72,
- pathMax:520,brMax:140,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:120,prepSec:0,zoneH:52,
- sqN:300,tint:0,borrowSec:1.2,shapeCD:6,armSec:4,sqPull:50,shapeLane:0.8,shapeLen:3,ring:0,rhoRef:10,kSurv:0.9,kPush:0.8,survMax:0.85,pushMax:0.9,aiLevel:3,aiLearn:1,liveBr:1,liveWall:1,converge:0,momentum:0,orient:0,bias:0,autoDist:0,pattern:0,duel:0,halo:1,reveal:1,capDef:PERFCAP,relMul:120,
+const DEFCFG={poolSize:POOL,lives:20,burn:20,circleDmg:1,circleR:22,pixHP:2,pixDmg:1,missP:20,ricoP:35,ricoMode:3,leash:108,fadeSec:1.2,shapesOn:0,sbxEnd:0,
+ paceMax:24,pathMax:520,brMax:140,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
+ sqN:300,tint:0,borrowSec:2,shapeCD:10,armSec:7,sqPull:50,shapeLane:0.8,shapeLen:3,ring:0,rhoRef:10,kSurv:0.9,kPush:0.8,survMax:0.85,pushMax:0.9,aiLevel:3,aiLearn:1,liveBr:1,liveWall:1,converge:0,momentum:0,orient:0,bias:0,autoDist:0,pattern:0,duel:0,halo:1,reveal:1,capDef:PERFCAP,relMul:120,
  laneDef:0,brWaste:0,koMargin:5,knockK:24,gate:1,arrowFront:60,reformSec:2.5,shockK:3,breakLive:20,kSpeed:100,aiForms:1,aiReview:1,stage:0,stageAll:1};
 let CFG=Object.assign({},DEFCFG);
-const LBL={ricoMode:['RANDOM','ANGLE','HYBRID','FULL HYBRID'],aiLevel:['OFF','EASY','NORMAL','HARD','BRUTAL'],laneDef:LANES,stage:['FREE PLAY','1 FUNDAMENTALS','2 TACTICAL','3 ADVANCED','4 STRATEGIC'],converge:['SEPARATE','MERGE','REFORM'],orient:['TIP FIRST','TIP LAST'],bias:['EVEN','FRONT','REAR'],pattern:['STEADY','PULSE'],duel:['VS AI','HOT-SEAT']};
+const LBL={ricoMode:['RANDOM','ANGLE','HYBRID','FULL HYBRID'],aiLevel:['OFF','EASY','NORMAL','HARD','BRUTAL'],laneDef:LANES,stage:['FREE PLAY','1 FUNDAMENTALS','2 TACTICAL','3 ADVANCED','4 STRATEGIC'],converge:['SEPARATE','MERGE','REFORM'],orient:['TIP FIRST','TIP LAST'],bias:['EVEN','FRONT','REAR'],pattern:['STEADY','PULSE'],duel:['VS AI','SANDBOX']};
 // [key,label,hint,type(r=range,e=enum,b=bool),min,max,step]
 const CUSTOM=[
  ['_','MATCH'],
  ['poolSize','Pool = circle HP (pixels)','10000 = 500 circle hits at burn 20','r',1000,POOL,500],['burn','Pool burned per circle hit','each enemy pixel that reaches your circle','r',1,200,1],['lives','Lives per pixel','each collision death uses one; at 0 it is gone for good','r',1,40,1],['circleDmg','Circle hits counted per pixel','','r',1,10,1],['circleR','Circle radius','','r',16,32,2],
  ['matchSec','Time limit (s)','higher circle HP wins at time','r',30,300,10],['prepSec','Prep timer (s)','0 = no limit, press START','r',0,120,10],['zoneH','Circle placement strip','how far up you may place it','r',30,150,10],
- ['duel','Players','HOT-SEAT = 2 humans, pass the device','e'],
+ ['duel','Players','SANDBOX = you control BOTH sides, draw and change anything any time, no win or lose (test the mechanics)','e'],['sbxEnd','Sandbox: end the game when a circle is empty','off = nothing ever ends; use REFILL to top the pools up','b'],
  ['_','PIXELS'],
+ ['paceMax','Fastest pace (units per second)','the PACE slider runs from a quarter of this up to this. 24 is a sloth jog: about 21 seconds to cross the field at the fastest','r',6,90,2],
  ['pixHP','Pixel HP','Jay locked 2','r',1,6,1],['pixDmg','Pixel damage per hit','Jay locked 1','r',1,3,1],['missP','Miss: ricochet instead of damage %','','r',0,60,5],['ricoP','Ricochet alongside a hit %','','r',0,80,5],
- ['ricoMode','Ricochet rule','random / angle / hybrid (angle + density) / FULL HYBRID (angle + closing speed + packing)','e'],['kSpeed','Impact speed effect %','FULL HYBRID: fast impacts hit harder and push farther, slow ones glance','r',0,150,10],['leash','Leash distance','the "2 inches": past this from the path, or from a shape area edge, a pixel goes home','r',30,140,6],['capDef','Max on screen per side (performance cap)','0.2 used 3000; 10000 = whole pool','r',250,POOL,250],['relMul','Release rate per notch','pixels/s per slider step','r',20,120,20],['pattern','Release pattern','steady stream or pulsing waves','e'],['momentum','Formation momentum','speed builds when not hit','b'],
+ ['ricoMode','Ricochet rule','random / angle / hybrid (angle + density) / FULL HYBRID (angle + closing speed + packing)','e'],['kSpeed','Impact speed effect %','FULL HYBRID: fast impacts hit harder and push farther, slow ones glance','r',0,150,10],['leash','Leash distance','how far a pixel may stray from its path (1.5x the old distance); past it the pixel fades out, then goes home','r',30,220,6],['fadeSec','Fade-out time (s)','a pixel past the leash fades for this long; it can still be hit while it fades, with less chance as it fades','r',0.2,4,0.2],['capDef','Max on screen per side (performance cap)','0.2 used 3000; 10000 = whole pool','r',250,POOL,250],['relMul','Release rate per notch','pixels/s per slider step','r',20,120,20],['pattern','Release pattern','steady stream or pulsing waves','e'],['momentum','Formation momentum','speed builds when not hit','b'],
  ['_','PATHS AND BRANCHES'],
  ['pathMax','Main path meter','','r',200,900,20],['brMax','Branch meter (each)','','r',40,300,20],['maxBr','Max branches','','r',0,5,1],['liveBr','Redraw branches in battle','erase and redraw a branch mid-match; the main path stays locked','b'],['brWaste','Branch meter lost when erased in battle %','0 = erasing is free (Jay): the meter comes back at once; total branch meter = branch meter x max branches','r',0,100,10],['laneDef','Default lane shape','the yellow hitbox band the pixels occupy: normal, wide (about 5x thin), narrow (thin, dense), tapered, arrow (a rounded bubble up to 3x thin)','e'],['tint','Tint shape pixels','shape pixels draw in a brighter color (off: every pixel is the same blue or red)','b'],['converge','Branch end','where pixels go when a branch ends','e'],['autoDist','Auto-distribute branch share','','b'],
  ['_','WALLS'],
  ['wallMax','Wall meter','keep under 360 so gaps stay','r',60,340,20],['segHP','Segment HP','','r',200,6000,100],['wallDmg','Damage per hit','','r',1,10,1],['wsp','Wall draw step','distance between wall points','r',6,14,2],['wcell','Wall cell size','damage is per cell: a hole opens exactly where the enemy keeps hitting','r',2,8,2],['liveWall','Build walls in battle','','b'],['gate','Friendly gates','a gate is a wall piece your own pixels pass through and enemies cannot','b'],
  ['_','SHAPES'],
  ['shapeCD','Shape cooldown (s)','each shape is an ability on an interval; the AI obeys the same cooldown','r',1,30,1],['armSec','Shape wait for pixels (s)','how long a fired shape waits at its form point','r',1,10,1],['sqN','Pixels borrowed per shape','at SHAPE DENS 7; the stream behind the shape thins by this much','r',40,600,20],['sqPull','Borrow % of passing pixels','higher = thinner stream behind the shape, faster gather','r',10,100,5],['borrowSec','Max gather time (s)','a shape closes with what it has after this long','r',0.4,3,0.2],['shapeLane','Shape area width','area half-width = this x lane half-width (never above 1.2 x = 3x the thin lane); shapes borrow, they never grow the lane','r',0.4,1,0.1],['shapeLen','Shape length (x lane half-width)','','r',1.2,4,0.2],['ring','RING shape available','moved here from the main game','b'],['arrowFront','Arrow front concentration %','a fuller leading edge on ARROW and WEDGE','r',0,100,10],['reformSec','Shape regroup time (s)','how long a hit shape takes to pull its pixels back in','r',0.5,8,0.5],['shockK','Shape damage per impact %','how much each impact loosens a shape (weaker pull, more jitter)','r',0,20,1],['breakLive','Shape breaks below % pixels','a shape with fewer live pixels than this disbands','r',5,60,5],['orient','Shape orientation','','e'],['bias','Pixel weight in shape','','e'],['koMargin','Knock-out distance','how far outside its shape area a pixel must be pushed to count as knocked out','r',2,16,1],['knockK','Collision knock','extra shove a shape pixel takes from every contact','r',0,80,4],
+ ['_','HIDDEN FOR NOW'],
+ ['shapesOn','Shapes: arrow, wedge, line, diamond, double, spiral, ring, your own outlines, shape buttons','hidden in the game for now (Jay t1122); the code is kept. Turn on to bring them back','b'],
  ['_','AI'],
  ['aiLevel','AI difficulty','decision quality, planning and adaptation only, never stats','e'],['aiLearn','AI learns during match','memory is wiped when it ends','b'],['aiForms','AI designs custom formations','same cooldowns and rules as yours','b'],['aiReview','AI match review at the end','shown on the result screen; its tactical memory is wiped','b'],
  ['_','PROGRESSION'],
@@ -152,21 +167,24 @@ const CUSTOM=[
  ['halo','Show lane halo','','b'],['reveal','Show enemy plan in battle','','b'],
  ['_','COLLISION DENSITY'],
  ['rhoRef','Density reference (pixels per 12x12)','local density that counts as 1x','r',4,30,1],['kSurv','Packed pixel survives more','survive-chance gain per density ratio','r',0,2,0.1],['kPush','Packed pixel pushes enemies away','bounce-chance gain per density ratio','r',0,2,0.1],['survMax','Max survive chance','','r',0.2,0.95,0.05],['pushMax','Max push-away chance','','r',0.2,0.95,0.05]];
-const DEF={speed:5,density:7,release:9,cap:PERFCAP,sdens:7,compact:6};
+const DEF={speed:5,density:7,release:9,cap:PERFCAP,sdens:7,compact:6,width:5,spacing:5};
 // ---------- RNG (all sim randomness)
 const mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 let seed=1,rnd=mul(1);
 const fin=v=>typeof v==='number'&&Number.isFinite(v);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
-function speedOf(set){return 30+9*set.speed;}
+const PACE_REF=75;   // the old (0.4.1) default pace; absolute velocities, knock, jitter and tick timers are scaled by speedOf/PACE_REF so slow pixels behave like slow-motion fast ones
+function speedOf(set){const hi=CFG.paceMax;return hi*(0.25+0.75*(set.speed-1)/9);}
+const vkOf=sp=>clamp(sp/PACE_REF,0.12,1.6),tkOf=sp=>clamp(PACE_REF/sp,1,5);
 function rateOf(set){return CFG.relMul*set.release;}
-function laneHW(set){return (30-set.density*2.5)*(1.25-0.05*set.speed);}
+const pset=(sd,P)=>(P&&P.id&&P.set)?P.set:sd.set;
+function laneHW(set){const w=set.width;return 1.5+0.4*w*w;}   // WIDTH slider: half-width of the lane the pixels follow (units); the lane shape factors (wide 2.0, thin 0.4, arrow 1.2) multiply it
 // LANE SHAPES: the hitbox area the pixels occupy. laneF(type,t) = half-width factor at fraction t along the path (allocation-free).
 function laneF(ty,t){if(t<0)t=0;else if(t>1)t=1;switch(ty){case 1:return 2.0;case 2:return 0.4;case 3:return 2.0-1.6*t;
   case 4:{if(t<0.45)return 0.4;if(t<0.72){const s=(t-0.45)/0.27;return 0.4+0.8*s*s*(3-2*s);}if(t<0.86)return 1.2;const x=(t-0.86)/0.14;return 1.2*Math.sqrt(Math.max(0,1-x*x));}default:return 1;}}
 // STAGES: which mechanics exist. stage 0 = free play (everything). The AI obeys the same table through the same API.
 const STAGEF={walls:2,branch:2,shapes:2,laneAB:2,gate:3,shapes2:3,laneCD:3,forms:3,rico3:4,aiForms:4};
-function feat(k){const st=CFG.stage|0;return !st||st>=STAGEF[k];}
+function feat(k){if(!CFG.shapesOn&&(k==='shapes'||k==='shapes2'||k==='forms'||k==='aiForms'))return false;const st=CFG.stage|0;return !st||st>=STAGEF[k];}
 // ---------- SHAPE OUTLINES: the outline editor's saved shapes (localStorage, validated like every other save). A form = a closed OUTLINE polygon in a unit box: x 0..1 across, y 0 (front) .. 1 (back).
 let PRESETS=[];
 function hullPts(pts){const p=pts.map(a=>[a[0],a[1]]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);if(p.length<3)return p;
@@ -186,7 +204,7 @@ function cleanForm(f){if(!f||typeof f!=='object')return null;let poly=[];
   if(r.length<3||Math.abs(polyArea(r))<0.03)return null;
   return{name:String(typeof f.name==='string'&&f.name?f.name:'FORM').slice(0,10),poly:r.map(a=>[Math.round(a[0]*1000)/1000,Math.round(a[1]*1000)/1000])};}
 function cloneForms(){return PRESETS.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));}
-function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF4)||'null');}catch(e){}
+function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
   if(Array.isArray(raw))for(const f of raw){if(a.length>=MAXCUS)break;const c=cleanForm(f);if(c)a.push(c);}PRESETS=a;}
 function saveForms(){try{localStorage.setItem(KEYF,JSON.stringify(PRESETS.map(f=>({name:f.name,poly:f.poly}))));}catch(e){}}
 function syncForms(){if(!S)return;for(const sd of S.sides)if(sd.human){sd.forms=cloneForms();for(let t=7;t<NSH;t++)sd.shReady[t]=0;}}
@@ -199,7 +217,7 @@ let S=null,CR=22,ME=0;
 const px=new Float32Array(NP),py=new Float32Array(NP),pvx=new Float32Array(NP),pvy=new Float32Array(NP),pox=new Float32Array(NP),poy=new Float32Array(NP);
 const php=new Int8Array(NP),pst=new Uint8Array(NP),pcnt=new Uint8Array(NP),pcd=new Uint8Array(NP),pwc=new Uint8Array(NP),pstun=new Uint8Array(NP);
 const pps=new Float32Array(NP),poff=new Float32Array(NP),pdr=new Float32Array(NP),pspm=new Float32Array(NP),pend=new Float32Array(NP);
-const pid=new Uint8Array(NP),pcap=new Uint8Array(NP),pdec=new Uint8Array(NP),psh=new Uint8Array(NP),pmom=new Uint8Array(NP);
+const pfree=new Uint8Array(NP),pfade=new Uint8Array(NP),pid=new Uint8Array(NP),pcap=new Uint8Array(NP),pdec=new Uint8Array(NP),psh=new Uint8Array(NP),pmom=new Uint8Array(NP);
 const psq=new Int16Array(NP).fill(-1),pslot=new Int16Array(NP),pgc=new Uint8Array(NP),plu=new Float32Array(NP),plv=new Float32Array(NP);
 const gHead=new Int32Array(GW*GH),gNext=new Int32Array(NP),cntA=[new Uint16Array(GW*GH),new Uint16Array(GW*GH)];
 let wGrid=new Array(WGW*WGH);
@@ -207,6 +225,7 @@ let wGrid=new Array(WGW*WGH);
 const plife=new Uint8Array(NP),qBuf=[new Int32Array(POOL),new Int32Array(POOL)],qHead=[0,0],qN=[0,0];
 function qPush(side,i){qBuf[side][(qHead[side]+qN[side])%POOL]=i;qN[side]++;}
 function qPop(side){const i=qBuf[side][qHead[side]];qHead[side]=(qHead[side]+1)%POOL;qN[side]--;return i;}
+const fmtN=n=>{n=Math.max(0,Math.floor(n));if(n<10000)return''+n;if(n<9.995e5)return(n/1e3).toFixed(n<1e5?1:0).replace(/\.0$/,'')+'k';if(n<9.995e8)return(n/1e6).toFixed(n<1e7?1:0).replace(/\.0$/,'')+'M';return(n/1e9).toFixed(1).replace(/\.0$/,'')+'B';};
 const poolN=()=>clamp(CFG.poolSize|0,1,POOL);
 function resetFree(){const n=poolN();plife.fill(0);for(let s=0;s<2;s++){qHead[s]=0;qN[s]=0;for(let k=0;k<n;k++){const i=s*POOL+k;plife[i]=clamp(CFG.lives|0,1,255);qPush(s,i);}}}
 let stat={ticks:0,ms:0,maxMs:0};
@@ -214,25 +233,28 @@ const zeros=n=>new Array(n).fill(0);
 function mkPath(id,par,fk){return{id:id,p:[],par:par,fk:fk,share:id?40:100,sh:{t:1,pull:CFG.sqPull,at:0},rj:-1,kids:[],arm:null,lane:(CFG.laneDef|0)};}
 function mkSide(id){return{id:id,dir:id===0?-1:1,circle:{x:W/2,y:id===0?H-44:44,r:CR,hp:poolN()},pool:poolN(),debt:0,paths:[mkPath(0,-1,0)],strokes:[],segs:[],sq:new Array(MAXSQ).fill(null),
   set:Object.assign({},DEF),acc:0,active:0,locked:false,human:id===0||!!CFG.duel,
-  stats:{released:0,kills:0,recalled:0,circleDmg:0,burned:0,livesUsed:0,lostForGood:0,wallDmg:0,wallsBroken:0,ricochets:0,misses:0,ct:0,defl:0,surv:0,pushed:0,intercepts:0,formBreaks:0,formReforms:0,knocked:0,reentered:0,koRecall:0,gatePass:0,wallTaken:0,brRedraws:0,shapeMade:zeros(NSH),shapeKill:zeros(NSH),shapeLoss:zeros(NSH)},forms:[],brWaste:0,
+  stats:{released:0,kills:0,recalled:0,circleDmg:0,burned:0,livesUsed:0,lostForGood:0,wallDmg:0,wallsBroken:0,ricochets:0,misses:0,ct:0,defl:0,surv:0,pushed:0,intercepts:0,formBreaks:0,formReforms:0,knocked:0,reentered:0,koRecall:0,gatePass:0,wallTaken:0,brRedraws:0,shapeMade:zeros(NSH),shapeKill:zeros(NSH),shapeLoss:zeros(NSH)},forms:[],brWaste:0,planned:false,
   pathKill:zeros(MAXP),pathLoss:zeros(MAXP),lossGrid:new Float32Array(LGX*LGY),openQ:zeros(MAXP).map(()=>-1),shReady:zeros(NSH),shUsed:zeros(NSH)};}
 function newGame(sd,keepSet){
   seed=sd>>>0;rnd=mul(seed);CR=CFG.circleR;
   const old=S;
-  S={tick:0,phase:'prep',over:false,winner:-2,paused:false,msg:'',tool:'main',sides:[mkSide(0),mkSide(1)],prepT:0,ai:null,aiSummary:null,aiReview:null,planInfo:[null,null],cfg:Object.assign({},CFG)};
+  S={aiRev:1,tick:0,phase:'prep',over:false,winner:-2,paused:false,msg:'',tool:'main',sides:[mkSide(0),mkSide(1)],prepT:0,ai:null,aiSummary:null,aiReview:null,planInfo:[null,null],cfg:Object.assign({},CFG)};
   S.sides[0].forms=cloneForms();if(CFG.duel)S.sides[1].forms=cloneForms();
   if(keepSet&&old){S.sides[0].set=Object.assign({},old.sides[0].set);S.sides[0].set.cap=Math.min(S.sides[0].set.cap,CFG.capDef);}
   for(const sd2 of S.sides){sd2.set.cap=Math.min(keepSet&&sd2.id===0?sd2.set.cap:CFG.capDef,CFG.capDef);}
   ME=0;selP=0;
   const e=S.sides[1].circle;e.x=clamp(40+rnd()*(W-80),CR+6,W-CR-6);e.y=28+Math.round(rnd()*(CFG.zoneH*0.6));
   for(const sd2 of S.sides)sd2.paths[0].p=[sd2.circle.x,sd2.circle.y];
-  pgc.fill(0);pst.fill(0);php.fill(0);pcd.fill(0);pwc.fill(0);pstun.fill(0);psq.fill(-1);pid.fill(0);pcap.fill(0);pdec.fill(0);psh.fill(0);pmom.fill(0);
+  pgc.fill(0);pfree.fill(0);pfade.fill(0);pst.fill(0);php.fill(0);pcd.fill(0);pwc.fill(0);pstun.fill(0);psq.fill(-1);pid.fill(0);pcap.fill(0);pdec.fill(0);psh.fill(0);pmom.fill(0);pbnc.fill(0);vpN=0;bN=0;
   wGrid=new Array(WGW*WGH);resetFree();
   stat={ticks:0,ms:0,maxMs:0};
+  if(!CFG.duel)aiPrepPlan();
+  else{S.phase='battle';S.paused=true;S.msg='Sandbox: draw both sides, then PLAY';for(const sd2 of S.sides){sd2.planned=true;sd2.openQ=zeros(MAXP).map(()=>-1);}}
 }
 // ---------- SIDE API (the ONLY way to build; player input and AI both call these; same meters for both)
 let selP=0;
-const zoneOf=side=>side===0?{y0:H-CFG.zoneH-8,y1:H-CR-6}:{y0:CR+6,y1:CFG.zoneH+8};
+const sbx=()=>CFG.duel===1;
+const zoneOf=side=>sbx()?{y0:CR+6,y1:H-CR-6}:side===0?{y0:H-CFG.zoneH-8,y1:H-CR-6}:{y0:CR+6,y1:CFG.zoneH+8};
 const pathN=P=>P.p.length>>1;
 const pathLen=P=>(pathN(P)-1)*PSP;
 const pathUsed=sd=>pathLen(sd.paths[0]);
@@ -242,15 +264,16 @@ const brTotal=sd=>{let n=sd.brWaste||0;for(let k=1;k<sd.paths.length;k++)if(sd.p
 const brCap=()=>CFG.brMax*Math.max(1,CFG.maxBr);
 const brLeft=(sd,P)=>Math.max(0,Math.min(CFG.brMax-brUsed(P),brCap()-brTotal(sd)));
 function brErased(sd,len){if(S.phase==='battle'&&len>0){sd.brWaste+=len*CFG.brWaste/100;sd.stats.brRedraws++;}}
-const wallUsed=sd=>{let n=0;for(const s of sd.strokes)n+=(s.pts.length/2-1)*CFG.wsp;return n;};
+const plen=q=>{let n=0;for(let k=0;k+3<q.length;k+=2)n+=Math.hypot(q[k+2]-q[k],q[k+3]-q[k+1]);return n;};
+const wallUsed=sd=>{let n=0;for(const s of sd.strokes)n+=plen(s.pts);return n;};
 const brCount=sd=>{let n=0;for(let k=1;k<sd.paths.length;k++)if(sd.paths[k])n++;return n;};
-const canMain=sd=>S.phase==='prep'&&!sd.locked&&!S.over;
-const canWall=sd=>!S.over&&feat('walls')&&((S.phase==='prep'&&!sd.locked)||(S.phase==='battle'&&!!CFG.liveWall));
-const canBr=sd=>!S.over&&feat('branch')&&((S.phase==='prep'&&!sd.locked)||(S.phase==='battle'&&!!CFG.liveBr));
+const canMain=sd=>sbx()?!S.over:S.phase==='prep'&&!sd.locked&&!S.over;
+const canWall=sd=>!S.over&&(sbx()||(feat('walls')&&((S.phase==='prep'&&!sd.locked)||(S.phase==='battle'&&!!CFG.liveWall))));
+const canBr=sd=>!S.over&&(sbx()||(feat('branch')&&S.phase==='battle'&&!!CFG.liveBr));   // branches are drawn ONLY during the match (Jay t1122)
 function placeCircle(side,x,y){const sd=S.sides[side];if(!canMain(sd)||!fin(x)||!fin(y))return false;
   const z=zoneOf(side);x=clamp(x,CR+6,W-CR-6);y=clamp(y,Math.min(z.y0,z.y1),Math.max(z.y0,z.y1));
   const c=sd.circle;if(Math.abs(x-c.x)<0.01&&Math.abs(y-c.y)<0.01)return true;
-  c.x=x;c.y=y;resetPaths(sd);
+  c.x=x;c.y=y;resetPaths(sd);if(side===0&&S.phase==='prep'&&!CFG.duel&&(!S.planFoe||Math.hypot(x-S.planFoe[0],y-S.planFoe[1])>8))aiPrepPlan();
   sd.strokes=sd.strokes.filter(s=>{for(let k=0;k<s.pts.length;k+=2)if(Math.hypot(s.pts[k]-x,s.pts[k+1]-y)<CR+8)return false;return true;});
   return true;}
 function resetPaths(sd){const c=sd.circle,m=mkPath(0,-1,0);m.p=[c.x,c.y];m.sh=sd.paths[0].sh;m.lane=sd.paths[0].lane;sd.paths=[m];}
@@ -272,7 +295,7 @@ function branchBegin(side,x,y){const sd=S.sides[side];if(!canBr(sd)||!fin(x)||!f
   if(brCount(sd)>=CFG.maxBr)return null;if(brCap()-brTotal(sd)<PSP)return null;
   if(best<0||bd>18)return null;
   let id=1;while(id<=CFG.maxBr&&sd.paths[id])id++;if(id>CFG.maxBr||id>=MAXP)return null;
-  const P=mkPath(id,0,best);P.p=[p[best*2],p[best*2+1]];sd.paths[id]=P;
+  const P=mkPath(id,0,best);P.p=[p[best*2],p[best*2+1]];P.set={speed:sd.set.speed,density:sd.set.density,width:sd.set.width,spacing:sd.set.spacing,compact:sd.set.compact};sd.paths[id]=P;
   M.kids=M.kids.filter(b=>b.id!==id);M.kids.push(P);M.kids.sort((a,b)=>a.fk-b.fk);redistribute(sd);return P;}
 function branchExtend(side,P,tx,ty){const sd=S.sides[side];if(!P||sd.paths[P.id]!==P||!canBr(sd)||!fin(tx)||!fin(ty))return 0;
   tx=clamp(tx,4,W-4);ty=clamp(ty,4,H-4);const p=P.p;let n=0;
@@ -290,24 +313,25 @@ function removeBranch(sd,id){const P=sd.paths[id];if(!P)return;brErased(sd,pathL
 function fixBranches(sd){const M=sd.paths[0],n=pathN(M);for(let k=1;k<sd.paths.length;k++){const P=sd.paths[k];if(!P)continue;if(P.fk>=n-1)removeBranch(sd,k);else rejoinOf(sd,P);}}
 function redistribute(sd){if(!CFG.autoDist)return;const bs=sd.paths.filter((P,i)=>i>0&&P);for(const P of bs)P.share=Math.round(100/(bs.length+1)/5)*5;}
 // walls
-function inWallZone(side,x,y){const sd=S.sides[side];if(x<6||x>W-6)return false;
-  if(side===0){if(y<H/2+8||y>H-6)return false;}else{if(y>H/2-8||y<6)return false;}
+function inWallZone(side,x,y){const sd=S.sides[side];if(sbx())return x>=0&&x<=W&&y>=0&&y<=H&&Math.hypot(x-sd.circle.x,y-sd.circle.y)>CR+8;if(x<0||x>W)return false;
+  if(side===0){if(y<H/2+8||y>H)return false;}else{if(y>H/2-8||y<0)return false;}
   return Math.hypot(x-sd.circle.x,y-sd.circle.y)>CR+8;}
 function wallBegin(side,x,y,gate){const sd=S.sides[side];if(!canWall(sd)||!fin(x)||!fin(y))return null;gate=!!gate;if(gate&&(!CFG.gate||!feat('gate')))return null;
-  if(sd.strokes.length>=MAX_STROKES||wallUsed(sd)+CFG.wsp>CFG.wallMax+1e-6||!inWallZone(side,x,y)||(!gate&&nearOwnPath(sd,x,y,clrOf(sd),true)))return null;
+  if(sd.strokes.length>=MAX_STROKES||wallUsed(sd)+WST>CFG.wallMax+1e-6||!inWallZone(side,x,y)||(!gate&&nearOwnPath(sd,x,y,clrOf(sd),true)))return null;
   const st={pts:[x,y],segs:[],hits:0,open:true,gate:gate};sd.strokes.push(st);return st;}
 function wallExtend(side,st,tx,ty){const sd=S.sides[side];if(!st||!canWall(sd)||!fin(tx)||!fin(ty))return 0;let n=0;
-  for(let g=0;g<200;g++){const L=st.pts.length,lx=st.pts[L-2],ly=st.pts[L-1],dx=tx-lx,dy=ty-ly,d=Math.hypot(dx,dy);
-    if(d<CFG.wsp)break;if(wallUsed(sd)+CFG.wsp>CFG.wallMax+1e-6)break;const nx=lx+dx/d*CFG.wsp,ny=ly+dy/d*CFG.wsp;if(!inWallZone(side,nx,ny)||(!st.gate&&nearOwnPath(sd,nx,ny,clrOf(sd),true)))break;st.pts.push(nx,ny);n++;}
+  tx=clamp(tx,0,W);ty=sbx()?clamp(ty,0,H):side===0?clamp(ty,H/2+8,H):clamp(ty,0,H/2-8);   // a finger past the edge still draws right to the edge
+  for(let g=0;g<400;g++){const L=st.pts.length,lx=st.pts[L-2],ly=st.pts[L-1],dx=tx-lx,dy=ty-ly,d=Math.hypot(dx,dy);
+    if(d<0.5)break;const stp=Math.min(WST,d);if(wallUsed(sd)+stp>CFG.wallMax+1e-6)break;const nx=lx+dx/d*stp,ny=ly+dy/d*stp;if(!inWallZone(side,nx,ny)||(!st.gate&&nearOwnPath(sd,nx,ny,clrOf(sd),true)))break;st.pts.push(nx,ny);n++;}
   return n;}
 function wallEnd(side,st){const sd=S.sides[side];if(!st)return;st.open=false;if(st.pts.length<4){const i=sd.strokes.indexOf(st);if(i>=0)sd.strokes.splice(i,1);return;}
   if(S.phase==='battle'){sealStroke(sd,st);rebuildSegs(sd);}}
 // WALL CELLS: every drawn step is cut into cells of CFG.wcell units, each with its OWN hp (cell hp = segHP * wcell / wsp, so a wall keeps the same hp per unit of length)
 function cellHP(){return Math.max(1,Math.round(CFG.segHP*CFG.wcell/CFG.wsp));}
-function sealStroke(sd,st){st.segs=[];const hp=cellHP();for(let k=0;k+3<st.pts.length;k+=2){const ax=st.pts[k],ay=st.pts[k+1],bx=st.pts[k+2],by=st.pts[k+3],L=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.round(L/CFG.wcell));
-  for(let c=0;c<n;c++){const t0=c/n,t1=(c+1)/n;st.segs.push({x1:ax+(bx-ax)*t0,y1:ay+(by-ay)*t0,x2:ax+(bx-ax)*t1,y2:ay+(by-ay)*t1,hp:hp,max:hp,side:sd.id,alive:true,st:st,gate:!!st.gate,hitT:-999});}}}
+function sealStroke(sd,st){st.segs=[];const hp=cellHP();for(let k=0;k+3<st.pts.length;k+=2){const ax=st.pts[k],ay=st.pts[k+1],bx=st.pts[k+2],by=st.pts[k+3],L=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.round(L/CFG.wcell)),ch=Math.max(1,Math.round(hp*(L/n)/CFG.wcell));
+  for(let c=0;c<n;c++){const t0=c/n,t1=(c+1)/n;st.segs.push({x1:ax+(bx-ax)*t0,y1:ay+(by-ay)*t0,x2:ax+(bx-ax)*t1,y2:ay+(by-ay)*t1,hp:ch,max:ch,side:sd.id,alive:true,st:st,gate:!!st.gate,hitT:-999});}}}
 // clearance: a side's own pixels are blocked by its own walls, so its paths and walls keep apart (lane half-width + margin)
-function clrOf(sd){let m=0.6;for(const P of sd.paths)if(P&&LMAX[P.lane|0]>m)m=LMAX[P.lane|0];return laneHW(sd.set)*Math.max(1,m)+4;}
+function clrOf(sd){let m=0;for(const P of sd.paths)if(P){const h=laneHW(pset(sd,P))*Math.max(0.6,LMAX[P.lane|0]);if(h>m)m=h;}return m+4;}
 function distPtSeg(x,y,ax,ay,bx,by){const ex=bx-ax,ey=by-ay,l2=ex*ex+ey*ey||1;let t=((x-ax)*ex+(y-ay)*ey)/l2;t=t<0?0:t>1?1:t;return Math.hypot(x-(ax+ex*t),y-(ay+ey*t));}
 function nearOwnWall(sd,x,y,clr){for(const st of sd.strokes){if(st.gate)continue;const q=st.pts;if(q.length<4){if(q.length>=2&&Math.hypot(x-q[0],y-q[1])<clr)return true;continue;}for(let k=0;k+3<q.length;k+=2)if(distPtSeg(x,y,q[k],q[k+1],q[k+2],q[k+3])<clr)return true;}return false;}
 function nearOwnPath(sd,x,y,clr,skipStart){for(const P of sd.paths){if(!P)continue;const p=P.p,n=p.length>>1;for(let k=skipStart&&P.id===0?Math.ceil((CR+10)/PSP):0;k<n;k++){const dx=x-p[k*2],dy=y-p[k*2+1];if(dx*dx+dy*dy<clr*clr)return true;}}return false;}
@@ -319,8 +343,11 @@ function eraseAt(side,x,y){const sd=S.sides[side];if(!fin(x)||!fin(y))return fal
   if(!did&&canMain(sd)){const p=sd.paths[0].p;for(let k=1;k<p.length/2;k++){if(Math.hypot(p[k*2]-x,p[k*2+1]-y)<14){pathTrim(side,k);did=true;break;}}}
   return did;}
 function setSetting(side,key,v){const sd=S.sides[side];if(!fin(v))return false;
-  if(key==='speed'||key==='density'||key==='release'||key==='sdens'||key==='compact')sd.set[key]=clamp(Math.round(v),1,10);
+  if(key==='speed'||key==='density'||key==='release'||key==='sdens'||key==='compact'||key==='width'||key==='spacing')sd.set[key]=clamp(Math.round(v),1,10);
   else if(key==='cap')sd.set.cap=clamp(Math.round(v/CAPSTEP)*CAPSTEP,CAPMIN,CFG.capDef);else return false;return true;}
+function setPathSetting(side,id,key,v){const sd=S.sides[side],P=sd.paths[id];if(!P||!fin(v))return false;if(id===0)return setSetting(side,key,v);
+  if(key==='share'||key==='flow')return setShare(side,id,v);
+  if(key==='speed'||key==='density'||key==='width'||key==='spacing'){P.set[key]=clamp(Math.round(v),1,10);return true;}return false;}
 function getPath(sd,id){return sd.paths[id]||null;}
 function setPull(side,id,v){const P=getPath(S.sides[side],id);if(!P||!fin(v))return false;P.sh.pull=clamp(Math.round(v),0,100);return true;}
 function setAt(side,id,v){const P=getPath(S.sides[side],id);if(!P||!fin(v))return false;P.sh.at=clamp(Math.round(v),0,100);return true;}
@@ -380,7 +407,7 @@ function fPos(P){const L=pathLen(P),f0=P.id===0?28:0;return f0+(P.sh.at/100)*Mat
 const CDMUL=[0.7,1,1,1,1.1,0.9,1.3];
 function shapeOk(t){return t>=0&&t<=6&&(t!==3||!!CFG.ring);}
 // per-side availability (stage unlocks + custom formations of that side); the AI goes through the same check
-function shapeOkS(sd,t){t=Math.round(+t);if(!fin(t)||t<0)return false;if(t<=6){if(!shapeOk(t)||!feat('shapes'))return false;return t<=2||feat('shapes2');}return t<7+MAXCUS&&!!sd.forms[t-7]&&feat('forms');}
+function shapeOkS(sd,t){if(!CFG.shapesOn)return false;t=Math.round(+t);if(!fin(t)||t<0)return false;if(t<=6){if(!shapeOk(t)||!feat('shapes'))return false;return t<=2||feat('shapes2');}return t<7+MAXCUS&&!!sd.forms[t-7]&&feat('forms');}
 function cdTicks(t){return Math.max(1,Math.round(CFG.shapeCD*60*(CDMUL[t]||1)));}
 function shapeLeft(side,t){return Math.max(0,S.sides[side].shReady[t]-S.tick);}
 function useShape(side,id,t){const sd=S.sides[side];t=Math.round(+t);if(!fin(t)||!shapeOkS(sd,t)||S.phase!=='battle'||S.over)return false;
@@ -420,13 +447,16 @@ function aiPlan(side){const sd=S.sides[side],foe=S.sides[1-side].circle,c=sd.cir
   if(lv>=3&&CFG.gate&&feat('gate')){const M0=sd.paths[0],n0=pathN(M0);for(const at of(lv>=4?[18,34]:[18])){if(n0<at+3)continue;const gx=M0.p[at*2],gy=M0.p[at*2+1],tx0=M0.p[(at+1)*2]-M0.p[(at-1)*2],ty0=M0.p[(at+1)*2+1]-M0.p[(at-1)*2+1],tl0=Math.hypot(tx0,ty0)||1,gnx=-ty0/tl0,gny=tx0/tl0;
     const g=wallBegin(side,gx-gnx*18,gy-gny*18,true);if(g){wallExtend(side,g,gx+gnx*18,gy+gny*18);wallEnd(side,g);if(g.pts.length>=4)S.planInfo[side].gates++;}}}
   if(lv>=2){const M=sd.paths[0],n=pathN(M);
-    if(CFG.maxBr>0&&n>6){const j=Math.max(3,Math.floor(n*(0.3+rnd()*0.2))),bx=M.p[j*2],by=M.p[j*2+1],tgx=M.p[(j+1)*2]-M.p[(j-1)*2],tgy=M.p[(j+1)*2+1]-M.p[(j-1)*2+1],tl=Math.hypot(tgx,tgy)||1,tux=tgx/tl,tuy=tgy/tl,bs=rnd()<.5?-1:1,bnx=-tuy*bs,bny=tux*bs;
-      const B=branchBegin(side,bx,by);if(B){const ex=foe.x+bnx*60,ey=foe.y+bny*40;
-        for(let i=1;i<=60;i++){const t=i/60;branchExtend(side,B,bez(bx,bx+bnx*70+tux*20,ex-ux*40,ex,t),bez(by,by+bny*70+tuy*20,ey-uy*40,ey,t));}
-        branchEnd(side,B);if(sd.paths[B.id]===B){B.share=CFG.autoDist?B.share:35+((rnd()*20)|0)*1;B.sh.at=20;S.planInfo[side].branches++;}}}
     sd.paths[0].sh.at=(10+rnd()*30)|0;}
   if(lv>=3&&CFG.aiForms&&feat('forms')&&feat('aiForms')){for(let k=0;k<(lv>=4?2:1);k++){const f=aiDesignForm(sd);if(f)S.planInfo[side].forms.push(f.name);}}
   sd.settingsPlanned=true;}
+// the AI opens its first branch DURING the match (branches are never drawn in prep): about 8 seconds in, normal level and up
+function aiOpenBranch(side){const sd=S.sides[side],foe=S.sides[1-side].circle,c=sd.circle,dx=foe.x-c.x,dy=foe.y-c.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;const M=sd.paths[0],n=pathN(M);
+    if(CFG.maxBr>0&&n>6&&canBr(sd)){const j=Math.max(3,Math.floor(n*(0.3+rnd()*0.2))),bx=M.p[j*2],by=M.p[j*2+1],tgx=M.p[(j+1)*2]-M.p[(j-1)*2],tgy=M.p[(j+1)*2+1]-M.p[(j-1)*2+1],tl=Math.hypot(tgx,tgy)||1,tux=tgx/tl,tuy=tgy/tl,bs=rnd()<.5?-1:1,bnx=-tuy*bs,bny=tux*bs;
+      const B=branchBegin(side,bx,by);if(B){const ex=foe.x+bnx*60,ey=foe.y+bny*40;
+        for(let i=1;i<=60;i++){const t=i/60;branchExtend(side,B,bez(bx,bx+bnx*70+tux*20,ex-ux*40,ex,t),bez(by,by+bny*70+tuy*20,ey-uy*40,ey,t));}
+        branchEnd(side,B);if(sd.paths[B.id]===B){B.share=CFG.autoDist?B.share:35+((rnd()*20)|0)*1;B.sh.at=20;S.planInfo[side].branches++;}}}
+}
 const aiEvery=lv=>lv>=4?60:lv>=3?150:240;
 // AI shape designer: builds a custom OUTLINE (polygon) from a template family + random mutation (same 6-shape cap and same cooldowns as the player)
 function aiDesignForm(sd){if(sd.forms.length>=MAXCUS)return null;const fam=(rnd()*6)|0,names=['COMB','CRESCENT','CROSS','TRIDENT','WAVE','WINGS'];let pts=[];
@@ -481,9 +511,21 @@ function aiShapes(side){const sd=S.sides[side],ai=S.ai,lv=Math.max(1,CFG.aiLevel
   let t=avail[(rnd()*avail.length)|0];if(ai&&ai.best!=null&&ai.best>=0&&avail.indexOf(ai.best)>=0&&rnd()<0.7)t=ai.best;
   const P=paths[(rnd()*paths.length)|0];useShape(side,P.id,t);}
 function dir0(side){return side===0?1:-1;}
-// ---------- MATCH
-function startBattle(){if(S.phase!=='prep')return false;
-  for(const sd of S.sides)if(!sd.human)aiPlan(sd.id);
+// PREP: the AI draws its plan with the same side API as soon as the prep starts; it is drawn on screen over ~3 seconds (S.aiRev 0..1) and redrawn when the player moves his circle.
+// It plans from the circle positions only (it does not read the player's path).
+function aiPrepPlan(){const sd=S.sides[1];if(sd.human||S.phase!=='prep'||CFG.duel)return;
+  const c=sd.circle,m=mkPath(0,-1,0);m.p=[c.x,c.y];sd.paths=[m];sd.strokes=[];sd.forms=[];sd.segs=[];selP=ME===1?0:selP;
+  S.planFoe=[S.sides[0].circle.x,S.sides[0].circle.y];aiPlan(1);sd.planned=true;S.aiRev=0;}
+// what a side still has to draw before START: the attack path and (when walls exist in this stage) a defense line
+const MINPATH=60,MINWALL=40;
+function wallLen(sd){let n=0;for(const s of sd.strokes)if(!s.gate)n+=plen(s.pts);return n;}
+function prepNeeds(sd){const r=[];if(pathUsed(sd)<MINPATH)r.push('path');if(feat('walls')&&CFG.wallMax>=MINWALL&&wallLen(sd)<MINWALL)r.push('wall');return r;}
+// default defense line for a side that has none (prep timer ran out): two wall pieces with a gap, in front of the circle
+function autoDefense(sd){if(!feat('walls'))return;const c=sd.circle,dir=sd.dir;
+  for(const [dy,gap] of [[56,22],[64,24],[72,22],[84,20],[48,22]]){if(wallLen(sd)>=MINWALL)break;const y=c.y+dir*dy,cx=clamp(c.x,70,W-70);
+    for(const seg of [[cx-gap-60,y,cx-gap,y],[cx+gap,y,cx+gap+60,y]]){const st=wallBegin(sd.id,seg[0],seg[1]);if(st){wallExtend(sd.id,st,seg[2],seg[3]);wallEnd(sd.id,st);}}}}
+function startBattle(){if(S.phase!=='prep')return false;S.aiRev=1;
+  for(const sd of S.sides)if(!sd.human&&!sd.planned)aiPlan(sd.id);
   for(const sd of S.sides){sd.locked=true;for(const st of sd.strokes)sealStroke(sd,st);rebuildSegs(sd);sd.openQ=zeros(MAXP).map(()=>-1);}
   S.phase='battle';S.aiSummary=null;
   S.ai=(CFG.aiLearn&&CFG.aiLevel>=2&&!S.sides[1].human)?{lessons:[],adapts:0,last:0,best:-1,designs:[]}:null;
@@ -534,8 +576,8 @@ function dirOut(sd){const p=sd.paths[0].p;if(p.length>=6){const dx=p[4]-p[0],dy=
 function release(side){const sd=S.sides[side];if(sd.active>=sd.set.cap||sd.pool<=0)return false;let i=-1;
   while(qN[side]>0){const c=qPop(side);if(pst[c]===0&&plife[c]>0){i=c;break;}}if(i<0)return false;
   const d=dirOut(sd),a=Math.atan2(d[1],d[0])+(rnd()-.5)*0.2,hx=Math.cos(a),hy=Math.sin(a),spm=0.88+rnd()*0.24,sp=speedOf(sd.set)*spm,c=sd.circle;
-  const lat=(rnd()-.5)*10;px[i]=c.x+hx*c.r*0.6-hy*lat;py[i]=c.y+hy*c.r*0.6+hx*lat;pvx[i]=hx*sp;pvy[i]=hy*sp;pox[i]=px[i];poy[i]=py[i];
-  php[i]=CFG.pixHP;pst[i]=1;pcnt[i]=EXIT_T;pps[i]=0;poff[i]=clamp((rnd()+rnd()+rnd()-1.5)*0.8,-1,1);pdr[i]=(rnd()-.5)*1.8;pspm[i]=spm;pend[i]=0;pcd[i]=0;pwc[i]=0;pstun[i]=0;pid[i]=0;pcap[i]=0;pdec[i]=0;psh[i]=0;pmom[i]=0;psq[i]=-1;
+  const po0=clamp((rnd()*2-1)*(1.1-0.06*(sd.set.density-1)),-1,1),hw0=Math.min(c.r*0.95,laneHW(sd.set)*laneF(sd.paths[0].lane,0)),lat=po0*hw0,fwd=Math.min(c.r*0.6,Math.sqrt(Math.max(0,c.r*c.r*0.9-lat*lat)));px[i]=c.x+hx*fwd-hy*lat;py[i]=c.y+hy*fwd+hx*lat;pvx[i]=hx*sp;pvy[i]=hy*sp;pox[i]=px[i];poy[i]=py[i];
+  php[i]=CFG.pixHP;pst[i]=1;pbnc[i]=0;pcnt[i]=Math.min(90,Math.round(EXIT_T*tkOf(speedOf(sd.set))));pps[i]=0;poff[i]=po0;pdr[i]=(rnd()-.5)*1.8;pspm[i]=spm;pend[i]=0;pcd[i]=0;pwc[i]=0;pstun[i]=0;pid[i]=0;pcap[i]=0;pdec[i]=0;psh[i]=0;pmom[i]=0;psq[i]=-1;pfade[i]=0;pfree[i]=0;
   sd.active++;sd.stats.released++;return true;}
 function pathAt(p,s,out){const n=p.length>>1;let f=s/PSP;if(f<0)f=0;if(f>n-1)f=n-1;let k=Math.floor(f);if(k>n-2)k=Math.max(0,n-2);const t=f-k;
   const ax=p[k*2],ay=p[k*2+1],bx=p[Math.min(n-1,k+1)*2],by=p[Math.min(n-1,k+1)*2+1];out[0]=ax+(bx-ax)*t;out[1]=ay+(by-ay)*t;
@@ -560,15 +602,22 @@ function disband(sd,qi,atEnd){const q=sd.sq[qi];if(!q)return;const P=sd.paths[q.
 function formErr(side,qi){const sd=S.sides[side],q=sd.sq[qi];if(!q)return -1;let sum=0,c=0;
   for(let k=0;k<q.n;k++){const i=q.slot[k];if(i<0)continue;sum+=Math.max(0,areaSd(q,i));c++;}return c?sum/c:-1;}
 
+const FADE_T=()=>clamp(Math.round(CFG.fadeSec*60),1,250);
+function freePix(i){if(pst[i]===4||pst[i]===5)return;const sd=S.sides[i<POOL?0:1];if(psq[i]>=0)unlink(i,sd);pst[i]=3;pfree[i]=1;pend[i]=0;}
+function sandboxRefill(){if(!sbx())return false;for(let i=0;i<NP;i++)if(pst[i])recall(i);for(const sd of S.sides){sd.debt=0;sd.pool=poolN();syncHP(sd);sd.active=0;sd.acc=0;}resetFree();return true;}
+function sandboxStep(n){if(!sbx()||S.phase!=='battle')return 0;n=clamp(Math.floor(+n)||0,0,600);for(let k=0;k<n;k++)tick();return n;}
+function strayStart(i,sd){if(pfade[i]===0){pfade[i]=FADE_T();sd.stats.strayed=(sd.stats.strayed||0)+1;}if(psq[i]>=0)unlink(i,sd);pst[i]=3;pend[i]=0;}
 function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
   for(let side=0;side<2;side++){const sd=S.sides[side],set=sd.set,spd0=speedOf(set),hw=laneHW(set),cc=sd.circle,base=side*POOL,end=base+POOL,paths=sd.paths,np=paths.length;
     const pn=[],pex=[],pey=[],pF=[],pL=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pn.push(0);pex.push(0);pey.push(0);pF.push(0);pL.push(1);continue;}const n=P.p.length>>1;pn.push(n);pL.push(Math.max(1,(n-1)*PSP));pex.push(P.p[(n-1)*2]);pey.push(P.p[(n-1)*2+1]);pF.push(P.arm?fPos(P):1e9);}
-    const compactK=1.2+0.9*set.compact,jit=(11-set.compact)*2.2,conv=CFG.converge;
+    const compactK=1.2+0.9*set.compact,vk=vkOf(spd0),jit=(11-set.compact)*2.2*vk,conv=CFG.converge,rev=0.04*set.density,spc=(set.spacing-1)/9*0.25,spcOn=spc>0&&S.phase==='battle';
+    const pSpd=[],pHw=[],pRev=[],pSpc=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pSpd.push(0);pHw.push(1);pRev.push(0);pSpc.push(0);continue;}const ps=pset(sd,P);pSpd.push(speedOf(ps));pHw.push(laneHW(ps));pRev.push(0.006*ps.density);pSpc.push((ps.spacing-1)/9*0.25);}
     squadTick(sd,spd0,dt);
     for(let i=base;i<end;i++){const st=pst[i];if(!st)continue;
-      let pi=pid[i];if(!paths[pi]){pi=0;pid[i]=0;}const P=paths[pi],p=P.p,n=pn[pi];let spd=spd0*pspm[i];
+      let pi=pid[i];if(!paths[pi]){pi=0;pid[i]=0;}const P=paths[pi],p=P.p,n=pn[pi];let spd=pSpd[pi]*pspm[i];
       if(mom){if(pmom[i]<255)pmom[i]++;spd*=1+0.3*Math.min(1,pmom[i]/180);}
       pox[i]=px[i];poy[i]=py[i];
+      if(pfade[i]>0&&--pfade[i]===0){recall(i);continue;}
       if(pcd[i]>0)pcd[i]--;if(pwc[i]>0)pwc[i]--;if(pgc[i]>0)pgc[i]--;
       const stun=pstun[i]>0;if(stun)pstun[i]--;
       let vx=pvx[i],vy=pvy[i],cur=st;
@@ -585,9 +634,10 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
         if(best>=n-1&&pi===pid[i]){
           if(pi>0&&conv>0&&P.rj>=0&&paths[0]){pid[i]=0;pps[i]=P.rj*PSP;if(conv===2)pcap[i]=0;else pcap[i]=1;}
           else{pst[i]=3;pend[i]=0;}}
-        else if(bd>L2){recall(i);continue;}
-        else{poff[i]=clamp(poff[i]+(rnd()-.5)*dt*3-poff[i]*dt*0.25,-1,1);
-          pathAt(p,pps[i]+LOOK,tmp);const lw=hw*laneF(P.lane,pps[i]/pL[pi]),tx=tmp[0]-tmp[3]*poff[i]*lw,ty=tmp[1]+tmp[2]*poff[i]*lw;
+        else if(bd>L2){strayStart(i,sd);}
+        else{let po=poff[i];if(spcOn&&pSpc[pi]>0){const rh=rhoAt(side,px[i],py[i]);if(rh>3)po+=(rnd()-.5)*pSpc[pi]*48*Math.min(1,rh/40)*dt;}
+          poff[i]=clamp(po+(rnd()-.5)*dt*3-po*dt*pRev[pi],-1,1);
+          pathAt(p,pps[i]+LOOK,tmp);const lw=pHw[pi]*laneF(P.lane,pps[i]/pL[pi]),tx=tmp[0]-tmp[3]*poff[i]*lw,ty=tmp[1]+tmp[2]*poff[i]*lw;
           let dx=tx-x,dy=ty-y;const d=Math.sqrt(dx*dx+dy*dy)||1;dx=dx/d*spd;dy=dy/d*spd;const kk=Math.min(1,(stun?1.0:8)*dt);
           vx+=(dx-vx)*kk;vy+=(dy-vy)*kk;}
       }else if(cur===4||cur===5){ // AREA MEMBER: wanders freely inside its shape's soft hitbox (spring to its own wander spot); a hard knock can push it out (5), it re-enters or goes home past the leash
@@ -601,49 +651,66 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
           if(!ph||cur===5||pcnt[i]>0){const sdi=areaSd(q,i);
             if(cur===4){if(pcnt[i]>0)pcnt[i]--;else if(sdi>CFG.koMargin){pst[i]=5;cur=5;sd.stats.knocked++;q.ko++;}}
             else if(sdi<=1){pst[i]=4;cur=4;pcnt[i]=0;sd.stats.reentered++;}
-            if(sdi>CFG.leash&&(cur===5||pcnt[i]===0)){sd.stats.koRecall++;recall(i);continue;}}
+            if(sdi>CFG.leash&&(cur===5||pcnt[i]===0)){sd.stats.koRecall++;strayStart(i,sd);cur=3;}}
           const tx=q.cx+q.tx*wu-q.ty*wv,ty=q.cy+q.ty*wu+q.tx*wv,dx=tx-px[i],dy=ty-py[i];
           const kc=compactK*(0.55+0.45*coh)*(cur===5?0.4:1),jj=jit*(1+1.5*(1-coh));let wx=q.vx-q.om*(ty-q.cy)+dx*kc+(rnd()-.5)*jj,wy=q.vy+q.om*(tx-q.cx)+dy*kc+(rnd()-.5)*jj;
           const wl=Math.sqrt(wx*wx+wy*wy),cap=spd*1.7;if(wl>cap){wx*=cap/wl;wy*=cap/wl;}
           const kk=Math.min(1,(stun?1.0:9)*dt);vx+=(wx-vx)*kk;vy+=(wy-vy)*kk;}
       }
       if(pst[i]===3){ // END: straight on, drifting/spreading; leash from the end of its path
-        if(!stun){let a=Math.atan2(vy,vx);const gain=Math.min(3,0.6+pend[i]*0.9);a+=pdr[i]*dt*gain;vx=Math.cos(a)*spd;vy=Math.sin(a)*spd;}
+        if(pfree[i]){pend[i]+=dt;if(pfade[i]===0&&((i+S.tick)&7)===0){let m=1e18;for(let k=0;k<n;k++){const ax=px[i]-p[k*2],ay=py[i]-p[k*2+1],d2=ax*ax+ay*ay;if(d2<m)m=d2;}if(m>L2)pfade[i]=FADE_T();}}
+        else{if(!stun){let a=Math.atan2(vy,vx);const gain=Math.min(3,0.6+pend[i]*0.9);a+=pdr[i]*dt*gain;vx=Math.cos(a)*spd;vy=Math.sin(a)*spd;}
         pend[i]+=dt;const dx=px[i]-pex[pi],dy=py[i]-pey[pi];
-        if(dx*dx+dy*dy>L2){recall(i);continue;}
+        if(dx*dx+dy*dy>L2&&pfade[i]===0)pfade[i]=FADE_T();}
       }
       pvx[i]=vx;pvy[i]=vy;px[i]+=vx*dt;py[i]+=vy*dt;
       if(!(px[i]>2&&px[i]<W-2&&py[i]>2&&py[i]<H-2)){recall(i);}
     }}}
+// ---------- VFX (visual only): destroyed pixels split into 1x1 bits that fade; ricocheting pixels glow and leave a fading trail. Fixed typed-array pool, own RNG, per-tick spawn budget, drops spawns when full.
+const VPMAX=1800,VBUD=20,vX=new Float32Array(VPMAX),vY=new Float32Array(VPMAX),vVX=new Float32Array(VPMAX),vVY=new Float32Array(VPMAX),vLife=new Uint8Array(VPMAX),vTot=new Uint8Array(VPMAX),vCol=new Uint32Array(VPMAX),vKind=new Uint8Array(VPMAX);
+const pbnc=new Uint8Array(NP),bList=new Int32Array(400);let vpN=0,bN=0,vBud=VBUD,vs=0x9E3779B9;
+const VFX={sparkBursts:0,bits:0,bounces:0,trails:0,dropped:0,on:1};
+const vr=()=>{vs^=vs<<13;vs^=vs>>>17;vs^=vs<<5;return((vs>>>0)%65536)/65536;};
+function vAdd(x,y,dx,dy,life,col,kind){if(vpN>=VPMAX){VFX.dropped++;return;}const k=vpN++;vX[k]=x;vY[k]=y;vVX[k]=dx;vVY[k]=dy;vLife[k]=life;vTot[k]=life;vCol[k]=col;vKind[k]=kind;}
+// a destroyed pixel: 4 bits fly apart and fade (1x1 device pixels)
+function sparkAt(i){if(!VFX.on||vBud<=0)return;vBud--;const cols=i<POOL?K_BITB:K_BITR;VFX.sparkBursts++;const a0=vr()*6.2832;
+  for(let k=0;k<4;k++){const a=a0+k*1.5708+(vr()-.5)*0.7,sp=9+vr()*16;vAdd(px[i],py[i],Math.cos(a)*sp,Math.sin(a)*sp,34+((vr()*26)|0),cols[k&1],0);VFX.bits++;}}
+// a ricochet: the pixel glows for ~0.5 s and drops fading trail bits where it has been, so the bounce shows as a visible V
+function bounceMark(i){if(!VFX.on)return;VFX.bounces++;if(pbnc[i]===0&&bN<400)bList[bN++]=i;pbnc[i]=32;}
+function vfxStep(){vBud=VBUD;
+  for(let k=0;k<bN;k++){const i=bList[k];if(pbnc[i]>0){pbnc[i]--;if(pst[i]&&(pbnc[i]&3)===0&&vpN<VPMAX-8){vAdd(px[i],py[i],0,0,26,(i<POOL?K_BITB:K_BITR)[1],1);VFX.trails++;}}
+    if(pbnc[i]===0||!pst[i]){pbnc[i]=0;bList[k]=bList[--bN];k--;}}
+  for(let k=0;k<vpN;k++){if(--vLife[k]===0){const l=--vpN;vX[k]=vX[l];vY[k]=vY[l];vVX[k]=vVX[l];vVY[k]=vVY[l];vLife[k]=vLife[l];vTot[k]=vTot[l];vCol[k]=vCol[l];vKind[k]=vKind[l];k--;continue;}
+    vX[k]+=vVX[k]*STEP;vY[k]+=vVY[k]*STEP;if(vKind[k]===0){vVX[k]*=0.97;vVY[k]*=0.97;}}}
 // ---------- COLLISION
 function deflect(i,nx,ny,rot,back){let vx=pvx[i],vy=pvy[i];const sp=Math.hypot(vx,vy)||1,dot=vx*nx+vy*ny;
   if(dot<0){vx-=2*dot*nx;vy-=2*dot*ny;}
   if(back){vx=vx*0.65-pvx[i]*0.35;vy=vy*0.65-pvy[i]*0.35;}
   const a=(rnd()-.5)*2*rot,c=Math.cos(a),s=Math.sin(a),m=Math.hypot(vx,vy)||1;
-  const rx=(vx*c-vy*s)/m*sp,ry=(vx*s+vy*c)/m*sp;pvx[i]=rx;pvy[i]=ry;pstun[i]=STUN;}
-function hurt(i,dmg,ks,kj){php[i]-=dmg;if(php[i]<=0){const vsd=S.sides[1-ks],ksd=S.sides[ks];ksd.stats.kills++;if(ks===0?py[i]>H/2:py[i]<H/2)ksd.stats.intercepts++;
+  const rx=(vx*c-vy*s)/m*sp,ry=(vx*s+vy*c)/m*sp;pvx[i]=rx;pvy[i]=ry;pstun[i]=Math.min(120,Math.round(STUN*tkOf(speedOf(S.sides[i<POOL?0:1].set))));}
+function hurt(i,dmg,ks,kj){php[i]-=dmg;if(php[i]<=0){sparkAt(i);const vsd=S.sides[1-ks],ksd=S.sides[ks];ksd.stats.kills++;if(ks===0?py[i]>H/2:py[i]<H/2)ksd.stats.intercepts++;
   let gx=(px[i]*LGX/W)|0,gy=(py[i]*LGY/H)|0;if(gx<0)gx=0;else if(gx>LGX-1)gx=LGX-1;if(gy<0)gy=0;else if(gy>LGY-1)gy=LGY-1;vsd.lossGrid[gy*LGX+gx]++;
   vsd.stats.shapeLoss[psh[i]]++;vsd.pathLoss[pid[i]]++;ksd.stats.shapeKill[psh[kj]]++;ksd.pathKill[pid[kj]]++;loseLife(i);}}
 // Only ENEMY pixels interact (friendly pass through). The grid holds side-1 pixels; each side-0 pixel queries its 3x3 neighbourhood.
 function rhoAt(side,x,y){let cx=(x/CELL)|0,cy=(y/CELL)|0;if(cx<1)cx=1;else if(cx>GW-2)cx=GW-2;if(cy<1)cy=1;else if(cy>GH-2)cy=GH-2;const c=cntA[side],k=cy*GW+cx;
   return c[k-GW-1]+c[k-GW]+c[k-GW+1]+c[k-1]+c[k]+c[k+1]+c[k+GW-1]+c[k+GW]+c[k+GW+1];}
-function knock(i,nx,ny){const K=CFG.knockK;if(K>0){pvx[i]+=nx*K;pvy[i]+=ny*K;}}
+function knock(i,nx,ny){const K=CFG.knockK*vkOf(speedOf(S.sides[i<POOL?0:1].set));if(K>0){pvx[i]+=nx*K;pvy[i]+=ny*K;}}
 function shock(side,i){const k=psq[i];if(k>=0){const q=S.sides[side].sq[k];if(q)q.hits++;}}
 function collide(){
   gHead.fill(-1);const s0=S.sides[0],s1=S.sides[1];const RR=Math.max(1,CFG.rhoRef),KS=CFG.kSurv,KP=CFG.kPush,SM=CFG.survMax,PM=CFG.pushMax;
   cntA[0].fill(0);cntA[1].fill(0);
   for(let side=0;side<2;side++){const sdd=S.sides[side];if(sdd.active>0){const ca=cntA[side],b0=side*POOL;for(let i=b0;i<b0+POOL;i++){if(!pst[i])continue;let cx=(px[i]/CELL)|0,cy=(py[i]/CELL)|0;if(cx<0)cx=0;else if(cx>GW-1)cx=GW-1;if(cy<0)cy=0;else if(cy>GH-1)cy=GH-1;ca[cy*GW+cx]++;}}}
-  const pHP=CFG.pixDmg,mode=((CFG.stage|0)>0&&!feat('rico3')?Math.min(CFG.ricoMode,(CFG.stage|0)>=3?2:0):CFG.ricoMode),mp=CFG.missP/100,rp=CFG.ricoP/100,KSP=CFG.kSpeed/100,RSP=speedOf(s0.set)+speedOf(s1.set);
+  const FT=FADE_T(),pHP=CFG.pixDmg,mode=((CFG.stage|0)>0&&!feat('rico3')?Math.min(CFG.ricoMode,(CFG.stage|0)>=3?2:0):CFG.ricoMode),mp=CFG.missP/100,rp=CFG.ricoP/100,KSP=CFG.kSpeed/100,RSP=speedOf(s0.set)+speedOf(s1.set),cdh=clamp(Math.round(CD_HIT*2*PACE_REF/RSP),CD_HIT,60);
   if(s1.active>0)for(let i=CAPMAX;i<NP;i++){if(!pst[i])continue;let cx=(px[i]/CELL)|0,cy=(py[i]/CELL)|0;if(cx<0)cx=0;else if(cx>GW-1)cx=GW-1;if(cy<0)cy=0;else if(cy>GH-1)cy=GH-1;const k=cy*GW+cx;gNext[i]=gHead[k];gHead[k]=i;}
-  if(s1.active>0&&s0.active>0)for(let i=0;i<CAPMAX;i++){if(!pst[i]||pcd[i]>0)continue;
+  if(s1.active>0&&s0.active>0)for(let i=0;i<CAPMAX;i++){if(!pst[i]||pcd[i]>0)continue;if(pfade[i]>0&&rnd()*FT>pfade[i])continue;
     let cx=(px[i]/CELL)|0,cy=(py[i]/CELL)|0;if(cx<0)cx=0;else if(cx>GW-1)cx=GW-1;if(cy<0)cy=0;else if(cy>GH-1)cy=GH-1;
     const gy0=cy>0?cy-1:0,gy1=cy<GH-1?cy+1:GH-1,gx0=cx>0?cx-1:0,gx1=cx<GW-1?cx+1:GW-1,xi=px[i],yi=py[i];let hit=false;
     for(let gy=gy0;gy<=gy1&&!hit;gy++)for(let gx=gx0;gx<=gx1&&!hit;gx++){
-      for(let j=gHead[gy*GW+gx];j>=0;j=gNext[j]){if(!pst[j]||pcd[j]>0)continue;
+      for(let j=gHead[gy*GW+gx];j>=0;j=gNext[j]){if(!pst[j]||pcd[j]>0)continue;if(pfade[j]>0&&rnd()*FT>pfade[j])continue;
         const dx=xi-px[j],dy=yi-py[j],d2=dx*dx+dy*dy;
         if(d2>=CONTACT*CONTACT)continue;
         let d=Math.sqrt(d2),nx,ny;if(d<1e-4){const a=rnd()*6.2832;nx=Math.cos(a);ny=Math.sin(a);d=0;}else{nx=dx/d;ny=dy/d;}
-        pcd[i]=pcd[j]=CD_HIT;pmom[i]=pmom[j]=0;let pm=mp,pr=rp,rotv=0.35,dI=0.6,dJ=0.6,base=0.6;if(psq[i]>=0){shock(0,i);knock(i,nx,ny);}if(psq[j]>=0){shock(1,j);knock(j,-nx,-ny);}
+        pcd[i]=pcd[j]=cdh;pmom[i]=pmom[j]=0;let pm=mp,pr=rp,rotv=0.35,dI=0.6,dJ=0.6,base=0.6;if(psq[i]>=0){shock(0,i);knock(i,nx,ny);}if(psq[j]>=0){shock(1,j);knock(j,-nx,-ny);}
         if(mode>0){const vi=Math.hypot(pvx[i],pvy[i])||1,vj=Math.hypot(pvx[j],pvy[j])||1,cs=clamp(-(pvx[i]*pvx[j]+pvy[i]*pvy[j])/(vi*vj),0,1),gl=1-cs,
           am=Math.min(0.9,mp*2*gl),ar=Math.min(0.95,rp*2*gl);if(mode===1){pm=am;pr=ar;}else{pm=(mp+am)/2;pr=(rp+ar)/2;}
           if(mode===3){ // FULL HYBRID: impact angle (gl: glancing=1, head-on=0) + closing speed (sfv) + packing (dr below)
@@ -658,8 +725,8 @@ function collide(){
         if(sI){s0.stats.misses++;s0.stats.surv++;}else hurt(i,pHP,1,j);
         if(sJ){s1.stats.misses++;s1.stats.surv++;}else hurt(j,pHP,0,i);
         if(!bI&&rnd()<psi)bI=true;if(!bJ&&rnd()<psj)bJ=true;
-        if(bI&&pst[i]){s0.stats.ricochets++;s0.stats.defl++;deflect(i,nx,ny,rotv,false);px[i]+=nx*dI;py[i]+=ny*dI;}
-        if(bJ&&pst[j]){s1.stats.ricochets++;s1.stats.defl++;deflect(j,-nx,-ny,rotv,false);px[j]-=nx*dJ;py[j]-=ny*dJ;}
+        if(bI&&pst[i]){bounceMark(i);s0.stats.ricochets++;s0.stats.defl++;deflect(i,nx,ny,rotv,false);freePix(i);px[i]+=nx*dI;py[i]+=ny*dI;}
+        if(bJ&&pst[j]){bounceMark(j);s1.stats.ricochets++;s1.stats.defl++;deflect(j,-nx,-ny,rotv,false);freePix(j);px[j]-=nx*dJ;py[j]-=ny*dJ;}
         if(bJ&&!sJ)s0.stats.pushed++;if(bI&&!sI)s1.stats.pushed++;
         hit=true;break;}}}
   // walls + circles
@@ -687,10 +754,11 @@ function tick(){
   const t0=performance.now();
   S.tick++;
   for(let side=0;side<2;side++){const sd=S.sides[side];let f=1;if(CFG.pattern===1)f=1+0.9*Math.sin(S.tick*0.0349);sd.acc+=STEP*rateOf(sd.set)*f;let g=0;while(sd.acc>=1&&g++<24){sd.acc-=1;release(side);}if(sd.acc>24)sd.acc=24;}
-  movePixels();collide();for(const sd of S.sides)if(!sd.human)aiShapes(sd.id);
+  movePixels();collide();vfxStep();for(const sd of S.sides)if(!sd.human){aiShapes(sd.id);if(!sd.aiBr&&S.tick>=480&&(CFG.aiLevel|0)>=2){sd.aiBr=1;aiOpenBranch(sd.id);}}
   if(S.ai&&CFG.aiLearn&&S.tick-S.ai.last>=aiEvery(CFG.aiLevel))aiAdapt(1);
   const a=S.sides[0].circle.hp,b=S.sides[1].circle.hp;
-  if(a<=0||b<=0){endMatch(a<=0&&b<=0?(a>b?0:b>a?1:-1):(b<=0?0:1));}
+  if(sbx()&&!CFG.sbxEnd){/* sandbox: nothing ends */}
+  else if(a<=0||b<=0){endMatch(a<=0&&b<=0?(a>b?0:b>a?1:-1):(b<=0?0:1));}
   else if(S.tick>=CFG.matchSec*60){endMatch(a>b?0:b>a?1:-1);}
   const ms=performance.now()-t0;stat.ticks++;stat.ms+=ms;if(ms>stat.maxMs)stat.maxMs=ms;
 }
@@ -704,7 +772,9 @@ function layout(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)retur
   LS=Math.min(w/W,h/H);LX=(w-W*LS)/2;LY=(h-H*LS)/2;return true;}
 const C_BLUE=['#1c2fd6','#7c88ee'],C_RED=['#cf2118','#ee8f89'];
 const rgba=h=>{const n=parseInt(h.slice(1),16);return((255<<24)|((n&255)<<16)|(n&0xff00)|(n>>16&255))>>>0;};const K_BLUE=C_BLUE.map(rgba),K_RED=C_RED.map(rgba);const K_SQB=rgba('#00c2e8'),K_SQR=rgba('#ff9a1a');let PL=null,PLc=null,PI=null,P32=null,PLdirty=false;
-const BRC='#7a2fd0';
+const BRCOL=['#7a2fd0','#e07a00','#0a9a5a','#d6307a','#1a8fd0'],BRT=['rgb(205,180,240)','rgb(255,205,150)','rgb(165,225,195)','rgb(245,185,210)','rgb(170,215,245)'];
+const brCol=id=>BRCOL[(id-1)%5];
+const K_BITB=[rgba('#1c2fd6'),rgba('#7c88ee')],K_BITR=[rgba('#cf2118'),rgba('#ee8f89')],K_BNC=rgba('#ff8c00');
 function lanePoly(P,hw){const p=P.p,n=p.length>>1,key=n+'|'+P.lane+'|'+hw.toFixed(1);if(P.pk===key)return P.pp;
   const pp=new Path2D(),L=Math.max(1,(n-1)*PSP),lx=new Array(n),ly=new Array(n),rx=new Array(n),ry=new Array(n);
   for(let k=0;k<n;k++){const a=k>0?k-1:0,b=k<n-1?k+1:n-1;let tx=p[b*2]-p[a*2],ty=p[b*2+1]-p[a*2+1];const tl=Math.hypot(tx,ty)||1;tx/=tl;ty/=tl;const w=hw*laneF(P.lane,k*PSP/L);lx[k]=p[k*2]-ty*w;ly[k]=p[k*2+1]+tx*w;rx[k]=p[k*2]+ty*w;ry[k]=p[k*2+1]-tx*w;}
@@ -722,17 +792,18 @@ function areaSprite(D){if(D.spr)return D.spr;const w=Math.ceil((D.Lu+2*APAD)*RS)
   D.spr=softCopy(t,w,h,2.6*RS/2,!!window.__pwNoFilter);return D.spr;}
 // the lane bands of every visible path: ONE half-resolution layer rebuilt only when a path, lane type or setting changes
 let LANEL=null,LANEK='',BGC=null,BGSRC=null;
-function laneLayer(){let key=S.phase+'|'+ME+'|'+(CFG.reveal?1:0)+'|'+(window.__pwNoFilter?1:0);const items=[];
-  for(const sd of S.sides){if(!showSide(sd))continue;const hw=laneHW(sd.set);for(const P of sd.paths){if(!P||P.p.length<4)continue;key+='|'+sd.id+P.id+':'+(P.p.length>>1)+','+P.lane+','+hw.toFixed(1)+','+(P.p[P.p.length-2]|0)+','+(P.p[P.p.length-1]|0);items.push([sd,P,hw]);}}
+function laneLayer(){let key=S.phase+'|'+ME+'|'+(CFG.reveal?1:0)+'|'+(CFG.duel?1:0)+'|'+(S.aiRev<1?0:1)+'|'+(window.__pwNoFilter?1:0);const items=[];
+  for(const sd of S.sides){if(!showSide(sd)||foePrep(sd))continue;for(const P of sd.paths){if(!P||P.p.length<4)continue;const hw=laneHW(pset(sd,P));key+='|'+sd.id+P.id+':'+(P.p.length>>1)+','+P.lane+','+hw.toFixed(1)+','+(P.p[P.p.length-2]|0)+','+(P.p[P.p.length-1]|0);items.push([sd,P,hw]);}}
   if(key===LANEK&&LANEL)return LANEL;LANEK=key;const w=W>>1,h=H>>1,t=document.createElement('canvas');t.width=w;t.height=h;const x=t.getContext('2d');x.scale(0.5,0.5);
-  for(const it of items){const sd=it[0],P=it[1];x.fillStyle=sd.id!==ME?'rgb(255,170,100)':(P.id?'rgb(150,190,255)':YEL);x.fill(lanePoly(P,it[2]));}
+  for(const it of items){const sd=it[0],P=it[1];x.fillStyle=sd.id!==ME?'rgb(255,170,100)':(P.id?BRT[(P.id-1)%5]:YEL);x.fill(lanePoly(P,it[2]));}
   LANEL=softCopy(t,w,h,2,!!window.__pwNoFilter);return LANEL;}
 // the white field + soft lane bands are baked into ONE opaque field-sized canvas, rebuilt only when the bands, the size or the halo setting change (a per-frame alpha blit of the band layer cost ~20 fps on the A03s)
 function bgLayer(fw,fh){const LL=CFG.halo?laneLayer():null;if(BGC&&BGC.width===fw&&BGC.height===fh&&BGSRC===LL&&BGC._h===!!CFG.halo)return BGC;
   if(!BGC||BGC.width!==fw||BGC.height!==fh){BGC=document.createElement('canvas');BGC.width=fw;BGC.height=fh;}
   const x=BGC.getContext('2d');x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.fillStyle='#fff';x.fillRect(0,0,fw,fh);if(LL){x.imageSmoothingEnabled=false;x.globalAlpha=0.5;x.drawImage(LL,0,0,fw,fh);x.globalAlpha=1;}
   BGSRC=LL;BGC._h=!!CFG.halo;return BGC;}
-function showSide(sd){return sd.id===ME||(S.phase!=='prep'&&!!CFG.reveal);}
+function showSide(sd){return sd.id===ME||CFG.duel===1||(S.phase!=='prep'?!!CFG.reveal:!CFG.duel);}
+const foePrep=sd=>sd.id!==ME&&S.phase==='prep'&&S.aiRev<1;
 function draw(){
   if(!layout())return;
   const sc=LS*DPR,fx=Math.round(LX*DPR),fy=Math.round(LY*DPR),fw=Math.round(W*sc),fh=Math.round(H*sc);
@@ -751,30 +822,32 @@ function draw(){
     ctx.globalAlpha=1;ctx.imageSmoothingEnabled=false;}
   // walls
   ctx.lineWidth=Math.max(2,WALL_HALF*2*sc);ctx.lineCap='butt';
-  for(const sd of S.sides){if(sd.id!==ME&&S.phase==='prep')continue;
-    for(const st of sd.strokes){if(!st.segs||!st.segs.length){ctx.strokeStyle=st.gate?'#2f6bff':'#000';ctx.setLineDash(st.gate?[3*sc,3*sc]:[]);ctx.beginPath();ctx.moveTo(X(st.pts[0]),Y(st.pts[1]));for(let k=2;k<st.pts.length;k+=2)ctx.lineTo(X(st.pts[k]),Y(st.pts[k+1]));ctx.stroke();continue;}
+  for(const sd of S.sides){if(!showSide(sd))continue;const fpr=foePrep(sd),wf=fpr?clamp((S.aiRev-0.6)/0.4,0,1)*sd.strokes.length:1e9;let sIdx=-1;
+    for(const st of sd.strokes){sIdx++;if(sIdx>=wf)break;if(!st.segs||!st.segs.length){const np=st.pts.length>>1,lim=fpr&&sIdx+1>wf?Math.max(2,Math.ceil(np*(wf-sIdx))):np;ctx.strokeStyle=st.gate?'#2f6bff':(sd.id!==ME?'#5a1a14':'#000');ctx.setLineDash(st.gate?[3*sc,3*sc]:[]);ctx.beginPath();ctx.moveTo(X(st.pts[0]),Y(st.pts[1]));for(let k=1;k<lim;k++)ctx.lineTo(X(st.pts[k*2]),Y(st.pts[k*2+1]));ctx.stroke();continue;}
       for(const sg of st.segs){if(!sg.alive)continue;const f=sg.hp/(sg.max||CFG.segHP),g=Math.round(200*(1-f)),fl=S.tick-sg.hitT<6;if(sg.gate){ctx.setLineDash([3*sc,3*sc]);ctx.strokeStyle=fl?'#e0261c':(sg.side?'#d4402f':'#2f6bff');}else{ctx.setLineDash([]);ctx.strokeStyle=fl?'#e0261c':'rgb('+g+','+g+','+g+')';}
         ctx.beginPath();ctx.moveTo(X(sg.x1),Y(sg.y1));ctx.lineTo(X(sg.x2),Y(sg.y2));ctx.stroke();}}}
   ctx.setLineDash([]);
   // paths (main black, branches purple, thin) + formation markers
   for(const sd of S.sides){if(!showSide(sd))continue;
-    for(const P of sd.paths){if(!P)continue;const p=P.p,n=p.length>>1;if(n<2)continue;
-      ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=P.id?BRC:'#161616';ctx.lineWidth=Math.max(1,1.6*sc);ctx.beginPath();ctx.moveTo(X(p[0]),Y(p[1]));for(let k=1;k<n;k++)ctx.lineTo(X(p[k*2]),Y(p[k*2+1]));ctx.stroke();
-      if(P.arm){pathAt(p,fPos(P),tmp);ctx.strokeStyle=P.id?BRC:'#161616';ctx.lineWidth=Math.max(1,1.2*sc);ctx.beginPath();ctx.arc(X(tmp[0]),Y(tmp[1]),3.2*sc,0,6.2832);ctx.stroke();}}}
-  if(S.phase==='prep'&&(S.tool==='main'||S.tool==='branch')){const sd=S.sides[ME],P=S.tool==='main'?sd.paths[0]:(sd.paths[selP]||sd.paths[0]),p=P.p;ctx.strokeStyle=P.id?BRC:'#161616';ctx.lineWidth=Math.max(1,1.2*sc);ctx.beginPath();ctx.arc(X(p[p.length-2]),Y(p[p.length-1]),6*sc,0,6.2832);ctx.stroke();}
+    for(const P of sd.paths){if(!P)continue;const p=P.p,n0=p.length>>1;if(n0<2)continue;const fpr=foePrep(sd),n=fpr?Math.max(2,Math.ceil(n0*clamp(S.aiRev/0.6,0,1))):n0;
+      ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=P.id?brCol(P.id):(sd.id!==ME&&S.phase==='prep'?'#7a1f18':'#161616');ctx.lineWidth=Math.max(1,(sd.id===ME&&P.id===selP&&S.phase!=='prep'?2.6:1.6)*sc);ctx.beginPath();ctx.moveTo(X(p[0]),Y(p[1]));for(let k=1;k<n;k++)ctx.lineTo(X(p[k*2]),Y(p[k*2+1]));ctx.stroke();
+      if(fpr&&S.aiRev<0.6&&P.id===0){ctx.fillStyle='#e0261c';ctx.beginPath();ctx.arc(X(p[(n-1)*2]),Y(p[(n-1)*2+1]),2.5*sc,0,6.2832);ctx.fill();}
+      if(P.arm){pathAt(p,fPos(P),tmp);ctx.strokeStyle=P.id?brCol(P.id):'#161616';ctx.lineWidth=Math.max(1,1.2*sc);ctx.beginPath();ctx.arc(X(tmp[0]),Y(tmp[1]),3.2*sc,0,6.2832);ctx.stroke();}}}
+  if(S.phase==='prep'&&(S.tool==='main'||S.tool==='branch')){const sd=S.sides[ME],P=S.tool==='main'?sd.paths[0]:(sd.paths[selP]||sd.paths[0]),p=P.p;ctx.strokeStyle=P.id?brCol(P.id):'#161616';ctx.lineWidth=Math.max(1,1.2*sc);ctx.beginPath();ctx.arc(X(p[p.length-2]),Y(p[p.length-1]),6*sc,0,6.2832);ctx.stroke();}
   // circles (ring + hp arc)
   for(const sd of S.sides){const c=sd.circle,col=sd.id===0?'#12b5d6':'#e0261c',f=clamp(c.hp/poolN(),0,1);
     ctx.lineWidth=Math.max(2,5*sc);ctx.lineCap='butt';ctx.strokeStyle='#d6d9e6';ctx.beginPath();ctx.arc(X(c.x),Y(c.y),(c.r-2.5)*sc,0,6.2832);ctx.stroke();
     if(f>0){ctx.strokeStyle=col;ctx.beginPath();ctx.arc(X(c.x),Y(c.y),(c.r-2.5)*sc,-Math.PI/2,-Math.PI/2+6.2832*f);ctx.stroke();}}
   // pixels: written straight into a field-sized Uint32 ImageData (2x2 device px dots), one putImageData + 1:1 drawImage per frame
-  const anyPx=S.sides[0].active+S.sides[1].active>0;
+  const anyPx=S.sides[0].active+S.sides[1].active+vpN>0;
   if(anyPx||PLdirty||!PL||PL.width!==fw||PL.height!==fh){PLdirty=anyPx;
     if(!PL||PL.width!==fw||PL.height!==fh){PL=document.createElement('canvas');PL.width=fw;PL.height=fh;PLc=PL.getContext('2d');PI=PLc.createImageData(fw,fh);P32=new Uint32Array(PI.data.buffer);}
     else P32.fill(0);
     const hh=CFG.pixHP*0.5;
+    for(let k=0;k<vpN;k++){const x=(vX[k]*sc)|0,y=(vY[k]*sc)|0;if(x<0||y<0||x>fw-2||y>fh-2)continue;const a=vKind[k]===0?Math.min(255,Math.round(255*vLife[k]/vTot[k]*1.25)):Math.round(200*vLife[k]/vTot[k]);P32[y*fw+x]=((a<<24)|(vCol[k]&0xffffff))>>>0;}
     for(let sidx=0;sidx<2;sidx++){const cols=sidx===0?K_BLUE:K_RED,b=sidx*CAPMAX,e=b+CAPMAX;
-      for(let i=b;i<e;i++){if(!pst[i])continue;const col=(CFG.tint&&pst[i]>=4)?(sidx?K_SQR:K_SQB):cols[php[i]>hh?0:1],big=false,x=(px[i]*sc-1)|0,y=(py[i]*sc-1)|0;
-        if(x<0||y<0||x>fw-3||y>fh-3)continue;let o=y*fw+x;P32[o]=col;P32[o+1]=col;o+=fw;P32[o]=col;P32[o+1]=col;
+      for(let i=b;i<e;i++){if(!pst[i])continue;const col=pbnc[i]>0?K_BNC:(CFG.tint&&pst[i]>=4)?(sidx?K_SQR:K_SQB):cols[php[i]>hh?0:1],big=false,x=(px[i]*sc-1)|0,y=(py[i]*sc-1)|0,cf=pfade[i]>0?(((40+215*pfade[i]/FADE_T())<<24)|(col&0xffffff))>>>0:col;
+        if(x<0||y<0||x>fw-3||y>fh-3)continue;let o=y*fw+x;P32[o]=cf;P32[o+1]=cf;o+=fw;P32[o]=cf;P32[o+1]=cf;
         if(big){P32[o+2]=col;P32[o+fw]=col;P32[o+fw+1]=col;P32[o+fw+2]=col;P32[o-fw+2]=col;}}}
     PLc.putImageData(PI,0,0);}
   ctx.drawImage(PL,fx,fy);
@@ -790,59 +863,57 @@ function setC(id,on){const k='c'+id;if(hudCache[k]!==on){hudCache[k]=on;$(id).cl
 function fmtT(t){const s=Math.floor(t/60);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
 const SHN=['LINE','ARROW','WEDGE','RING','DIAM','DOUBLE','SPIRAL'];
 let curTab='D',lastPhase='prep',view='app',chipKey='';
-function showView(v){view=v;if(v==='menu')setT('mDiff','DIFFICULTY: '+DIFFN[prefs.diff]);for(const id of['menu','custom','help','stages','editor'])$(id).style.display=id===v?'flex':'none';$('app').style.display=v==='app'?'flex':'none';if(v!=='app'&&S&&S.phase==='battle')S.paused=true;CW=0;}
-const HELP=['Destroy the enemy circle. Your pixels hurt it on contact; they never shoot or fight, they only collide.',
- 'POOL = HP: your circle holds a pool of pixels (10,000). Every enemy pixel that reaches it burns 20 pixels out of the pool (500 hits to lose). Pool at 0 = you lose.',
- 'LIVES: each pixel has 20 lives. A collision death costs one life and the pixel goes back to the circle to come out again. After 20 deaths it is gone for good.',
- 'PREP: place your circle, draw one PATH (it locks at START), spend the WALL meter on barriers, and draw BRANCHES only from the path. A path is a route; the LANE is the area the pixels occupy around it.',
- 'LANE SHAPES: the LANE button gives a path (or branch) a hitbox geometry: NORMAL, WIDE, NARROW, TAPERED (wide to narrow) or ARROW (narrow shaft, flared head). It shows as a faint yellow (purple for branches) area. Narrow lanes pack the pixels tighter.',
- 'You choose how the stream looks: DENSITY (wide and loose vs tight and packed), FLOW (how fast pixels leave the circle) and PACE (how fast they travel). The most pixels out at once is limited by your pool and a performance cap.',
- 'SHAPES are abilities with a cooldown (shown on each button). A shape is a soft yellow AREA that opens in the lane by borrowing pixels from the stream, so the pixels behind it are thinner. Its pixels wander freely inside it, denser along the line. It never grows past about 3x a thin lane (the ARROW head is a rounded bubble) and the dots stay a constant 2x2. FORM AT slides where it opens; 0 starts it right at the circle.',
- 'KNOCK-OUT: hits knock area pixels out of the hitbox. A pixel that is out comes back in when it is close; if it ends up 2 inches (72 units) past the shape edge it is recalled to the circle. A badly hit area breaks apart, a surviving one regroups.',
- 'SHAPE EDITOR (menu): draw ONE closed outline with your finger, top = front, and SAVE up to 6 on this device. The outline is the shape\'s yellow hitbox; each one becomes a shape button in the SHAPE tab with the same cooldown and lane rules. The AI draws its own outlines the same way.',
- 'BRANCHES can be erased and redrawn during the battle (ERASE, then BRANCH; start on the end of a branch to continue it). The main path stays locked. All branches share one meter. Erasing is free: the meter comes back at once.',
- 'WALLS block both sides. Your own pixels stop at your walls and do no damage. Each wall section has 1000 HP and an enemy hit does 5 damage to only the exact spot it hits, so a hole opens where they keep hitting. A GATE is a wall piece (dashed) that your own pixels pass through and enemies cannot.',
- 'RICOCHET (FULL HYBRID, the default): the chance a pixel bounces off instead of taking damage and the chance it pushes the enemy away depend on the IMPACT ANGLE (glancing bounces more, head-on hits harder), the CLOSING SPEED (fast hits hit harder and push farther) and PACKING (tightly packed pixels survive and push more). Custom Game can switch to the older rules.',
- 'DIFFICULTY (Easy, Normal, Hard, Brutal) changes only how well the AI plans, adapts and times its shapes. Its pool, lives, burn, cooldowns and meters are exactly yours.',
- 'STAGES unlock mechanics step by step: 1 Fundamentals, 2 Tactical, 3 Advanced, 4 Strategic. Quick Match and Custom Game have everything. After a match the result screen shows your stats and the AI review; the AI then wipes its tactical memory. CUSTOM GAME exposes every rule.'];
-function hud(){const me=S.sides[ME],foe=S.sides[1-ME];
-  const prep=S.phase==='prep';
-  if(lastPhase!==S.phase){if(S.phase==='battle')curTab='F';lastPhase=S.phase;}
+function showView(v){view=v;if(v==='menu'){setT('mDiff','DIFFICULTY: '+DIFFN[prefs.diff]);$('mForms').style.display=CUS.shapesOn?'block':'none';}for(const id of['menu','custom','help','stages','editor'])$(id).style.display=id===v?'flex':'none';$('app').style.display=v==='app'?'flex':'none';if(v!=='app'&&S&&S.phase==='battle')S.paused=true;CW=0;}
+const HELP=[
+'GOAL: your pixels flow out of your circle and run along your path. Every pixel that touches the enemy circle takes away some of its health. Wipe out the enemy circle to win.',
+'PREP, STEP 1: draw your ATTACK PATH. Drag from your circle toward the enemy. The enemy draws its own plan at the same time, and you can see it.',
+'PREP, STEP 2: draw a DEFENSE LINE of walls across your side. You need both before START lights up. Leave a gap if you want your own pixels to get through. Walls can go all the way to the screen edge.',
+'The match is slow on purpose. Pixels flow like a river, so there is time to think and change things.',
+'IN THE MATCH you can add BRANCHES. Press BRANCH, then drag out from your main path. Every branch has its own color and its own meter. ERASE is free, so try and redraw as often as you like.',
+'TAP any path (the main path or a branch) and its SLIDERS open. Each path keeps its own settings: PACE (how fast), DENSITY (how tightly pixels hug the line), SPACING (how loose and spread they are), LANE WIDTH (how wide the stream is) and FLOW (how many come out). The big - and + buttons are easy to hit.',
+'When pixels from both sides touch, they bounce or get destroyed. A destroyed pixel breaks into tiny bits that fade away. A bounced pixel keeps flying straight and does not turn back.',
+'A pixel that drifts too far from its path fades out slowly and goes home to your circle. While it fades it can still hit things, a little less each moment.',
+'SANDBOX (in the menu): a free play area. Both sides are yours to edit at any time: move circles, draw paths and walls, change the sliders. Use SIDE to switch sides, STEP to move forward a little, REFILL to reset the pixels. Nobody wins or loses.',
+'Shapes (arrows, blocks and so on) are hidden for now. You can turn them back on in CUSTOM GAME.'];
+const PW=['crawl','very slow','slow','easy','steady','steady','brisk','brisk','quick','top'],DW=v=>v<=3?'loose':v<=7?'medium':'tight',SW=v=>v<=3?'close':v<=7?'medium':'far',WW=v=>v<=3?'narrow':v<=7?'medium':'wide';
+let chipK='';
+function hud(){const me=S.sides[ME],foe=S.sides[1-ME],prep=S.phase==='prep',sb=sbx();
+  lastPhase=S.phase;
   setD('main',S.over?'none':'block');setD('result',S.over?'block':'none');
-  let st;if(S.over)st=S.winner===0?(CFG.duel?'P1 WINS':'YOU WIN'):S.winner===1?(CFG.duel?'P2 WINS':'YOU LOSE'):'DRAW';
-  else if(prep){const left=CFG.prepSec>0?'  '+Math.max(0,Math.ceil(CFG.prepSec-S.prepT))+'s':'';st=(S.msg||({circle:'PREP: place your circle',main:'PREP: draw the main path',branch:'PREP: draw from the path',wall:'PREP: walls on your half',erase:'PREP: tap to erase'}[S.tool]))+left;if(CFG.duel)st=(ME===0?'P1 ':'P2 ')+st;}
-  else st=(S.paused?'PAUSED ':'BATTLE ')+fmtT(S.tick)+(CFG.stage?'  STAGE '+CFG.stage:'')+(S.ai&&S.ai.lessons.length?'  AI learned '+S.ai.lessons.length:'');
-  setT('status',st);setT('btnPause',S.paused?'PLAY':'PAUSE');
   if(selP>0&&!me.paths[selP])selP=0;
-  const sP=me.paths[selP]||me.paths[0];
-  if(selP===0){const pu=pathUsed(me);setT('tP','PATH '+Math.max(0,Math.round(CFG.pathMax-pu)));setW('mP',(CFG.pathMax-pu)/CFG.pathMax*100);}
-  else{const bu=brUsed(sP);setT('tP','BR'+selP+' '+Math.round(brLeft(me,sP)));setW('mP',brLeft(me,sP)/CFG.brMax*100);}
+  const sP=me.paths[selP]||me.paths[0],ps=pset(me,sP);
+  let st;if(S.over)st=S.winner===0?(sb?'BLUE WINS':'YOU WIN'):S.winner===1?(sb?'RED WINS':'YOU LOSE'):'DRAW';
+  else if(prep){const need=prepNeeds(me),left=CFG.prepSec>0?'  '+Math.max(0,Math.ceil(CFG.prepSec-S.prepT))+'s':'';
+    st=S.msg||(S.aiRev<1?'Enemy is drawing its plan. Watch, then draw yours.':need.indexOf('path')>=0?'STEP 1: draw your ATTACK PATH from your circle.':need.indexOf('wall')>=0?'STEP 2: draw your DEFENSE LINE across your side.':'Ready. Press START. Branches come in the match.');st+=left;}
+  else if(sb)st=S.msg||((S.paused?'SANDBOX paused. ':'SANDBOX. ')+'Editing '+(ME===0?'BLUE':'RED')+'.');
+  else st=S.msg||((S.paused?'PAUSED ':'')+fmtT(S.tick)+(CFG.stage?'  STAGE '+CFG.stage:'')+(S.ai&&S.ai.lessons.length?'  Enemy learned '+S.ai.lessons.length+'.':'')+' Tap a path for sliders.');
+  setT('status',st);setT('btnPause',S.paused?'PLAY':'PAUSE');setD('btnStep',sb&&S.paused&&!S.over?'block':'none');
+  if(selP===0){const pu=pathUsed(me);setT('tP','PATH '+Math.max(0,Math.round(CFG.pathMax-pu)));setW('mP',(CFG.pathMax-pu)/CFG.pathMax*100);$('mP').firstElementChild.style.background='#e8e8f0';}
+  else{setT('tP','BR'+selP+' '+Math.round(brLeft(me,sP)));setW('mP',brLeft(me,sP)/CFG.brMax*100);$('mP').firstElementChild.style.background=brCol(selP);}
   const wu=wallUsed(me);setT('tW','WALL '+Math.max(0,Math.round(CFG.wallMax-wu)));setW('mW',(CFG.wallMax-wu)/CFG.wallMax*100);
-  setT('tY',(CFG.duel?'P'+(ME+1)+' ':'YOU ')+Math.max(0,me.pool));setW('hY',me.pool/poolN()*100);setT('tF',(CFG.duel?'P'+(2-ME)+' ':'FOE ')+Math.max(0,foe.pool));setW('hF',foe.pool/poolN()*100);
-  for(const t of['D','S','F']){setC('tab'+t,curTab===t);setD('p'+t,curTab===t?'block':'none');}
-  // DRAW tab
-  const toolOk={circle:prep,main:prep,branch:canBr(me)&&CFG.maxBr>0,wall:canWall(me),gate:canWall(me)&&!!CFG.gate&&feat('gate'),erase:canWall(me)||canBr(me)||prep};
+  setT('tY',(sb?(ME===0?'BLUE ':'RED '):'YOU ')+fmtN(me.pool));setW('hY',me.pool/poolN()*100);setT('tF',(sb?(ME===0?'RED ':'BLUE '):'ENEMY ')+fmtN(foe.pool));setW('hF',foe.pool/poolN()*100);
+  const toolOk={circle:prep||sb,main:prep||sb,branch:canBr(me)&&CFG.maxBr>0,wall:canWall(me),gate:canWall(me)&&!!CFG.gate&&(sb||feat('gate')),erase:canWall(me)||canBr(me)||prep||sb};
   for(const t of['circle','main','branch','wall','gate','erase']){const id='t'+t[0].toUpperCase()+t.slice(1);setD(id,toolOk[t]?'block':'none');setC(id,S.tool===t);}
-  setD('tStart',prep?'block':'none');setT('tLane',(selP?'BR'+selP:'MAIN')+' '+LANES[(me.paths[selP]||me.paths[0]).lane|0]);setD('tSwap',prep&&CFG.duel?'block':'none');setT('tSwap',ME===0?'P1>P2':'P2>P1');
-  if(prep)setT('info',CFG.duel?'Hot-seat: hand the device over, then START.':'Branches: '+brCount(me)+'/'+CFG.maxBr+'. Walls leave gaps by design.');
-  else if(S.ai&&S.ai.lessons.length)setT('info','AI: '+S.ai.lessons[S.ai.lessons.length-1]);
-  else setT('info','YOU '+me.active+'  FOE '+foe.active+'  WALLS '+wallsLeft(me)+'/'+wallsLeft(foe));
-  // SHAPE tab: path chips
-  let key=ME+':'+me.paths.map((P,i)=>P?i:'-').join('')+':'+selP;
-  if(key!==chipKey){chipKey=key;const h=$('chips');h.innerHTML='';me.paths.forEach((P,i)=>{if(!P)return;const b=document.createElement('button');b.className='chip'+(i===selP?' on':'');b.textContent=i?'BR'+i:'MAIN';b.addEventListener('click',()=>{selP=i;});h.appendChild(b);});}
-  // shape ability buttons: one per shape, each with its own cooldown (name, seconds left, bar)
-  {const ids=[];for(let t=0;t<NSH;t++)if(shapeOkS(me,t))ids.push(t);const lab=t=>t<7?SHN[t]:shName(me,t);const kk=ids.join()+'|'+ids.map(lab).join();const h=$('shbtns');
-   if(h.dataset.k!==kk){h.dataset.k=kk;h.innerHTML='';for(const t of ids){const b=document.createElement('button');b.className='shb';b.id='shb'+t;const s1=document.createElement('span');s1.textContent=lab(t);const s2=document.createElement('span');s2.className='cdt';s2.textContent='-';const bar=document.createElement('i');b.appendChild(s1);b.appendChild(s2);b.appendChild(bar);b.addEventListener('click',()=>{if(S.phase!=='battle'){S.msg='Shapes are used in battle';return;}if(!useShape(ME,selP,t))S.msg=shapeLeft(ME,t)>0?lab(t)+' recharging':'Cannot form here';});h.appendChild(b);}}
-   for(const t of ids){const b=$('shb'+t),left=S.phase==='battle'?shapeLeft(ME,t):0,tot=cdTicks(t),busy=!!sP.arm&&S.phase==='battle',txt=S.phase!=='battle'?'-':left>0?(left/60).toFixed(1)+'s':busy?'wait':'READY';
-    const sp=b.children[1];if(sp.textContent!==txt)sp.textContent=txt;const w=S.phase!=='battle'?0:Math.round((1-left/tot)*100)+'%';if(b.children[2].style.width!==w)b.children[2].style.width=w;const cd=left>0||S.phase!=='battle';if(b.classList.contains('cd')!==cd)b.classList.toggle('cd',cd);}}
-  setT('lAt','AT '+sP.sh.at);setT('lSh',selP?'SHARE '+sP.share:'SHARE -');
-  $('sSh').disabled=selP===0||!!CFG.autoDist;
-  setT('lSp','PACE '+me.set.speed);setT('lDe','DENSITY '+me.set.density);setT('lRe','FLOW '+me.set.release);setT('lCa','OUT '+me.active);setT('lSD','SHAPE D '+me.set.sdens);setT('lCo','COMPACT '+me.set.compact);
+  const ready=prep&&!sb&&prepNeeds(me).length===0&&S.aiRev>=1;
+  setD('tStart',prep&&!sb?'block':'none');if(hudCache.rdy!==ready){hudCache.rdy=ready;$('tStart').classList.toggle('go',ready);$('tStart').classList.toggle('wait',!ready);}
+  setT('tStart',ready?'START':'START (finish the steps)');
+  setD('tSwap',sb?'block':'none');setT('tSwap',ME===0?'EDIT: BLUE':'EDIT: RED');setD('tRefill',sb?'block':'none');
+  // path chips (during the match): MAIN and each branch, each its own colour and its own meter
+  const showChips=!prep;setD('chips',showChips?'flex':'none');
+  if(showChips){const ck=ME+':'+me.paths.map((P,i)=>P?i:'-').join('')+':'+selP;if(ck!==chipK){chipK=ck;const h=$('chips');h.innerHTML='';me.paths.forEach((P,i)=>{if(!P)return;const b=document.createElement('button');b.className='chip'+(i===selP?' on':'');b.dataset.id=i;b.textContent=i?'BRANCH '+i:'MAIN';b.style.borderColor=i?brCol(i):'#e8e8f0';b.style.color=i&&i!==selP?brCol(i):'';const m=document.createElement('i');b.appendChild(m);b.addEventListener('click',()=>{selP=i;});h.appendChild(b);});}
+    for(const b of $('chips').children){const i=+b.dataset.id,P=me.paths[i];if(!P)continue;const f=i?brLeft(me,P)/CFG.brMax:(CFG.pathMax-pathUsed(me))/CFG.pathMax,w=Math.round(clamp(f,0,1)*100)+'%';if(b.firstElementChild.style.width!==w)b.firstElementChild.style.width=w;}}
+  // slider rows: they change the selected path only
+  const nm=selP?'BRANCH '+selP:'MAIN PATH';setT('slh','Sliders: '+nm+(selP?'':'  (tap a path to switch)'));$('slh').style.color=selP?brCol(selP):'#e8e8f0';
+  setT('lSp','PACE\n'+ps.speed+' '+PW[ps.speed-1]);setT('lDe','DENSITY\n'+ps.density+' '+DW(ps.density));setT('lSpc','SPACING\n'+ps.spacing+' '+SW(ps.spacing));setT('lWd','LANE WIDTH\n'+ps.width+' '+WW(ps.width));
+  const rm=$('sRe');if(rm.dataset.m!==(selP?'b':'m')){rm.dataset.m=selP?'b':'m';rm.min=selP?0:1;rm.max=selP?100:10;rm.step=selP?5:1;}
+  setT('lRe',selP?'SHARE\n'+sP.share+'% of main':'FLOW\n'+me.set.release+' of 10');rm.disabled=selP>0&&!!CFG.autoDist;
+  setT('tLane','LANE: '+LANES[sP.lane|0]);
+  $('legacy').style.display=CFG.shapesOn?'block':'none';
+  setT('lAt','AT '+sP.sh.at);setT('lSh',selP?'SHARE '+sP.share:'SHARE -');setT('lCa','OUT '+me.active);setT('lSD','SHAPE D '+me.set.sdens);setT('lCo','COMPACT '+me.set.compact);
   if(S.over){if(!revInit){revInit=true;revPane=!!S.aiReview;}setT('rTitle',st);const rk=S.tick+':'+revPane+':'+(S.aiReview?1:0);if(hudCache.rk!==rk){hudCache.rk=rk;renderResult();}
     setD('btnRev',S.aiReview?'block':'none');setT('btnRev',revPane?'STATS':'AI REVIEW');}else{hudCache.rk=null;revInit=false;revPane=false;}
-  const sl=[['sSp','speed'],['sDe','density'],['sRe','release'],['sCa','cap'],['sSD','sdens'],['sCo','compact']];
-  for(const q of sl){const el=$(q[0]);if(document.activeElement!==el&&+el.value!==me.set[q[1]])el.value=me.set[q[1]];}
-  for(const q of[['sPu',sP.sh.pull],['sAt',sP.sh.at],['sSh',sP.share]]){const el=$(q[0]);if(document.activeElement!==el&&+el.value!==q[1])el.value=q[1];}
+  const sl=[['sSp',ps.speed],['sDe',ps.density],['sSpc',ps.spacing],['sWd',ps.width],['sRe',selP?sP.share:me.set.release],['sCa',me.set.cap],['sSD',me.set.sdens],['sCo',me.set.compact],['sPu',sP.sh.pull],['sAt',sP.sh.at]];
+  for(const q of sl){const el=$(q[0]);if(document.activeElement!==el&&+el.value!==q[1])el.value=q[1];}
 }
 let revPane=false,revInit=false;
 // RESULT SCREEN: full stats table (you / foe) and, when the AI played, its match review (the AI's tactical memory is already wiped by then)
@@ -866,8 +937,8 @@ function wpt(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.lef
 // ---------- INPUT (the player drives the same SIDE API as the AI)
 let ptr=null,ptrId=-1;
 function toolDown(q){const sd=S.sides[ME];S.msg='';
-  if(S.tool==='circle'){if(S.phase!=='prep')return;placeCircle(ME,q.x,q.y);ptr={mode:'circle'};}
-  else if(S.tool==='main'){if(S.phase!=='prep')return;const p=sd.paths[0].p,n=p.length>>1,ex=p[(n-1)*2],ey=p[(n-1)*2+1];
+  if(S.tool==='circle'){if(S.phase!=='prep'&&!sbx())return;placeCircle(ME,q.x,q.y);ptr={mode:'circle'};}
+  else if(S.tool==='main'){if(S.phase!=='prep'&&!sbx())return;const p=sd.paths[0].p,n=p.length>>1,ex=p[(n-1)*2],ey=p[(n-1)*2+1];
     const ok=n===1?Math.hypot(q.x-ex,q.y-ey)<CR+26:Math.hypot(q.x-ex,q.y-ey)<34;
     if(ok){selP=0;ptr={mode:'main',px:ex,py:ey};}else{ptr=null;S.msg=n===1?'Start on your circle':'Continue from the end';}}
   else if(S.tool==='branch'){const P=branchBegin(ME,q.x,q.y);if(P){selP=P.id;P.born=S.tick;ptr={mode:'branch',P:P,px:P.p[0],py:P.p[1]};}else{ptr=null;S.msg=brCount(sd)>=CFG.maxBr?'No branches left':'Start ON the main path';}}
@@ -875,34 +946,40 @@ function toolDown(q){const sd=S.sides[ME];S.msg='';
   else if(S.tool==='erase'){eraseAt(ME,q.x,q.y);ptr={mode:'erase'};}
 }
 function toolMove(q){if(!ptr)return;ptr.tx=q.x;ptr.ty=q.y;
-  if(ptr.mode==='circle'&&S.phase==='prep')placeCircle(ME,q.x,q.y);
+  if(ptr.mode==='circle'&&(S.phase==='prep'||sbx()))placeCircle(ME,q.x,q.y);
   else if(ptr.mode==='main'){ptr.px+=(q.x-ptr.px)*0.55;ptr.py+=(q.y-ptr.py)*0.55;pathExtend(ME,ptr.px,ptr.py);if(pathUsed(S.sides[ME])+PSP>CFG.pathMax)S.msg='Path meter used up';}
   else if(ptr.mode==='branch'){ptr.px+=(q.x-ptr.px)*0.55;ptr.py+=(q.y-ptr.py)*0.55;branchExtend(ME,ptr.P,ptr.px,ptr.py);if(brUsed(ptr.P)+PSP>CFG.brMax)S.msg='Branch meter used up';}
-  else if(ptr.mode==='wall'){ptr.px+=(q.x-ptr.px)*0.6;ptr.py+=(q.y-ptr.py)*0.6;wallExtend(ME,ptr.st,ptr.px,ptr.py);}
+  else if(ptr.mode==='wall'){ptr.px=q.x;ptr.py=q.y;wallExtend(ME,ptr.st,ptr.px,ptr.py);}   // walls follow the finger exactly (1:1), in 3-unit steps, right to the screen edge
   else if(ptr.mode==='erase')eraseAt(ME,q.x,q.y);}
-function toolUp(){if(ptr&&ptr.tx!==undefined){if(ptr.mode==='main')pathExtend(ME,ptr.tx,ptr.ty);else if(ptr.mode==='branch')branchExtend(ME,ptr.P,ptr.tx,ptr.ty);else if(ptr.mode==='wall')wallExtend(ME,ptr.st,ptr.tx,ptr.ty);}
+function toolUp(){if(ptr&&ptr.mode==='circle'&&S.phase==='prep'&&!CFG.duel&&S.planFoe&&Math.hypot(S.sides[0].circle.x-S.planFoe[0],S.sides[0].circle.y-S.planFoe[1])>0.5)aiPrepPlan();
+  if(ptr&&ptr.tx!==undefined){if(ptr.mode==='main')pathExtend(ME,ptr.tx,ptr.ty);else if(ptr.mode==='branch')branchExtend(ME,ptr.P,ptr.tx,ptr.ty);else if(ptr.mode==='wall')wallExtend(ME,ptr.st,ptr.tx,ptr.ty);}
   if(ptr&&ptr.mode==='wall')wallEnd(ME,ptr.st);if(ptr&&ptr.mode==='branch')branchEnd(ME,ptr.P);ptr=null;}
-canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(ptr||S.over)return;try{canvas.setPointerCapture(e.pointerId);}catch(_){}ptr=null;ptrId=e.pointerId;toolDown(wpt(e));});
-canvas.addEventListener('pointermove',e=>{if(e.pointerId!==ptrId)return;toolMove(wpt(e));});
-const up=e=>{if(e.pointerId!==ptrId)return;ptrId=-1;toolUp();};
+let tapS=null;
+function selectAt(q){const me=S.sides[ME];let bd=16,bi=-1;for(let i=0;i<me.paths.length;i++){const P=me.paths[i];if(!P)continue;const p=P.p;for(let k=0;k<p.length;k+=2){const d=Math.hypot(p[k]-q.x,p[k+1]-q.y);if(d<bd){bd=d;bi=i;}}}if(bi>=0){selP=bi;chipK='';return true;}return false;}
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();tapS={x:e.clientX,y:e.clientY,t:Date.now(),moved:false,q:wpt(e)};if(ptr||S.over)return;try{canvas.setPointerCapture(e.pointerId);}catch(_){}ptr=null;ptrId=e.pointerId;toolDown(wpt(e));});
+canvas.addEventListener('pointermove',e=>{if(e.pointerId!==ptrId)return;if(tapS&&Math.hypot(e.clientX-tapS.x,e.clientY-tapS.y)>8)tapS.moved=true;const ev=e.getCoalescedEvents?e.getCoalescedEvents():null;if(ev&&ev.length>1){for(const c of ev)toolMove(wpt(c));}else toolMove(wpt(e));});
+const up=e=>{if(e.pointerId!==ptrId)return;ptrId=-1;toolUp();if(tapS&&!tapS.moved&&Date.now()-tapS.t<600&&S.tool!=='erase'&&S.tool!=='circle'&&!S.over)selectAt(tapS.q);tapS=null;};
 canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
 for(const t of['circle','main','branch','wall','gate','erase'])$('t'+t[0].toUpperCase()+t.slice(1)).addEventListener('click',()=>{S.tool=t;S.msg='';});
 $('tLane').addEventListener('click',()=>{const sd=S.sides[ME],P=sd.paths[selP]||sd.paths[0];for(let k=1;k<=5;k++){const c=((P.lane|0)+k)%5;if(laneOk(c)){setLane(ME,P.id,c);break;}}});
 $('btnRev').addEventListener('click',()=>{revPane=!revPane;});
-for(const t of['D','S','F'])$('tab'+t).addEventListener('click',()=>{curTab=t;});
-$('tStart').addEventListener('click',()=>{if(S.phase==='prep'){autoStart();savePrefs();}});
-$('tSwap').addEventListener('click',()=>{ME=1-ME;selP=0;ptr=null;S.tool='main';chipKey='';});
+$('tStart').addEventListener('click',()=>{if(S.phase==='prep'&&tryStart())savePrefs();});
+$('tSwap').addEventListener('click',()=>{ME=1-ME;selP=0;ptr=null;S.tool='main';chipKey='';chipK='';});
 $('btnPause').addEventListener('click',()=>{S.paused=!S.paused;});
 const restart=()=>{newGame((seed*1664525+1013904223)>>>0,true);ptr=null;chipKey='';curTab='D';lastPhase='prep';};
 $('btnRestart').addEventListener('click',restart);$('btnAgain').addEventListener('click',restart);
 $('btnMenu').addEventListener('click',()=>showView('menu'));
-for(const q of[['sSp','speed'],['sDe','density'],['sRe','release'],['sCa','cap'],['sSD','sdens'],['sCo','compact']]){$(q[0]).addEventListener('input',e=>setSetting(ME,q[1],+e.target.value));$(q[0]).addEventListener('change',savePrefs);}
+for(const q of[['sSp','speed'],['sDe','density'],['sSpc','spacing'],['sWd','width']]){$(q[0]).addEventListener('input',e=>setPathSetting(ME,selP,q[1],+e.target.value));$(q[0]).addEventListener('change',savePrefs);}
+$('sRe').addEventListener('input',e=>{if(selP)setShare(ME,selP,+e.target.value);else setSetting(ME,'release',+e.target.value);});$('sRe').addEventListener('change',savePrefs);
+for(const q of[['sCa','cap'],['sSD','sdens'],['sCo','compact']]){$(q[0]).addEventListener('input',e=>setSetting(ME,q[1],+e.target.value));$(q[0]).addEventListener('change',savePrefs);}
+for(const b of document.querySelectorAll('.pm')){b.addEventListener('click',()=>{const el=$(b.dataset.for),stp=+el.step||1,v=clamp(+el.value+(+b.dataset.d)*stp,+el.min,+el.max);el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));});}
+$('tRefill').addEventListener('click',()=>{sandboxRefill();S.msg='Pools refilled';});$('btnStep').addEventListener('click',()=>{sandboxStep(10);});
 $('sPu').addEventListener('input',e=>setPull(ME,selP,+e.target.value));$('sAt').addEventListener('input',e=>setAt(ME,selP,+e.target.value));$('sSh').addEventListener('input',e=>setShare(ME,selP,+e.target.value));
 window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){if(S)S.paused=true;}});
 window.addEventListener('popstate',()=>{S.paused=true;});
 // menu / custom / help
 let CUS=Object.assign({},DEFCFG);
-function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
+function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
 function schemaOf(k){for(const r of CUSTOM)if(r[0]===k)return r;return null;}
 function clampCus(k,v){const r=schemaOf(k);if(!r)return v;if(r[3]==='b')return v?1:0;if(r[3]==='e')return clamp(Math.round(v),0,(LBL[k]||[0,1]).length-1);return clamp(v,r[4],r[5]);}
 function saveCustom(){try{localStorage.setItem(KEYC,JSON.stringify(CUS));}catch(e){}}
@@ -949,6 +1026,7 @@ $('mForms').addEventListener('click',()=>{showView('editor');edChips();edMsg(ED.
 window.addEventListener('resize',()=>{if(view==='editor')edLayout();});
 $('mResume').addEventListener('click',()=>{showView('app');});
 $('mQuick').addEventListener('click',()=>startWith({aiLevel:prefs.diff}));
+$('mSandbox').addEventListener('click',()=>startWith({duel:1,aiLevel:0}));
 $('mDiff').addEventListener('click',()=>{prefs.diff=prefs.diff>=4?1:prefs.diff+1;setT('mDiff','DIFFICULTY: '+DIFFN[prefs.diff]);hudCache.mDiff=null;savePrefs();});
 $('mCustom').addEventListener('click',()=>{buildCustom();showView('custom');});
 $('mHelp').addEventListener('click',()=>showView('help'));
@@ -958,10 +1036,10 @@ $('cBack').addEventListener('click',()=>showView('menu'));$('hBack').addEventLis
 $('hbody').innerHTML=HELP.map(t=>'<p>'+t+'</p>').join('');
 // ---------- prefs (validated, never throws)
 const prefs={wins:0,losses:0,stage:0,diff:3};
-function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
-  for(const k of['speed','density','release','cap','sdens','compact'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
+function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
+  for(const k of['speed','density','release','cap','sdens','compact','width','spacing'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
   prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;}}catch(e){}}
-function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,density:s.density,release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff}));}catch(e){}}
+function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,density:s.density,release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,spacing:s.spacing,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff}));}catch(e){}}
 // ---------- loop
 let last=0,acc=0,counted=false;
 function frame(now){
@@ -969,7 +1047,8 @@ function frame(now){
   if(!last)last=now;let dt=(now-last)/1000;last=now;dt=Math.min(0.1,Math.max(0,dt));
   if(window.__tt&&window.__tt.manual){acc=0;}
   else if(!document.hidden&&!S.paused&&view==='app'){
-    if(S.phase==='prep'&&CFG.prepSec>0){S.prepT+=dt;if(S.prepT>=CFG.prepSec)autoStart();}
+    if(S.phase==='prep'&&CFG.prepSec>0){S.prepT+=dt;if(S.prepT>=CFG.prepSec)autoStart(true);}
+    if(S.phase==='prep'&&S.aiRev<1)S.aiRev=Math.min(1,S.aiRev+dt/3);
     acc+=dt;let n=0;while(acc>=STEP&&n++<6){tick();acc-=STEP;}if(n>=6)acc=0;}
   if(S.over&&!counted){counted=true;if(S.winner===0)prefs.wins++;else if(S.winner===1)prefs.losses++;savePrefs();}
   if(!S.over)counted=false;
@@ -977,7 +1056,9 @@ function frame(now){
 }
 document.addEventListener('visibilitychange',()=>{last=0;acc=0;});
 window.addEventListener('resize',()=>{CW=0;});window.addEventListener('orientationchange',()=>setTimeout(()=>{CW=0;},60));
-function autoStart(){for(const sd of S.sides)if(sd.human&&sd.paths[0].p.length<4&&sd.strokes.length===0){aiPlan(sd.id);}startBattle();}
+function autoStart(fill){for(const sd of S.sides)if(sd.human&&sd.paths[0].p.length<4&&sd.strokes.length===0){aiPlan(sd.id);}
+  if(fill)for(const sd of S.sides)if(sd.human&&S.phase==='prep'&&prepNeeds(sd).indexOf('wall')>=0)autoDefense(sd);startBattle();}
+function tryStart(){if(S.phase!=='prep')return false;for(const sd of S.sides){if(!sd.human)continue;const n=prepNeeds(sd);if(n.length){if(CFG.duel&&sd.id!==ME){S.msg='Player '+(sd.id+1)+' must draw a '+(n[0]==='path'?'path':'defense line')+' first';}else S.msg=n[0]==='path'?'Draw your attack path first':'Draw your defense line first';return false;}}autoStart(false);return true;}
 // ---------- __tt hook (tough-tools HOOKS.md)
 function num(v){if(!fin(v))throw new Error('bad number');return v;}
 const CMDS=[{name:'pause'},{name:'resume'},{name:'restart'},{name:'start'},{name:'autoplan'},
@@ -1032,8 +1113,8 @@ window.__tt={version:1,manual:false,
 window.__pw={get S(){return S;},get CFG(){return CFG;},set CFG(v){CFG=v;},get ME(){return ME;},set ME(v){ME=v;},get selP(){return selP;},set selP(v){selP=v;},get L(){return{LX:LX,LY:LY,LS:LS};},get view(){return view;},
  C:{W,H,CAPMAX,PSP,CONTACT,STUN,MAXP,MAXSQ,DEFCFG,SHAPES,NSH,MAXCUS,POLYMAX,MX,MY},
  px,py,pvx,pvy,pox,poy,php,pst,pstun,pps,pcd,pwc,pid,psq,pslot,plu,plv,pcnt,pspm,psh,pcap,release,recall,collide,movePixels,tick,startBattle,aiPlan,aiAdapt,placeCircle,pathExtend,pathTrim,wallBegin,wallExtend,wallEnd,eraseAt,eraseStroke,
- branchBegin,branchExtend,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},
- setRnd(f){rnd=f;},useShape,shapeLeft,cdTicks,shapeOk,rhoAt,burnPool,loseLife,plife,qN,cntA,nearOwnWall,nearOwnPath,clrOf,cellHP,aiShapes,laneHW,POOL,get qHead(){return qHead;},newGame,buildWallGrid,wallsLeft,prefs,endMatch,autoStart,startWith,showView,buildCustom,get CUS(){return CUS;},CUSTOM,pathAt,restart,canWall,canBr,canMain,rebuildSegs,crossesOwnWall,compact};
+ branchBegin,branchExtend,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},sbx,sandboxRefill,sandboxStep,setPathSetting,pfree,freePix,pfade,FADE_T,VFX,vfxStep,pbnc,get vpN(){return vpN;},VPMAX,vAdd,vX,vY,vLife,vKind,prepNeeds,tryStart,autoDefense,aiPrepPlan,wallLen,MINPATH,MINWALL,vkOf,tkOf,PACE_REF,
+ setRnd(f){rnd=f;},useShape,shapeLeft,cdTicks,shapeOk,rhoAt,burnPool,loseLife,plife,qN,cntA,nearOwnWall,nearOwnPath,clrOf,cellHP,aiShapes,aiOpenBranch,brCol,BRCOL,pset,selectAt,POOL,get qHead(){return qHead;},newGame,buildWallGrid,wallsLeft,prefs,endMatch,autoStart,startWith,showView,buildCustom,get CUS(){return CUS;},CUSTOM,pathAt,restart,canWall,canBr,canMain,rebuildSegs,crossesOwnWall,compact};
 // ---------- boot
 newGame(((Math.random()*4294967296)>>>0)||1,false);
 loadPrefs();loadCustom();loadForms();syncForms();
