@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>PIXEL WAR 0.4.4</title>
+<title>PIXEL WAR 0.4.5</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d1c;color:#dfe3ff;font:600 13px/1.2 system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 #app{display:flex;flex-direction:column;height:100%}
@@ -110,7 +110,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
   <div id="result"><h2 id="rTitle">-</h2><div id="rBody"></div><div class="rb"><button id="btnRev">AI REVIEW</button><button id="btnAgain" class="go">PLAY AGAIN</button></div></div>
  </div>
 </div>
-<div class="view" id="menu"><h1>PIXEL WAR 0.4.4</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
+<div class="view" id="menu"><h1>PIXEL WAR 0.4.5</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
  <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
 <div class="view" id="stages"><h1>STAGES</h1><p class="sub">Four stages unlock the mechanics one step at a time. QUICK MATCH and CUSTOM GAME have everything.</p><div class="btns" id="stlist" style="flex:1;overflow-y:auto"></div><div class="btns" style="padding-top:0"><button id="stBack">BACK</button></div></div>
 <div class="view" id="editor"><h1>SHAPE EDITOR</h1><p class="sub">Draw ONE closed outline with your finger; the top edge is the FRONT. The outline is the shape's yellow hitbox: its pixels wander freely inside it. Saved shapes are abilities in the SHAPE tab (the AI designs its own).</p><div id="edwrap"><canvas id="edc"></canvas></div><div id="edmsg"></div><div id="edlist"></div>
@@ -122,7 +122,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 'use strict';
 (function(){
 /* =====================================================================
-   PIXEL WAR 0.4.4 — full game on the 0.1.1 density engine (0.4.2 lane-fill mixed with 0.4.3 steady flow and smooth motion; the path is a direction guide only, not a rail; shorter ricochet travel). 0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
+   PIXEL WAR 0.4.5 — full game on the 0.1.1 density engine (0.4.2 lane-fill mixed with 0.4.3 steady flow and smooth motion; the path is a direction guide only, not a rail; short random ricochet; in-lane chip/knock; widening end cone). 0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
    Layers: CONFIG/CUSTOM · RNG · STATE (struct-of-arrays) · SIDE API (shared by player + AI)
    · SHAPES (squads) · AI (plan + live learning, memory kept between matches) · MATCH · PIXELS · COLLISION · RENDER · VIEWS/HUD · INPUT · __tt hook
    Pixel states: 1 exit, 2 follow path, 3 end (straight + drift, leash), 4 area member (wanders inside its shape's soft hitbox), 5 knocked out of the area (comes back, or is recalled past the leash).
@@ -131,7 +131,7 @@ const W=360,H=500,STEP=1/60,CELL=4,GW=Math.ceil(W/CELL)+2,GH=Math.ceil(H/CELL)+2
 // pool 10000 = HP / reserve; at most 200..400 pixels per side are on the field at once
 const POOL=10000,CAPMAX=POOL,NP=POOL*2,CAPMIN=200,CAPSTEP=50,PERFCAP=400,MAXP=6,MAXSQ=40,PSP=4,LGX=9,LGY=12;
 const WST=3,WALL_HALF=2,MAX_STROKES=12,CONTACT=3.5,LOOK=14,EXIT_T=14,STUN=24,CD_HIT=10,CD_WALL=8;
-const KEY='pixelwar.v44',KEYC='pixelwar.v44.custom',KEYF='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
+const KEY='pixelwar.v45',KEYC='pixelwar.v45.custom',KEYF='pixelwar.v45.forms',KEY44='pixelwar.v44',KEYC44='pixelwar.v44.custom',KEYF44='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
 const MAXCUS=6,NSH=7+MAXCUS,POLYMAX=24,MX=22,MY=18;
 const SHAPES=['LINE','ARROW','WEDGE','RING','DIAMOND','DOUBLE','SPIRAL','C1','C2','C3','C4','C5','C6'];
 const LANES=['NORMAL','WIDE','NARROW','TAPERED','ARROW'],LMAX=[1,2.0,0.4,2.0,1.2];
@@ -175,11 +175,12 @@ let seed=1,rnd=mul(1);
 const fin=v=>typeof v==='number'&&Number.isFinite(v);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const PACE_REF=75;   // the old (0.4.1) default pace; absolute velocities, knock, jitter and tick timers are scaled by speedOf/PACE_REF so slow pixels behave like slow-motion fast ones
-const RICO_LEASH_K=0.28,RICO_SPD=0.33,RICO_PAD=14;   // short ricochet range (Jay t1140/t1141). Each spray rolls a random chance, then a random heading and a random takeoff in 0.15..0.38 of current speed (t1148).
+const RICO_LEASH_K=0.28,RICO_SPD=0.33,RICO_PAD=14;   // short ricochet / path-end range (Jay t1140/t1141/t1143). Each spray rolls a random chance, then a random heading and a random takeoff in 0.15..0.38 of current speed (t1148).
+const endLeash=hw=>Math.max((hw||0)+RICO_PAD,CFG.leash*RICO_LEASH_K);
 function speedOf(set){const hi=CFG.paceMax;return hi*(0.25+0.75*(set.speed-1)/9);}
 const vkOf=sp=>clamp(sp/PACE_REF,0.12,1.6),tkOf=sp=>clamp(PACE_REF/sp,1,5);
 function onField(set){return Math.round(200+(clamp(set.release,1,10)-1)/9*200);}   // FLOW slider 1..10 -> 200..400 pixels of that path on the field at once (steady state)
-function flowRate(sd,P){const set=pset(sd,P),sp=Math.max(4,speedOf(set)),len=Math.max(80,pathLen(P)+(P.id?P.fk*PSP:0)),T=(len+CFG.leash)/sp*0.8;return CFG.relMul/120*onField(set)/T;}   // pixels per second that keeps ~onField() of them on the field: a steady stream
+function flowRate(sd,P){const set=pset(sd,P),sp=Math.max(4,speedOf(set)),len=Math.max(80,pathLen(P)+(P.id?P.fk*PSP:0)),T=(len+endLeash(laneHW(set))+sp*CFG.fadeSec*0.5)/sp;return CFG.relMul/120*onField(set)/T;}   // pixels per second that keeps ~onField() of them on the field, using the short end leash + fade (not the old 108-unit path leash)
 function flowPS(r){return onField({release:r});}
 function rateOf(set){return CFG.relMul/120*onField(set)/20;}
 const pset=(sd,P)=>(P&&P.id&&P.set)?P.set:sd.set;
@@ -209,7 +210,7 @@ function cleanForm(f){if(!f||typeof f!=='object')return null;let poly=[];
   if(r.length<3||Math.abs(polyArea(r))<0.03)return null;
   return{name:String(typeof f.name==='string'&&f.name?f.name:'FORM').slice(0,10),poly:r.map(a=>[Math.round(a[0]*1000)/1000,Math.round(a[1]*1000)/1000])};}
 function cloneForms(){return PRESETS.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));}
-function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
+function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF44)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
   if(Array.isArray(raw))for(const f of raw){if(a.length>=MAXCUS)break;const c=cleanForm(f);if(c)a.push(c);}PRESETS=a;}
 function saveForms(){try{localStorage.setItem(KEYF,JSON.stringify(PRESETS.map(f=>({name:f.name,poly:f.poly}))));}catch(e){}}
 function syncForms(){if(!S)return;for(const sd of S.sides)if(sd.human){sd.forms=cloneForms();for(let t=7;t<NSH;t++)sd.shReady[t]=0;}}
@@ -499,10 +500,10 @@ function aiDesignForm(sd){if(sd.forms.length>=MAXCUS)return null;const fam=(rnd(
   for(const p of pts){p[0]=clamp(p[0]+(rnd()-.5)*0.05,0,1);p[1]=clamp(p[1]+(rnd()-.5)*0.05,0,1);}
   const f=cleanForm({name:names[fam],poly:pts});if(!f)return null;sd.forms.push(f);if(S.ai&&S.ai.designs)S.ai.designs.push(f.name);return f;}
 // ---- AI MEMORY: kept between matches on this device (lessons, best shape, designed shapes, where its stream keeps dying, the slider setup that worked). DELETE AI MEMORY in the menu clears it.
-const KEYAI='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
+const KEYAI='pixelwar.v45.aimem',KEYAI44='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
 const aiMemEmpty=()=>({matches:0,wins:0,losses:0,lessons:[],best:-1,forms:[],loss:[],tune:null});
 let AIMEM=aiMemEmpty();
-function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localStorage.getItem(KEYAI43)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
+function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localStorage.getItem(KEYAI44)||localStorage.getItem(KEYAI43)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
   m.matches=fin(+v.matches)?clamp(v.matches|0,0,1e6):0;m.wins=fin(+v.wins)?clamp(v.wins|0,0,1e6):0;m.losses=fin(+v.losses)?clamp(v.losses|0,0,1e6):0;
   m.lessons=Array.isArray(v.lessons)?v.lessons.filter(x=>typeof x==='string').slice(-60).map(x=>x.slice(0,140)):[];m.best=fin(+v.best)?clamp(v.best|0,-1,NSH-1):-1;
   m.forms=Array.isArray(v.forms)?v.forms.slice(0,MAXCUS).map(cleanForm).filter(Boolean):[];
@@ -510,7 +511,7 @@ function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localSt
   if(v.tune&&typeof v.tune==='object'){const t={};let ok=true;for(const k of['speed','density','release','width']){if(!fin(+v.tune[k])){ok=false;break;}t[k]=clamp(Math.round(+v.tune[k]),1,10);}m.tune=ok?t:null;}
   AIMEM=m;}catch(e){}}
 function saveAiMem(){try{localStorage.setItem(KEYAI,JSON.stringify(AIMEM));}catch(e){}}
-function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
+function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI44);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
 const aiMemForms=()=>AIMEM.forms.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));
 function aiLearn(note){const ai=S.ai;if(!ai)return;const L=ai.lessons;if(L.length&&L[L.length-1]===note)return;if(L.length>=60)L.shift();L.push(note);}
 function eraseStroke(sd,st){const i=sd.strokes.indexOf(st);if(i>=0){sd.strokes.splice(i,1);if(S.phase==='battle')rebuildSegs(sd);}}
@@ -669,8 +670,8 @@ function strayStart(i,sd){if(pfade[i]===0){pfade[i]=FADE_T();sd.stats.strayed=(s
 const fv=[0,0];
 function freeFwd(i,p,s,lw,spd,stun,vx,vy,wob){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;let vt=vx*tx+vy*ty,vn=-vx*ty+vy*tx;
   if(!stun){const kk=Math.min(1,8*STEP);vt+=(spd-vt)*kk;vn+=pdr[i]*spd*0.4*STEP+(rnd()-.5)*spd*wob*STEP;}
-  if((lat>lw&&vn>0)||(lat<-lw&&vn<0))vn*=-0.55;fv[0]=vt*tx-vn*ty;fv[1]=vt*ty+vn*tx;}
-function holdLane(i,p,s,lw){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;if(lat>lw||lat<-lw){const e=lat>0?lw:-lw,k=lat-e;px[i]+=ty*k;py[i]-=tx*k;let vt=pvx[i]*tx+pvy[i]*ty,vn=-pvx[i]*ty+pvy[i]*tx;if((e>0&&vn>0)||(e<0&&vn<0))vn*=-0.55;pvx[i]=vt*tx-vn*ty;pvy[i]=vt*ty+vn*tx;}}
+  if((lat>lw&&vn>0)||(lat<-lw&&vn<0)){vn*=-0.55;vn+=(lat>0?-1:1)*spd*0.08;}fv[0]=vt*tx-vn*ty;fv[1]=vt*ty+vn*tx;}
+function holdLane(i,p,s,lw){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx,lim=lw*0.98;if(lat>lim||lat<-lim){const e=lat>0?lim:-lim,k=lat-e;px[i]+=ty*k;py[i]-=tx*k;let vt=pvx[i]*tx+pvy[i]*ty,vn=-pvx[i]*ty+pvy[i]*tx;if((e>0&&vn>0)||(e<0&&vn<0))vn*=-0.55;vn+=(e>0?-1:1)*Math.max(2,Math.hypot(pvx[i],pvy[i])*0.06);pvx[i]=vt*tx-vn*ty;pvy[i]=vt*ty+vn*tx;}}
 function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
   for(let side=0;side<2;side++){const sd=S.sides[side],set=sd.set,spd0=speedOf(set),hw=laneHW(set),cc=sd.circle,base=side*POOL,end=base+POOL,paths=sd.paths,np=paths.length;
     const pn=[],pex=[],pey=[],pF=[],pL=[],pTx=[],pTy=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pn.push(0);pex.push(0);pey.push(0);pF.push(0);pL.push(1);pTx.push(0);pTy.push(1);continue;}const n=P.p.length>>1;pn.push(n);{const q=P.p,a=n>=4?n-4:0,ex=n>=2?q[(n-1)*2]-q[a*2]:0,ey=n>=2?q[(n-1)*2+1]-q[a*2+1]:1,dd=Math.hypot(ex,ey)||1;pTx.push(ex/dd);pTy.push(ey/dd);}pL.push(Math.max(1,(n-1)*PSP));pex.push(P.p[(n-1)*2]);pey.push(P.p[(n-1)*2+1]);pF.push(P.arm?fPos(P):1e9);}
@@ -698,8 +699,8 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
         if(pst[i]===4){pvx[i]=vx;pvy[i]=vy;continue;}
         if(best>=n-1&&pi===pid[i]){
           if(pi>0&&conv>0&&P.rj>=0&&paths[0]){pid[i]=0;pps[i]=P.rj*PSP;if(conv===2)pcap[i]=0;else pcap[i]=1;}
-          else{pst[i]=3;pend[i]=0;{const u=pdr[i]/0.9,o=(u<0?-1:1)*Math.pow(Math.abs(u),2.2)*0.5,co=Math.cos(o),so=Math.sin(o);vx=(pTx[pi]*co-pTy[pi]*so)*spd;vy=(pTx[pi]*so+pTy[pi]*co)*spd;}}}
-        else{const lw=pHw[pi]*laneF(P.lane,pps[i]/pL[pi]),wob=0.7-0.04*(pset(sd,P).density-1)+(spcOn?pSpc[pi]*0.8:0);freeFwd(i,p,pps[i],lw,spd,stun,vx,vy,wob);vx=fv[0];vy=fv[1];}
+          else{pst[i]=3;pend[i]=0;{const u=pdr[i]/0.9,o=(u<0?-1:1)*Math.pow(Math.abs(u),2.2)*0.7,co=Math.cos(o),so=Math.sin(o);vx=(pTx[pi]*co-pTy[pi]*so)*spd;vy=(pTx[pi]*so+pTy[pi]*co)*spd;}}}   // loose starting cone, then it widens in state 3
+        else{const ps=pset(sd,P),lw=pHw[pi]*laneF(P.lane,pps[i]/pL[pi]),th=clamp((5-ps.width)/4,0,1),wob=(0.7-0.04*(ps.density-1))*(1-0.55*th)+(spcOn?pSpc[pi]*0.8:0);freeFwd(i,p,pps[i],lw,spd,stun,vx,vy,wob);vx=fv[0];vy=fv[1];}   // thin hitbox: less wander so packing rises (t1132), still no pull to the line
       }else if(cur===4||cur===5){ // AREA MEMBER: wanders freely inside its shape's soft hitbox (spring to its own wander spot); a hard knock can push it out (5), it re-enters or goes home past the leash
         const q=sd.sq[psq[i]];
         if(!q){pst[i]=3;psq[i]=-1;pend[i]=0;}
@@ -718,13 +719,13 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
           const kk=Math.min(1,(stun?1.0:9)*dt);vx+=(wx-vx)*kk;vy+=(wy-vy)*kk;}
       }
       if(pst[i]===3){ // END: straight on, drifting/spreading; leash from the end of its path
-        if(pfree[i]){pend[i]+=dt;if(pfade[i]===0&&((i+S.tick)&3)===0){let m=1e18;for(let k=0;k<n;k++){const ax=px[i]-p[k*2],ay=py[i]-p[k*2+1],d2=ax*ax+ay*ay;if(d2<m)m=d2;}const hwR=pHw[pi]*laneF(P.lane,Math.min(1,pps[i]/pL[pi])),lim=Math.max(hwR+RICO_PAD,CFG.leash*RICO_LEASH_K),traveled=pend[i]*Math.hypot(pvx[i],pvy[i]);if(m>lim*lim||traveled>CFG.leash*RICO_LEASH_K)pfade[i]=FADE_T();}}
-        else{if(!stun){const m=Math.hypot(vx,vy)||1;vx=vx/m*spd;vy=vy/m*spd;}   // past the end: dead straight, loose cone heading, then fade on the short leash (t1143)
-        pend[i]+=dt;const dx=px[i]-pex[pi],dy=py[i]-pey[pi],lim=Math.max(pHw[pi]+RICO_PAD,CFG.leash*RICO_LEASH_K);
+        if(pfree[i]){pend[i]+=dt;if(pfade[i]===0&&((i+S.tick)&3)===0){let m=1e18;for(let k=0;k<n;k++){const ax=px[i]-p[k*2],ay=py[i]-p[k*2+1],d2=ax*ax+ay*ay;if(d2<m)m=d2;}const lim=endLeash(pHw[pi]*laneF(P.lane,Math.min(1,pps[i]/pL[pi]))),traveled=pend[i]*Math.hypot(pvx[i],pvy[i]);if(m>lim*lim||traveled>CFG.leash*RICO_LEASH_K)pfade[i]=FADE_T();}}
+        else{if(!stun){const tx=pTx[pi],ty=pTy[pi];let vt=vx*tx+vy*ty,vn=-vx*ty+vy*tx,side=pdr[i]<0?-1:1;vn=clamp(vn+side*spd*0.28*dt,-spd*0.45,spd*0.45);vt=spd;vx=vt*tx-vn*ty;vy=vt*ty+vn*tx;}   // past the end: mostly straight, loose widening cone, then fade on the short leash
+        pend[i]+=dt;const dx=px[i]-pex[pi],dy=py[i]-pey[pi],lim=endLeash(pHw[pi]);
         if((dx*dx+dy*dy>lim*lim||pend[i]*spd>CFG.leash*RICO_LEASH_K)&&pfade[i]===0)pfade[i]=FADE_T();}
       }
       pvx[i]=vx;pvy[i]=vy;px[i]+=vx*dt;py[i]+=vy*dt;
-      if((pst[i]===1||pst[i]===2)&&n>=2){const lw=(pst[i]===1)?hwEx:pHw[pi]*laneF(P.lane,Math.min(1,pps[i]/pL[pi]));holdLane(i,p,pps[i],lw);}
+      if((pst[i]===1||pst[i]===2)&&n>=2&&pwc[i]===0){const lw=(pst[i]===1)?hwEx:pHw[pi]*laneF(P.lane,Math.min(1,pps[i]/pL[pi]));holdLane(i,p,pps[i],lw);}   // don't fight a wall bounce (pwc) by clamping back into the defense line
       if(!(px[i]>2&&px[i]<W-2&&py[i]>2&&py[i]<H-2)){recall(i);}
     }}}
 // ---------- VFX (visual only): destroyed pixels split into 1x1 bits that fade; ricocheting pixels glow and leave a fading trail. Fixed typed-array pool, own RNG, per-tick spawn budget, drops spawns when full.
@@ -789,7 +790,9 @@ function collide(){
         if(sI){s0.stats.misses++;s0.stats.surv++;}else hurt(i,pHP,1,j);
         if(sJ){s1.stats.misses++;s1.stats.surv++;}else hurt(j,pHP,0,i);
         if(bI&&pst[i]){bounceMark(i);s0.stats.ricochets++;s0.stats.defl++;ricoSpray(i,nx,ny);freePix(i);px[i]+=nx*dI;py[i]+=ny*dI;}
+        else if(pst[i]){pvx[i]+=nx*2.2;pvy[i]+=ny*2.2;px[i]+=nx*0.55;py[i]+=ny*0.55;const cap=Math.hypot(pvx[i],pvy[i]),mx=speedOf(s0.set)*1.05;if(cap>mx){pvx[i]*=mx/cap;pvy[i]*=mx/cap;}}   // no spray: still chip and knock, stay in play (in-lane next tick)
         if(bJ&&pst[j]){bounceMark(j);s1.stats.ricochets++;s1.stats.defl++;ricoSpray(j,-nx,-ny);freePix(j);px[j]-=nx*dJ;py[j]-=ny*dJ;}
+        else if(pst[j]){pvx[j]-=nx*2.2;pvy[j]-=ny*2.2;px[j]-=nx*0.55;py[j]-=ny*0.55;const cap=Math.hypot(pvx[j],pvy[j]),mx=speedOf(s1.set)*1.05;if(cap>mx){pvx[j]*=mx/cap;pvy[j]*=mx/cap;}}
         if(bJ&&!sJ)s0.stats.pushed++;if(bI&&!sI)s1.stats.pushed++;
         hit=true;break;}}}
   // walls + circles
@@ -1055,7 +1058,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){
 window.addEventListener('popstate',()=>{S.paused=true;});
 // menu / custom / help
 let CUS=Object.assign({},DEFCFG);
-function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
+function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC44)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
 function schemaOf(k){for(const r of CUSTOM)if(r[0]===k)return r;return null;}
 function clampCus(k,v){const r=schemaOf(k);if(!r)return v;if(r[3]==='b')return v?1:0;if(r[3]==='e')return clamp(Math.round(v),0,(LBL[k]||[0,1]).length-1);return clamp(v,r[4],r[5]);}
 function saveCustom(){try{localStorage.setItem(KEYC,JSON.stringify(CUS));}catch(e){}}
@@ -1113,7 +1116,7 @@ $('cBack').addEventListener('click',()=>showView('menu'));$('hBack').addEventLis
 $('hbody').innerHTML=HELP.map(t=>'<p>'+t+'</p>').join('');
 // ---------- prefs (validated, never throws)
 const prefs={wins:0,losses:0,stage:0,diff:3};
-function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
+function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY44)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
   for(const k of['speed','density','release','cap','sdens','compact','width','spacing'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
   prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;}}catch(e){}}
 function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,density:s.density,release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,spacing:s.spacing,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff}));}catch(e){}}
