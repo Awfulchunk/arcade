@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>PIXEL WAR 0.4.3</title>
+<title>PIXEL WAR 0.4.4</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d1c;color:#dfe3ff;font:600 13px/1.2 system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 #app{display:flex;flex-direction:column;height:100%}
@@ -93,10 +93,10 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
    <div id="sl">
     <div id="slh"></div>
     <div class="box"><span class="lab2" id="lSp"></span><button class="pm" data-d="-1" data-for="sSp" aria-label="pace down">&minus;</button><input id="sSp" type="range" min="1" max="10" step="1" value="5" aria-label="pace"><button class="pm" data-d="1" data-for="sSp" aria-label="pace up">+</button></div>
-    <div class="box"><span class="lab2" id="lDe"></span><button class="pm" data-d="-1" data-for="sDe" aria-label="density down">&minus;</button><input id="sDe" type="range" min="1" max="10" step="1" value="7" aria-label="density"><button class="pm" data-d="1" data-for="sDe" aria-label="density up">+</button></div>
+    <div class="box"><span class="lab2" id="lDe"></span><button class="pm" data-d="-1" data-for="sDe" aria-label="density down">&minus;</button><input id="sDe" type="range" min="1" max="10" step="1" value="5" aria-label="density"><button class="pm" data-d="1" data-for="sDe" aria-label="density up">+</button></div>
     <div class="box"><span class="lab2" id="lSpc"></span><button class="pm" data-d="-1" data-for="sSpc" aria-label="spacing down">&minus;</button><input id="sSpc" type="range" min="1" max="10" step="1" value="5" aria-label="spacing"><button class="pm" data-d="1" data-for="sSpc" aria-label="spacing up">+</button></div>
     <div class="box"><span class="lab2" id="lWd"></span><button class="pm" data-d="-1" data-for="sWd" aria-label="lane width down">&minus;</button><input id="sWd" type="range" min="1" max="10" step="1" value="5" aria-label="lane width"><button class="pm" data-d="1" data-for="sWd" aria-label="lane width up">+</button></div>
-    <div class="box"><span class="lab2" id="lRe"></span><button class="pm" data-d="-1" data-for="sRe" aria-label="flow down">&minus;</button><input id="sRe" type="range" min="1" max="10" step="1" value="9" aria-label="flow"><button class="pm" data-d="1" data-for="sRe" aria-label="flow up">+</button></div>
+    <div class="box"><span class="lab2" id="lRe"></span><button class="pm" data-d="-1" data-for="sRe" aria-label="flow down">&minus;</button><input id="sRe" type="range" min="1" max="10" step="1" value="5" aria-label="flow"><button class="pm" data-d="1" data-for="sRe" aria-label="flow up">+</button></div>
     <div class="box"><span class="lab2" id="lLn">LANE SHAPE</span><button id="tLane" style="flex:1;margin:0 0 0 4px">NORMAL</button></div>
     <div id="legacy" style="display:none">
      <div class="row" id="chipsL"></div><div class="row" id="shbtns"></div>
@@ -110,7 +110,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
   <div id="result"><h2 id="rTitle">-</h2><div id="rBody"></div><div class="rb"><button id="btnRev">AI REVIEW</button><button id="btnAgain" class="go">PLAY AGAIN</button></div></div>
  </div>
 </div>
-<div class="view" id="menu"><h1>PIXEL WAR 0.4.3</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
+<div class="view" id="menu"><h1>PIXEL WAR 0.4.4</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
  <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
 <div class="view" id="stages"><h1>STAGES</h1><p class="sub">Four stages unlock the mechanics one step at a time. QUICK MATCH and CUSTOM GAME have everything.</p><div class="btns" id="stlist" style="flex:1;overflow-y:auto"></div><div class="btns" style="padding-top:0"><button id="stBack">BACK</button></div></div>
 <div class="view" id="editor"><h1>SHAPE EDITOR</h1><p class="sub">Draw ONE closed outline with your finger; the top edge is the FRONT. The outline is the shape's yellow hitbox: its pixels wander freely inside it. Saved shapes are abilities in the SHAPE tab (the AI designs its own).</p><div id="edwrap"><canvas id="edc"></canvas></div><div id="edmsg"></div><div id="edlist"></div>
@@ -122,7 +122,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 'use strict';
 (function(){
 /* =====================================================================
-   PIXEL WAR 0.4.3 — full game on the 0.1.1 density engine (0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
+   PIXEL WAR 0.4.4 — full game on the 0.1.1 density engine (0.4.2 lane-fill mixed with 0.4.3 steady flow and smooth motion; the path is a direction guide only, not a rail; shorter ricochet travel). 0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
    Layers: CONFIG/CUSTOM · RNG · STATE (struct-of-arrays) · SIDE API (shared by player + AI)
    · SHAPES (squads) · AI (plan + live learning, memory kept between matches) · MATCH · PIXELS · COLLISION · RENDER · VIEWS/HUD · INPUT · __tt hook
    Pixel states: 1 exit, 2 follow path, 3 end (straight + drift, leash), 4 area member (wanders inside its shape's soft hitbox), 5 knocked out of the area (comes back, or is recalled past the leash).
@@ -131,13 +131,13 @@ const W=360,H=500,STEP=1/60,CELL=4,GW=Math.ceil(W/CELL)+2,GH=Math.ceil(H/CELL)+2
 // pool 10000 = HP / reserve; at most 200..400 pixels per side are on the field at once
 const POOL=10000,CAPMAX=POOL,NP=POOL*2,CAPMIN=200,CAPSTEP=50,PERFCAP=400,MAXP=6,MAXSQ=40,PSP=4,LGX=9,LGY=12;
 const WST=3,WALL_HALF=2,MAX_STROKES=12,CONTACT=3.5,LOOK=14,EXIT_T=14,STUN=24,CD_HIT=10,CD_WALL=8;
-const KEY='pixelwar.v43',KEYC='pixelwar.v43.custom',KEYF='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
+const KEY='pixelwar.v44',KEYC='pixelwar.v44.custom',KEYF='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
 const MAXCUS=6,NSH=7+MAXCUS,POLYMAX=24,MX=22,MY=18;
 const SHAPES=['LINE','ARROW','WEDGE','RING','DIAMOND','DOUBLE','SPIRAL','C1','C2','C3','C4','C5','C6'];
 const LANES=['NORMAL','WIDE','NARROW','TAPERED','ARROW'],LMAX=[1,2.0,0.4,2.0,1.2];
 // ---------- CONFIG: every constant a rule (quick match uses DEFCFG; CUSTOM GAME edits a copy)
 const DEFCFG={poolSize:POOL,lives:20,burn:20,circleDmg:1,circleR:22,pixHP:2,pixDmg:1,missP:20,ricoP:45,ricoMode:3,leash:108,fadeSec:1.2,shapesOn:0,sbxEnd:0,
- paceMax:24,pathMax:520,brMax:140,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
+ paceMax:27,pathMax:520,brMax:140,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
  sqN:300,tint:0,borrowSec:2,shapeCD:10,armSec:7,sqPull:50,shapeLane:0.8,shapeLen:3,ring:0,rhoRef:10,kSurv:0.9,kPush:0.8,survMax:0.85,pushMax:0.9,aiLevel:3,aiLearn:1,liveBr:1,liveWall:1,converge:0,momentum:0,orient:0,bias:0,autoDist:0,pattern:0,duel:0,halo:1,reveal:1,capDef:PERFCAP,relMul:120,
  laneDef:0,brWaste:0,koMargin:5,knockK:24,gate:1,arrowFront:60,reformSec:2.5,shockK:3,breakLive:20,kSpeed:100,aiForms:1,aiReview:1,stage:0,stageAll:1};
 let CFG=Object.assign({},DEFCFG);
@@ -149,7 +149,7 @@ const CUSTOM=[
  ['matchSec','Time limit (s)','higher circle HP wins at time','r',30,300,10],['prepSec','Prep timer (s)','0 = no limit, press START','r',0,120,10],['zoneH','Circle placement strip','how far up you may place it','r',30,150,10],
  ['duel','Players','SANDBOX = you control BOTH sides, draw and change anything any time, no win or lose (test the mechanics)','e'],['sbxEnd','Sandbox: end the game when a circle is empty','off = nothing ever ends; use REFILL to top the pools up','b'],
  ['_','PIXELS'],
- ['paceMax','Fastest pace (units per second)','the PACE slider runs from a quarter of this up to this. 24 is a sloth jog: about 21 seconds to cross the field at the fastest','r',6,90,2],
+ ['paceMax','Fastest pace (units per second)','the PACE slider runs from a quarter of this up to this. 27 is a slightly quicker sloth jog: about 18.5 seconds to cross the field at the fastest','r',6,90,2],
  ['pixHP','Pixel HP','Jay locked 2','r',1,6,1],['pixDmg','Pixel damage per hit','Jay locked 1','r',1,3,1],['missP','Miss: ricochet instead of damage %','','r',0,60,5],['ricoP','Ricochet alongside a hit %','','r',0,80,5],
  ['ricoMode','Ricochet rule','random / angle / hybrid (angle + density) / FULL HYBRID (angle + closing speed + packing)','e'],['kSpeed','Impact speed effect %','FULL HYBRID: fast impacts hit harder and push farther, slow ones glance','r',0,150,10],['leash','Leash distance','how far a pixel may stray from its path (1.5x the old distance); past it the pixel fades out, then goes home','r',30,220,6],['fadeSec','Fade-out time (s)','a pixel past the leash fades for this long; it can still be hit while it fades, with less chance as it fades','r',0.2,4,0.2],['capDef','Max on screen per side (performance cap)','0.2 used 3000; 10000 = whole pool','r',250,POOL,250],['relMul','Release rate per notch','pixels/s per slider step','r',20,120,20],['pattern','Release pattern','steady stream or pulsing waves','e'],['momentum','Formation momentum','speed builds when not hit','b'],
  ['_','PATHS AND BRANCHES'],
@@ -168,13 +168,14 @@ const CUSTOM=[
  ['halo','Show lane halo','','b'],['reveal','Show enemy plan in battle','','b'],
  ['_','COLLISION DENSITY'],
  ['rhoRef','Density reference (pixels per 12x12)','local density that counts as 1x','r',4,30,1],['kSurv','Packed pixel survives more','survive-chance gain per density ratio','r',0,2,0.1],['kPush','Packed pixel pushes enemies away','bounce-chance gain per density ratio','r',0,2,0.1],['survMax','Max survive chance','','r',0.2,0.95,0.05],['pushMax','Max push-away chance','','r',0.2,0.95,0.05]];
-const DEF={speed:5,density:3,release:3,cap:PERFCAP,sdens:7,compact:6,width:5,spacing:5};
+const DEF={speed:5,density:5,release:5,cap:PERFCAP,sdens:7,compact:6,width:5,spacing:5};
 // ---------- RNG (all sim randomness)
 const mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 let seed=1,rnd=mul(1);
 const fin=v=>typeof v==='number'&&Number.isFinite(v);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const PACE_REF=75;   // the old (0.4.1) default pace; absolute velocities, knock, jitter and tick timers are scaled by speedOf/PACE_REF so slow pixels behave like slow-motion fast ones
+const RICO_LEASH_K=0.28,RICO_SPD=0.33,RICO_PAD=14;   // short ricochet range (Jay t1140/t1141). Each spray rolls a random chance, then a random heading and a random takeoff in 0.15..0.38 of current speed (t1148).
 function speedOf(set){const hi=CFG.paceMax;return hi*(0.25+0.75*(set.speed-1)/9);}
 const vkOf=sp=>clamp(sp/PACE_REF,0.12,1.6),tkOf=sp=>clamp(PACE_REF/sp,1,5);
 function onField(set){return Math.round(200+(clamp(set.release,1,10)-1)/9*200);}   // FLOW slider 1..10 -> 200..400 pixels of that path on the field at once (steady state)
@@ -182,7 +183,7 @@ function flowRate(sd,P){const set=pset(sd,P),sp=Math.max(4,speedOf(set)),len=Mat
 function flowPS(r){return onField({release:r});}
 function rateOf(set){return CFG.relMul/120*onField(set)/20;}
 const pset=(sd,P)=>(P&&P.id&&P.set)?P.set:sd.set;
-function laneHW(set){const w=set.width;return 1.5+0.4*w*w;}   // WIDTH slider: half-width of the lane the pixels follow (units); the lane shape factors (wide 2.0, thin 0.4, arrow 1.2) multiply it
+function laneHW(set){const w=set.width;return 1.5+0.4*w*w;}   // WIDTH slider: half-width of the hitbox the pixels stay inside (units); the lane shape factors (wide 2.0, thin 0.4, arrow 1.2) multiply it. The drawn path is only a direction guide, not a rail.
 // LANE SHAPES: the hitbox area the pixels occupy. laneF(type,t) = half-width factor at fraction t along the path (allocation-free).
 function laneF(ty,t){if(t<0)t=0;else if(t>1)t=1;switch(ty){case 1:return 2.0;case 2:return 0.4;case 3:return 2.0-1.6*t;
   case 4:{if(t<0.45)return 0.4;if(t<0.72){const s=(t-0.45)/0.27;return 0.4+0.8*s*s*(3-2*s);}if(t<0.86)return 1.2;const x=(t-0.86)/0.14;return 1.2*Math.sqrt(Math.max(0,1-x*x));}default:return 1;}}
@@ -208,7 +209,7 @@ function cleanForm(f){if(!f||typeof f!=='object')return null;let poly=[];
   if(r.length<3||Math.abs(polyArea(r))<0.03)return null;
   return{name:String(typeof f.name==='string'&&f.name?f.name:'FORM').slice(0,10),poly:r.map(a=>[Math.round(a[0]*1000)/1000,Math.round(a[1]*1000)/1000])};}
 function cloneForms(){return PRESETS.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));}
-function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
+function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
   if(Array.isArray(raw))for(const f of raw){if(a.length>=MAXCUS)break;const c=cleanForm(f);if(c)a.push(c);}PRESETS=a;}
 function saveForms(){try{localStorage.setItem(KEYF,JSON.stringify(PRESETS.map(f=>({name:f.name,poly:f.poly}))));}catch(e){}}
 function syncForms(){if(!S)return;for(const sd of S.sides)if(sd.human){sd.forms=cloneForms();for(let t=7;t<NSH;t++)sd.shReady[t]=0;}}
@@ -498,10 +499,10 @@ function aiDesignForm(sd){if(sd.forms.length>=MAXCUS)return null;const fam=(rnd(
   for(const p of pts){p[0]=clamp(p[0]+(rnd()-.5)*0.05,0,1);p[1]=clamp(p[1]+(rnd()-.5)*0.05,0,1);}
   const f=cleanForm({name:names[fam],poly:pts});if(!f)return null;sd.forms.push(f);if(S.ai&&S.ai.designs)S.ai.designs.push(f.name);return f;}
 // ---- AI MEMORY: kept between matches on this device (lessons, best shape, designed shapes, where its stream keeps dying, the slider setup that worked). DELETE AI MEMORY in the menu clears it.
-const KEYAI='pixelwar.v43.aimem';
+const KEYAI='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
 const aiMemEmpty=()=>({matches:0,wins:0,losses:0,lessons:[],best:-1,forms:[],loss:[],tune:null});
 let AIMEM=aiMemEmpty();
-function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
+function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localStorage.getItem(KEYAI43)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
   m.matches=fin(+v.matches)?clamp(v.matches|0,0,1e6):0;m.wins=fin(+v.wins)?clamp(v.wins|0,0,1e6):0;m.losses=fin(+v.losses)?clamp(v.losses|0,0,1e6):0;
   m.lessons=Array.isArray(v.lessons)?v.lessons.filter(x=>typeof x==='string').slice(-60).map(x=>x.slice(0,140)):[];m.best=fin(+v.best)?clamp(v.best|0,-1,NSH-1):-1;
   m.forms=Array.isArray(v.forms)?v.forms.slice(0,MAXCUS).map(cleanForm).filter(Boolean):[];
@@ -509,7 +510,7 @@ function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||'null')
   if(v.tune&&typeof v.tune==='object'){const t={};let ok=true;for(const k of['speed','density','release','width']){if(!fin(+v.tune[k])){ok=false;break;}t[k]=clamp(Math.round(+v.tune[k]),1,10);}m.tune=ok?t:null;}
   AIMEM=m;}catch(e){}}
 function saveAiMem(){try{localStorage.setItem(KEYAI,JSON.stringify(AIMEM));}catch(e){}}
-function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);}catch(e){}return true;}
+function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
 const aiMemForms=()=>AIMEM.forms.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));
 function aiLearn(note){const ai=S.ai;if(!ai)return;const L=ai.lessons;if(L.length&&L[L.length-1]===note)return;if(L.length>=60)L.shift();L.push(note);}
 function eraseStroke(sd,st){const i=sd.strokes.indexOf(st);if(i>=0){sd.strokes.splice(i,1);if(S.phase==='battle')rebuildSegs(sd);}}
@@ -628,9 +629,9 @@ function dirOut(sd){const p=sd.paths[0].p;if(p.length>=6){const dx=p[4]-p[0],dy=
   if(p.length>=4){const dx=p[2]-p[0],dy=p[3]-p[1],d=Math.hypot(dx,dy)||1;return[dx/d,dy/d];}return[0,sd.dir];}
 function release(side,dest,ago){const sd=S.sides[side];if(sd.active>=sd.set.cap||sd.pool<=0)return false;let i=-1;
   while(qN[side]>0){const c=qPop(side);if(pst[c]===0&&plife[c]>0){i=c;break;}}if(i<0)return false;
-  const c=sd.circle,p0=sd.paths[0].p,n0=p0.length>>1,spm=0.96+rnd()*0.08,sp=speedOf(sd.set)*spm;
-  sd.gr=((sd.gr||0)+0.6180339887)%1;   // low-discrepancy lateral slot: pixels spread evenly across the lane, no random clumps
-  const po0=clamp((sd.gr*2-1+(rnd()-.5)*0.05)*(1.1-0.06*(sd.set.density-1)),-1,1),hw0=Math.min(c.r*0.95,laneHW(sd.set)*laneF(sd.paths[0].lane,0)),lat=po0*hw0,fwd0=Math.min(c.r*0.6,Math.sqrt(Math.max(0,c.r*c.r*0.9-lat*lat)))+sp*STEP*clamp(ago||0,0,3);
+  const c=sd.circle,p0=sd.paths[0].p,n0=p0.length>>1,spm=0.92+rnd()*0.16,sp=speedOf(sd.set)*spm;   // mid 0.4.2 (0.88-1.12) and 0.4.3 (0.96-1.04) speed variation
+  sd.gr=((sd.gr||0)+0.6180339887)%1;   // hybrid fill: half even golden-ratio slots (0.4.3), half 0.4.2 random spread, so the lane fills instead of lining up in a comb
+  const po0=clamp((sd.gr*2-1)*0.5+(rnd()*2-1)*0.5,-1,1),hw0=Math.min(c.r*0.95,laneHW(sd.set)*laneF(sd.paths[0].lane,0)),lat=po0*hw0,fwd0=Math.min(c.r*0.6,Math.sqrt(Math.max(0,c.r*c.r*0.9-lat*lat)))+sp*STEP*clamp(ago||0,0,3);
   let bx,by,tx,ty;if(n0>=2){pathAt(p0,fwd0,tmp);bx=tmp[0];by=tmp[1];tx=tmp[2];ty=tmp[3];}else{const d=dirOut(sd);tx=d[0];ty=d[1];bx=c.x+tx*fwd0;by=c.y+ty*fwd0;}
   px[i]=bx-ty*lat;py[i]=by+tx*lat;pvx[i]=tx*sp;pvy[i]=ty*sp;pox[i]=px[i];poy[i]=py[i];
   php[i]=CFG.pixHP;pst[i]=1;pbnc[i]=0;pcnt[i]=Math.min(90,Math.round(EXIT_T*tkOf(speedOf(sd.set))));pps[i]=n0>=2?fwd0:0;poff[i]=po0;pdr[i]=(rnd()-.5)*1.8;pspm[i]=spm;pend[i]=0;pcd[i]=0;pwc[i]=0;pstun[i]=0;pid[i]=0;pcap[i]=0;pdec[i]=0;psh[i]=0;pmom[i]=0;psq[i]=-1;pfade[i]=0;pfree[i]=0;pdst[i]=dest|0;
@@ -663,11 +664,18 @@ function freePix(i){if(pst[i]===4||pst[i]===5)return;const sd=S.sides[i<POOL?0:1
 function sandboxRefill(){if(!sbx())return false;for(let i=0;i<NP;i++)if(pst[i])recall(i);for(const sd of S.sides){sd.debt=0;sd.pool=poolN();syncHP(sd);sd.active=0;sd.acc=0;}resetFree();return true;}
 function sandboxStep(n){if(!sbx()||S.phase!=='battle')return 0;n=clamp(Math.floor(+n)||0,0,600);for(let k=0;k<n;k++)tick();return n;}
 function strayStart(i,sd){if(pfade[i]===0){pfade[i]=FADE_T();sd.stats.strayed=(sd.stats.strayed||0)+1;}if(psq[i]>=0)unlink(i,sd);pst[i]=3;pend[i]=0;}
+// The drawn path is a visual guide for lane DIRECTION only, not a rail (Jay t1142 / t1143).
+// Inside the hitbox: free forward motion + each pixel's own slight lateral drift and wander; the lane edges are a hard bound (soft-reflect / clamp). Only ricochet sprays (pfree) and past-the-end strays may leave, and they use the short leash.
+const fv=[0,0];
+function freeFwd(i,p,s,lw,spd,stun,vx,vy,wob){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;let vt=vx*tx+vy*ty,vn=-vx*ty+vy*tx;
+  if(!stun){const kk=Math.min(1,8*STEP);vt+=(spd-vt)*kk;vn+=pdr[i]*spd*0.4*STEP+(rnd()-.5)*spd*wob*STEP;}
+  if((lat>lw&&vn>0)||(lat<-lw&&vn<0))vn*=-0.55;fv[0]=vt*tx-vn*ty;fv[1]=vt*ty+vn*tx;}
+function holdLane(i,p,s,lw){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;if(lat>lw||lat<-lw){const e=lat>0?lw:-lw,k=lat-e;px[i]+=ty*k;py[i]-=tx*k;let vt=pvx[i]*tx+pvy[i]*ty,vn=-pvx[i]*ty+pvy[i]*tx;if((e>0&&vn>0)||(e<0&&vn<0))vn*=-0.55;pvx[i]=vt*tx-vn*ty;pvy[i]=vt*ty+vn*tx;}}
 function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
   for(let side=0;side<2;side++){const sd=S.sides[side],set=sd.set,spd0=speedOf(set),hw=laneHW(set),cc=sd.circle,base=side*POOL,end=base+POOL,paths=sd.paths,np=paths.length;
     const pn=[],pex=[],pey=[],pF=[],pL=[],pTx=[],pTy=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pn.push(0);pex.push(0);pey.push(0);pF.push(0);pL.push(1);pTx.push(0);pTy.push(1);continue;}const n=P.p.length>>1;pn.push(n);{const q=P.p,a=n>=4?n-4:0,ex=n>=2?q[(n-1)*2]-q[a*2]:0,ey=n>=2?q[(n-1)*2+1]-q[a*2+1]:1,dd=Math.hypot(ex,ey)||1;pTx.push(ex/dd);pTy.push(ey/dd);}pL.push(Math.max(1,(n-1)*PSP));pex.push(P.p[(n-1)*2]);pey.push(P.p[(n-1)*2+1]);pF.push(P.arm?fPos(P):1e9);}
     const hwEx=Math.min(cc.r*0.95,laneHW(set)*laneF(paths[0].lane,0)),compactK=1.2+0.9*set.compact,vk=vkOf(spd0),jit=(11-set.compact)*2.2*vk,conv=CFG.converge,rev=0.04*set.density,spc=(set.spacing-1)/9*0.25,spcOn=spc>0&&S.phase==='battle';
-    const pSpd=[],pHw=[],pRev=[],pSpc=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pSpd.push(0);pHw.push(1);pRev.push(0);pSpc.push(0);continue;}const ps=pset(sd,P);pSpd.push(speedOf(ps));pHw.push(laneHW(ps));{const th=clamp((5-ps.width)/4,0,1);pRev.push(0.006*ps.density*(1+1.2*th));pSpc.push((ps.spacing-1)/9*0.25*(1-0.7*th));}}
+    const pSpd=[],pHw=[],pRev=[],pSpc=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pSpd.push(0);pHw.push(1);pRev.push(0);pSpc.push(0);continue;}const ps=pset(sd,P);pSpd.push(speedOf(ps));pHw.push(laneHW(ps));{const th=clamp((5-ps.width)/4,0,1);pRev.push(0.006*ps.density*(1+0.6*th));pSpc.push((ps.spacing-1)/9*0.25*(1-0.35*th));}}  // hybrid pack: half of 0.4.3's thin-lane squeeze so the hitbox still fills like 0.4.2
     squadTick(sd,spd0,dt);
     for(let i=base;i<end;i++){const st=pst[i];if(!st)continue;
       let pi=pid[i];if(!paths[pi]){pi=0;pid[i]=0;}const P=paths[pi],p=P.p,n=pn[pi];let spd=pSpd[pi]*pspm[i];
@@ -677,10 +685,10 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
       if(pcd[i]>0)pcd[i]--;if(pwc[i]>0)pwc[i]--;if(pgc[i]>0)pgc[i]--;
       const stun=pstun[i]>0;if(stun)pstun[i]--;
       let vx=pvx[i],vy=pvy[i],cur=st;
-      if(cur===1){ // EXIT: leave along the path's own start direction (tangent + held lane offset), so the stream is smooth and straight out of the circle
-        if(n>=2){pps[i]+=spd*dt;pathAt(p,pps[i],tmp);const tgx=tmp[0]-tmp[3]*poff[i]*hwEx,tgy=tmp[1]+tmp[2]*poff[i]*hwEx;{const kk=Math.min(1,9*dt);vx+=(tmp[2]*spd+(tgx-px[i])*6-vx)*kk;vy+=(tmp[3]*spd+(tgy-py[i])*6-vy)*kk;}if(--pcnt[i]===0){pst[i]=2;pend[i]=0;}}
+      if(cur===1){ // EXIT: free forward along the path's start direction, already spread across the lane; edges hold them in
+        if(n>=2){pps[i]+=spd*dt;freeFwd(i,p,pps[i],hwEx,spd,stun,vx,vy,0.5);vx=fv[0];vy=fv[1];if(--pcnt[i]===0){pst[i]=2;pend[i]=0;}}
         else if(--pcnt[i]===0){const dx=px[i]-cc.x,dy=py[i]-cc.y;pps[i]=Math.sqrt(dx*dx+dy*dy);pst[i]=3;pend[i]=0;}
-      }else if(cur===2){ // FOLLOW: steer inside the lane (not rails)
+      }else if(cur===2){ // FOLLOW: free forward along the lane direction; wander inside the hitbox; edges hold them in. The path line is not a rail.
         const k0=Math.round(pps[i]/PSP),ka=k0>3?k0-3:0,kb=k0+6<n-1?k0+6:n-1;let best=ka,bd=1e18;const x=px[i],y=py[i];
         for(let k=ka;k<=kb;k++){const dx=x-p[k*2],dy=y-p[k*2+1],d2=dx*dx+dy*dy;if(d2<bd){bd=d2;best=k;}}
         pps[i]=best*PSP;
@@ -691,13 +699,7 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
         if(best>=n-1&&pi===pid[i]){
           if(pi>0&&conv>0&&P.rj>=0&&paths[0]){pid[i]=0;pps[i]=P.rj*PSP;if(conv===2)pcap[i]=0;else pcap[i]=1;}
           else{pst[i]=3;pend[i]=0;{const u=pdr[i]/0.9,o=(u<0?-1:1)*Math.pow(Math.abs(u),2.2)*0.5,co=Math.cos(o),so=Math.sin(o);vx=(pTx[pi]*co-pTy[pi]*so)*spd;vy=(pTx[pi]*so+pTy[pi]*co)*spd;}}}
-        else if(bd>L2){strayStart(i,sd);}
-        else{let po=poff[i];if(spcOn&&pSpc[pi]>0){const rh=rhoAt(side,px[i],py[i]);if(rh>3)po+=(rnd()-.5)*pSpc[pi]*48*Math.min(1,rh/40)*dt;}
-          poff[i]=clamp(po+(rnd()-.5)*dt*3-po*dt*pRev[pi],-1,1);
-          pathAt(p,pps[i]+LOOK,tmp);const ex=pps[i]+LOOK-pL[pi];if(ex>0){tmp[2]=pTx[pi];tmp[3]=pTy[pi];tmp[0]+=pTx[pi]*ex;tmp[1]+=pTy[pi]*ex;}   // past the end: aim along the end direction, never back at the endpoint
-          const lw=pHw[pi]*laneF(P.lane,pps[i]/pL[pi]),tx=tmp[0]-tmp[3]*poff[i]*lw,ty=tmp[1]+tmp[2]*poff[i]*lw;
-          let dx=tx-x,dy=ty-y;const d=Math.sqrt(dx*dx+dy*dy)||1;dx=dx/d*spd;dy=dy/d*spd;const kk=Math.min(1,(stun?1.0:8)*dt);
-          vx+=(dx-vx)*kk;vy+=(dy-vy)*kk;}
+        else{const lw=pHw[pi]*laneF(P.lane,pps[i]/pL[pi]),wob=0.7-0.04*(pset(sd,P).density-1)+(spcOn?pSpc[pi]*0.8:0);freeFwd(i,p,pps[i],lw,spd,stun,vx,vy,wob);vx=fv[0];vy=fv[1];}
       }else if(cur===4||cur===5){ // AREA MEMBER: wanders freely inside its shape's soft hitbox (spring to its own wander spot); a hard knock can push it out (5), it re-enters or goes home past the leash
         const q=sd.sq[psq[i]];
         if(!q){pst[i]=3;psq[i]=-1;pend[i]=0;}
@@ -716,12 +718,13 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
           const kk=Math.min(1,(stun?1.0:9)*dt);vx+=(wx-vx)*kk;vy+=(wy-vy)*kk;}
       }
       if(pst[i]===3){ // END: straight on, drifting/spreading; leash from the end of its path
-        if(pfree[i]){pend[i]+=dt;if(pfade[i]===0&&((i+S.tick)&3)===0){let m=1e18;for(let k=0;k<n;k++){const ax=px[i]-p[k*2],ay=py[i]-p[k*2+1],d2=ax*ax+ay*ay;if(d2<m)m=d2;}if(m>L2)pfade[i]=FADE_T();}}
-        else{if(!stun){const m=Math.hypot(vx,vy)||1;vx=vx/m*spd;vy=vy/m*spd;}   // past the end: dead straight, constant heading (no steering, no swirl)
-        pend[i]+=dt;const dx=px[i]-pex[pi],dy=py[i]-pey[pi];
-        if(dx*dx+dy*dy>L2&&pfade[i]===0)pfade[i]=FADE_T();}
+        if(pfree[i]){pend[i]+=dt;if(pfade[i]===0&&((i+S.tick)&3)===0){let m=1e18;for(let k=0;k<n;k++){const ax=px[i]-p[k*2],ay=py[i]-p[k*2+1],d2=ax*ax+ay*ay;if(d2<m)m=d2;}const hwR=pHw[pi]*laneF(P.lane,Math.min(1,pps[i]/pL[pi])),lim=Math.max(hwR+RICO_PAD,CFG.leash*RICO_LEASH_K),traveled=pend[i]*Math.hypot(pvx[i],pvy[i]);if(m>lim*lim||traveled>CFG.leash*RICO_LEASH_K)pfade[i]=FADE_T();}}
+        else{if(!stun){const m=Math.hypot(vx,vy)||1;vx=vx/m*spd;vy=vy/m*spd;}   // past the end: dead straight, loose cone heading, then fade on the short leash (t1143)
+        pend[i]+=dt;const dx=px[i]-pex[pi],dy=py[i]-pey[pi],lim=Math.max(pHw[pi]+RICO_PAD,CFG.leash*RICO_LEASH_K);
+        if((dx*dx+dy*dy>lim*lim||pend[i]*spd>CFG.leash*RICO_LEASH_K)&&pfade[i]===0)pfade[i]=FADE_T();}
       }
       pvx[i]=vx;pvy[i]=vy;px[i]+=vx*dt;py[i]+=vy*dt;
+      if((pst[i]===1||pst[i]===2)&&n>=2){const lw=(pst[i]===1)?hwEx:pHw[pi]*laneF(P.lane,Math.min(1,pps[i]/pL[pi]));holdLane(i,p,pps[i],lw);}
       if(!(px[i]>2&&px[i]<W-2&&py[i]>2&&py[i]<H-2)){recall(i);}
     }}}
 // ---------- VFX (visual only): destroyed pixels split into 1x1 bits that fade; ricocheting pixels glow and leave a fading trail. Fixed typed-array pool, own RNG, per-tick spawn budget, drops spawns when full.
@@ -741,6 +744,9 @@ function vfxStep(){vBud=VBUD;
   for(let k=0;k<vpN;k++){if(--vLife[k]===0){const l=--vpN;vX[k]=vX[l];vY[k]=vY[l];vVX[k]=vVX[l];vVY[k]=vVY[l];vLife[k]=vLife[l];vTot[k]=vTot[l];vCol[k]=vCol[l];vKind[k]=vKind[l];k--;continue;}
     vX[k]+=vVX[k]*STEP;vY[k]+=vVY[k]*STEP;if(vKind[k]===0){vVX[k]*=0.97;vVY[k]*=0.97;}}}
 // ---------- COLLISION
+// Pixel-vs-pixel ricochet spray (Jay t1148): one random chance already decided the bounce. Heading is random in the outward hemisphere; speed is random inside the short range — unpatterned, not a mirrored bounce at a fixed fraction of speed.
+function ricoSpray(i,nx,ny){const sp0=Math.hypot(pvx[i],pvy[i])||1,sp=sp0*RICO_SPD*(0.45+rnd()*0.7),a=Math.atan2(ny,nx)+(rnd()-0.5)*Math.PI;
+  pvx[i]=Math.cos(a)*sp;pvy[i]=Math.sin(a)*sp;pstun[i]=Math.min(120,Math.round(STUN*tkOf(speedOf(S.sides[i<POOL?0:1].set))));}
 function deflect(i,nx,ny,rot,back){let vx=pvx[i],vy=pvy[i];const sp=Math.hypot(vx,vy)||1,dot=vx*nx+vy*ny;
   if(dot<0){vx-=2*dot*nx;vy-=2*dot*ny;}
   if(back){vx=vx*0.65-pvx[i]*0.35;vy=vy*0.65-pvy[i]*0.35;}
@@ -778,13 +784,12 @@ function collide(){
         //   push-away chance (the enemy is bounced): push_j = clamp(pr*(1 + kPush*dr), 0, pushMax)  push_i = clamp(pr*(1 - kPush*dr), 0, pushMax)
         const dr=(rhoAt(0,xi,yi)-rhoAt(1,px[j],py[j]))/RR,svi=clamp(pm*(1+KS*dr),0,SM),svj=clamp(pm*(1-KS*dr),0,SM),psj=clamp(pr*(1+KP*dr),0,PM),psi=clamp(pr*(1-KP*dr),0,PM);
         if(mode===3){dI=base*clamp(1-0.25*dr,0.5,1.8);dJ=base*clamp(1+0.25*dr,0.5,1.8);}
-        const sI=rnd()<svi,sJ=rnd()<svj;let bI=sI,bJ=sJ;
+        const sI=rnd()<svi,sJ=rnd()<svj,bI=rnd()<psi,bJ=rnd()<psj;   // damage miss and ricochet are separate random rolls — a hit does not always spray (Jay t1148)
         s0.stats.ct++;s1.stats.ct++;
         if(sI){s0.stats.misses++;s0.stats.surv++;}else hurt(i,pHP,1,j);
         if(sJ){s1.stats.misses++;s1.stats.surv++;}else hurt(j,pHP,0,i);
-        if(!bI&&rnd()<psi)bI=true;if(!bJ&&rnd()<psj)bJ=true;
-        if(bI&&pst[i]){bounceMark(i);s0.stats.ricochets++;s0.stats.defl++;deflect(i,nx,ny,rotv,false);freePix(i);px[i]+=nx*dI;py[i]+=ny*dI;}
-        if(bJ&&pst[j]){bounceMark(j);s1.stats.ricochets++;s1.stats.defl++;deflect(j,-nx,-ny,rotv,false);freePix(j);px[j]-=nx*dJ;py[j]-=ny*dJ;}
+        if(bI&&pst[i]){bounceMark(i);s0.stats.ricochets++;s0.stats.defl++;ricoSpray(i,nx,ny);freePix(i);px[i]+=nx*dI;py[i]+=ny*dI;}
+        if(bJ&&pst[j]){bounceMark(j);s1.stats.ricochets++;s1.stats.defl++;ricoSpray(j,-nx,-ny);freePix(j);px[j]-=nx*dJ;py[j]-=ny*dJ;}
         if(bJ&&!sJ)s0.stats.pushed++;if(bI&&!sI)s1.stats.pushed++;
         hit=true;break;}}}
   // walls + circles
@@ -936,7 +941,7 @@ const HELP=[
 'PREP, STEP 2: draw a DEFENSE LINE of walls across your side. You need both before START lights up. Leave a gap if you want your own pixels to get through. Walls can go all the way to the screen edge.',
 'The match is slow on purpose. Pixels flow like a river, so there is time to think and change things.',
 'IN THE MATCH you can add BRANCHES. Press BRANCH, then drag out from your main path. Every branch has its own color and its own meter. ERASE is free, so try and redraw as often as you like.',
-'TAP any path (the main path or a branch) and its SLIDERS open. Each path keeps its own settings: PACE (how fast), DENSITY (how tightly pixels hug the line), SPACING (how loose and spread they are), LANE WIDTH (how wide the stream is) and FLOW (how many come out each second, a steady stream; every branch has its own). The big - and + buttons are easy to hit.',
+'TAP any path (the main path or a branch) and its SLIDERS open. Each path keeps its own settings: PACE (how fast), DENSITY (how much they wander inside the lane — they never hug the drawn line), SPACING (how loose the wander is), LANE WIDTH (how wide the stream is) and FLOW (how many come out each second, a steady stream; every branch has its own). The big - and + buttons are easy to hit.',
 'When pixels from both sides touch, they bounce or get destroyed. A destroyed pixel breaks into tiny bits that fade away. A bounced pixel keeps flying straight and does not turn back.',
 'A pixel that drifts too far from its path fades out slowly and goes home to your circle. While it fades it can still hit things, a little less each moment.',
 'SANDBOX (in the menu): a free play area. Both sides are yours to edit at any time: move circles, draw paths and walls, change the sliders. Use SIDE to switch sides, STEP to move forward a little, REFILL to reset the pixels. Nobody wins or loses.',
@@ -1050,7 +1055,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){
 window.addEventListener('popstate',()=>{S.paused=true;});
 // menu / custom / help
 let CUS=Object.assign({},DEFCFG);
-function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
+function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
 function schemaOf(k){for(const r of CUSTOM)if(r[0]===k)return r;return null;}
 function clampCus(k,v){const r=schemaOf(k);if(!r)return v;if(r[3]==='b')return v?1:0;if(r[3]==='e')return clamp(Math.round(v),0,(LBL[k]||[0,1]).length-1);return clamp(v,r[4],r[5]);}
 function saveCustom(){try{localStorage.setItem(KEYC,JSON.stringify(CUS));}catch(e){}}
@@ -1108,7 +1113,7 @@ $('cBack').addEventListener('click',()=>showView('menu'));$('hBack').addEventLis
 $('hbody').innerHTML=HELP.map(t=>'<p>'+t+'</p>').join('');
 // ---------- prefs (validated, never throws)
 const prefs={wins:0,losses:0,stage:0,diff:3};
-function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
+function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
   for(const k of['speed','density','release','cap','sdens','compact','width','spacing'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
   prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;}}catch(e){}}
 function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,density:s.density,release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,spacing:s.spacing,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff}));}catch(e){}}
