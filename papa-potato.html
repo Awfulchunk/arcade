@@ -2,9 +2,9 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Papa Potato 0.4.10</title>
+<title>Papa Potato 0.4.11</title>
 <style>
-/* Papa Potato 0.4.10 (Tough & J's Arcade). Art lock: 0.3.1 Papa (sleep locked) + 0.4 machines/decor. Swarm DPR. */
+/* Papa Potato 0.4.11 (Tough & J's Arcade). Art lock: 0.3.1 Papa (sleep locked) + 0.4 machines/decor. Swarm DPR. */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;font-family:"Courier New",Courier,monospace;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 :root{--hud-w:100px;--rail-w:48px;--cmd-pad:6px;--gap:4px;--tap:44px;--box-h:48px;--buy-h:44px;--tray-h:0px;
@@ -12,7 +12,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 @media (min-height:700px){:root{--hud-w:108px}}
 #app{position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) var(--hud-w);grid-template-rows:minmax(0,1fr) var(--tray-h) var(--cmd-h);
   grid-template-areas:"stage hud" "tray hud" "cmd cmd";background:#0c1220}
-#app.editing{--tray-h:92px}
+#app.editing{--tray-h:116px}
 /* 0.4.1: pan/zoom rails hidden (not deleted). The room uses the full stage width and always fits the screen. */
 #stage{grid-area:stage;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"play";min-width:0;min-height:0;background:#0c1220}
 #play{grid-area:play;position:relative;overflow:hidden;background:#8a846c;min-width:0;min-height:0;touch-action:none}
@@ -54,6 +54,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 .bar i{display:block;height:100%;width:100%;transform-origin:0 50%}
 .bar.hunger i{background:#e09040}
 .bar.energy i{background:#81ad78}
+.bar.mood i{background:#d68ac8}.bar.hands i{background:#7ac0e0}
+.mh .bar{height:5px}.mh .stat .k{font-size:7px;letter-spacing:.04em;margin-bottom:3px}.mh .stat .pct{font-size:9px;margin-top:2px}
+@media (max-height:640px){.mh{display:none}}   /* short screens: tap Papa for MOOD + CLEAN HANDS */
 .bar.low i{background:#d04a3a}
 .stat .pct{display:block;color:#cde;font:700 10px/1 monospace;margin-top:3px}
 .states{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
@@ -219,16 +222,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 #invTray{grid-area:tray;display:none;flex-direction:column;min-width:0;min-height:0;background:#0c1220;border-top:3px solid #3a5080;padding:4px 6px 4px;overflow:hidden}
 #app.editing #invTray{display:flex}
 #invTray .th{font:700 9px/1 monospace;color:#7f93ad;letter-spacing:.1em;margin:1px 2px 4px;flex:0 0 auto}
-#invChips{flex:1 1 auto;min-height:0;display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:6px;align-items:stretch;scrollbar-width:none;touch-action:none}
+#trayTabs{display:flex;gap:3px;flex:0 0 auto;margin:0 0 4px;align-items:center;overflow:hidden}
+.ttab{flex:1 1 0;min-width:0;height:26px;padding:0;overflow:hidden;text-overflow:clip;letter-spacing:0 !important;font-size:8px !important;line-height:1 !important;background:#14203a;border:1px solid #2e4060;border-radius:4px;color:#9ab0c8;font:700 9px/1 monospace;letter-spacing:.04em;white-space:nowrap}
+.ttab.on{background:#3a5080;color:#fff;border-color:#6a88c0}.ttab b{display:block;color:#ffe066;font-size:7px;margin-top:2px}
+.tpg{margin-left:auto;display:flex;align-items:center;gap:2px;flex:0 0 auto}.tpg i{font:700 9px/1 monospace;color:#7f93ad;font-style:normal;min-width:22px;text-align:center}
+.tpb{width:28px;height:24px;background:#1a2840;border:1px solid #2e4060;border-radius:4px;color:#ffe066;font:700 11px/1 monospace;padding:0}.tpb[disabled]{opacity:.3}
+#invChips{flex:1 1 auto;min-height:0;display:flex;flex-wrap:nowrap;overflow:hidden;overflow-y:hidden;gap:6px;align-items:stretch;scrollbar-width:none;touch-action:none}
 #invChips::-webkit-scrollbar{display:none}
-.invchip{flex:0 0 auto;min-width:86px;max-width:120px;height:64px;background:#1a2840;border:2px solid #2e4060;border-radius:5px;padding:5px 6px;color:#e8eef4;font:700 10px/1.15 monospace;letter-spacing:.04em;display:flex;flex-direction:column;justify-content:center;touch-action:none}
+.invchip{flex:0 0 auto;width:78px;min-width:78px;max-width:78px;height:58px;background:#1a2840;border:2px solid #2e4060;border-radius:5px;padding:5px 6px;color:#e8eef4;font:700 10px/1.15 monospace;letter-spacing:.04em;display:flex;flex-direction:column;justify-content:center;touch-action:none}
 .invchip b{color:#ffe066;font-size:8px;letter-spacing:.08em;margin-top:3px}
 .invchip.empty{color:#7f93ad;border-style:dashed;min-width:140px}
 #editBtn.hud{width:100%;height:auto;min-height:44px;margin:0;font-size:11px;letter-spacing:.08em;color:#ffd060;border:3px solid #6a5020;background:#2a1e08;box-shadow:inset 0 -3px #140e04;border-radius:4px;padding:6px 0;touch-action:none}
 #editBtn.hud.on{border-color:#ffe066;color:#ffe066;background:#3a2c10}
 #bar #invBtn{flex:0 0 28%;margin-right:6px;border-color:#3a5080;background:#14203a;color:#9fc0ff;box-shadow:inset 0 -4px #0a1226}
 #bar #invBtn.press{background:#1f3150;border-color:#b3d5ff;color:#fff}
-/* 0.4.10 radio button (only once the radio is bought) + radio screen rows */
+/* 0.4.11 radio button (only once the radio is bought) + radio screen rows */
 #bar #radioBtn{flex:0 0 22%;margin-right:6px;border-color:#3a6040;background:#142a1c;color:#9fe0a8;box-shadow:inset 0 -4px #0a1a10}
 #bar #radioBtn.off{display:none}
 #bar #radioBtn.press{background:#1f4a2c;border-color:#c4e490;color:#fff}
@@ -238,12 +246,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 .row .btns .go{min-width:44px;margin-left:4px;padding:0 4px}
 #bar #shopBtn{flex:1 1 auto;margin-right:6px}
 #bar #helpBtn{flex:0 0 26%}
-#putAway{flex:0 0 auto;height:36px;min-width:86px;margin-left:6px;border:3px solid #6a5020;border-radius:4px;background:#2a1e08;color:#ffd060;font:700 10px/1 monospace;letter-spacing:.06em;padding:0 8px;box-shadow:inset 0 -3px #140e04;touch-action:none;display:none}
+#putAway{flex:0 0 auto;height:36px;min-width:64px;margin-left:6px;border:3px solid #6a5020;border-radius:4px;background:#2a1e08;color:#ffd060;font:700 10px/1 monospace;letter-spacing:.06em;padding:0 8px;box-shadow:inset 0 -3px #140e04;touch-action:none;display:none}
 #putAway.on{display:block}
 #putAway.press{background:#3a2c10;border-color:#ffe066}
 #trayRow{display:flex;align-items:stretch;min-height:0;flex:1 1 auto}
 /* 0.4.2: ROTATE (editor) + tap-for-info card on the right HUD */
-#rotBtn{flex:0 0 auto;height:44px;min-width:76px;margin-left:6px;border:3px solid #3a5080;border-radius:4px;background:#14203a;color:#9fc0ff;font:700 10px/1 monospace;letter-spacing:.06em;padding:0 6px;box-shadow:inset 0 -3px #0a1226;touch-action:none;align-self:center}
+#rotBtn{flex:0 0 auto;height:44px;min-width:58px;margin-left:6px;border:3px solid #3a5080;border-radius:4px;background:#14203a;color:#9fc0ff;font:700 10px/1 monospace;letter-spacing:.06em;padding:0 6px;box-shadow:inset 0 -3px #0a1226;touch-action:none;align-self:center}
 #rotBtn.on{border-color:#9fc0ff;color:#e8f0ff}
 #rotBtn.press{background:#1f3150;border-color:#b3d5ff;color:#fff}
 #putAway{height:44px;align-self:center}
@@ -290,7 +298,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
     </aside>
   </div>
   <aside id="hud">
-    <div class="brand"><b>PAPA<br>POTATO</b><span>v0.4.10</span></div>
+    <div class="brand"><b>PAPA<br>POTATO</b><span>v0.4.11</span></div>
     <div class="stat"><span class="k">LEVEL</span><div class="lv" id="level">1 / 5</div></div>
     <div class="stat"><span class="k">COINS</span><div class="coins"><canvas id="coinIco" width="14" height="14"></canvas><span id="coins">0</span></div>
       <div class="shipc" title="Washed vs unwashed shipped"><span class="wsh">3c <b id="washedN">0</b></span><span class="unw">2c <b id="unwashedN">0</b></span></div>
@@ -302,6 +310,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
     <div class="mess" id="mess"></div>
     <div class="stat"><span class="k">HUNGER</span><div class="bar hunger" id="hBar"><i id="hFill"></i></div><span class="pct" id="hPct">100%</span></div>
     <div class="stat"><span class="k">ENERGY</span><div class="bar energy" id="eBar"><i id="eFill"></i></div><span class="pct" id="ePct">100%</span></div>
+    <div class="two mh">
+      <div class="stat"><span class="k">MOOD</span><div class="bar mood" id="mBar"><i id="mFill"></i></div><span class="pct" id="mPct">50%</span></div>
+      <div class="stat"><span class="k">HANDS</span><div class="bar hands" id="cBar"><i id="cFill"></i></div><span class="pct" id="cPct">100%</span></div>
+    </div>
     <div class="states"><span class="k">STATE</span>
       <div class="st" data-s="PEELING">PEELING</div>
       <div class="st" data-s="EATING">EATING</div>
@@ -317,7 +329,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
     <button id="editBtn" class="hud" type="button" data-act="editor">EDIT</button>
   </aside>
   <div id="invTray" aria-label="Inventory tray">
-    <div class="th">INVENTORY — drag into the room, or select a placed item and PUT AWAY</div>
+    <div class="th">INVENTORY — DRAG IN · TAP PLACED + PUT AWAY</div>
+    <div id="trayTabs"></div>
     <div id="trayRow">
       <div id="invChips"></div>
       <button id="rotBtn" type="button" data-act="rotate">ROTATE</button><button id="putAway" type="button" data-act="putaway">PUT AWAY</button>
@@ -332,7 +345,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
   <div id="ovl"><div id="ovlHead"><span class="tt" id="ovlTitle"></span><span class="cn" id="ovlCoins"></span><button class="x" id="ovlClose" type="button" data-act="close" aria-label="Close">X</button></div><div id="ovlBody"></div></div>
 </div>
 <script>
-/* ===== Papa Potato 0.4.10 — simulation (0.4.10: decor with real effects: radio music, 4 carpets, wall clock, poster, fan, pantry shelf, rubber duck). Was 0.4.9. Save v12, loads v1-v11. ===== */
+/* ===== Papa Potato 0.4.11 — simulation (0.4.11: 24 new decor items (wall, floor, table-top, wash room, basin, cosmetic themes), a TABLE SINK built into the peel table (hand hygiene + RINSE command), a MOOD meter that decor lifts. Save v13, loads v1-v12. Was 0.4.10: decor with real effects: radio music, 4 carpets, wall clock, poster, fan, pantry shelf, rubber duck). Was 0.4.9. Save v12, loads v1-v11. ===== */
 var PPSim=(function(){
   var RW=108,RH=280;                    /* 0.4: longer and slightly wider. x,y in the save are fractions of this */
   var PACE=["CHILL","EASY","STEADY","BRISK","GRIND"];
@@ -389,13 +402,29 @@ var PPSim=(function(){
     smallCooler:{x:92,y:90},
     /* 0.4.10 decor defaults (the editor spirals out to a free spot if these are taken) */
     kitchenMat:{x:53,y:141},runner:{x:44,y:196},roundRug:{x:62,y:168},
-    clock:{x:80,y:3.5},poster:{x:94,y:3.5},fan:{x:96,y:182},shelf:{x:90,y:72}};
+    clock:{x:80,y:3.5},poster:{x:94,y:3.5},fan:{x:96,y:182},shelf:{x:90,y:72},
+    /* 0.4.11 decor defaults (wall items snap to the nearest free wall spot; floor items spiral out to a free spot) */
+    window:{x:3.5,y:60},spiceRack:{x:104.5,y:70},coatHook:{x:12,y:3.5},calendar:{x:3.5,y:84},potsPans:{x:104.5,y:96},photos:{x:3.5,y:110},
+    stringLights:{x:86,y:3.5},neonSign:{x:104.5,y:40},trophyShelf:{x:3.5,y:136},
+    sideTable:{x:20,y:96},compost:{x:16,y:150},sackPile:{x:96,y:232},bookshelf:{x:84,y:14},catBed:{x:20,y:206},statue:{x:98,y:92},
+    fruitBowl:{x:20,y:96},cookbook:{x:20,y:96},aquarium:{x:20,y:96}};
   var GEO0=JSON.parse(JSON.stringify(GEO));
   var FIXED=["pile","ret","ship"]; /* editor must never move these */
   var TOOLS=["betterPeeler","carryBag","broomDustpan"];
-  var PLACEABLES=["sink","smallCooler","basicCot","conveyor","suction","plant","lamp","autoPeeler","outConveyor","radio","rug","tvArmchair","kitchenMat","runner","roundRug","clock","poster","fan","shelf"];
+  var PLACEABLES=["sink","smallCooler","basicCot","conveyor","suction","plant","lamp","autoPeeler","outConveyor","radio","rug","tvArmchair","kitchenMat","runner","roundRug","clock","poster","fan","shelf",
+    "window","spiceRack","coatHook","calendar","potsPans","photos","stringLights","neonSign","trophyShelf","sideTable","compost","sackPile","bookshelf","catBed","statue","fruitBowl","cookbook","aquarium","towelRack","soap","mopBucket"];
   var RUGS=["rug","kitchenMat","runner","roundRug"];   /* 0.4.10 carpets: walkable, never block, may slide under furniture, never on each other */
-  var WALLS=["clock","poster"];                        /* 0.4.10 wall items: hang on the north / east / west wall, never on the floor */
+  var WALLS=["clock","poster","window","spiceRack","coatHook","calendar","potsPans","photos","stringLights","neonSign","trophyShelf"];   /* wall items: hang on the north / east / west wall, never on the floor */
+  var TOPS=["fruitBowl","cookbook","aquarium"];          /* 0.4.11 table-top items: sit in a slot on the SIDE TABLE (2) or the food cooler lid (1); no floor footprint */
+  var WASHW=["towelRack","soap"];                       /* 0.4.11 wash-room wall items: north wall (off the door and ship opening) or west wall */
+  var WASHF=["mopBucket"];                              /* 0.4.11 wash-room floor items: off the basin, canal, outlet, door and his walking lane */
+  var BASIN=["duck","toyBoat","bubbles"];               /* float in the wash basin, put in from INV */
+  var FLOOR11=["sideTable","compost","sackPile","bookshelf","catBed","statue"];
+  var THEMES={wall:["CLASSIC","MINT STRIPE","ROSE TILE","NAVY PANEL"],floor:["CLASSIC","BLACK + WHITE","TERRACOTTA","OAK PLANK"]};
+  function isTop(id){return TOPS.indexOf(id)>=0;}
+  function isWashItem(id){return WASHW.indexOf(id)>=0||WASHF.indexOf(id)>=0;}
+  function isWashWall(id){return WASHW.indexOf(id)>=0;}
+  function isBasin(id){return BASIN.indexOf(id)>=0;}
   function isRug(id){return RUGS.indexOf(id)>=0;}
   function isWall(id){return WALLS.indexOf(id)>=0;}
   var STARTER=["table","cooler","stool","mat"];
@@ -411,12 +440,14 @@ var PPSim=(function(){
     var b0x=-tw/2+4,b0y=-th/2+3.5,c=rot(b0x+bw/2,b0y+bh/2,r),hw=(odd?bh:bw)/2,hh=(odd?bw:bh)/2;
     var board={x0:cx+c[0]-hw,y0:cy+c[1]-hh,x1:cx+c[0]+hw,y1:cy+c[1]+hh};
     var kn=rot(b0x+bw+3,0,r);
+    var skx=tw/2-3.6,sc0=rot(skx,0,r),shw=(odd?3.5:2.0),shh=(odd?2.0:3.5);   /* 0.4.11 TABLE SINK: built into the far end of the slab, past the knife */
     var st=GEO.tableStand||{x:cx,y:T.y1+10,dir:0,side:0};
     var nx=st.side===1?0:st.side===2?-1:st.side===3?1:0,ny=st.side===0?1:st.side===1?-1:0;
     return {
       cx:cx,cy:cy,r:r,
       board:board,
       knife:{x:cx+kn[0],y:cy+kn[1],ok:b0x+bw+6<tw/2-1},
+      sink:{x:cx+sc0[0],y:cy+sc0[1],hw:shw,hh:shh,r:r},
       peelSpawn:{x:st.side===2?T.x0-2:st.side===3?T.x1+2:cx,y:st.side===0?T.y1+2:st.side===1?T.y0-2:cy,nx:nx,ny:ny},
       stand:{x:st.x,y:st.y,dir:st.dir,side:st.side}
     };
@@ -463,6 +494,10 @@ var PPSim=(function(){
       what:"Sends him to sweep when the peel count on the floor goes over the number.",
       effect:"Lower = he sweeps earlier and keeps the floor clean, but spends more time sweeping. He sweeps until the floor is nearly clear (under 10% of the trigger). OFF = never. Peels slow him up to 30% at 90 peels.",
       range:"OFF, 5 to 90 peels (step 5)"},
+    {id:"rinse",does:"Rinses his hands at the table sink.",affects:"Clean hands under the number = rinse (1 s, at the table). Under 25% his hands are sticky: peeling 15% slower.",hi:"70%",lo:"OFF",name:"RINSE WHEN HANDS <",min:0,max:70,step:5,def:30,
+      what:"Sends him to rinse his hands at the TABLE SINK (built into the peel table) when his clean hands drop below the number.",
+      effect:"Peeling makes his hands dirty. Rinsing takes about 1 second right at the table and brings CLEAN HANDS back to 100%. Under 25% his hands are sticky and peeling is 15% slower. OFF = he never rinses.",
+      range:"OFF, 5% to 70% (step 5)"},
     {id:"pot",does:"How many potatoes are in the loop.",affects:"More = bigger pile, no waiting. The top of the slider is what you own (buy more in the SHOP).",hi:"OWNED",lo:"4",name:"POTATOES IN PLAY",min:0,max:POT_MAX,step:1,def:6,dyn:"potCap",
       what:"How many potatoes are in the loop (pile + hands + chute + pipe).",
       effect:"The kitchen pile is fully stocked (9999 potatoes in the loop). The POTATOES IN PLAY slider is hidden, not deleted. Visual pile drawing stays capped for perf.",
@@ -565,9 +600,35 @@ var PPSim=(function(){
     {id:"duck",name:"RUBBER DUCK",lv:3,price:12,group:"decor",kind:"duck",fx:"WASH ROOM. Put it in the basin from INV. The current pulls potatoes off the heap 25% faster. Needs the ROOM KEY."},
     {id:"tvArmchair",name:"TV + ARMCHAIR",lv:4,price:90,group:"decor",kind:"place",fx:"TV ON + WATCH WHEN ENERGY < : he sits and gets energy back (slower than a nap)."},
     {id:"roundRug",name:"ROUND BRAID RUG",lv:4,price:30,group:"decor",kind:"place",fx:"CARPET. Grabbing, peeling and dropping are 8% faster while he stands on it."},
-    {id:"autoWash",name:"AUTO-WASH",lv:4,price:220,group:"machine",kind:"toggle",fx:"An expensive late upgrade. Once bought, the AUTO-WASH command appears. When ON, he places peeled potatoes in the kitchen X-ray scanner; they come out the matching wash-room machine into the basin, then ride the canal to the ship opening (3c). Needs the ROOM KEY."}
+    {id:"autoWash",name:"AUTO-WASH",lv:4,price:220,group:"machine",kind:"toggle",fx:"An expensive late upgrade. Once bought, the AUTO-WASH command appears. When ON, he places peeled potatoes in the kitchen X-ray scanner; they come out the matching wash-room machine into the basin, then ride the canal to the ship opening (3c). Needs the ROOM KEY."},
+    /* ---- 0.4.11 decor (Jay t1205). cat: wall / floor / top / wash / basin / theme ---- */
+    {id:"coatHook",name:"COAT HOOK + APRON",lv:1,price:10,group:"decor",kind:"place",cat:"wall",fx:"WALL. Papa's apron. QUICK peeling drops 4 peels a potato, not 5."},
+    {id:"calendar",name:"CALENDAR",lv:1,price:8,group:"decor",kind:"place",cat:"wall",fx:"WALL. Shows the shift day. Each new shift day (every 24 shift hours) pays a 10c payday."},
+    {id:"spiceRack",name:"SPICE RACK",lv:1,price:12,group:"decor",kind:"place",cat:"wall",fx:"WALL. Tastier meals: each food can gives +65 hunger, not +55."},
+    {id:"window",name:"WINDOW + CURTAINS",lv:1,price:14,group:"decor",kind:"place",cat:"wall",fx:"WALL. Daylight (6 AM to 8 PM shift time): he works 4% faster."},
+    {id:"sideTable",name:"SIDE TABLE",lv:1,price:12,group:"decor",kind:"place",cat:"floor",fx:"FLOOR. Holds 2 table-top items (fruit bowl, cookbook, aquarium)."},
+    {id:"compost",name:"COMPOST BIN",lv:1,price:16,group:"decor",kind:"place",cat:"floor",fx:"FLOOR. Short trip to the bin: sweeping is 25% faster, and every 20 peels swept turn into 1c of compost."},
+    {id:"fruitBowl",name:"FRUIT BOWL",lv:1,price:10,group:"decor",kind:"place",cat:"top",fx:"TABLE-TOP (side table or cooler lid). He snacks: hunger drains 10% slower in the kitchen."},
+    {id:"wallpaper",name:"WALLPAPER BOOK",lv:1,price:15,group:"decor",kind:"theme",cat:"theme",fx:"COSMETIC ONLY. Kitchen walls: CLASSIC, MINT STRIPE, ROSE TILE or NAVY PANEL. Change it in INV."},
+    {id:"potsPans",name:"HANGING POTS + PANS",lv:2,price:18,group:"decor",kind:"place",cat:"wall",fx:"WALL. Cooking at home: food cans cost 1c less."},
+    {id:"photos",name:"FRAMED POTATO PHOTOS",lv:2,price:14,group:"decor",kind:"place",cat:"wall",fx:"WALL. Family photos keep his spirits up: he only goes AUTO-LAZY under 20%, not 25%."},
+    {id:"sackPile",name:"POTATO SACK PILE",lv:2,price:18,group:"decor",kind:"place",cat:"floor",fx:"FLOOR. Spare sacks by the pile: grabbing potatoes is 20% faster."},
+    {id:"cookbook",name:"COOKBOOK STAND",lv:2,price:16,group:"decor",kind:"place",cat:"top",fx:"TABLE-TOP. NEAT peeling works at 90% speed, not 80%."},
+    {id:"towelRack",name:"TOWEL RACK",lv:2,price:14,group:"decor",kind:"place",cat:"wash",fx:"WASH ROOM WALL. Dry hands: energy drains 15% slower while he is in the wash room. Needs the ROOM KEY."},
+    {id:"soap",name:"SOAP DISPENSER",lv:2,price:12,group:"decor",kind:"place",cat:"wash",fx:"WASH ROOM WALL. Soapy water: the current pulls potatoes off the basin heap 15% faster. Needs the ROOM KEY."},
+    {id:"mopBucket",name:"MOP BUCKET",lv:2,price:12,group:"decor",kind:"place",cat:"wash",fx:"WASH ROOM FLOOR. Dry floor: he walks 10% faster in the wash room. Needs the ROOM KEY."},
+    {id:"floorTiles",name:"FLOOR TILES",lv:2,price:20,group:"decor",kind:"theme",cat:"theme",fx:"COSMETIC ONLY. Kitchen floor: CLASSIC, BLACK + WHITE, TERRACOTTA or OAK PLANK. Change it in INV."},
+    {id:"stringLights",name:"STRING LIGHTS",lv:3,price:22,group:"decor",kind:"place",cat:"wall",fx:"WALL. Night shift (8 PM to 6 AM shift time): he works 4% faster. They twinkle."},
+    {id:"neonSign",name:"NEON OPEN SIGN",lv:3,price:30,group:"decor",kind:"place",cat:"wall",fx:"WALL. Open for business: every 20th potato shipped gets a +1c tip."},
+    {id:"bookshelf",name:"BOOKSHELF",lv:3,price:28,group:"decor",kind:"place",cat:"floor",fx:"FLOOR. Self-help books: buying the next LEVEL costs 10% less."},
+    {id:"catBed",name:"CAT BED + CAT",lv:3,price:35,group:"decor",kind:"place",cat:"floor",fx:"FLOOR. A cat wanders the kitchen and naps here. Purring: his naps restore energy 10% faster."},
+    {id:"toyBoat",name:"TOY BOAT",lv:3,price:16,group:"decor",kind:"basin",cat:"basin",fx:"WASH BASIN. Put it in from INV. It rides the canal: the current is 15% stronger. Needs the ROOM KEY."},
+    {id:"trophyShelf",name:"TROPHY SHELF",lv:4,price:40,group:"decor",kind:"place",cat:"wall",fx:"WALL. Shows your progress: one cup per level reached, a gold cup per 500 potatoes shipped (up to 3). He works 1% faster per cup."},
+    {id:"aquarium",name:"AQUARIUM",lv:4,price:45,group:"decor",kind:"place",cat:"top",fx:"TABLE-TOP. Calm fish: hunger and energy drain 5% slower."},
+    {id:"bubbles",name:"BUBBLE MAKER",lv:4,price:24,group:"decor",kind:"basin",cat:"basin",fx:"WASH BASIN. Put it in from INV. Sloppy potatoes that ship through the wash room pay the full 3c. Needs the ROOM KEY."},
+    {id:"statue",name:"PAPA STATUE",lv:5,price:60,group:"decor",kind:"place",cat:"floor",fx:"FLOOR. A golden potato Papa. Pride: he works 5% faster."}
   ];
-  var ITEMI={};for(var ii=0;ii<ITEMS.length;ii++)ITEMI[ITEMS[ii].id]=ITEMS[ii];
+  var ITEMI={};for(var ii=0;ii<ITEMS.length;ii++){var it0=ITEMS[ii];ITEMI[it0.id]=it0;if(!it0.cat)it0.cat=it0.group==='machine'?'machine':it0.group==='starter'?(it0.kind==='place'?'floor':it0.kind):(RUGS.indexOf(it0.id)>=0?'rug':WALLS.indexOf(it0.id)>=0?'wall':it0.kind==='duck'?'basin':'floor');}
   var LEVEL_PRICE=[0,0,80,160,280,450]; /* cost to BUY that level (reach Lv N). Max 5. */
   var BELT_SPD=[0,0.55,1.0,1.45];
   var SPEED_NAME=["OFF","SLOW","STEADY","FAST"];
@@ -738,16 +799,17 @@ var PPSim=(function(){
     if(id==="tvArmchair")return {x:GEO.tv.x,y:GEO.tv.y};
     if(id==="broomDustpan")return {x:GEO.broom.x,y:GEO.broom.y};
     if(id==="carryBag")return {x:GEO.bag.x,y:GEO.bag.y};
-    if(typeof g.x==="number")return {x:g.x,y:g.y};
+    if(typeof g.x==="number"){if(isWall(id)&&(g.x<=GEO.WALL||g.x>=RW-GEO.WALL))return {x:g.x,y:g.y,r:g.x<=GEO.WALL?3:1};return {x:g.x,y:g.y};}
     return {x:(g.x0+g.x1)/2,y:(g.y0+g.y1)/2};
   }
-  function decorFresh(){return {lamp:0,radio:0,tv:0,plant:0,plantT:0,radioTune:0,radioSt:0,radioVol:6,radioNear:1};}
+  var WDEF={towelRack:{x:3.5,y:250,r:3},soap:{x:3.5,y:290,r:3},mopBucket:{x:22,y:330}};   /* 0.4.11 wash-room decor defaults (defaults sit in the bottom half: t1187 bans default props up top; the player may drag them anywhere legal) */
+  function decorFresh(){return {lamp:0,radio:0,tv:0,plant:0,plantT:0,radioTune:0,radioSt:0,radioVol:6,radioNear:1,day:0,paydays:0,shipN:0,tips:0,compostN:0,compost:0};}
   function fixDecor(d){var f=decorFresh(),k;if(!d||typeof d!=="object")return f;for(k in f)if(typeof d[k]!=="number"||!isFinite(d[k]))d[k]=f[k];
     d.radioSt=Math.max(0,Math.min(2,Math.floor(d.radioSt)));d.radioVol=Math.max(0,Math.min(10,Math.floor(d.radioVol)));d.radioNear=d.radioNear?1:0;return d;}
   function fresh(seed){
     seed=(seed>>>0)||((Math.random()*4294967295)>>>0);
     var b={};for(var id in BOX)b[id]=BOX[id].def;b.pot=POT_MAX;
-    return {v:12,seed:seed,rs:0,rr:seed|0,t:0,level:1,duckIn:0,
+    return {v:13,seed:seed,rs:0,rr:seed|0,t:0,level:1,duckIn:0,hyg:100,basin:{},theme:{wall:0,floor:0},
       coins:C.startCoins,food:C.startFood,hunger:100,energy:100,
       box:b,potCap:POT_MAX,up:upsFresh(),
       owned:{},place:{},equipped:{},line:lineFresh(),
@@ -777,12 +839,33 @@ var PPSim=(function(){
   P.emit=function(e){if(this.s.ev.length<64)this.s.ev.push(e);};
   P.up=function(id){return Math.max(0,Math.min(UPI[id].max,this.s.up[id]|0));};
   P.spd=function(){var g=this.s.g;return g.lazy?(this.placed("poster")?0.70:C.lazySpeed):SPD[this.s.box.pace];};
+  P.lazyLow=function(){return this.placed("photos")?20:C.lazyLow;};
   P.messF=function(){return 1-(this.placed("fan")?0.15:C.messMax)*Math.min(1,this.s.peels/C.messFull);};
   P.wspd=function(){return this.spd()*this.messF();};
-  P.price=function(){var b=this.s.stats.bought;return Math.min(C.priceCap,Math.round(C.foodPrice*Math.pow(C.priceGrow,b))+Math.floor(this.s.t/C.priceEvery));};
+  P.price=function(){var b=this.s.stats.bought;return Math.max(1,Math.min(C.priceCap,Math.round(C.foodPrice*Math.pow(C.priceGrow,b))+Math.floor(this.s.t/C.priceEvery))-(this.placed("potsPans")?1:0));};
   P.foodMax=function(){return C.foodMax+3*this.up("pantry")+(this.placed("smallCooler")?2:0)+(this.placed("shelf")?2:0);};
   P.chuteCap=function(){return C.chuteCap+2*this.up("chute");};
-  P.peelTime=function(){return C.peel*Math.pow(0.85,this.up("peeler"))*(this.equipped("betterPeeler")?0.90:1)/(this.lampOn()?1.08:1)/STYLE[this.s.box.style].sp;};
+  P.peelTime=function(){var st=this.s.box.style,sp=STYLE[st].sp;if(st===0&&this.placed("cookbook"))sp=0.9;return C.peel*Math.pow(0.85,this.up("peeler"))*(this.equipped("betterPeeler")?0.90:1)/(this.lampOn()?1.08:1)/sp/(this.sticky()?0.85:1);};
+  /* ---- 0.4.11 table sink: clean hands (hygiene). Peeling dirties them; he rinses at the sink built into the peel table. ---- */
+  P.hyg=function(){var h=+this.s.hyg;return isFinite(h)?Math.max(0,Math.min(100,h)):100;};
+  P.sticky=function(){return this.hyg()<25;};
+  P.wantRinse=function(){var b=this.s.box;return b.rinse>0&&this.hyg()<b.rinse;};
+  P.peelsPer=function(){var st=this.s.box.style;if(st===2&&this.placed("coatHook"))return 4;return STYLE[st].peels;};
+  P.grabTime=function(){return C.grab*(this.placed("sackPile")?0.8:1);};
+  P.mealGain=function(){return C.meal+(this.placed("spiceRack")?10:0);};
+  P.isDay=function(){var h=this.clockTime().h;return h>=6&&h<20;};
+  P.trophies=function(){return Math.max(1,Math.min(5,this.s.level|0))+Math.min(3,Math.floor(((this.s.stats.washedShip|0)+(this.s.stats.unwashedShip|0))/500));};
+  /* MOOD (0.4.11): read-only, from his needs and the room. Decor lifts it; mood 60+ = work +3%, 80+ = +6%, under 30 = -5%. */
+  P.decorCount=function(){var n=0,i,it;for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(it.group!=="decor"||it.kind==="theme")continue;if(it.kind==="duck"?this.duckOn():it.kind==="basin"?this.basinOn(it.id):this.placed(it.id))n++;}return n;};
+  P.mood=function(){var s=this.s,m=50+Math.min(30,this.decorCount()*2);if(this.musicOn())m+=8;if(this.plantOk())m+=4;if(this.ownTheme())m+=3;
+    if(s.hunger<25)m-=15;if(s.energy<25)m-=10;if(this.sticky())m-=10;if(s.peels>=60)m-=10;else if(s.peels>=30)m-=5;
+    return Math.max(0,Math.min(100,Math.round(m)));};
+  P.moodMul=function(){var m=this.mood();return m>=80?1.06:m>=60?1.03:1;   /* bonus only: a bare starter room is never slower than 0.4.10 */};
+  P.ownTheme=function(){var t=this.s.theme||{};return (this.owned("wallpaper")&&(t.wall|0)>0)||(this.owned("floorTiles")&&(t.floor|0)>0);};
+  P.basinOn=function(id){if(id==="duck")return this.duckOn();return this.owned(id)&&this.hasKey()&&!!(this.s.basin&&this.s.basin[id]);};
+  P.putBasin=function(id,on){if(id==="duck")return this.putDuck(on);if(!isBasin(id)||!this.owned(id))return "bad";if(on&&!this.hasKey())return "nokey";if(!this.s.basin||typeof this.s.basin!=="object")this.s.basin={};this.s.basin[id]=on?1:0;return "ok";};
+  P.setTheme=function(which,v){var own=which==="wall"?"wallpaper":which==="floor"?"floorTiles":null;if(!own||!this.owned(own))return "bad";v=Math.floor(+v);if(!isFinite(v))return "bad";var L=THEMES[which].length;v=((v%L)+L)%L;if(!this.s.theme)this.s.theme={wall:0,floor:0};this.s.theme[which]=v;return "ok";};
+  P.theme=function(){var t=this.s.theme||{};return {wall:this.owned("wallpaper")?(t.wall|0):0,floor:this.owned("floorTiles")?(t.floor|0):0};};
   /* ---- 0.4.10 decor effects (all deterministic: the sim counts the radio as playing while it is placed and ON) ---- */
   P.lampOn=function(){return this.placed("lamp")&&this.s.box.lamp>0;};
   P.musicOn=function(){return this.placed("radio")&&this.s.box.radio>0;};
@@ -791,9 +874,15 @@ var PPSim=(function(){
     var p=this.placeOf(id),x=g.x*RW,y=g.y*RH,f=this.footOf(id,p.x,p.y,p.r|0);
     if(id==="rug"||id==="roundRug"){var dx=(x-p.x)/f.hx,dy=(y-p.y)/f.hy;return dx*dx+dy*dy<=1;}
     return x>=f.x0&&x<=f.x1&&y>=f.y0&&y<=f.y1;};
-  P.energyMul=function(){var m=1,kit=this.s.g.where!=="wash";if(this.musicOn())m*=kit?0.8:0.9;if(kit&&this.plantOk())m*=0.9;if(this.onRug("kitchenMat"))m*=0.7;return m;};
-  P.hungerMul=function(){return this.onRug("rug")?0.8:1;};
-  P.workMul=function(){var m=1;if(this.musicOn())m*=1.05;if(this.onRug("roundRug"))m*=1.08;return m;};
+  P.energyMul=function(){var m=1,kit=this.s.g.where!=="wash";if(this.musicOn())m*=kit?0.8:0.9;if(kit&&this.plantOk())m*=0.9;if(this.onRug("kitchenMat"))m*=0.7;if(this.placed("aquarium"))m*=0.95;if(!kit&&this.placed("towelRack")&&this.hasKey())m*=0.85;return m;};
+  P.hungerMul=function(){var m=this.onRug("rug")?0.8:1;if(this.placed("fruitBowl")&&this.s.g.where!=="wash")m*=0.9;if(this.placed("aquarium"))m*=0.95;return m;};
+  P.workMul=function(){var m=1;if(this.musicOn())m*=1.05;if(this.onRug("roundRug"))m*=1.08;
+    if(this.placed("window")&&this.isDay())m*=1.04;if(this.placed("stringLights")&&!this.isDay())m*=1.04;
+    if(this.placed("trophyShelf"))m*=1+0.01*this.trophies();if(this.placed("statue"))m*=1.05;
+    return m*this.moodMul();};
+  P.washWalk=function(){return (this.placed("mopBucket")&&this.hasKey())?1.10:1;};
+  P.pullMul=function(){return (this.duckOn()?1.25:1)*((this.placed("soap")&&this.hasKey())?1.15:1);};
+  P.flowMul=function(){return this.basinOn("toyBoat")?1.15:1;};
   P.walkDecor=function(){return this.onRug("runner")?1.15:1;};
   P.eatTime=function(){return C.eat*(this.placed("clock")?0.7:1);};
   P.duckOn=function(){return this.owned("duck")&&this.hasKey()&&!!this.s.duckIn;};
@@ -814,11 +903,35 @@ var PPSim=(function(){
     add("shelf",this.placed("shelf"),"SHELF: +2 food storage");
     add("duck",this.duckOn(),"DUCK: basin pull +25%");
     add("tvArmchair",this.placed("tvArmchair")&&this.s.box.tv>0,"TV: watch for energy");
+    add("window",this.placed("window")&&this.isDay(),"WINDOW: work +4% (daytime)");
+    add("stringLights",this.placed("stringLights")&&!this.isDay(),"STRING LIGHTS: work +4% (night)");
+    add("spiceRack",this.placed("spiceRack"),"SPICE RACK: meals +10 hunger");
+    add("coatHook",this.placed("coatHook"),"APRON: QUICK = 4 peels");
+    add("calendar",this.placed("calendar"),"CALENDAR: 10c payday each shift day");
+    add("potsPans",this.placed("potsPans"),"POTS + PANS: food -1c");
+    add("photos",this.placed("photos"),"PHOTOS: lazy only under 20%");
+    add("neonSign",this.placed("neonSign"),"NEON: +1c tip every 20th ship");
+    add("trophyShelf",this.placed("trophyShelf"),"TROPHIES: work +"+this.trophies()+"%");
+    add("sideTable",this.placed("sideTable"),"SIDE TABLE: 2 table-top slots");
+    add("compost",this.placed("compost"),"COMPOST: sweep +25%, 1c per 20 peels");
+    add("sackPile",this.placed("sackPile"),"SACKS: grab +20%");
+    add("bookshelf",this.placed("bookshelf"),"BOOKS: level -10%");
+    add("catBed",this.placed("catBed"),"CAT: naps +10%");
+    add("statue",this.placed("statue"),"STATUE: work +5%");
+    add("fruitBowl",this.placed("fruitBowl")&&this.s.g.where!=="wash","FRUIT: hunger -10% (kitchen)");
+    add("cookbook",this.placed("cookbook"),"COOKBOOK: NEAT at 90%");
+    add("aquarium",this.placed("aquarium"),"AQUARIUM: hunger + energy -5%");
+    add("towelRack",this.placed("towelRack")&&this.hasKey()&&this.s.g.where==="wash","TOWELS: energy -15% (wash room)");
+    add("soap",this.placed("soap")&&this.hasKey(),"SOAP: basin pull +15%");
+    add("mopBucket",this.placed("mopBucket")&&this.hasKey(),"MOP: wash-room walk +10%");
+    add("toyBoat",this.basinOn("toyBoat"),"BOAT: current +15%");
+    add("bubbles",this.basinOn("bubbles"),"BUBBLES: sloppy wash pay 3c");
+    add("wallpaper",false,"WALLPAPER: cosmetic");add("floorTiles",false,"FLOOR TILES: cosmetic");
     return o;};
   P.dropTime=function(){return C.drop*Math.pow(0.7,this.up("chute"));};
   P.walkMul=function(){return 1+0.10*this.up("boots");};
-  P.sweepRate=function(){return C.sweepRate*(1+0.5*this.up("broom"));};
-  P.napRegen=function(){return C.napRegen*(1+0.35*this.up("mat"));};
+  P.sweepRate=function(){return C.sweepRate*(1+0.5*this.up("broom"))*(this.placed("compost")?1.25:1);};
+  P.napRegen=function(){return C.napRegen*(1+0.35*this.up("mat"))*(this.placed("catBed")?1.10:1);};
   P.potMax=function(){return Math.max(0,Math.min(POT_MAX,this.s.potCap));};
   P.target=function(){return POT_LOCK;}; /* 0.4.9: kitchen stock is locked; box.pot stays in the save */
   P.total=function(){var s=this.s,k=s.suck,L=s.line;var ln=L?((L.beltIn?L.beltIn.length:0)+(L.peeler?1:0)+(L.beltOut?L.beltOut.length:0)):0;return s.pile+this.heldN()+s.chute+(k?k.n-k.landed:0)+ln+washCount(s.wash);};
@@ -834,8 +947,8 @@ var PPSim=(function(){
     var eatThr=b.eat>0?b.eat:0,napThr=b.nap>0?b.nap:0;
     var wantEat=eatThr>0&&s.hunger<eatThr&&s.food>0;
     var wantNap=napThr>0&&s.energy<napThr;
-    var hungerUnmet=(eatThr>0)?(s.hunger<eatThr&&s.food<=0):(s.hunger<C.lazyLow);
-    var energyUnmet=napThr>0?false:(s.energy<C.lazyLow);
+    var LL=this.lazyLow(),hungerUnmet=(eatThr>0)?(s.hunger<eatThr&&s.food<=0):(s.hunger<LL);
+    var energyUnmet=napThr>0?false:(s.energy<LL);
     var lazy=(hungerUnmet||energyUnmet);
     var wantWatch=this.placed("tvArmchair")&&b.tv>0&&b.watch>0&&s.energy<b.watch&&!s.g.hold;
     var wantWater=this.placed("plant")&&b.water>0&&(s.decor&&s.decor.plant>=b.water)&&!s.g.hold;
@@ -897,6 +1010,7 @@ var PPSim=(function(){
     else if(kind==="peel"){
       if(!this.atTable()){g.job="peel";g.tmiss=(g.tmiss|0)+1;if(g.tmiss<=3){this.walkTo(SPOT.table.x,SPOT.table.y,SPOT.table.dir,"peel","to the table");return;}}
       g.tmiss=0;g.job="peel";g.dir=SPOT.table.dir;
+      if(this.wantRinse()){g.act={t:"rinse",e:0,label:"rinsing his hands at the table sink"};return;}
       /* carry bag equipped and a load in it: set the sack on the floor beside him and peel them one by one until it is done */
       if(this.equipped("carryBag")&&this.heldN()>1&&g.hold==="raw"){var sd=this.sackSpot();g.sack={x:sd.x,y:sd.y,n:this.heldN()};}else g.sack=null;
       g.act={t:"peel",label:g.lazy?"peeling (sloppy)":(g.sack?"peeling from the sack":"peeling")};}
@@ -976,13 +1090,14 @@ var PPSim=(function(){
         if(d<=mv||d<0.01){g.x=gt[0];g.y=gt[1];if(fin){g.dir=a.dir;this.startAt(a.then);}else a.wp.shift();}
         else{g.x+=dx/d*mv/RW;g.y+=dy/d*mv/RH;}
         break;}
-      case "grab":a.e+=dt*wk;if(a.e>=C.grab){
-          if(s.pile<=0){a.e=C.grab;a.label="waiting for potatoes";s.stats.waitTime+=dt;if(s.chute>0&&!s.suck)this.startSuck();break;}
+      case "grab":a.e+=dt*wk;if(a.e>=this.grabTime()){
+          if(s.pile<=0){a.e=this.grabTime();a.label="waiting for potatoes";s.stats.waitTime+=dt;if(s.chute>0&&!s.suck)this.startSuck();break;}
           var take=Math.min(this.carryCap(),s.pile);s.pile-=take;g.hold="raw";g.held=take;g.washed=false;g.job=(this.owned("sink")&&s.box.wash>0)?"wash":"table";g.peel=0;g.pgot=0;g.sloppy=false;this.emit({k:"grab",n:take});this.decide();}break;
       case "peel":{
         if(g.lazy)g.sloppy=true;
         var nHold=Math.max(1,this.heldN());
-        var np=(g.sloppy?C.peelPerSloppy:STYLE[s.box.style].peels)*nHold;
+        var np=(g.sloppy?C.peelPerSloppy:this.peelsPer())*nHold;
+        s.hyg=Math.max(0,this.hyg()-1.5*dt*wk);
         g.peel+=dt*wk/(this.peelTime()*(0.70+0.30*nHold));
         /* the skin comes off progressively: one peel pops off at each fraction of the load */
         while(g.pgot<np&&g.peel>=(g.pgot+1)/(np+1)&&g.peel<1){g.pgot++;this.peelEmit(1);}
@@ -1003,7 +1118,7 @@ var PPSim=(function(){
           if(g.held<=0){g.hold=null;g.held=0;g.job="pile";g.peel=0;g.sloppy=false;g.washed=false;this.decide();}
           else{a.e=0;a.label="shipping them";}}break;
       case "eat":a.e+=dt;if(a.e>=this.eatTime()){
-          if(s.food>0){s.food--;s.hunger=Math.min(100,s.hunger+C.meal);s.stats.meals++;this.emit({k:"ate"});}
+          if(s.food>0){s.food--;s.hunger=Math.min(100,s.hunger+this.mealGain());s.stats.meals++;this.emit({k:"ate"});}
           if(g.force==="eat"){if(g.holdRepeat==="eat"&&s.food>0&&s.hunger<98){a.e=0;break;}g.force=null;this.decide();break;}
           var n=this.needState();if(n.wantEat){a.e=0;}else this.decide();}break;
       case "nap":{s.energy=Math.min(100,s.energy+this.napRegen()*dt);var wk=s.box.wake>=100?C.napWake:s.box.wake;if(g.force==="nap"&&(wk<80||g.holdRepeat==="nap"))wk=100;if(s.energy>=wk){var bs=bedside();g.x=bs.x/RW;g.y=bs.y/RH;g.dir=bs.dir;if(g.force==="nap")g.force=null;this.decide();}break;}
@@ -1032,6 +1147,8 @@ var PPSim=(function(){
         a.e+=dt*sp;if(a.e>=2.4){if(s.decor){s.decor.plant=0;s.decor.plantT=s.t;}this.emit({k:"watered"});this.decide();}break;}
       case "tune":{
         a.e+=dt;if(a.e>=1.8){if(s.decor)s.decor.radioTune=s.t;this.decide();}break;}
+      case "rinse":{   /* 0.4.11: at the table sink, right where he peels */
+        a.e+=dt*sp;if(a.e>=1.0){s.hyg=100;s.stats.rinses=(s.stats.rinses|0)+1;this.emit({k:"rinse"});if(g.hold==="raw")this.startAt("peel");else this.decide();}break;}
     }
   };
   P.run=function(sec,h){h=h||0.1;var n=Math.round(sec/h);for(var i=0;i<n;i++)this.step(h);};
@@ -1057,6 +1174,7 @@ var PPSim=(function(){
     if(a.t==="watch"||(a.t==="walk"&&a.then==="watch"))return "WATCHING";
     if(a.t==="water"||(a.t==="walk"&&a.then==="water"))return "WATERING";
     if(a.t==="tune"||(a.t==="walk"&&a.then==="tune"))return "TUNING";
+    if(a.t==="rinse")return "PEELING";
     if(a.t==="wash"||(a.t==="walk"&&a.then==="wash"))return "WASHING";
     if(a.t==="scoop"||a.t==="dumpPool"||a.t==="wdump"||(a.t==="wwalk"&&(a.then==="scoop"||a.then==="dumpPool"||a.then==="enterWash")))return "WASHING";
     if(g.force==="washPool"||g.holdRepeat==="wash"||this.wantsAutoWash()){
@@ -1067,13 +1185,15 @@ var PPSim=(function(){
 
   P.owned=function(id){return !!(this.s.owned&&this.s.owned[id]);};
   P.unlocked=function(id){var it=ITEMI[id];return !!(it&&this.s.level>=it.lv);};
-  P.placed=function(id){return this.owned(id)&&!!(this.s.place&&this.s.place[id]);};
+  P.placed=function(id){if(!this.owned(id))return false;if(isWashItem(id))return !!(this.s.placeWash&&this.s.placeWash[id]);return !!(this.s.place&&this.s.place[id]);};
   P.equipped=function(id){return this.owned(id)&&!!(this.s.equipped&&this.s.equipped[id]);};
   P.inInv=function(id){if(!this.owned(id))return false;if(isTool(id))return !this.equipped(id);if(isPlaceable(id))return !this.placed(id);return false;};
-  P.placeOf=function(id){var p=(this.s.place&&this.s.place[id])||defaultPlace(id);return p;};
+  P.placeOf=function(id){if(isWashItem(id))return (this.s.placeWash&&this.s.placeWash[id])||WDEF[id];var p=(this.s.place&&this.s.place[id])||defaultPlace(id);return p;};
   P.equip=function(id){if(!isTool(id)||!this.owned(id))return "bad";if(!this.s.equipped)this.s.equipped={};this.s.equipped[id]=1;this.poke();return "ok";};
   P.unequip=function(id){if(!isTool(id)||!this.owned(id))return "bad";if(this.s.equipped)this.s.equipped[id]=0;this.poke();return "ok";};
   P.placeItem=function(id,x,y){if(!isPlaceable(id)||!this.owned(id))return "bad";
+    if(isWashItem(id))return this.placeWashItem(id,x,y);
+    if(isTop(id)){if(x==null||y==null||!isFinite(+x)||!isFinite(+y)){x=GEO.sideTable.x;y=GEO.sideTable.y;}return this.placeTop(id,+x,+y);}
     if(x==null||y==null||!isFinite(+x)||!isFinite(+y)){var d=defaultPlace(id);x=d.x;y=d.y;}x=+x;y=+y;
     if(!this.s.place)this.s.place={};
     if(id==="conveyor"||id==="outConveyor"||id==="suction"){var dp=defaultPlace(id);this.s.place[id]={x:dp.x,y:dp.y};this.refresh();this.replan();this.poke();return "ok";}   /* fixed work-line machines */
@@ -1090,14 +1210,52 @@ var PPSim=(function(){
     if(id==="sink"&&!this.s.sinkAuto){this.s.sinkAuto=1;this.s.box.wash=1;}
     this.replan();this.poke();return "ok";};
   P.unplace=function(id){if(!isPlaceable(id)||!this.placed(id))return "bad";
+    if(isWashItem(id)){delete this.s.placeWash[id];this.poke();return "ok";}
     delete this.s.place[id];this.refresh();this.replan();this.poke();return "ok";};
   P.invList=function(){var out=[],i,it;
     for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(!this.owned(it.id))continue;
       out.push({id:it.id,name:it.name,kind:it.kind||(isTool(it.id)?"tool":"place"),equipped:this.equipped(it.id),placed:it.kind==="duck"?this.duckOn():this.placed(it.id),inInv:this.inInv(it.id)});
     }return out;};
-  P.trayList=function(){var out=[],i,it;
-    for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(isPlaceable(it.id)&&this.owned(it.id)&&!this.placed(it.id))out.push({id:it.id,name:it.name});}
+  P.trayList=function(room){var out=[],i,it;room=room||"any";
+    for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(!(isPlaceable(it.id)&&this.owned(it.id)&&!this.placed(it.id)))continue;
+      if(room==="wash"&&!isWashItem(it.id))continue;if(room==="kitchen"&&isWashItem(it.id))continue;
+      out.push({id:it.id,name:it.name,cat:isWashItem(it.id)?"wash":(it.cat||"floor")});}
     return out;};
+  /* ---- 0.4.11 TABLE-TOP slots: 2 on the side table, 1 on the food cooler lid ---- */
+  P.topSlots=function(){var o=[],p,r,a,b;
+    if(this.placed("sideTable")){p=this.placeOf("sideTable");r=(p.r|0)&3;a=rot(-3.4,-0.4,r);b=rot(3.4,-0.4,r);o.push({on:"sideTable",slot:0,x:p.x+a[0],y:p.y+a[1]});o.push({on:"sideTable",slot:1,x:p.x+b[0],y:p.y+b[1]});}
+    var K=GEO.cooler;o.push({on:"cooler",slot:0,x:(K.x0+K.x1)/2,y:(K.y0+K.y1)/2-0.6});
+    return o;};
+  P.topOwner=function(on,slot,skip){var pl=this.s.place||{},i,q;for(i=0;i<TOPS.length;i++){if(TOPS[i]===skip)continue;q=pl[TOPS[i]];if(q&&this.owned(TOPS[i])&&q.on===on&&(q.slot|0)===slot)return TOPS[i];}return null;};
+  P.syncTops=function(){var pl=this.s.place||{},sl=this.topSlots(),i,j,q,f;
+    for(i=0;i<TOPS.length;i++){q=pl[TOPS[i]];if(!q)continue;f=null;for(j=0;j<sl.length;j++)if(sl[j].on===q.on&&sl[j].slot===(q.slot|0)){f=sl[j];break;}
+      if(!f){delete pl[TOPS[i]];continue;}   /* its surface was put away: back to the inventory */
+      q.x=f.x;q.y=f.y;}};
+  P.placeTop=function(id,x,y){if(!isTop(id)||!this.owned(id))return "bad";var sl=this.topSlots(),best=null,bd=1e9,i,d;
+    for(i=0;i<sl.length;i++){if(this.topOwner(sl[i].on,sl[i].slot,id))continue;d=Math.hypot(sl[i].x-x,sl[i].y-y);if(d<bd){bd=d;best=sl[i];}}
+    if(!best)return "blocked";if(!this.s.place)this.s.place={};this.s.place[id]={x:best.x,y:best.y,on:best.on,slot:best.slot};this.poke();return "ok";};
+  /* ---- 0.4.11 WASH-ROOM decor: wall items on the north wall (off the door and ship opening) or the west wall; floor items off the basin, canal, outlet, door and his walk lanes ---- */
+  P.fitsWashWall=function(id,x,y,r){r=(r|0)&3;var f=this.footOf(id,x,y,r),W=GEO.WALL,D=WASH.door,h=WASH.hole,i,q,f2;
+    if(r===0){if(Math.abs(y-W/2)>0.01)return false;if(f.x0<W+1||f.x1>WW-W-1)return false;if(f.x1>D.x0-2&&f.x0<D.x0+D.w+2)return false;if(f.x1>h.x-h.w/2-4)return false;}
+    else if(r===3){if(Math.abs(x-W/2)>0.01)return false;if(f.y0<W+2||f.y1>WH-W-2)return false;}
+    else return false;
+    for(i=0;i<WASHW.length;i++){if(WASHW[i]===id||!this.placed(WASHW[i]))continue;q=this.placeOf(WASHW[i]);f2=this.footOf(WASHW[i],q.x,q.y,q.r|0);if(f.x0<f2.x1+1&&f.x1>f2.x0-1&&f.y0<f2.y1+1&&f.y1>f2.y0-1)return false;}
+    return true;};
+  P.washWallSnap=function(id,x,y){var W=GEO.WALL,walls=[{r:0,d:Math.abs(y)},{r:3,d:Math.abs(x)}],i,j,o,px,py;walls.sort(function(a1,b1){return a1.d-b1.d;});
+    for(i=0;i<walls.length;i++){var r=walls[i].r;for(j=0;j<=800;j++){o=(j&1?1:-1)*Math.ceil(j/2);if(r===0){px=x+o;py=W/2;}else{px=W/2;py=y+o;}if(this.fitsWashWall(id,px,py,r))return {x:px,y:py,r:r};}}
+    return null;};
+  P.washLanes=function(){var d=WASH.doorSpot,L=WASH.land;return [{x0:d.x,y0:d.y,x1:L.x-18,y1:L.y-2},{x0:d.x,y0:d.y,x1:L.x,y1:L.y-L.ry},{x0:d.x,y0:d.y,x1:L.x+L.rx,y1:L.y},{x0:d.x,y0:d.y,x1:L.x-L.rx,y1:L.y}];};
+  P.fitsWashFloor=function(id,x,y){if(!this.fitsWash(id,x,y))return false;var f=this.footOf(id,x,y,0),ln=this.washLanes(),i,c,q,f2;
+    for(i=0;i<ln.length;i++){c=distToSeg(x,y,ln[i]);if(c.d<Math.max(f.hx,f.hy)+9)return false;}   /* he walks the door-to-basin lanes in straight lines: never in his way */
+    for(i=0;i<WASHF.length;i++){if(WASHF[i]===id||!this.placed(WASHF[i]))continue;q=this.placeOf(WASHF[i]);f2=this.footOf(WASHF[i],q.x,q.y,0);if(f.x0<f2.x1+1&&f.x1>f2.x0-1&&f.y0<f2.y1+1&&f.y1>f2.y0-1)return false;}
+    return true;};
+  P.placeWashItem=function(id,x,y){if(!isWashItem(id)||!this.owned(id))return "bad";if(!this.hasKey())return "nokey";
+    if(x==null||y==null||!isFinite(+x)||!isFinite(+y)){var d0=WDEF[id];x=d0.x;y=d0.y;}x=+x;y=+y;
+    if(!this.s.placeWash)this.s.placeWash={};
+    if(isWashWall(id)){var sn=this.washWallSnap(id,x,y);if(!sn)return "blocked";this.s.placeWash[id]={x:sn.x,y:sn.y,r:sn.r};this.poke();return "ok";}
+    var ra,i2,a2,px,py;for(ra=0;ra<=120;ra+=3){var nA=ra?Math.max(8,Math.round(ra*0.7)):1;for(i2=0;i2<nA;i2++){a2=i2*2*Math.PI/nA;px=x+Math.cos(a2)*ra;py=y+Math.sin(a2)*ra;
+      if(this.fitsWashFloor(id,px,py)){this.s.placeWash[id]={x:px,y:py};this.poke();return "ok";}}}
+    return "blocked";};
   /* 0.4.2: the EXACT spot first (0.4.1 always added a 10-unit pad, so he stopped short of the shipping X and stood off the table).
      Then the nearest free spot he can actually walk to, closest first. */
   P.standBeside=function(x,y){
@@ -1150,7 +1308,8 @@ var PPSim=(function(){
     for(i=0;i<left.length;i++)far.push(left[i].p);
     s.mess=far;s.peels=s.mess.length;
     var removed=[];for(i=0;i<take.length;i++)removed.push({x:take[i].p.x,y:take[i].p.y,d:take[i].d});
-    if(removed.length)s.stats.swept+=removed.length;
+    if(removed.length){s.stats.swept+=removed.length;
+      if(this.placed("compost")){var dc=s.decor||(s.decor=decorFresh());dc.compostN=(dc.compostN|0)+removed.length;while(dc.compostN>=20){dc.compostN-=20;s.coins+=1;s.stats.earned+=1;dc.compost=(dc.compost|0)+1;}}}
     this.lastSweep={x:x,y:y,removed:removed};
     return removed.length;
   };
@@ -1177,6 +1336,7 @@ var PPSim=(function(){
     if(this.placed("lamp")){lp=this.placeOf("lamp");SPOT.lamp.x=lp.x-8;SPOT.lamp.y=lp.y;}
     if(this.placed("plant")){pn=this.placeOf("plant");SPOT.plant.x=pn.x;SPOT.plant.y=pn.y+12;}
     if(this.placed("basicCot")){ct=this.placeOf("basicCot");SPOT.cot.x=ct.x;SPOT.cot.y=ct.y+14;}
+    this.syncTops();
   };
   P.lineOn=function(which){
     var b=this.s.box;
@@ -1195,7 +1355,7 @@ var PPSim=(function(){
   P.carryCap=function(){return this.equipped("carryBag")?(2+this.up("bag")):1;};
   P.heldN=function(){var g=this.s.g;if(!g.hold)return 0;var n=g.held|0;return n>0?n:1;};
   P.sitSpot=function(){var tv=this.placeOf("tvArmchair"),r=tv.r|0,o=rot(-5.6,0.4,r);return {x:tv.x+o[0],y:tv.y+o[1],dir:(1+r)&3};};
-  P.levelPrice=function(){var n=this.s.level+1;if(n>5)return null;return LEVEL_PRICE[n];};
+  P.levelPrice=function(){var n=this.s.level+1;if(n>5)return null;return this.placed("bookshelf")?Math.round(LEVEL_PRICE[n]*0.9):LEVEL_PRICE[n];};
   P.buyLevel=function(){var s=this.s,pr=this.levelPrice();if(pr===null)return "max";if(s.coins<pr)return "poor";s.coins-=pr;s.level++;s.stats.spent+=pr;s.stats.boughtUp++;this.emit({k:"level",lv:s.level});return "ok";};
   P.itemPrice=function(id){var it=ITEMI[id];if(!it)return null;if(this.owned(id))return null;return it.price;};
   P.buyItem=function(id){var s=this.s,it=ITEMI[id];if(!it)return "bad";if(!this.unlocked(id))return "locked";if(this.owned(id))return "have";if(s.coins<it.price)return "poor";
@@ -1204,7 +1364,9 @@ var PPSim=(function(){
     s.stats.spent+=it.price;s.stats.boughtUp++;this.poke();this.emit({k:"item",id:id});return "ok";};
   /* 0.4.2 footprints (half sizes, unrotated) for every object the editor can move */
   var FOOT={table:[17,9],cooler:[7,5],stool:[5,5],mat:[16,9],bed:[16,9],autoPeeler:[12,12],sink:[8,8],basicCot:[14,8],tvArmchair:[16,8],smallCooler:[7,6],plant:[6,6],lamp:[5,6],radio:[5,5],suction:[8,8],conveyor:[6,18],outConveyor:[14,6],rug:[12,8],
-    kitchenMat:[9,6],runner:[6,20],roundRug:[11,11],clock:[4,3.5],poster:[5,3.5],fan:[5,5],shelf:[10,4]};
+    kitchenMat:[9,6],runner:[6,20],roundRug:[11,11],clock:[4,3.5],poster:[5,3.5],fan:[5,5],shelf:[10,4],
+    window:[7,3.5],spiceRack:[5,3.5],coatHook:[3.5,3.5],calendar:[3.5,3.5],potsPans:[7,3.5],photos:[6,3.5],stringLights:[12,3.5],neonSign:[7,3.5],trophyShelf:[8,3.5],
+    sideTable:[7,5],compost:[5,5],sackPile:[8,6],bookshelf:[10,4],catBed:[6,5],statue:[5,5],fruitBowl:[3,3],cookbook:[3,3],aquarium:[3.2,2.6],towelRack:[9.6,3.5],soap:[4.8,3.5],mopBucket:[8,8]};   /* wash items are drawn 1.6x (the wash room is drawn at a smaller scale) */
   Sim.FOOT=FOOT;
   P.rotOf=function(id){if(id==="bed")id="mat";var p=this.s.place&&this.s.place[id];if(p&&typeof p.r==="number")return p.r&3;return 0;};
   P.centerOf=function(id){
@@ -1280,6 +1442,9 @@ var PPSim=(function(){
     x=+x;y=+y;if(!isFinite(x)||!isFinite(y))return false;
     if(!this.canMove(id))return false;
     var key=id==="bed"?"mat":id,r=this.rotOf(key);
+    if(isWashItem(key)){if(isWashWall(key)){var ww=this.washWallSnap(key,x,y);if(!ww)return false;this.s.placeWash[key]={x:ww.x,y:ww.y,r:ww.r};return true;}
+      if(!this.fitsWashFloor(key,x,y))return false;this.s.placeWash[key]={x:x,y:y};return true;}
+    if(isTop(key)){var old=this.s.place[key];var rr=this.placeTop(key,x,y);return rr==="ok";}
     if(isWall(key)){var wsn=this.wallSnap(key,x,y);if(!wsn)return false;return this.applyPlace(key,wsn.x,wsn.y,wsn.r);}
     var sp=this.findFree(key,x,y,r);if(!sp)return false;
     return this.applyPlace(key,sp.x,sp.y,r);
@@ -1287,7 +1452,7 @@ var PPSim=(function(){
   /* ROTATE (0.4.2): a quarter turn clockwise. If the turned shape does not fit where it is, it shifts a little; if it cannot fit at all it stays. */
   P.rotateItem=function(id){
     if(id==="washPile"||id==="streetMouth")return false;
-    if(isWall(id))return false;   /* 0.4.10: wall items turn with the wall they hang on; drag them to another wall */
+    if(isWall(id)||isTop(id)||isWashItem(id))return false;   /* wall items turn with the wall they hang on; table-tops sit in a slot; wash decor stays upright */
     if(!this.canMove(id))return false;
     var key=id==="bed"?"mat":id,r=(this.rotOf(key)+1)&3,c=this.centerOf(key);
     for(var tries=0;tries<4;tries++){var sp=this.findFree(key,c.x,c.y,r);if(sp&&this.applyPlace(key,sp.x,sp.y,r))return true;r=(r+1)&3;if(r===this.rotOf(key))break;}
@@ -1325,6 +1490,7 @@ var PPSim=(function(){
     add.call(this,"suction",8,8);
     add.call(this,"fan",5,5);     /* 0.4.10 */
     add.call(this,"shelf",10,4);
+    for(var fi=0;fi<FLOOR11.length;fi++){var ff=FOOT[FLOOR11[fi]];add.call(this,FLOOR11[fi],ff[0],ff[1]);}   /* 0.4.11 floor decor blocks walking */
     /* 0.4.2: the inbound / outbound belts are low runs along the walls (drawn at GEO.beltX / outBeltY). 0.4.1 put an invisible 12x36 block at the TV spot for them; gone. */
     OBST=list;INF=inflated();Sim.OBST=OBST;GVER++;
     this.pickStand();
@@ -1395,7 +1561,7 @@ var PPSim=(function(){
     if(a.t==="watch"){var sp=this.sitSpot();g.x=sp.x/RW;g.y=sp.y/RH;return;}
     if(a.t==="lazynap"||a.t==="idle")return;
     var x=g.x*RW,y=g.y*RH,inside=false;for(var j=0;j<OBST.length;j++){var o=OBST[j];if(x>o.x0&&x<o.x1&&y>o.y0&&y<o.y1){inside=true;break;}}
-    var spot=a.t==="peel"?SPOT.table:a.t==="drop"?SPOT.ship:a.t==="wash"?SPOT.sink:a.t==="eat"?SPOT.food:null;
+    var spot=(a.t==="peel"||a.t==="rinse")?SPOT.table:a.t==="drop"?SPOT.ship:a.t==="wash"?SPOT.sink:a.t==="eat"?SPOT.food:null;
     if(a.t==="walk"||inside||(spot&&Math.hypot(spot.x-x,spot.y-y)>3)||(a.t==="sweep")){g.sack=null;this.decide();}
   };
   P.refresh=function(){this.syncGeom();this.rebuildObst();this.fixMess();};
@@ -1439,8 +1605,12 @@ var PPSim=(function(){
       }
     }
   };
+  P.neonTip=function(){var d=this.s.decor;if(!d||!this.placed("neonSign"))return 0;d.shipN=(d.shipN|0)+1;if(d.shipN>=20){d.shipN=0;d.tips=(d.tips|0)+1;this.emit({k:"tip"});return 1;}return 0;};
   P.decorStep=function(dt){
     var s=this.s;if(!s.decor)s.decor=decorFresh();
+    /* 0.4.11 calendar payday: 10c at each new shift day while it hangs (no back pay for days before it went up) */
+    var day=this.clockTime().day;if(!(s.decor.day>0))s.decor.day=day;
+    if(day>s.decor.day){if(this.placed("calendar")){s.coins+=10;s.stats.earned+=10;s.decor.paydays=(s.decor.paydays|0)+1;this.emit({k:"payday"});}s.decor.day=day;}
     if(this.placed("plant"))s.decor.plant=Math.min(100,s.decor.plant+dt*0.15);
     /* 0.4.10: the old flat radio energy tick is replaced by energyMul (music = 20% slower drain) */
   };
@@ -1461,7 +1631,7 @@ var PPSim=(function(){
     opt=opt||{};var s=this.s,p={washed:!!opt.washed,sloppy:!!opt.sloppy};
     if(s.chute>=this.chuteCap()&&!s.suck)this.startSuck();
     if(s.chute>=this.chuteCap())return false;
-    var v=shipPay(p);
+    var v=shipPay(p)+this.neonTip();
     s.chute++;s.coins+=v;s.stats.earned+=v;s.stats.peeled++;
     if(p.washed)s.stats.washedShip=(s.stats.washedShip|0)+1;else s.stats.unwashedShip=(s.stats.unwashedShip|0)+1;
     if(s.chute>=this.chuteCap())this.startSuck();
@@ -1578,7 +1748,7 @@ var PPSim=(function(){
     var s=this.s,g=s.g,a=g.act,mv,dx,dy,d;
     if(!a){this.decideWash();return;}
     if(a.t==="wwalk"){
-      dx=a.x-g.wx;dy=a.y-g.wy;d=Math.sqrt(dx*dx+dy*dy);mv=C.walk*wsp*this.walkMul()*dt;
+      dx=a.x-g.wx;dy=a.y-g.wy;d=Math.sqrt(dx*dx+dy*dy);mv=C.walk*wsp*this.walkMul()*this.washWalk()*dt;
       g.walkPh+=mv*0.35;
       if(Math.abs(dx)>Math.abs(dy)*0.8)g.dir=dx>0?1:3;else g.dir=dy>0?2:0;
       if(d<=mv||d<0.01){g.wx=a.x;g.wy=a.y;g.dir=a.dir;this.startAt(a.then);}
@@ -1621,9 +1791,10 @@ var PPSim=(function(){
       ang=this.rand()*6.283;r=this.rand()*Math.min(L.rx,L.ry)*0.45;
       this.spawnWash({x:H.x+Math.cos(ang)*r,y:H.y+Math.sin(ang)*r*0.7,vx:(this.rand()-0.5)*4,vy:(this.rand()-0.5)*4,washed:true,sloppy:sloppy,age:0.8,onStreet:false});}};
   P.shipWashOne=function(p){
-    var s=this.s,v=shipPay(p);
+    var s=this.s,v;
     if(s.chute>=this.chuteCap()&&!s.suck)this.startSuck();
     if(s.chute>=this.chuteCap())return false;   /* hold it until the pipe takes a batch */
+    v=(p&&p.washed&&p.sloppy&&this.basinOn("bubbles"))?C.washValue:shipPay(p);v+=this.neonTip();
     s.chute++;s.coins+=v;s.stats.earned+=v;
     if(p.washed)s.stats.washedShip=(s.stats.washedShip|0)+1;else s.stats.unwashedShip=(s.stats.unwashedShip|0)+1;
     if(s.chute>=this.chuteCap())this.startSuck();
@@ -1632,11 +1803,11 @@ var PPSim=(function(){
   P.washStep=function(dt){
     var s=this.s;ensureWash(s);this.syncWashGeom();
     var w=s.wash,i,p,H=heapCenter(),hole=WASH.hole,lo=GEO.WALL+4,hx=WW-GEO.WALL-4,hy=WH-GEO.WALL-4;
-    var j,q,dx,dy,d,nx,ny,sp,push,gx,gy,up=this.up("channel"),wid=streetWidth(up),reach=currentReach(up),flow=streetFlow(up),hit,on,keep,best,bd,east,score;
+    var j,q,dx,dy,d,nx,ny,sp,push,gx,gy,up=this.up("channel"),wid=streetWidth(up),reach=currentReach(up),flow=streetFlow(up)*this.flowMul(),hit,on,keep,best,bd,east,score;
     if(w.bulk>0&&w.pots.length<WASH_LIVE-4)this.releaseBulk(Math.min(4,WASH_LIVE-4-w.pots.length));
     if(s.g.where==="wash"){gx=s.g.wx;gy=s.g.wy;}
     /* current peels potatoes off the basin heap into the canal; faster at higher channel levels */
-    w.pullAcc=(w.pullAcc||0)+heapPullRate(up)*(this.duckOn()?1.25:1)*dt;
+    w.pullAcc=(w.pullAcc||0)+heapPullRate(up)*this.pullMul()*dt;
     while(w.pullAcc>=1){
       w.pullAcc-=1;
       best=null;bd=-1e9;
@@ -1730,7 +1901,7 @@ var PPSim=(function(){
     return out;
   };
 
-  P.serialize=function(){var s=this.s;var o=JSON.parse(JSON.stringify(s));o.ev=[];o.v=12;return JSON.stringify(o);};
+  P.serialize=function(){var s=this.s;var o=JSON.parse(JSON.stringify(s));o.ev=[];o.v=13;return JSON.stringify(o);};
 
   function synthMess(n,seed){
     var out=[],i,k,sp,ang,r,x,y;
@@ -1836,9 +2007,18 @@ var PPSim=(function(){
     o.decor=fixDecor(o.decor);
     o.duckIn=o.duckIn&&o.owned&&o.owned.duck?1:0;
   }
-  /* accepts a 0.4.10 save (v:12), a 0.4.9 save (v:11), a 0.4.8 save (v:10), a 0.4.7 save (v:9), a 0.4.6 save (v:8), a 0.4.5 save (v:7), a 0.4.4 save (v:6), a 0.4.3 save (v:5), a 0.4 save (v:4), a 0.3 save (v:3), a 0.2 save (v:2) or a 0.1 save (v:1). Older saves are migrated in memory; the old keys are never written. */
-  Sim.load=function(str){try{var o=JSON.parse(str);if(!o||(o.v!==1&&o.v!==2&&o.v!==3&&o.v!==4&&o.v!==5&&o.v!==6&&o.v!==7&&o.v!==8&&o.v!==9&&o.v!==10&&o.v!==11&&o.v!==12)||typeof o.coins!=="number"||!o.g||typeof o.g!=="object"||!o.box||typeof o.box!=="object")return null;
-      var old=o.v<3,from1=o.v===1,from3=o.v===3;ensure12(o);
+  function ensure13(o){
+    ensure12(o);o.v=13;
+    var h=+o.hyg;o.hyg=isFinite(h)?Math.max(0,Math.min(100,h)):100;
+    if(!o.basin||typeof o.basin!=="object")o.basin={};var b2={};for(var i=0;i<BASIN.length;i++)if(BASIN[i]!=="duck"&&o.basin[BASIN[i]]&&o.owned&&o.owned[BASIN[i]])b2[BASIN[i]]=1;o.basin=b2;
+    if(!o.theme||typeof o.theme!=="object")o.theme={wall:0,floor:0};
+    o.theme={wall:((Math.floor(+o.theme.wall)||0)%4+4)%4,floor:((Math.floor(+o.theme.floor)||0)%4+4)%4};
+    if(o.box&&typeof o.box.rinse!=="number")o.box.rinse=BOX.rinse.def;
+    if(o.placeWash&&typeof o.placeWash==="object"){for(var k in o.placeWash){var q=o.placeWash[k];if(!q||typeof q!=="object"||!isFinite(+q.x)||!isFinite(+q.y))delete o.placeWash[k];}}
+  }
+  /* accepts a 0.4.11 save (v:13), a 0.4.10 save (v:12), a 0.4.9 save (v:11), a 0.4.8 save (v:10), a 0.4.7 save (v:9), a 0.4.6 save (v:8), a 0.4.5 save (v:7), a 0.4.4 save (v:6), a 0.4.3 save (v:5), a 0.4 save (v:4), a 0.3 save (v:3), a 0.2 save (v:2) or a 0.1 save (v:1). Older saves are migrated in memory; the old keys are never written. */
+  Sim.load=function(str){try{var o=JSON.parse(str);if(!o||(o.v!==1&&o.v!==2&&o.v!==3&&o.v!==4&&o.v!==5&&o.v!==6&&o.v!==7&&o.v!==8&&o.v!==9&&o.v!==10&&o.v!==11&&o.v!==12&&o.v!==13)||typeof o.coins!=="number"||!o.g||typeof o.g!=="object"||!o.box||typeof o.box!=="object")return null;
+      var old=o.v<3,from1=o.v===1,from3=o.v===3;ensure13(o);
       var f=fresh(o.seed);for(var k in f)if(!(k in o))o[k]=f[k];
       if(!o.stats||typeof o.stats!=="object")o.stats={};for(var k2 in f.stats)if(typeof o.stats[k2]!=="number"||!isFinite(o.stats[k2]))o.stats[k2]=f.stats[k2];
       var oldPot=+o.box.pot;
@@ -1857,7 +2037,7 @@ var PPSim=(function(){
       var kk=o.suck;if(kk&&typeof kk==="object"&&isFinite(+kk.t0)&&+kk.n>0&&+kk.n<=cmx&&+kk.landed>=0&&+kk.landed<=+kk.n){o.suck={t0:+kk.t0,n:Math.floor(+kk.n),landed:Math.floor(+kk.landed)};if(o.suck.t0>o.t)o.suck.t0=o.t;}else o.suck=null;
       var g=o.g;if(g.act&&typeof g.act!=="object")g.act=null;
       if(old)g.act=null;      /* geometry changed in 0.3: let him re-decide from where he stands */
-      var ok={walk:1,wwalk:1,grab:1,peel:1,drop:1,eat:1,nap:1,lazynap:1,idle:1,sweep:1,wash:1,watch:1,water:1,tune:1,scoop:1,dumpPool:1,wdump:1};if(g.act&&!ok[g.act.t])g.act=null;
+      var ok={walk:1,wwalk:1,grab:1,peel:1,drop:1,eat:1,nap:1,lazynap:1,idle:1,sweep:1,wash:1,watch:1,water:1,tune:1,scoop:1,dumpPool:1,wdump:1,rinse:1};if(g.act&&!ok[g.act.t])g.act=null;
       if(g.act&&g.act.t==="walk"&&!(isFinite(+g.act.x)&&isFinite(+g.act.y)))g.act=null;
       if(typeof g.x!=="number"||!(g.x>=0&&g.x<=1))g.x=0.5;if(typeof g.y!=="number"||!(g.y>=0&&g.y<=1))g.y=0.2;if(typeof g.dir!=="number"||!(g.dir>=0&&g.dir<=3))g.dir=2;
       if(old){g.x=Math.max(0.12,Math.min(0.88,g.x));g.y=Math.max(0.08,Math.min(0.92,g.y));}
@@ -1876,7 +2056,7 @@ var PPSim=(function(){
       if(from1||have!==want){if(have>want){o.pile=Math.max(0,o.pile-(have-want));}else o.pile+=want-have;}
       return sim;}catch(e){return null;}};
   Sim.fresh=function(seed){return new Sim(fresh(seed));};
-  Sim.C=C;Sim.POTS=POTS;Sim.BOX=BOX;Sim.PACE=PACE;Sim.SPOT=SPOT;Sim.SPD=SPD;Sim.DRN=DRN;Sim.GEO=GEO;Sim.OBST=OBST;Sim.RW=RW;Sim.RH=RH;Sim.WW=WW;Sim.WH=WH;Sim.WASH=WASH;Sim.WASH0=WASH0;Sim.shipPay=shipPay;Sim.inPool=inPool;Sim.inStreet=inStreet;Sim.inLanding=inLanding;Sim.streetWidth=streetWidth;Sim.canalWidth=canalWidth;Sim.streetSeg=streetSeg;Sim.canalPts=canalPts;Sim.projectCanal=projectCanal;Sim.pointAlongCanal=pointAlongCanal;Sim.currentReach=currentReach;Sim.streetFlow=streetFlow;Sim.heapPullRate=heapPullRate;Sim.heapCenter=heapCenter;Sim.inCanalProper=inCanalProper;Sim.inHeap=inHeap;Sim.washHeapCount=washHeapCount;Sim.HEAP_VIS=HEAP_VIS;Sim.HEAP_SPILL=HEAP_SPILL;Sim.POT_LOCK=POT_LOCK;Sim.POT_SLIDER=POT_SLIDER;Sim.RUGS=RUGS;Sim.WALLS=WALLS;Sim.isRug=isRug;Sim.isWall=isWall;Sim.FOOT=FOOT;
+  Sim.C=C;Sim.POTS=POTS;Sim.BOX=BOX;Sim.PACE=PACE;Sim.SPOT=SPOT;Sim.SPD=SPD;Sim.DRN=DRN;Sim.GEO=GEO;Sim.OBST=OBST;Sim.RW=RW;Sim.RH=RH;Sim.WW=WW;Sim.WH=WH;Sim.WASH=WASH;Sim.WASH0=WASH0;Sim.shipPay=shipPay;Sim.inPool=inPool;Sim.inStreet=inStreet;Sim.inLanding=inLanding;Sim.streetWidth=streetWidth;Sim.canalWidth=canalWidth;Sim.streetSeg=streetSeg;Sim.canalPts=canalPts;Sim.projectCanal=projectCanal;Sim.pointAlongCanal=pointAlongCanal;Sim.currentReach=currentReach;Sim.streetFlow=streetFlow;Sim.heapPullRate=heapPullRate;Sim.heapCenter=heapCenter;Sim.inCanalProper=inCanalProper;Sim.inHeap=inHeap;Sim.washHeapCount=washHeapCount;Sim.HEAP_VIS=HEAP_VIS;Sim.HEAP_SPILL=HEAP_SPILL;Sim.POT_LOCK=POT_LOCK;Sim.POT_SLIDER=POT_SLIDER;Sim.RUGS=RUGS;Sim.WALLS=WALLS;Sim.TOPS=TOPS;Sim.WASHW=WASHW;Sim.WASHF=WASHF;Sim.BASIN=BASIN;Sim.FLOOR11=FLOOR11;Sim.THEMES=THEMES;Sim.isTop=isTop;Sim.isWashItem=isWashItem;Sim.isWashWall=isWashWall;Sim.isBasin=isBasin;Sim.isRug=isRug;Sim.isWall=isWall;Sim.FOOT=FOOT;
   Sim.COMMANDS=COMMANDS;Sim.UPS=UPS;Sim.STYLE=STYLE;Sim.ITEMS=ITEMS;Sim.ITEMI=ITEMI;Sim.LEVEL_PRICE=LEVEL_PRICE;Sim.SPEED_NAME=SPEED_NAME;Sim.FIXED=FIXED;Sim.TOOLS=TOOLS;Sim.PLACEABLES=PLACEABLES;Sim.STARTER=STARTER;Sim.isTool=isTool;Sim.isPlaceable=isPlaceable;Sim.tableKids=tableKids;Sim.bedside=bedside;Sim.spill=spill;Sim.route=route;Sim.INFL=function(){return INF;};Sim.defaultPlace=defaultPlace;Sim.rot=rot;Sim.routeSafe=routeSafe;Sim.gridRoute=gridRoute;Sim.freePt=freePt;
   return Sim;
 })();
@@ -2771,17 +2951,21 @@ if(typeof module!=="undefined")module.exports=PPSim;
 
   /* ======================== 0.4.10 DECOR (carpets, wall items, fan, shelf, duck) ======================== */
   function drawKitchenMat(cx, cy, state, opt) {
-    /* black rubber anti-fatigue mat, rust edge, drain holes (top-down, sits flat on the tiles) */
-    var w = 18, h = 12, x0 = cx - w / 2, y0 = cy - h / 2, i, j;
-    wr(x0 + 0.4, y0 + 0.5, w, h, "rgba(0,0,0,0.22)");
-    blob(wx(x0), wy(y0), ws(w), ws(h), ws(1.4), "#2e2a28", "#141010");
-    wr(x0 + 0.7, y0 + 0.7, w - 1.4, 0.8, "#8a3a26");
-    wr(x0 + 0.7, y0 + h - 1.5, w - 1.4, 0.8, "#6a2a1a");
-    wr(x0 + 0.7, y0 + 0.9, w - 1.4, 0.35, "#b05a3a");
-    for (j = 0; j < 4; j++) for (i = 0; i < 7; i++)
-      wr(x0 + 2.0 + i * 2.15 + (j & 1) * 1.05, y0 + 2.6 + j * 1.9, 0.95, 0.95, "#141010");
-    for (j = 0; j < 4; j++) for (i = 0; i < 7; i++)
-      wr(x0 + 2.0 + i * 2.15 + (j & 1) * 1.05, y0 + 2.6 + j * 1.9, 0.95, 0.3, "#4a4440");
+    /* 0.4.11 redraw (Jay: read as a mat, not a dark block): sage cushion mat, cream stitched border,
+       ribbed field with light ridges, tasselled short ends. Same 18x12 footprint. */
+    var w = 18, h = 12, x0 = cx - w / 2, y0 = cy - h / 2, i;
+    wr(x0 + 0.5, y0 + 0.7, w, h, "rgba(0,0,0,0.22)");
+    blob(wx(x0), wy(y0), ws(w), ws(h), ws(1.6), "#e2d6b2", "#5a4a30");          /* cream edge band */
+    blob(wx(x0 + 1.3), wy(y0 + 1.3), ws(w - 2.6), ws(h - 2.6), ws(1.0), "#5f8a6c", "#3e5e48"); /* sage field */
+    for (i = 0; i < 6; i++) {                                                        /* raised ribs across the field */
+      var ry = y0 + 2.4 + i * 1.45;
+      wr(x0 + 2.0, ry, w - 4.0, 0.55, "#86b090");
+      wr(x0 + 2.0, ry + 0.55, w - 4.0, 0.3, "#4a7056");
+    }
+    for (i = 0; i < 9; i++) wr(x0 + 1.6 + i * 1.85, y0 + 0.55, 0.7, 0.35, "#b0a07a"); /* stitch dashes */
+    for (i = 0; i < 9; i++) wr(x0 + 1.6 + i * 1.85, y0 + h - 0.9, 0.7, 0.35, "#b0a07a");
+    for (i = 0; i < 5; i++) { wr(x0 - 1.1, y0 + 2.0 + i * 2.0, 1.2, 0.5, "#e8dcba"); wr(x0 + w - 0.1, y0 + 2.0 + i * 2.0, 1.2, 0.5, "#e8dcba"); } /* tassels */
+    oval(wx(x0 + 4.5), wy(y0 + 3.2), ws(2.4), ws(0.8), "rgba(255,255,240,0.18)");
   }
   function drawRunner(cx, cy, state, opt) {
     /* long woven runner (unrotated: north-south), navy field, cream band, rust bars, fringe */
@@ -3003,6 +3187,10 @@ if(typeof module!=="undefined")module.exports=PPSim;
     potato: potato,
     peelFlake: peelFlake,
     /* expose primitives so the harness room can share them */
+    /* 0.4.11: add-on sprite packs register here (decor11.js) */
+    register: function (id, fn, meta) { DRAWS[id] = fn; if (meta && !BY_ID[id]) { meta.id = id; CATALOG.push(meta); BY_ID[id] = meta; } },
+    getCtx: function () { return ctx; },
+    anim: function () { return { f: ANIM_F, t: ANIM_T, k: k }; },
     primitives: function () {
       return { R: R, wr: wr, oval: oval, disc: disc, blob: blob, softShadow: softShadow, wx: wx, wy: wy, ws: ws, bolt: bolt, led: led, OUT: OUT };
     }
@@ -3010,6 +3198,154 @@ if(typeof module!=="undefined")module.exports=PPSim;
   root.PPSprites04 = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
+
+/* ===== Papa Potato 0.4.11 — decor sprite pack (24 items + the cat). Same C-look: flat shading, 1px dark outline,
+   top-down, wall items drawn for the NORTH wall band (the game turns them for east / west walls).
+   (x, y) is the world-unit centre. Registers into PPSprites04. ===== */
+(function(){
+  var S=window.PPSprites04;if(!S)return;
+  var P=S.primitives(),wr=P.wr,oval=P.oval,disc=P.disc,blob=P.blob,softShadow=P.softShadow,wx=P.wx,wy=P.wy,ws=P.ws,OUT=P.OUT;
+  function C(){return S.getCtx();}
+  function A(){return S.anim();}
+  function shadow(x0,y0,w,h){wr(x0+0.5,y0+0.6,w,h,"rgba(0,0,0,0.26)");}
+  function plate(x0,y0,w,h,fill,edge){wr(x0,y0,w,h,edge||"#2a1c10");wr(x0+0.45,y0+0.45,w-0.9,h-0.9,fill);}
+  function poly(pts,c){var g=C();g.fillStyle=c;g.beginPath();for(var i=0;i<pts.length;i++){var X=wx(pts[i][0]),Y=wy(pts[i][1]);if(i)g.lineTo(X,Y);else g.moveTo(X,Y);}g.closePath();g.fill();}
+  function line(x0,y0,x1,y1,c,w){var g=C();g.strokeStyle=c;g.lineWidth=Math.max(0.7,ws(w||0.3));g.beginPath();g.moveTo(wx(x0),wy(y0));g.lineTo(wx(x1),wy(y1));g.stroke();}
+  function potatoFace(x,y,r){disc(wx(x),wy(y),ws(r),ws(r*0.8),"#c08a48",OUT);oval(wx(x-r*0.35),wy(y-r*0.25),ws(r*0.35),ws(r*0.25),"#e0b070");
+    wr(x-r*0.42,y-r*0.1,r*0.22,r*0.22,"#1a1410");wr(x+r*0.2,y-r*0.1,r*0.22,r*0.22,"#1a1410");wr(x-r*0.25,y+r*0.32,r*0.5,r*0.15,"#5a3418");}
+
+  /* ---------------- WALL (north band, 7 units deep) ---------------- */
+  function drawWindow(cx,cy,st,o){o=o||{};var w=14,h=6.4,x0=cx-w/2,y0=cy-h/2,day=o.day!==false;
+    shadow(x0,y0,w,h);plate(x0,y0,w,h,"#7a5430");
+    wr(x0+1,y0+1,w-2,h-2,day?"#9fd4f0":"#1c2850");
+    if(day){wr(x0+1,y0+h-2.6,w-2,1.6,"#bfe6c8");oval(wx(x0+w-3.4),wy(y0+2.2),ws(1.0),ws(1.0),"#fff3a0");}
+    else{wr(x0+3,y0+2,0.5,0.5,"#ffffff");wr(x0+7.5,y0+1.6,0.5,0.5,"#e8f0ff");oval(wx(x0+w-3.4),wy(y0+2.3),ws(0.9),ws(0.9),"#f0f0d0");}
+    wr(cx-0.3,y0+1,0.6,h-2,"#7a5430");wr(x0+1,cy-0.3,w-2,0.6,"#7a5430");
+    /* gingham curtains */
+    var i;for(i=0;i<2;i++){var cxp=i?x0+w-3.2:x0+0.2;wr(cxp,y0+0.3,3,h-0.6,"#c0361e");wr(cxp+0.5,y0+0.3,0.6,h-0.6,"#e86a50");wr(cxp+1.8,y0+0.3,0.6,h-0.6,"#e86a50");wr(cxp,y0+2,3,0.5,"#f0d0c0");wr(cxp,y0+4,3,0.5,"#f0d0c0");}
+    wr(x0-0.4,y0-0.2,w+0.8,0.7,"#4a3018");}
+  function drawSpiceRack(cx,cy){var w=10,h=6,x0=cx-w/2,y0=cy-h/2,i,cols=["#c0361e","#e0a020","#4a7a30","#7a3a8a","#d8d0b0"];
+    shadow(x0,y0,w,h);plate(x0,y0,w,h,"#8a5a2c","#3a2410");wr(x0+0.5,y0+h-1.6,w-1,0.6,"#5a3818");
+    for(i=0;i<5;i++){var jx=x0+1.3+i*1.8,jy=y0+2.9;disc(wx(jx),wy(jy),ws(0.75),ws(0.75),"#e8f0f0",OUT);oval(wx(jx),wy(jy),ws(0.55),ws(0.55),cols[i]);wr(jx-0.2,jy-0.3,0.3,0.3,"#ffffff");}}
+  function drawCoatHook(cx,cy){var x0=cx-3.2,y0=cy-3.2;
+    wr(x0+1,y0,4.4,1.1,"#4a3018");oval(wx(cx),wy(y0+0.6),ws(0.5),ws(0.5),"#c8c0a0");
+    poly([[cx-1.8,y0+1.2],[cx+1.8,y0+1.2],[cx+2.6,y0+6.2],[cx-2.6,y0+6.2]],OUT);
+    poly([[cx-1.5,y0+1.4],[cx+1.5,y0+1.4],[cx+2.2,y0+5.9],[cx-2.2,y0+5.9]],"#f0e8d4");
+    wr(cx-1.6,y0+3.2,3.2,0.45,"#c0361e");wr(cx-0.9,y0+4.1,1.8,1.3,"#c0361e");wr(cx-0.6,y0+4.3,1.2,0.8,"#e86a50");
+    line(cx-1.4,y0+1.4,cx,y0+0.6,"#c0361e",0.25);line(cx+1.4,y0+1.4,cx,y0+0.6,"#c0361e",0.25);}
+  function drawCalendar(cx,cy,st,o){o=o||{};var w=6,h=6.2,x0=cx-w/2,y0=cy-h/2,i,j,d=((o.day|0)-1)%28;
+    shadow(x0,y0,w,h);plate(x0,y0,w,h,"#f4efe0","#3a2a18");wr(x0+0.45,y0+0.45,w-0.9,1.4,"#c0361e");wr(cx-0.3,y0-0.3,0.6,0.8,"#6a6a6a");
+    for(j=0;j<4;j++)for(i=0;i<5;i++){var n=j*5+i;wr(x0+0.8+i*0.95,y0+2.3+j*0.95,0.6,0.55,n===d%20?"#c0361e":"#9a9080");}}
+  function drawPotsPans(cx,cy){var w=14,x0=cx-w/2,y0=cy-3.2;
+    wr(x0,y0+0.3,w,0.7,"#6a6a68");wr(x0,y0+0.3,w,0.25,"#b0b0a8");
+    function pan(x,r,c,c2){line(x,y0+0.8,x,y0+1.8,"#3a3a38",0.3);disc(wx(x),wy(y0+1.8+r),ws(r),ws(r),c,OUT);oval(wx(x),wy(y0+1.8+r),ws(r*0.7),ws(r*0.7),c2);oval(wx(x-r*0.35),wy(y0+1.5+r*0.7),ws(r*0.25),ws(r*0.18),"rgba(255,255,255,0.45)");}
+    pan(x0+2.4,1.9,"#b86a30","#8a4a20");pan(x0+6.4,2.2,"#3a3a3a","#1e1e1e");pan(x0+10.8,1.7,"#c88a48","#a06a30");
+    wr(x0+12.6,y0+0.9,1.1,3.6,"#c8c0a8");oval(wx(x0+13.15),wy(y0+0.9),ws(0.7),ws(0.4),"#c8c0a8");}
+  function drawPhotos(cx,cy){var x0=cx-6,y0=cy-3,i,fr=["#c8a050","#7a5430","#3a3a3a"];
+    for(i=0;i<3;i++){var fx=x0+0.4+i*4,fy=y0+(i===1?0.3:0.9),fw=3.4,fh=i===1?5.2:4.2;shadow(fx,fy,fw,fh);plate(fx,fy,fw,fh,"#e8dcc0",fr[i]);
+      wr(fx+0.6,fy+0.6,fw-1.2,fh-1.2,i===0?"#a8d0e0":i===1?"#d8c0a0":"#c0d8a8");potatoFace(fx+fw/2,fy+fh/2+0.2,i===1?1.2:1.0);}}
+  function drawStringLights(cx,cy,st,o){o=o||{};var w=24,x0=cx-w/2,y0=cy-2.4,i,a=A(),cols=["#ff5a4a","#ffd040","#6ae070","#6ab0ff","#ff8ad8"],n=9,night=!!o.night;
+    var g=C();g.strokeStyle="#2a2a20";g.lineWidth=Math.max(0.7,ws(0.25));g.beginPath();
+    for(i=0;i<=24;i++){var t=i/24,x=x0+t*w,y=y0+1.0+Math.sin(t*Math.PI*3)*0.9;if(i)g.lineTo(wx(x),wy(y));else g.moveTo(wx(x),wy(y));}g.stroke();
+    for(i=0;i<n;i++){var tt=(i+0.5)/n,bx=x0+tt*w,by=y0+1.6+Math.sin(tt*Math.PI*3)*0.9,on=((i+a.f)%4)!==0||night;
+      if(on&&night)oval(wx(bx),wy(by),ws(1.7),ws(1.7),"rgba(255,230,160,0.22)");
+      disc(wx(bx),wy(by),ws(0.65),ws(0.8),on?cols[i%5]:"#5a5a50",OUT);if(on)oval(wx(bx-0.2),wy(by-0.25),ws(0.25),ws(0.25),"#ffffff");}}
+  function drawNeonSign(cx,cy,st,o){var w=14,h=6,x0=cx-w/2,y0=cy-h/2,a=A(),flick=(Math.floor(a.t*3)%17)===0;
+    shadow(x0,y0,w,h);plate(x0,y0,w,h,"#141018","#000000");
+    var g=C();g.save();g.font="700 "+Math.max(5,Math.round(ws(3.6)))+"px Courier New,monospace";g.textAlign="center";g.textBaseline="middle";
+    g.shadowColor="#ff3a9a";g.shadowBlur=flick?0:Math.max(2,ws(1.2));g.fillStyle=flick?"#7a2a50":"#ff6ab8";g.fillText("OPEN",wx(cx),wy(cy+0.2));g.restore();
+    wr(x0+0.8,y0+0.8,w-1.6,0.35,flick?"#2a2040":"#6ad8ff");wr(x0+0.8,y0+h-1.15,w-1.6,0.35,flick?"#2a2040":"#6ad8ff");}
+  function drawTrophyShelf(cx,cy,st,o){o=o||{};var w=16,x0=cx-w/2,y0=cy-3,n=Math.max(1,Math.min(8,o.n|0)),gold=Math.max(0,o.gold|0),i;
+    shadow(x0,y0+4.4,w,1.4);wr(x0,y0+4.4,w,1.4,"#5a3818");wr(x0,y0+4.4,w,0.45,"#9a6a40");
+    for(i=0;i<n;i++){var tx=x0+1.2+i*1.85,isG=i>=n-gold,c=isG?"#ffd040":(i%2?"#c8c8d0":"#d08a48"),c2=isG?"#fff3a0":"#f0f0f8";
+      wr(tx-0.6,y0+3.6,1.2,0.8,"#3a2a18");wr(tx-0.25,y0+2.6,0.5,1.0,c);disc(wx(tx),wy(y0+1.9),ws(0.8),ws(0.75),c,OUT);oval(wx(tx-0.25),wy(y0+1.7),ws(0.25),ws(0.25),c2);}}
+
+  /* ---------------- FLOOR ---------------- */
+  function drawSideTable(cx,cy){var w=14,h=10,x0=cx-w/2,y0=cy-h/2;
+    softShadow(wx(cx+0.5),wy(cy+1),ws(8),ws(6));blob(wx(x0),wy(y0),ws(w),ws(h),ws(1.6),"#8a5a2c","#2a1808");
+    blob(wx(x0+0.9),wy(y0+0.9),ws(w-1.8),ws(h-1.8),ws(1.2),"#a87440","#6a4420");wr(x0+1.4,y0+1.2,w-2.8,0.5,"#c89060");
+    oval(wx(cx),wy(cy+0.2),ws(5.2),ws(3.4),"rgba(250,245,230,0.85)");oval(wx(cx),wy(cy+0.2),ws(4.4),ws(2.7),"rgba(230,220,200,0.6)");}
+  function drawCompost(cx,cy){var X=wx(cx),Y=wy(cy);softShadow(X,wy(cy+0.8),ws(5.4),ws(4.6));
+    disc(X,Y,ws(4.5),ws(4.5),"#3a6a2a",OUT);oval(X,Y,ws(3.8),ws(3.8),"#4a8a36");oval(X,Y,ws(2.9),ws(2.9),"#3a6a2a");
+    wr(cx-2.8,cy-0.45,5.6,0.9,"#2a4a1c");poly([[cx-1.2,cy+1.6],[cx,cy-0.6],[cx+1.2,cy+1.6]],"#c4e490");line(cx,cy+1.6,cx,cy+0.2,"#2a4a1c",0.22);
+    oval(X-ws(1.4),Y-ws(1.8),ws(1.1),ws(0.6),"rgba(255,255,255,0.18)");}
+  function drawSackPile(cx,cy){var i,pos=[[-3.8,1.2,4.2],[3.6,1.6,4.0],[0,-1.8,4.4]];softShadow(wx(cx),wy(cy+1.5),ws(9),ws(6));
+    for(i=0;i<3;i++){var x=cx+pos[i][0],y=cy+pos[i][1],r=pos[i][2];disc(wx(x),wy(y),ws(r),ws(r*0.85),"#b08a54",OUT);oval(wx(x),wy(y),ws(r*0.82),ws(r*0.68),"#c8a46a");
+      var k;for(k=-2;k<=2;k++)wr(x+k*1.4-0.15,y-r*0.6,0.3,r*1.2,"rgba(120,90,50,0.35)");
+      disc(wx(x),wy(y),ws(1.1),ws(0.9),"#8a6a3a","#4a3418");wr(x-0.9,y-0.15,1.8,0.3,"#5a3a18");}
+    disc(wx(cx+5.8),wy(cy-3.2),ws(1.3),ws(1.05),"#b07a3c","#5a3418");}
+  function drawBookshelf(cx,cy){var w=20,h=8,x0=cx-w/2,y0=cy-h/2,i,cols=["#c0361e","#2c5a8a","#e0a020","#4a7a30","#7a3a8a","#d8d0b0","#8a5a2c","#3a8a8a"];
+    shadow(x0,y0,w,h);plate(x0,y0,w,h,"#6a4220","#2a1808");wr(x0+0.5,y0+0.5,w-1,0.7,"#9a6a40");
+    var x=x0+1.0;for(i=0;x<x0+w-1.6;i++){var bw=1.0+((i*7)%3)*0.35;wr(x,y0+1.5,bw-0.15,h-2.4,cols[i%cols.length]);wr(x,y0+1.5,bw-0.15,0.5,"rgba(255,255,255,0.25)");x+=bw;}
+    wr(x0+0.5,y0+h-1.0,w-1,0.5,"#3a2410");}
+  function drawCatBed(cx,cy,st,o){o=o||{};var X=wx(cx),Y=wy(cy);softShadow(X,wy(cy+0.8),ws(7),ws(5.6));
+    disc(X,Y,ws(6),ws(5),"#7a4a8a",OUT);oval(X,Y,ws(4.6),ws(3.7),"#c890d0");oval(X,Y,ws(3.9),ws(3.0),"#e8d0ec");
+    if(o.cat)drawCatSprite(cx,cy+0.2,"sleep",{dir:0});}
+  function drawStatue(cx,cy){var x0=cx-5,y0=cy-5;softShadow(wx(cx),wy(cy+1),ws(6),ws(5.4));
+    plate(x0,y0,10,10,"#a8a49a","#3a3830");wr(x0+0.8,y0+0.8,8.4,0.6,"#d0ccc0");wr(x0+0.8,y0+8.6,8.4,0.6,"#7a766c");
+    disc(wx(cx),wy(cy+0.4),ws(3.4),ws(2.8),"#e0a020","#6a4a10");oval(wx(cx-1.0),wy(cy-0.5),ws(1.4),ws(0.9),"#fff3a0");
+    wr(cx-1.6,cy-0.1,0.6,0.6,"#6a4a10");wr(cx+1.0,cy-0.1,0.6,0.6,"#6a4a10");
+    poly([[cx-1.8,cy-2.0],[cx-1.2,cy-3.4],[cx-0.4,cy-2.4],[cx,cy-3.7],[cx+0.4,cy-2.4],[cx+1.2,cy-3.4],[cx+1.8,cy-2.0]],"#ffd040");
+    var a=A();if(a.f===0)wr(cx+2.0,cy-2.6,0.5,0.5,"#ffffff");}
+
+  /* ---------------- TABLE-TOP ---------------- */
+  function drawFruitBowl(cx,cy){var X=wx(cx),Y=wy(cy);disc(X,wy(cy+0.4),ws(2.8),ws(2.3),"#e8e0d0",OUT);oval(X,wy(cy+0.4),ws(2.2),ws(1.8),"#c8bca8");
+    disc(wx(cx-0.9),wy(cy),ws(0.95),ws(0.95),"#d8362a","#5a1410");disc(wx(cx+0.9),wy(cy+0.2),ws(0.95),ws(0.95),"#f09020","#6a3a08");disc(wx(cx),wy(cy+0.9),ws(0.85),ws(0.85),"#7ab030","#2a4a10");
+    poly([[cx-1.6,cy-0.9],[cx+1.4,cy-1.4],[cx+1.6,cy-0.9],[cx-1.2,cy-0.3]],"#f0d040");wr(cx-0.95,cy-1.1,0.3,0.4,"#3a2a10");}
+  function drawCookbook(cx,cy){var x0=cx-2.6,y0=cy-2.2;wr(x0+0.4,y0+0.5,5.2,4.2,"rgba(0,0,0,0.25)");wr(x0,y0+3.4,5.2,0.9,"#5a3818");
+    plate(x0,y0,2.6,3.8,"#f4efe0","#7a2a18");plate(x0+2.6,y0,2.6,3.8,"#f4efe0","#7a2a18");
+    var i;for(i=0;i<3;i++){wr(x0+0.5,y0+0.9+i*0.8,1.6,0.25,"#9a9080");wr(x0+3.1,y0+0.9+i*0.8,1.6,0.25,"#9a9080");}potatoFace(x0+1.3,y0+3.0,0.6);}
+  function drawAquarium(cx,cy){var a=A(),w=6.4,h=5.2,x0=cx-w/2,y0=cy-h/2;shadow(x0,y0,w,h);plate(x0,y0,w,h,"#4a9ad0","#1a2a3a");
+    wr(x0+0.45,y0+0.45,w-0.9,0.6,"#8ad0f0");wr(x0+0.45,y0+h-1.3,w-0.9,0.85,"#d8c890");
+    var fx=cx+Math.sin(a.t*0.9)*1.8,fy=cy-0.4+Math.sin(a.t*1.7)*0.4,dir=Math.cos(a.t*0.9)>0?1:-1;
+    disc(wx(fx),wy(fy),ws(0.8),ws(0.5),"#ff8a20",null);poly([[fx-dir*0.7,fy],[fx-dir*1.4,fy-0.5],[fx-dir*1.4,fy+0.5]],"#ff8a20");
+    var gx=cx-Math.sin(a.t*0.6+1)*1.5;disc(wx(gx),wy(cy+0.7),ws(0.55),ws(0.35),"#ffe040",null);
+    wr(x0+1.0,y0+h-2.6,0.4,1.4,"#3a8a3a");wr(x0+w-1.4,y0+h-2.2,0.4,1.0,"#3a8a3a");
+    if(a.f&1)wr(cx+1.6,y0+1.2-0.3*(a.f>>1),0.35,0.35,"#e0f4ff");}
+
+  /* ---------------- WASH ROOM ---------------- */
+  function drawTowelRack(cx,cy){var w=12,x0=cx-w/2,y0=cy-3;wr(x0,y0+0.6,w,0.6,"#b0b4b8");wr(x0,y0+0.4,0.7,1.0,"#7a7e82");wr(x0+w-0.7,y0+0.4,0.7,1.0,"#7a7e82");
+    plate(x0+1,y0+1,4.6,4.8,"#4a8ad0","#1a3a6a");wr(x0+1.45,y0+4.4,3.7,0.5,"#ffffff");
+    plate(x0+6.2,y0+1,4.6,4.0,"#f4f0e8","#7a766c");wr(x0+6.65,y0+3.6,3.7,0.5,"#c0361e");}
+  function drawSoap(cx,cy){var x0=cx-2.4,y0=cy-3;wr(x0+0.4,y0+0.6,4.8,6,"rgba(0,0,0,0.25)");plate(x0+0.2,y0+2,4.4,4.0,"#f08ab8","#6a2a4a");
+    wr(x0+0.65,y0+2.4,1.0,3.2,"#ffc0dc");wr(x0+1.8,y0+0.6,1.2,1.5,"#e8e8e8");wr(x0+2.8,y0+0.6,1.4,0.5,"#e8e8e8");
+    oval(wx(cx+1.4),wy(cy+1.6),ws(0.5),ws(0.5),"rgba(255,255,255,0.7)");}
+  function drawMopBucket(cx,cy){var X=wx(cx),Y=wy(cy);softShadow(X,wy(cy+0.8),ws(5.4),ws(4.6));
+    disc(X,Y,ws(4.4),ws(4.4),"#e0b020",OUT);oval(X,Y,ws(3.6),ws(3.6),"#6aa8d0");oval(X-ws(1),Y-ws(1),ws(1.2),ws(0.7),"rgba(255,255,255,0.4)");
+    line(cx+0.6,cy+0.6,cx+5.6,cy-4.4,"#8a5a2c",0.6);disc(wx(cx+0.4),wy(cy+0.5),ws(1.5),ws(1.3),"#e8e0c8","#7a7060");}
+  function drawToyBoat(cx,cy,st,o){o=o||{};var a=A(),bob=Math.sin(a.t*2.3)*0.25;cy+=bob;
+    oval(wx(cx),wy(cy+1.2),ws(3.6),ws(1.2),"rgba(255,255,255,0.25)");
+    poly([[cx-3,cy-0.2],[cx+3,cy-0.2],[cx+2,cy+1.4],[cx-2,cy+1.4]],OUT);poly([[cx-2.6,cy],[cx+2.6,cy],[cx+1.8,cy+1.1],[cx-1.8,cy+1.1]],"#d8362a");
+    wr(cx-2.2,cy,4.4,0.35,"#ffffff");wr(cx-0.15,cy-3.6,0.3,3.6,"#5a3418");poly([[cx+0.15,cy-3.4],[cx+2.4,cy-0.6],[cx+0.15,cy-0.6]],"#f4f0e8");}
+  function drawBubbles(cx,cy,st,o){var a=A(),i;disc(wx(cx),wy(cy),ws(1.6),ws(1.3),"#4ac0c8",OUT);oval(wx(cx),wy(cy),ws(0.9),ws(0.7),"#a0f0f4");
+    for(i=0;i<7;i++){var ph=(a.t*0.6+i/7)%1,bx=cx+Math.sin(i*2.3+a.t)*4*ph+(i-3)*0.8,by=cy-ph*9,r=0.5+0.6*((i*3)%4)/3;
+      var g=C();g.globalAlpha=Math.max(0,1-ph);g.strokeStyle="#e8fcff";g.lineWidth=Math.max(0.6,ws(0.2));g.beginPath();g.ellipse(wx(bx),wy(by),ws(r),ws(r),0,0,6.283);g.stroke();
+      g.fillStyle="rgba(255,255,255,0.8)";g.fillRect(wx(bx-r*0.4),wy(by-r*0.5),Math.max(1,ws(0.25)),Math.max(1,ws(0.25)));g.globalAlpha=1;}}
+
+  /* ---------------- THE CAT (wanders; renderer-only) ---------------- */
+  function drawCatSprite(cx,cy,st,o){o=o||{};var a=A(),g=C(),dir=o.dir||0,X=wx(cx),Y=wy(cy);
+    if(st==="sleep"){disc(X,Y,ws(2.6),ws(2.1),"#e08a30",OUT);oval(X-ws(0.6),Y-ws(0.5),ws(1.2),ws(0.8),"#f8b060");
+      disc(wx(cx+1.6),wy(cy-0.8),ws(1.2),ws(1.05),"#e08a30",OUT);wr(cx+1.0,cy-0.9,0.5,0.15,"#3a2010");wr(cx+1.8,cy-0.9,0.5,0.15,"#3a2010");
+      g.strokeStyle="#c06a20";g.lineWidth=Math.max(0.8,ws(0.5));g.beginPath();g.arc(X,Y,ws(2.4),1.0,2.6);g.stroke();
+      if(a.f<2){g.fillStyle="#ffffff";g.font="700 "+Math.max(6,Math.round(ws(2.2)))+"px monospace";g.fillText("z",wx(cx+2.6),wy(cy-2.4-a.f*0.6));}
+      return;}
+    g.save();g.translate(X,Y);g.rotate(dir);
+    var step=st==="walk"?Math.sin(a.t*14)*0.5:0;
+    g.strokeStyle="#c06a20";g.lineWidth=Math.max(0.8,ws(0.45));g.beginPath();g.moveTo(-ws(2.0),0);g.quadraticCurveTo(-ws(3.2),ws(1.2+step),-ws(3.8),ws(0.2));g.stroke();
+    oval(ws(-0.8+step*0.3),ws(1.2),ws(0.45),ws(0.35),"#c06a20");oval(ws(0.9-step*0.3),ws(-1.2),ws(0.45),ws(0.35),"#c06a20");
+    disc(0,0,ws(2.2),ws(1.4),"#e08a30",OUT);oval(-ws(0.4),-ws(0.3),ws(1.2),ws(0.6),"#f8b060");
+    disc(ws(2.2),0,ws(1.15),ws(1.05),"#e08a30",OUT);
+    g.fillStyle="#e08a30";g.beginPath();g.moveTo(ws(2.0),-ws(0.7));g.lineTo(ws(2.4),-ws(1.6));g.lineTo(ws(2.9),-ws(0.6));g.closePath();g.fill();
+    g.beginPath();g.moveTo(ws(2.0),ws(0.7));g.lineTo(ws(2.4),ws(1.6));g.lineTo(ws(2.9),ws(0.6));g.closePath();g.fill();
+    g.fillStyle="#1a1410";g.fillRect(ws(2.6),-ws(0.5),Math.max(1,ws(0.3)),Math.max(1,ws(0.3)));g.fillRect(ws(2.6),ws(0.25),Math.max(1,ws(0.3)),Math.max(1,ws(0.3)));
+    g.restore();}
+
+  var REG={window:[drawWindow,14,7],spiceRack:[drawSpiceRack,10,7],coatHook:[drawCoatHook,7,7],calendar:[drawCalendar,7,7],potsPans:[drawPotsPans,14,7],photos:[drawPhotos,12,7],
+    stringLights:[drawStringLights,24,7],neonSign:[drawNeonSign,14,7],trophyShelf:[drawTrophyShelf,16,7],sideTable:[drawSideTable,14,10],compost:[drawCompost,10,10],
+    sackPile:[drawSackPile,16,12],bookshelf:[drawBookshelf,20,8],catBed:[drawCatBed,12,10],statue:[drawStatue,10,10],fruitBowl:[drawFruitBowl,6,6],cookbook:[drawCookbook,6,6],
+    aquarium:[drawAquarium,6.4,5.2],towelRack:[drawTowelRack,12,7],soap:[drawSoap,6,7],mopBucket:[drawMopBucket,10,10],toyBoat:[drawToyBoat,6,5],bubbles:[drawBubbles,6,10],cat:[drawCatSprite,8,4]};
+  for(var id in REG)S.register(id,REG[id][0],{name:id.toUpperCase(),group:"decor",w:REG[id][1],h:REG[id][2],states:["on"],animated:[],blurb:"0.4.11 decor"});
+})();
 
 /* ===== Papa Potato 0.4.10 — the little radio (WebAudio). Two built-in stations are synthesized live (no recorded audio).
    MY MUSIC plays the player's own files (picked with <input type=file>) through the same small-speaker chain:
@@ -3167,16 +3503,17 @@ var PPRadio=(function(){
     songs:function(){return songs;},state:state,level:level,onHidden:onHidden,hasGoodSong:hasGoodSong};
 })();
 
-/* ===== Papa Potato 0.4.10 — renderer (0.4.10: decor that does something — radio with stations + your own music, 4 carpets, wall clock, poster, fan, pantry shelf, rubber duck). Was 0.4.9. Save v12, loads v1-v11. ===== */
+/* ===== Papa Potato 0.4.11 — renderer (0.4.11: 24 new decor items + tabbed editor tray, wash-room decor, table sink, mood, themes). Save v13, loads v1-v12. Was 0.4.10 (0.4.10: decor that does something — radio with stations + your own music, 4 carpets, wall clock, poster, fan, pantry shelf, rubber duck). Was 0.4.9. Save v12, loads v1-v11. ===== */
 (function(){
 "use strict";
-var SAVE_KEY="papaPotato.save.v12",KEY_V11="papaPotato.save.v11",KEY_V10="papaPotato.save.v10",KEY_V9="papaPotato.save.v9",KEY_V8="papaPotato.save.v8",KEY_V7="papaPotato.save.v7",KEY_V6="papaPotato.save.v6",KEY_V5="papaPotato.save.v5",KEY_V4="papaPotato.save.v4",KEY_V3="papaPotato.save.v3",KEY_V2="papaPotato.save.v2",KEY_V1="papaPotato.save.v1";   /* older keys are only ever READ */
+var SAVE_KEY="papaPotato.save.v13",KEY_V12="papaPotato.save.v12",KEY_V11="papaPotato.save.v11",KEY_V10="papaPotato.save.v10",KEY_V9="papaPotato.save.v9",KEY_V8="papaPotato.save.v8",KEY_V7="papaPotato.save.v7",KEY_V6="papaPotato.save.v6",KEY_V5="papaPotato.save.v5",KEY_V4="papaPotato.save.v4",KEY_V3="papaPotato.save.v3",KEY_V2="papaPotato.save.v2",KEY_V1="papaPotato.save.v1";   /* older keys are only ever READ */
 var C=PPSim.C,BOX=PPSim.BOX,SPOT=PPSim.SPOT,PACE=PPSim.PACE,GEO=PPSim.GEO,RW=PPSim.RW,RH=PPSim.RH,CMDS=PPSim.COMMANDS,UPS=PPSim.UPS,STYLE=PPSim.STYLE,SPD=PPSim.SPD,POTS=PPSim.POTS;
 var sim=null;
 var migrated=false;
 var WW=PPSim.WW,WH=PPSim.WH,WASH=PPSim.WASH;
 /* 0.4.9 save first; else carry over a 0.4.8 / 0.4.7 / 0.4.6 / 0.4.5 / 0.4.4 / 0.4.3 / 0.4.2 / 0.3 / 0.2 / 0.1 save (those keys are never written). */
 function loadGame(){var s=null;try{var raw=localStorage.getItem(SAVE_KEY);if(raw)s=PPSim.load(raw);}catch(e){}
+  if(!s){try{var o12=localStorage.getItem(KEY_V12);if(o12){s=PPSim.load(o12);if(s)migrated="0.4.10";}}catch(e){}}
   if(!s){try{var o11=localStorage.getItem(KEY_V11);if(o11){s=PPSim.load(o11);if(s)migrated="0.4.9";}}catch(e){}}
   if(!s){try{var o10=localStorage.getItem(KEY_V10);if(o10){s=PPSim.load(o10);if(s)migrated="0.4.8";}}catch(e){}}
   if(!s){try{var o9=localStorage.getItem(KEY_V9);if(o9){s=PPSim.load(o9);if(s)migrated="0.4.7";}}catch(e){}}
@@ -3337,25 +3674,38 @@ function potato(x,y,s,peeled,flip,spots,pal){
 }
 /* ---------- room pieces ---------- */
 function drawFloor(){R(0,0,W,H,"#2a2820");var ix=wx(WALL),iy=wy(WALL),ix2=wx(roomW-WALL),iy2=wy(roomH-WALL);var fw=Math.max(1,ix2-ix),fh=Math.max(1,iy2-iy);
-  R(ix,iy,fw,fh,"#9a947c");var step=Math.max(5,ws(6));var ox=ix-((ix%step)+step)%step,oy=iy-((iy%step)+step)%step;
-  for(var y=oy;y<iy+fh;y+=step)for(var x=ox;x<ix+fw;x+=step){if(x+1>=ix&&y+1>=iy){var cw=Math.min(step,ix+fw-x),ch=Math.min(step,iy+fh-y);if((((x-ox)+(y-oy))/step)%2===0)R(x,y,cw,ch,"#8e876e");}}
-  for(var i=0;i<130;i++){R(ix+((i*73)%Math.max(2,fw)),iy+((i*47)%Math.max(2,fh)),1,1,i%3===0?"#7a7460":"#a8a288");}
-  ctx.strokeStyle="rgba(60,55,40,0.28)";ctx.lineWidth=1;ctx.beginPath();
+  var FT=FLOOR_THEMES[(!viewIsWash()&&sim.theme)?sim.theme().floor:0]||FLOOR_THEMES[0];
+  R(ix,iy,fw,fh,FT.a);var step=Math.max(5,ws(6));var ox=ix-((ix%step)+step)%step,oy=iy-((iy%step)+step)%step;
+  if(FT.plank){var ph=Math.max(4,ws(4));for(var py=iy,rw=0;py<iy+fh;py+=ph,rw++){R(ix,py,fw,1,FT.line);var off=(rw%3)*Math.round(step*1.7);for(var px=ix-off;px<ix+fw;px+=step*5){if(px>ix)R(px,py,1,ph,FT.line);}if(rw%2)R(ix,py+1,fw,Math.max(1,ph-2),FT.b);}}
+  else for(var y=oy;y<iy+fh;y+=step)for(var x=ox;x<ix+fw;x+=step){if(x+1>=ix&&y+1>=iy){var cw=Math.min(step,ix+fw-x),ch=Math.min(step,iy+fh-y);if((((x-ox)+(y-oy))/step)%2===0)R(x,y,cw,ch,FT.b);}}
+  for(var i=0;i<130;i++){R(ix+((i*73)%Math.max(2,fw)),iy+((i*47)%Math.max(2,fh)),1,1,i%3===0?FT.s1:FT.s2);}
+  ctx.strokeStyle=FT.plank?"rgba(0,0,0,0)":FT.grid;ctx.lineWidth=1;ctx.beginPath();
   for(var x2=ix;x2<=ix+fw;x2+=step){ctx.moveTo(x2+0.5,iy);ctx.lineTo(x2+0.5,iy+fh);}for(var y2=iy;y2<=iy+fh;y2+=step){ctx.moveTo(ix,y2+0.5);ctx.lineTo(ix+fw,y2+0.5);}ctx.stroke();
   /* 0.3: the dashed centre stripe had no use and is hidden (drawCentreStripe, not called) */
   if(!viewIsWash()){var lcx=wx(gx),lcy=wy(gy);for(var j=0;j<7;j++){ctx.fillStyle="rgba(255,240,180,"+(0.07-j*0.009)+")";ctx.beginPath();ctx.ellipse(lcx,lcy,ws(22+j*6),ws(15+j*4.5),0,0,6.28);ctx.fill();}}}
 function drawCentreStripe(){var cx=wx(roomW*0.5);for(var y3=wy(WALL+8);y3<wy(roomH*0.72);y3+=Math.max(5,ws(5)))R(cx-ws(3.5),y3,ws(7),1,"#8a846c");}
 
+/* 0.4.11 cosmetic themes (kitchen only; index 0 = the original look) */
+var FLOOR_THEMES=[{a:"#9a947c",b:"#8e876e",s1:"#7a7460",s2:"#a8a288",grid:"rgba(60,55,40,0.28)"},
+  {a:"#e4e0d4",b:"#3a3a3e",s1:"#c8c4b8",s2:"#f4f0e8",grid:"rgba(20,20,20,0.30)"},
+  {a:"#b8663e",b:"#a85a34",s1:"#8a4426",s2:"#cc7a50",grid:"rgba(250,230,200,0.30)"},
+  {a:"#a8784a",b:"#9a6c40",s1:"#7a522c",s2:"#c08e5c",line:"#6a4626",plank:true}];
+var WALL_THEMES=[{w:"#3a3830",b1:"#4a4638",b2:"#323028",hi:"#5a5648"},
+  {w:"#5a8a78",b1:"#7ab09a",b2:"#4a7a68",hi:"#9ad0b8",stripe:true},
+  {w:"#a86a72",b1:"#c88a90",b2:"#985a62",hi:"#e0aab0"},
+  {w:"#2e3c5a",b1:"#44587e",b2:"#26324c",hi:"#6a80a8"}];
 function drawWalls(){var x0=wx(0),y0=wy(0),x1=wx(roomW),y1=wy(roomH);var ix=wx(WALL),iy=wy(WALL),ix2=wx(roomW-WALL),iy2=wy(roomH-WALL);
-  R(x0,y0,x1-x0,iy-y0,"#3a3830");R(x0,iy2,x1-x0,y1-iy2,"#3a3830");R(x0,iy,ix-x0,iy2-iy,"#3a3830");R(ix2,iy,x1-ix2,iy2-iy,"#3a3830");
+  var WT=WALL_THEMES[(!viewIsWash()&&sim.theme)?sim.theme().wall:0]||WALL_THEMES[0];
+  R(x0,y0,x1-x0,iy-y0,WT.w);R(x0,iy2,x1-x0,y1-iy2,WT.w);R(x0,iy,ix-x0,iy2-iy,WT.w);R(ix2,iy,x1-ix2,iy2-iy,WT.w);
   var t=Math.max(2,ws(2.4));R(x0,y0,x1-x0,t,"#1a1814");R(x0,y1-t,x1-x0,t,"#1a1814");R(x0,y0,t,y1-y0,"#1a1814");R(x1-t,y0,t,y1-y0,"#1a1814");
   var bs=Math.max(4,ws(5));for(var i=0;i<80;i++){var side=i%4,bx,by;
     if(side===0){bx=x0+t+((i*11)%Math.max(2,x1-x0-t*2));by=y0+t+((i*5)%Math.max(2,iy-y0-t));}
     else if(side===1){bx=x0+t+((i*13)%Math.max(2,x1-x0-t*2));by=iy2+((i*7)%Math.max(2,y1-iy2-t));}
     else if(side===2){bx=x0+t+((i*3)%Math.max(2,ix-x0-t));by=iy+((i*17)%Math.max(2,iy2-iy));}
     else{bx=ix2+((i*3)%Math.max(2,x1-ix2-t));by=iy+((i*19)%Math.max(2,iy2-iy));}
-    R(bx,by,bs,Math.max(2,ws(2.2)),(i%3===0)?"#4a4638":"#323028");}
-  R(ix,iy,ix2-ix,1,"#5a5648");R(ix,iy2-1,ix2-ix,1,"#2a2820");R(ix,iy,1,iy2-iy,"#5a5648");R(ix2-1,iy,1,iy2-iy,"#2a2820");
+    R(bx,by,bs,Math.max(2,ws(2.2)),(i%3===0)?WT.b1:WT.b2);}
+  if(WT.stripe){var sp2=Math.max(4,ws(4));for(var sx2=x0+t;sx2<x1-t;sx2+=sp2*2)R(sx2,y0+t,Math.max(1,ws(1.4)),iy-y0-t,WT.b1);for(var sy2=iy;sy2<iy2;sy2+=sp2*2){R(x0+t,sy2,ix-x0-t,Math.max(1,ws(1.4)),WT.b1);R(ix2,sy2,x1-ix2-t,Math.max(1,ws(1.4)),WT.b1);}}
+  R(ix,iy,ix2-ix,1,WT.hi);R(ix,iy2-1,ix2-ix,1,"#2a2820");R(ix,iy,1,iy2-iy,"#5a5648");R(ix2-1,iy,1,iy2-iy,"#2a2820");
   R(ix+1,iy+1,ws(3),iy2-iy-2,"rgba(0,0,0,0.18)");R(ix+1,iy+1,ix2-ix-2,ws(2),"rgba(0,0,0,0.14)");}
 function drawChuteBase(){var cx=wx(chute.cx),mouthW=ws(chute.mouthW),y0=wy(2),yLip=wy(chute.lip),wallInner=wy(WALL),y1=yLip;
   for(var y=y0;y<=y1;y++){var t=(y-y0)/Math.max(1,y1-y0);var half=Math.round((mouthW*0.28)+(mouthW*0.22)*t);
@@ -3598,7 +3948,23 @@ function drawTable2(){var G=GEO.table,x=wx(G.x0),y=wy(G.y0),w=ws(G.x1-G.x0),h=ws
   if(kx+kw>wx(G.x1)-1)kx=wx(G.x1)-1-kw;
   if(kx-blw<wx(B.x1)+1){/* sits just east of the board, still on the table */}
   R(kx,ky,kw,kh,"#3a2a20");R(kx+1,ky,kw-2,1,"#6a4a30");R(kx-1,ky,1,kh,"#2a1c14");
-  R(kx-blw,ky,blw,Math.max(2,ws(1.5)),"#c8d0d8");R(kx-blw,ky,blw,1,"#f0f4f8");R(kx-blw,ky+Math.max(1,ws(1.5))-1,blw,1,"#8a9098");}
+  R(kx-blw,ky,blw,Math.max(2,ws(1.5)),"#c8d0d8");R(kx-blw,ky,blw,1,"#f0f4f8");R(kx-blw,ky+Math.max(1,ws(1.5))-1,blw,1,"#8a9098");
+  drawTableSink(kids.sink,false);}
+/* 0.4.11 TABLE SINK: a small steel basin set into the slab's far end, tap on the back rim (rotates with the table) */
+function drawTableSink(S,running){if(!S)return;var x0=wx(S.x-S.hw),y0=wy(S.y-S.hh),w=Math.max(4,wx(S.x+S.hw)-x0),h=Math.max(4,wy(S.y+S.hh)-y0),r=(S.r|0)&3;
+  if(!running){R(x0-1,y0-1,w+2,h+2,"#2a2a2a");R(x0,y0,w,h,"#9aa4ac");R(x0+1,y0+1,w-2,h-2,"#4a5660");R(x0+1,y0+1,w-2,1,"#2e3840");
+    R(x0+2,y0+2,Math.max(1,w-4),Math.max(1,h-4),"#6a8aa0");R(x0+2,y0+2,Math.max(1,w-4),1,"#8ab0c8");
+    var dx=Math.round(x0+w/2)-1,dy=Math.round(y0+h/2)-1;R(dx,dy,2,2,"#1a1e22");
+    /* tap on the rim that faces away from his stand side */
+    var tx,ty,tw2=Math.max(2,Math.round(w*0.5)),th2=2;
+    if(r===0||r===2){tx=Math.round(x0+w/2-tw2/2);ty=r===0?y0-1:y0+h-1;R(tx,ty,tw2,th2,"#c8d0d8");R(tx+Math.round(tw2/2)-1,ty+(r===0?1:-1),2,2,"#e8eef4");}
+    else{tx=r===1?x0+w-1:x0-1;ty=Math.round(y0+h/2-tw2/2);R(tx,ty,th2,tw2,"#c8d0d8");R(tx+(r===1?-1:1),ty+Math.round(tw2/2)-1,2,2,"#e8eef4");}
+    return;}
+  /* running water + splash while he rinses */
+  var cx=Math.round((x0+x0+w)/2),cy=Math.round((y0+y0+h)/2),f=ANIM_F;
+  ctx.globalAlpha=0.85;R(cx-1,cy-Math.round(h/2),2,Math.round(h/2),"#bfe4ff");ctx.globalAlpha=1;
+  oval(cx,cy,Math.max(1.5,w*0.32+(f&1)*0.6),Math.max(1.2,h*0.22+(f&1)*0.4),"rgba(220,240,255,0.75)");
+  R(cx-2+(f%3),cy-2,1,1,"#ffffff");R(cx+1-(f%2),cy+1,1,1,"#ffffff");}
 function drawBed(){var cx=GEO.mat.x,cy=GEO.mat.y,mw=GEO.mat.w,mh=GEO.mat.h;var x=wx(cx-mw/2),y=wy(cy-mh/2),w=ws(mw),h=ws(mh);
   /* full-size wooden frame, mattress, west pillows, east blanket — holds a lying Papa */
   R(x+2,y+2,w,h,"rgba(0,0,0,0.30)");
@@ -3879,6 +4245,7 @@ function drawWashProps(){
 function drawWashStatic(){
   var P=WASH.pile;
   drawDoor();
+  drawWashDecor11();   /* 0.4.11 player-placed wash decor (no default props: t1187) */
   /* 0.4.3/0.4.4/0.4.5 intake, circular pool, mouth, diagonal street and floating bench stay in the file (hidden, not deleted). */
   drawWashProps();
   drawCanalTrench();
@@ -4104,7 +4471,7 @@ function drawWashScene(now){
   drawWashOutlet();
   drawHoleStatic();
   drawCanalPots();
-  drawDuckWash();
+  drawDuckWash();drawBasin11();
   if(sim.s.g.where==="wash")drawGuy(now);
   drawShipAnim(now);
 }
@@ -4114,7 +4481,8 @@ function drawStatic(){drawFloor();drawWalls();
   /* hidden props (0.2.1 t1027, still hidden): drawPipes drawShelf drawToolRack drawMachinePad x3 drawDrain drawPeelBin drawBucket drawSack x4 drawCrate x3 drawLamp; 0.3 also hides drawCentreStripe and the old drawChuteBase/drawCooler/drawMat/drawTable */
   drawPileBay();drawPileShadow();drawDoor();   /* 0.4.2: the wall door first, so furniture pushed against the back wall sits in front of it */
   drawRugs04();   /* 0.4.10: carpets lie on the floor, under every piece of furniture (static layer) */
-  drawBedR(drawBed);drawRectR(GEO.table,drawTable2);drawRectR(GEO.cooler,drawCooler2);drawStool();drawReturnChute();}
+  drawBedR(drawBed);drawRectR(GEO.table,drawTable2);drawRectR(GEO.cooler,drawCooler2);drawStool();drawReturnChute();
+  drawDecorStatic11();}
 function ensureStatic(){if(staticLayer&&staticLayer.width===cv.width&&staticLayer.height===cv.height)return;drawStatic();var copy=document.createElement("canvas");copy.width=cv.width;copy.height=cv.height;var g=copy.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(cv,0,0);staticLayer=copy;}
 
 /* ---------- the guy: 0.3.1 slimmer Papa, Swarm hybrid (DPR vectors, flat shading, 1px outline). True top-down, crown + arms only (mock 0.1b look lock). ---------- */
@@ -4365,6 +4733,42 @@ function drawRugs04(){var S=bindSprites();if(!S)return;var ids=PPSim.RUGS,i;
   for(i=0;i<ids.length;i++){(function(id){if(!sim.placed(id))return;var p=itemXY(id);rotWrap(p.x,p.y,p.r,function(){S.draw(id,"on",p.x,p.y);});})(ids[i]);}}
 function duckPos(t){var L=WASH.land,a=t*0.22;return {x:L.x+Math.cos(a)*L.rx*0.70,y:L.y+Math.sin(a)*L.ry*0.58+Math.sin(t*2.1)*0.35,dir:a+1.5708};}
 function drawDuckWash(){if(!sim.duckOn())return;var S=bindSprites();if(!S)return;var d=duckPos(RT||0);S.draw("duck","on",d.x,d.y,{dir:d.dir});}
+/* ---------- 0.4.11 decor drawing ---------- */
+var STATIC11=["window","spiceRack","coatHook","calendar","potsPans","photos","trophyShelf","sideTable","compost","sackPile","bookshelf","catBed","statue","fruitBowl","cookbook"];
+var LIVE11=["stringLights","neonSign","aquarium"];
+function decorOpt11(id){var t=sim.clockTime();if(id==="window")return {day:sim.isDay()};if(id==="calendar")return {day:t.day};if(id==="stringLights")return {night:!sim.isDay()};
+  if(id==="trophyShelf"){var n=sim.trophies();return {n:n,gold:n-Math.max(1,Math.min(5,sim.s.level|0))};}return {};}
+function decorKey11(){var t=sim.theme?sim.theme():{wall:0,floor:0};return [sim.isDay()?1:0,sim.placed("calendar")?sim.clockTime().day:0,sim.placed("trophyShelf")?sim.trophies():0,t.wall,t.floor].join(",");}
+function drawDecorStatic11(){var S=bindSprites();if(!S||!S.register)return;var i,id,p;
+  for(i=0;i<STATIC11.length;i++){id=STATIC11[i];if(!sim.placed(id))continue;p=itemXY(id);
+    (function(id,p){var o=decorOpt11(id);if(PPSim.isTop(id)){S.draw(id,"on",p.x,p.y,o);return;}rotWrap(p.x,p.y,p.r,function(){S.draw(id,"on",p.x,p.y,o);});})(id,p);}}
+function drawDecorLive11(S,RD,a){if(!S.register)return;var i,id;
+  for(i=0;i<LIVE11.length;i++){id=LIVE11[i];if(!sim.placed(id))continue;if(PPSim.isTop(id)){var q=itemXY(id);S.draw(id,"on",q.x,q.y,decorOpt11(id));}else RD(id,"on",decorOpt11(id));}
+  if(a&&a.t==="rinse")drawTableSink(PPSim.tableKids().sink,true);
+  if(sim.placed("catBed"))drawCat11(S);}
+function drawWashDecor11(){var S=bindSprites();if(!S||!S.register||!sim.hasKey())return;var ids=PPSim.WASHW.concat(PPSim.WASHF),i;
+  for(i=0;i<ids.length;i++)(function(id){if(!sim.placed(id))return;var p=sim.placeOf(id);rotWrap(p.x,p.y,p.r,function(){big16(p.x,p.y,function(){S.draw(id,"on",p.x,p.y);});});})(ids[i]);}
+/* the wash room is drawn smaller than the kitchen, so its decor is drawn 1.6x to stay readable at 360x800 */
+function big16(cx,cy,fn){var px=wx(cx),py=wy(cy);ctx.save();ctx.translate(px,py);ctx.scale(1.6,1.6);ctx.translate(-px,-py);try{fn();}finally{ctx.restore();}}
+function boatPos(t){var u=(t*0.035)%1,q=PPSim.pointAlongCanal(0.12+u*0.76);return {x:q.x,y:q.y};}
+function drawBasin11(){var S=bindSprites();if(!S||!S.register)return;var L=WASH.land;
+  if(sim.basinOn("bubbles")){var bx=L.x-L.rx*0.62,by=L.y+L.ry*0.30;big16(bx,by,function(){S.draw("bubbles","on",bx,by);});}
+  if(sim.basinOn("toyBoat")){var b=boatPos(RT||0);big16(b.x,b.y,function(){S.draw("toyBoat","on",b.x,b.y);});}}
+/* the cat: renderer-only, wanders between free spots he can walk to, naps in its bed now and then (never blocks Papa) */
+var CAT={x:null,y:null,path:[],wait:0,mode:"walk",dir:0,seed:7,last:0};
+function catRand(){CAT.seed=(CAT.seed*1103515245+12345)&0x7fffffff;return CAT.seed/0x7fffffff;}
+function catHome(){var p=sim.placeOf("catBed");return {x:p.x,y:p.y};}
+function catStep(t){var dt=Math.min(0.1,Math.max(0,t-(CAT.last||t)));CAT.last=t;var h=catHome();
+  if(CAT.x==null||!isFinite(CAT.x)){CAT.x=h.x;CAT.y=h.y;CAT.mode="sleep";CAT.wait=4;}
+  if(CAT.mode==="sleep"){CAT.x=h.x;CAT.y=h.y;CAT.wait-=dt;if(CAT.wait<=0){CAT.mode="walk";CAT.path=[];}return;}
+  if(CAT.mode==="sit"){CAT.wait-=dt;if(CAT.wait<=0){CAT.mode="walk";CAT.path=[];}return;}
+  if(!CAT.path.length){var goHome=catRand()<0.25,tx,ty,k2;
+    if(goHome){tx=h.x;ty=h.y+7;}else{for(k2=0;k2<12;k2++){tx=12+catRand()*(RW-24);ty=14+catRand()*(GEO.pile.base-30);if(PPSim.freePt(tx,ty))break;}}
+    var r=PPSim.routeSafe(CAT.x,CAT.y,tx,ty)||[[tx,ty]];CAT.path=r.slice(0,24);CAT.home=goHome;if(!CAT.path.length){CAT.mode="sit";CAT.wait=2;return;}}
+  var g=CAT.path[0],dx=g[0]-CAT.x,dy=g[1]-CAT.y,d=Math.hypot(dx,dy),mv=11*dt;
+  if(d<=mv){CAT.x=g[0];CAT.y=g[1];CAT.path.shift();if(!CAT.path.length){if(CAT.home){CAT.mode="sleep";CAT.wait=8+catRand()*10;}else{CAT.mode="sit";CAT.wait=1.5+catRand()*3;}}}
+  else{CAT.x+=dx/d*mv;CAT.y+=dy/d*mv;CAT.dir=Math.atan2(dy,dx);}}
+function drawCat11(S){catStep(RT||0);if(CAT.mode==="sleep"){S.draw("cat","sleep",CAT.x,CAT.y+0.2,{});return;}S.draw("cat",CAT.mode==="walk"?"walk":"sit",CAT.x,CAT.y,{dir:CAT.dir});}
 function drawWorkLine04(){
   var S=bindSprites();if(!S)return;
   var stC=sim.lineOn("conveyor")?"on":"off";
@@ -4387,6 +4791,7 @@ function drawItems04(){
   function st(id,onId){return sim.owned(id)?(sim.s.box[onId||id]>0?"on":"off"):null;}
   function RD(id,state,o){var p=itemXY(id);rotWrap(p.x,p.y,p.r,function(){S.draw(id,state,p.x,p.y,o);});}
   /* 0.4.10: carpets are in the static layer (under furniture); wall items, fan and shelf are drawn here */
+  drawDecorLive11(S,RD,a);
   if(sim.placed("shelf"))RD("shelf","on",{n:Math.min(5,sim.s.food)});
   if(sim.placed("fan"))RD("fan","on",{t:ANIM_T});
   if(sim.placed("poster"))RD("poster","on");
@@ -4424,8 +4829,9 @@ function drawPeelerPeels(){
   var peels=S.peelerPeelWorld(p.x,p.y,ANIM_F,b);
   for(var i=0;i<peels.length;i++)S.peelFlake(wx(peels[i].x),wy(peels[i].y),peels[i].ang,ws(peels[i].settled?1.7:2.0));
 }
-var EDIT_IDS=["table","cooler","stool","mat","sink","smallCooler","basicCot","plant","lamp","radio","rug","tvArmchair","autoPeeler","fan","shelf","clock","poster","kitchenMat","runner","roundRug"];
-var WASH_EDIT_IDS=[]; /* 0.4.8: basin heap stays with the basin; dry pile is hidden, not draggable */
+var EDIT_IDS=["fruitBowl","cookbook","aquarium","table","cooler","stool","mat","sink","smallCooler","basicCot","plant","lamp","radio","rug","tvArmchair","autoPeeler","fan","shelf","clock","poster","kitchenMat","runner","roundRug",
+  "window","spiceRack","coatHook","calendar","potsPans","photos","stringLights","neonSign","trophyShelf","sideTable","compost","sackPile","bookshelf","catBed","statue"];
+var WASH_EDIT_IDS=["towelRack","soap","mopBucket"]; /* 0.4.11 player wash decor. The basin heap stays with the basin; dry pile is hidden, not draggable */
 function editIds(){return viewIsWash()?WASH_EDIT_IDS:EDIT_IDS;}
 function editRect(id){var c=sim.centerOf(id);if(!c)return null;if(id==="washPile"||id==="streetMouth")return sim.footOf(id,c.x,c.y,0);var f=sim.footOf(id,c.x,c.y,id==="table"?(GEO.table.r|0):id==="cooler"?(GEO.cooler.r|0):id==="mat"?(GEO.mat.r|0):(c.r|0));return f;}
 function drawEditOverlay(){
@@ -4433,7 +4839,7 @@ function drawEditOverlay(){
   var ids=editIds(),i,id,f;
   for(i=0;i<ids.length;i++){
     id=ids[i];
-    if(!viewIsWash()&&["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
+    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
     f=editRect(id);if(!f)continue;
     ctx.strokeStyle=dragId===id?"#ffe066":"#9fc0ff";ctx.lineWidth=dragId===id?2:1;
     ctx.strokeRect(wx(f.x0)+0.5,wy(f.y0)+0.5,Math.max(2,wx(f.x1)-wx(f.x0)-1),Math.max(2,wy(f.y1)-wy(f.y0)-1));
@@ -4443,7 +4849,7 @@ function drawEditOverlay(){
     ctx.strokeStyle="#1a1010";ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(xx,yy,ws(h.r+2),ws(h.r),0,0,6.28);ctx.stroke();
     ctx.restore();
     ctx.font="700 10px Courier New,monospace";ctx.fillStyle="#ffe066";ctx.textAlign="left";
-    ctx.fillText("EDITOR: the basin heap, machines, canal and ship opening stay put.",8,16);
+    ctx.fillText("EDITOR: drag your wash decor. Basin, machines, canal stay put.",8,16);
     return;
   }
   var sp=SPOT.ship,xx=wx(sp.x),yy=wy(sp.y),q=Math.max(3,ws(2.4));ctx.strokeStyle="#ff8a5a";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xx-q,yy-q);ctx.lineTo(xx+q,yy+q);ctx.moveTo(xx+q,yy-q);ctx.lineTo(xx-q,yy+q);ctx.stroke();
@@ -4461,7 +4867,7 @@ function hitEditItem(wx0,wy0){
   var hits=[],i,id,f,m=3,strict,d,ids=editIds();
   for(i=0;i<ids.length;i++){
     id=ids[i];
-    if(!viewIsWash()&&["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
+    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
     f=editRect(id);if(!f)continue;
     if(wx0>=f.x0-m&&wx0<=f.x1+m&&wy0>=f.y0-m&&wy0<=f.y1+m){
       strict=wx0>=f.x0&&wx0<=f.x1&&wy0>=f.y0&&wy0<=f.y1;
@@ -4496,6 +4902,31 @@ var INFO={
   poster:["PAPA POSTER","Papa of the Month. AUTO-LAZY speed 70% (not 50%)."],
   fan:["FLOOR FAN","Peel mess slows him at most 15% (not 30%)."],
   shelf:["PANTRY SHELF","+2 food can storage."],
+  tableSink:function(){return ["TABLE SINK","Built into the peel table. He rinses his hands here (RINSE WHEN HANDS <). Clean hands now "+Math.round(sim.hyg())+"%. Under 25% peeling is 15% slower."];},
+  window:function(){return ["WINDOW + CURTAINS","Daylight 6 AM to 8 PM: works 4% faster. Now: "+(sim.isDay()?"DAY (on)":"NIGHT (off)")+"."];},
+  spiceRack:["SPICE RACK","Each food can gives +65 hunger (not +55)."],
+  coatHook:["COAT HOOK + APRON","QUICK peeling drops 4 peels a potato, not 5."],
+  calendar:function(){return ["CALENDAR","Shift day "+sim.clockTime().day+". Pays a 10c payday at each new shift day ("+((sim.s.decor&&sim.s.decor.paydays)|0)+" so far)."];},
+  potsPans:["HANGING POTS + PANS","Cooking at home: food cans cost 1c less."],
+  photos:["FRAMED POTATO PHOTOS","He only goes AUTO-LAZY under 20%, not 25%."],
+  stringLights:function(){return ["STRING LIGHTS","Night shift 8 PM to 6 AM: works 4% faster. Now: "+(sim.isDay()?"DAY (off)":"NIGHT (on)")+"."];},
+  neonSign:function(){return ["NEON OPEN SIGN","Every 20th potato shipped gets a +1c tip ("+((sim.s.decor&&sim.s.decor.tips)|0)+" tips so far)."];},
+  trophyShelf:function(){return ["TROPHY SHELF",sim.trophies()+" cups: one per level reached, a gold cup per 500 shipped (max 3). Works "+sim.trophies()+"% faster."];},
+  sideTable:["SIDE TABLE","Holds 2 table-top items. Put it away and they go back to INV."],
+  compost:function(){return ["COMPOST BIN","Sweeping 25% faster. Every 20 peels swept = 1c ("+((sim.s.decor&&sim.s.decor.compost)|0)+"c so far)."];},
+  sackPile:["POTATO SACK PILE","Grabbing potatoes is 20% faster."],
+  bookshelf:["BOOKSHELF","The next LEVEL costs 10% less."],
+  catBed:["CAT BED + CAT","The cat wanders and naps here. Purring: his naps restore 10% faster."],
+  statue:["PAPA STATUE","Pride: he works 5% faster."],
+  fruitBowl:["FRUIT BOWL","Table-top. Hunger drains 10% slower in the kitchen."],
+  cookbook:["COOKBOOK STAND","Table-top. NEAT peeling at 90% speed, not 80%."],
+  aquarium:["AQUARIUM","Table-top. Hunger and energy drain 5% slower."],
+  towelRack:["TOWEL RACK","Wash room. Energy drains 15% slower while he is in here."],
+  soap:["SOAP DISPENSER","Wash room. The current pulls potatoes off the heap 15% faster."],
+  mopBucket:["MOP BUCKET","Wash room. He walks 10% faster in here."],
+  toyBoat:["TOY BOAT","Rides the canal. The current is 15% stronger."],
+  bubbles:["BUBBLE MAKER","Sloppy potatoes that ship through the wash room pay the full 3c."],
+  papa:function(){return ["PAPA","MOOD "+sim.mood()+"% ("+(sim.moodMul()>1?"works +"+Math.round((sim.moodMul()-1)*100)+"%":"no bonus yet")+"). Decor, music and a clean, fed Papa raise it. CLEAN HANDS "+Math.round(sim.hyg())+"%."];},
   duck:["RUBBER DUCK","Floats in the basin. The current pulls potatoes off the heap 25% faster."],
   autoPeeler:["AUTO-PEELER","Peels potatoes from the conveyor. AUTO-PEELER SPEED."],
   pile:["POTATO PILE","Raw potatoes. He grabs here. Fixed in place."],
@@ -4527,6 +4958,9 @@ function hitAny(x,y){
       if(x>=WASH.outlet.x-ow/2-2&&x<=WASH.outlet.x+ow/2+4&&y>=oy0-4&&y<=WH-GEO.WALL+2)return "washOutlet";}
     if(Math.hypot(x-I.x,y-I.y)<=I.r+6)return "inlet";
     if(sim.duckOn()){var dk=duckPos(RT||0);if(Math.hypot(x-dk.x,y-dk.y)<=6)return "duck";}
+    if(sim.basinOn("toyBoat")){var bt=boatPos(RT||0);if(Math.hypot(x-bt.x,y-bt.y)<=6)return "toyBoat";}
+    if(sim.basinOn("bubbles")){var bbx=WASH.land.x-WASH.land.rx*0.62,bby=WASH.land.y+WASH.land.ry*0.30;if(Math.hypot(x-bbx,y-bby)<=5)return "bubbles";}
+    var wi=["towelRack","soap","mopBucket"];for(var wj=0;wj<wi.length;wj++){if(!sim.placed(wi[wj]))continue;var wq=sim.placeOf(wi[wj]),wf=sim.footOf(wi[wj],wq.x,wq.y,wq.r|0);if(x>=wf.x0-2&&x<=wf.x1+2&&y>=wf.y0-2&&y<=wf.y1+2)return wi[wj];}
     if(PPSim.inLanding&&PPSim.inLanding(x,y))return "land";
     if(PPSim.inStreet(x,y,up))return "street";
     if(WASH.showDryPile&&Math.abs(x-pl.cx)<=pl.rx&&Math.abs(y-pl.cy)<=pl.rz)return "washPile";
@@ -4538,6 +4972,8 @@ function hitAny(x,y){
     }
     return null;
   }
+  var gq=sim.s.g;if(!editMode&&gq.where!=="wash"&&Math.hypot(x-gq.x*RW,y-gq.y*RH)<=4.5)return "papa";
+  var tsk=PPSim.tableKids().sink;if(!editMode&&tsk&&Math.abs(x-tsk.x)<=tsk.hw+1&&Math.abs(y-tsk.y)<=tsk.hh+1)return "tableSink";
   var h=hitEditItem(x,y);if(h)return h;
   if(sim.doorHit(x,y,"kitchen"))return "door";
   var G=GEO.pile;if(Math.abs(x-G.cx)<=G.rx&&y>=G.base-G.rz-4&&y<=RH-GEO.WALL)return "pile";
@@ -4547,6 +4983,7 @@ function hitAny(x,y){
 var infoUntil=0,infoId=null;
 function showInfo(id){var el=$("objInfo");if(!el)return;var d=id==="door"?doorInfoText():INFO[id];if(typeof d==="function")d=d();if(!d){el.className="off";infoId=null;return;}
   infoId=id;$("oiName").textContent=d[0];$("oiDesc").textContent=d[1];el.className="";infoUntil=performance.now()+(editMode?600000:5000);}
+function showInfoText(n,d){var el=$("objInfo");if(!el)return;infoId="msg";$("oiName").textContent=n;$("oiDesc").textContent=d;el.className="";infoUntil=performance.now()+3500;}
 function tickInfo(){var el=$("objInfo");if(el&&infoId&&performance.now()>infoUntil){el.className="off";infoId=null;}}
 function rotateSelected(){var btn=$("rotBtn");if(!dragId){if(btn)flashBtn(btn,"PICK ONE");return;}
   if(sim.rotateItem(dragId)){staticLayer=null;messLayer=null;messVer++;changed();showInfo(dragId);}else if(btn)flashBtn(btn,"NO ROOM");}
@@ -4554,7 +4991,8 @@ function flashBtn(btn,txt){var old=btn.getAttribute("data-label")||btn.textConte
 function drawFade(){if(!fading&&fadeT<=0)return;var a=0;
   if(fading){if(fadeT<=1)a=Math.min(1,fadeT);else a=Math.max(0,2-fadeT);}
   if(a<=0)return;ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalAlpha=a;ctx.fillStyle="#0c1220";ctx.fillRect(0,0,W,H);ctx.restore();resetXform();}
-function drawScene(now){if(W<2||H<2)return;tickAnim(now);ensureStatic();var s=sim.s;blitLayer(staticLayer);
+var decorKeyLast="";
+function drawScene(now){if(W<2||H<2)return;tickAnim(now);if(!viewIsWash()){var dk=decorKey11();if(dk!==decorKeyLast){decorKeyLast=dk;staticLayer=null;kitLayer=null;}}ensureStatic();var s=sim.s;blitLayer(staticLayer);
   if(viewIsWash()){drawWashScene(now);}
   else{
     drawWorkLine04();
@@ -4588,6 +5026,9 @@ function updateHud(){var s=sim.s;var bs="",ci;for(ci=0;ci<CMDS.length;ci++)bs+=s
   $("foodRow").className="food"+(s.food<=0?" out":"");
   var h=Math.round(s.hunger),e=Math.round(s.energy);
   if(hud.h!==h){hud.h=h;$("hFill").style.transform="scaleX("+(h/100)+")";$("hPct").textContent=h+"%";$("hBar").className="bar hunger"+(h<20?" low":"");}
+  var mo=sim.mood(),hy=Math.round(sim.hyg());
+  if(hud.mo!==mo){hud.mo=mo;$("mFill").style.transform="scaleX("+(mo/100)+")";$("mPct").textContent=mo+"%";$("mBar").className="bar mood"+(mo<30?" low":"");}
+  if(hud.hy!==hy){hud.hy=hy;$("cFill").style.transform="scaleX("+(hy/100)+")";$("cPct").textContent=hy+"%";$("cBar").className="bar hands"+(hy<25?" low":"");}
   if(hud.e!==e){hud.e=e;$("eFill").style.transform="scaleX("+(e/100)+")";$("ePct").textContent=e+"%";$("eBar").className="bar energy"+(e<20?" low":"");}
   var st=sim.stateName();if(hud.st!==st){hud.st=st;var els=document.querySelectorAll(".st");for(var i=0;i<els.length;i++)els[i].classList.toggle("on",els[i].getAttribute("data-s")===st);fitStates();}
   var a=s.g.act;setText("doing",a&&a.label?a.label:"");
@@ -4692,13 +5133,15 @@ function doAct(a){
   else if(a&&a.indexOf("buy:")===0)shopBuy(a.slice(4));
   else if(a&&a.indexOf("equip:")===0){sim.equip(a.slice(6));if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();}
   else if(a&&a.indexOf("unequip:")===0){sim.unequip(a.slice(8));if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();}
-  else if(a&&a.indexOf("return:")===0){sim.unplace(a.slice(7));staticLayer=null;if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();layout();}
+  else if(a&&a.indexOf("return:")===0){sim.unplace(a.slice(7));bustRoomCache();if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();layout();}
   else if(a&&a.indexOf("toedit:")===0){closeOvl();if(!editMode)toggleEditor();}
   else if(a==="radio"){radioWake();openOvl("radio");}
   else if(a&&a.indexOf("radio:")===0)radioAct(a.slice(6));
+  else if(a&&a.indexOf("basin:")===0){var pa=a.split(":"),br=sim.putBasin(pa[1],pa[2]==="in");if(br==="nokey"){var bb=ovl.querySelector('[data-act="'+a+'"]');if(bb)bb.innerHTML="NEED<br>KEY";setTimeout(function(){ovlDirty=true;},800);}else ovlDirty=true;changed();}
+  else if(a&&a.indexOf("theme:")===0){var tq=a.split(":"),th0=sim.theme();sim.setTheme(tq[1],(tq[1]==="wall"?th0.wall:th0.floor)+1);bustRoomCache();ovlDirty=true;changed();}
   else if(a&&a.indexOf("duck:")===0){var dr=sim.putDuck(a.slice(5)==="in");if(dr==="nokey"){var db=ovl.querySelector('[data-act="'+a+'"]');if(db)db.innerHTML="NEED<br>KEY";setTimeout(function(){ovlDirty=true;},800);}else ovlDirty=true;changed();}}
 function toggleEditor(){
-  editMode=!editMode;dragId=null;if(!editMode)showInfo(null);
+  editMode=!editMode;dragId=null;if(!editMode)showInfo(null);trayPage=0;
   var b=$("editBtn"),pl=$("play"),app=$("app");
   if(b)b.classList.toggle("on",editMode);
   if(pl)pl.classList.toggle("editing",editMode);
@@ -4706,18 +5149,32 @@ function toggleEditor(){
   rebuildTray();
   layout();
 }
+/* 0.4.11 tray: category tabs + pages (no endless scroll). Kitchen tabs: FLOOR / RUGS / WALL / TABLE-TOP / MACHINES. Wash room: WASH only. */
+var TRAY_TABS_K=[["floor","FLOOR"],["rug","RUG"],["wall","WALL"],["top","TOP"],["machine","MACH"]],TRAY_TABS_W=[["wash","WASH"]];
+var trayTab="floor",trayPage=0;
+function trayPer(){var el=$("invChips");var w=el?el.clientWidth:200;return Math.max(2,Math.floor((w+6)/84));}
 function rebuildTray(){
-  var el=$("invChips"),away=$("putAway");if(!el)return;
-  var list=sim.trayList(),h="",i;
-  if(!list.length)h='<div class="invchip empty">No unplaced items. Buy in the SHOP, or PUT AWAY something already in the room.</div>';
-  for(i=0;i<list.length;i++)h+='<button class="invchip" type="button" data-place="'+list[i].id+'">'+esc(list[i].name)+'<b>DRAG IN</b></button>';
+  var el=$("invChips"),away=$("putAway"),tb=$("trayTabs");if(!el)return;
+  var wash=viewIsWash(),list=sim.trayList(wash?"wash":"kitchen"),h="",i,tabs=wash?TRAY_TABS_W:TRAY_TABS_K,cnt={},th="";
+  for(i=0;i<list.length;i++){var ct=list[i].cat==="starter"?"floor":list[i].cat;if(ct!=="rug"&&ct!=="wall"&&ct!=="top"&&ct!=="machine"&&ct!=="wash")ct="floor";list[i].tab=ct;cnt[ct]=(cnt[ct]|0)+1;}
+  var okTab=false;for(i=0;i<tabs.length;i++)if(tabs[i][0]===trayTab)okTab=true;
+  if(!okTab){trayTab=tabs[0][0];trayPage=0;}
+  if(!(cnt[trayTab]>0)){for(i=0;i<tabs.length;i++)if(cnt[tabs[i][0]]>0){trayTab=tabs[i][0];trayPage=0;break;}}
+  var shown=list.filter(function(q){return q.tab===trayTab;}),per=trayPer(),pages=Math.max(1,Math.ceil(shown.length/per));
+  if(trayPage>=pages)trayPage=pages-1;if(trayPage<0)trayPage=0;
+  for(i=0;i<tabs.length;i++)th+='<button type="button" class="ttab'+(tabs[i][0]===trayTab?' on':'')+'" data-tab="'+tabs[i][0]+'">'+tabs[i][1]+(cnt[tabs[i][0]]?'<b>'+cnt[tabs[i][0]]+'</b>':'<b>&nbsp;</b>')+'</button>';
+  th+='<span class="tpg"><button type="button" class="tpb" data-tpage="-1"'+(trayPage<=0?' disabled':'')+'>&lt;</button><i>'+(trayPage+1)+'/'+pages+'</i><button type="button" class="tpb" data-tpage="1"'+(trayPage>=pages-1?' disabled':'')+'>&gt;</button></span>';
+  if(tb)tb.innerHTML=th;
+  if(!list.length)h='<div class="invchip empty">'+(wash?'No wash-room decor to place. Buy towels, soap or a mop bucket in the SHOP.':'No unplaced items. Buy in the SHOP, or PUT AWAY something already in the room.')+'</div>';
+  else if(!shown.length)h='<div class="invchip empty">Nothing in this tab.</div>';
+  for(i=trayPage*per;i<Math.min(shown.length,(trayPage+1)*per);i++)h+='<button class="invchip" type="button" data-place="'+shown[i].id+'">'+esc(shown[i].name)+'<b>DRAG IN</b></button>';
   el.innerHTML=h;
   if(away)away.className=dragId&&PPSim.isPlaceable(dragId)&&sim.placed(dragId)?"on":"";
-  var rb=$("rotBtn");if(rb)rb.className=(dragId&&dragId!=="washPile"&&dragId!=="streetMouth"&&!PPSim.isWall(dragId))?"on":"";
+  var rb=$("rotBtn");if(rb)rb.className=(dragId&&dragId!=="washPile"&&dragId!=="streetMouth"&&!PPSim.isWall(dragId)&&!PPSim.isTop(dragId)&&!PPSim.isWashItem(dragId))?"on":"";
 }
 function putAwaySelected(){
   if(!dragId||!PPSim.isPlaceable(dragId)||!sim.placed(dragId))return;
-  sim.unplace(dragId);dragId=null;staticLayer=null;messLayer=null;changed();rebuildTray();layout();
+  sim.unplace(dragId);dragId=null;bustRoomCache();messLayer=null;changed();rebuildTray();layout();
 }
 
 var holdT=null,holdOn=false,holdId=null;
@@ -4775,7 +5232,7 @@ $("play").addEventListener("pointerdown",function(e){
 $("play").addEventListener("pointermove",function(e){
   if(!PE||PE.id!==e.pointerId)return;
   if(PE.act==="drag"&&dragId){if(!PE.moved&&Math.abs(e.clientX-PE.x0)<6&&Math.abs(e.clientY-PE.y0)<6)return;PE.moved=true;
-    var w=worldFromEvent(e);if(sim.moveItem(dragId,w.x-(PE.ox||0),w.y-(PE.oy||0))){if(dragId==="washPile"||dragId==="streetMouth")bustRoomCache();else{staticLayer=null;messLayer=null;}messVer++;if(playRect)placeTags();}}
+    var w=worldFromEvent(e);if(sim.moveItem(dragId,w.x-(PE.ox||0),w.y-(PE.oy||0))){bustRoomCache();messLayer=null;messVer++;if(playRect)placeTags();}}
 });
 function endPE(e){
   if(!PE||PE.id!==e.pointerId)return;
@@ -4800,6 +5257,8 @@ bindRail($("leftRail"));bindRail($("rightRail"));bindRail($("editBtn"));bindRail
 (function(){
   var tray=$("invChips"),TD=null;
   if(!tray)return;
+  var tabs=$("trayTabs");if(tabs)tabs.addEventListener("pointerdown",function(e){var b=e.target.closest?e.target.closest("[data-tab],[data-tpage]"):null;if(!b||b.disabled)return;e.preventDefault();
+    if(b.hasAttribute("data-tab")){trayTab=b.getAttribute("data-tab");trayPage=0;}else trayPage+=+b.getAttribute("data-tpage");rebuildTray();});
   tray.addEventListener("pointerdown",function(e){
     var chip=e.target.closest?e.target.closest("[data-place]"):null;if(!chip)return;
     TD={id:e.pointerId,item:chip.getAttribute("data-place"),x0:e.clientX,y0:e.clientY};
@@ -4814,7 +5273,8 @@ bindRail($("leftRail"));bindRail($("rightRail"));bindRail($("editBtn"));bindRail
     if(cancel)return;
     if(e.clientX>=pr.left&&e.clientX<=pr.right&&e.clientY>=pr.top&&e.clientY<=pr.bottom){
       var w=worldFromEvent(e);
-      if(sim.placeItem(item,w.x,w.y)==="ok"){staticLayer=null;messLayer=null;changed();rebuildTray();layout();}
+      var pr2=sim.placeItem(item,w.x,w.y);if(pr2==="ok"){bustRoomCache();messLayer=null;changed();rebuildTray();layout();dragId=item;showInfo(item);rebuildTray();}
+      else showInfoText(sim.s&&PPSim.ITEMI[item]?PPSim.ITEMI[item].name:"",pr2==="nokey"?"Needs the ROOM KEY.":(PPSim.isTop(item)?"No free table-top slot. Place a SIDE TABLE (2 slots) or clear the cooler lid.":"No room there. Try another spot."));
     }
   }
   tray.addEventListener("pointerup",function(e){endTD(e,false);});
@@ -4840,15 +5300,21 @@ function buildInv(){
   h+='<div class="sec">FURNITURE, MACHINES AND DECOR</div>';
   var places=0;
   for(i=0;i<list.length;i++){
-    it=list[i];if(it.kind!=="place")continue;places++;
+    it=list[i];if(it.kind!=="place")continue;places++;var isW=PPSim.isWashItem(it.id);
     if(it.placed)btn='<button class="go done" type="button" data-act="return:'+it.id+'">PUT AWAY</button>';
     else btn='<button class="go" type="button" data-act="toedit:'+it.id+'">EDIT TO PLACE</button>';
-    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(it.placed?"IN ROOM":"IN INV")+'</b></div><div class="fx">'+(it.placed?"In the room. PUT AWAY sends it back to the inventory.":"In your inventory. Open EDIT and drag it into the room.")+'</div></div>'+btn+'</div>';
+    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(it.placed?"IN ROOM":"IN INV")+'</b></div><div class="fx">'+(it.placed?"In the room. PUT AWAY sends it back to the inventory.":isW?(sim.hasKey()?"Wash-room decor. Go to the wash room, open EDIT and drag it in.":"Wash-room decor. Needs the ROOM KEY."):PPSim.isTop(it.id)?"Table-top. Open EDIT and drag it onto a SIDE TABLE or the cooler lid.":"In your inventory. Open EDIT and drag it into the room.")+'</div></div>'+btn+'</div>';
   }
   if(!places)h+='<div class="row"><div class="tx"><div class="nm">NOTHING TO PLACE</div><div class="fx">Buy machines, a sink, a cot or decorations in the SHOP. They wait here until you place them.</div></div></div>';
   for(i=0;i<list.length;i++){it=list[i];if(it.kind!=="duck")continue;places++;
     btn=it.placed?'<button class="go done" type="button" data-act="duck:out">TAKE OUT</button>':'<button class="go" type="button" data-act="duck:in">PUT IN<br>BASIN</button>';
     h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(it.placed?"IN THE BASIN":"IN INV")+'</b></div><div class="fx">'+(sim.hasKey()?"Floats in the wash-room basin: the current pulls potatoes off the heap 25% faster.":"Needs the ROOM KEY: it floats in the wash-room basin.")+'</div></div>'+btn+'</div>';}
+  for(i=0;i<list.length;i++){it=list[i];if(it.kind!=="basin")continue;places++;var bon=sim.basinOn(it.id);
+    btn=bon?'<button class="go done" type="button" data-act="basin:'+it.id+':out">TAKE OUT</button>':'<button class="go" type="button" data-act="basin:'+it.id+':in">PUT IN<br>BASIN</button>';
+    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(bon?"IN THE BASIN":"IN INV")+'</b></div><div class="fx">'+(sim.hasKey()?esc(INFO[it.id][1]):"Needs the ROOM KEY: it goes in the wash-room basin.")+'</div></div>'+btn+'</div>';}
+  var TN={wall:["CLASSIC","MINT STRIPE","ROSE TILE","NAVY PANEL"],floor:["CLASSIC","BLACK + WHITE","TERRACOTTA","OAK PLANK"]},thm=sim.theme();
+  for(i=0;i<list.length;i++){it=list[i];if(it.kind!=="theme")continue;var wk=it.id==="wallpaper"?"wall":"floor";
+    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+TN[wk][thm[wk]|0]+'</b></div><div class="fx">COSMETIC ONLY. Kitchen '+(wk==="wall"?"walls":"floor")+'. CHANGE cycles the looks.</div></div><button class="go" type="button" data-act="theme:'+wk+'">CHANGE</button></div>';}
   var fxl=sim.decorEffects();if(fxl.length){h+='<div class="sec">DECOR EFFECTS RIGHT NOW</div><div class="row"><div class="tx">';
     for(i=0;i<fxl.length;i++)h+='<div class="fx" style="color:'+(fxl[i].on?'#c4e490':'#6a7a8a')+'">'+(fxl[i].on?'ON  ':'off ')+esc(fxl[i].txt)+'</div>';
     h+='</div></div>';}
@@ -4863,17 +5329,21 @@ function buildShop(){var s=sim.s,h="",pr=sim.price(),fm=sim.foodMax(),i,it,st,lp
   h+='<div class="sec">LEVEL</div>';
   lp=sim.levelPrice();
   h+='<div class="row"><div class="tx"><div class="nm">LEVEL <b>'+s.level+' / 5</b></div><div class="fx">Pay coins to level up. Each level unlocks machines and decorations, then you buy them below. Lv1 is the six starters.</div></div>'+(lp===null?goBtn("buy:lv",0,"done"):goBtn("buy:lv",lp,s.coins<lp?"poor":""))+'</div>';
-  h+='<div class="sec">UNLOCKED ITEMS</div>';
-  for(i=0;i<PPSim.ITEMS.length;i++){
-    it=PPSim.ITEMS[i];
-    if(s.level<it.lv)continue;
-    st=sim.owned(it.id)?"done":(s.coins<it.price?"poor":"");
-    h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>Lv'+it.lv+'</b></div><div class="fx">'+esc(it.fx)+'</div></div>'+goBtn("buy:item:"+it.id,it.price,st)+'</div>';
-  }
+  /* 0.4.11: unlocked items grouped by category (same rows, same prices) */
+  var SG=[["machine","MACHINES, TOOLS + KEY"],["floor","FURNITURE + FLOOR DECOR"],["rug","CARPETS"],["wall","WALL DECOR"],["top","TABLE-TOP"],["wash","WASH ROOM + BASIN"],["theme","THEMES (COSMETIC)"]];
+  function shopCat(it){if(PPSim.isWashItem(it.id)||it.kind==="basin"||it.kind==="duck")return "wash";var c=it.cat||"floor";if(c==="starter")c="floor";if(c==="basin")c="wash";if(c==="tool"||c==="key")c="machine";return SG.some(function(g){return g[0]===c;})?c:"floor";}
+  for(var gi=0;gi<SG.length;gi++){var gh="";
+    for(i=0;i<PPSim.ITEMS.length;i++){
+      it=PPSim.ITEMS[i];
+      if(s.level<it.lv||shopCat(it)!==SG[gi][0])continue;
+      st=sim.owned(it.id)?"done":(s.coins<it.price?"poor":"");
+      gh+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>Lv'+it.lv+'</b></div><div class="fx">'+esc(it.fx)+'</div></div>'+goBtn("buy:item:"+it.id,it.price,st)+'</div>';
+    }
+    if(gh)h+='<div class="sec">'+SG[gi][1]+'</div>'+gh;}
   var locked=0;for(i=0;i<PPSim.ITEMS.length;i++)if(s.level<PPSim.ITEMS[i].lv)locked++;
   if(locked)h+='<div class="row"><div class="tx"><div class="nm">LOCKED</div><div class="fx">'+locked+' more item'+(locked>1?"s":"")+' unlock at higher levels. (They are hidden, not deleted.)</div></div></div>';
   h+='<div class="sec">FOOD</div>';
-  h+='<div class="row"><div class="tx"><div class="nm">FOOD CAN <b>'+s.food+' / '+fm+'</b></div><div class="fx">One can = +55 hunger when he eats. The price climbs a little with each can and slowly over time.</div></div>'+(s.food>=fm?goBtn("buy:food",pr,"done"):goBtn("buy:food",pr,s.coins<pr?"poor":""))+'</div>';
+  h+='<div class="row"><div class="tx"><div class="nm">FOOD CAN <b>'+s.food+' / '+fm+'</b></div><div class="fx">One can = +'+sim.mealGain()+' hunger when he eats. The price climbs a little with each can and slowly over time.</div></div>'+(s.food>=fm?goBtn("buy:food",pr,"done"):goBtn("buy:food",pr,s.coins<pr?"poor":""))+'</div>';
   if(PPSim.POT_SLIDER){h+='<div class="sec">POTATOES</div>';var pp=sim.potPrice(),cap=s.potCap;
   h+='<div class="row"><div class="tx"><div class="nm">MORE POTATOES <b>'+POTS[cap]+(pp===null?'':' &rarr; '+POTS[cap+1])+'</b></div><div class="fx">You own '+POTS[cap]+'. Buying raises your limit to the next stop and puts the new potatoes on the pile. The POTATOES IN PLAY slider goes up to what you own.</div></div>'+(pp===null?goBtn("buy:pot",0,"done"):goBtn("buy:pot",pp,s.coins<pp?"poor":""))+'</div>';}
   /* 0.4.9: MORE POTATOES shop row hidden (stock locked at 9999). The buyPotatoes path stays in the file. */
@@ -4883,7 +5353,7 @@ function buildShop(){var s=sim.s,h="",pr=sim.price(),fm=sim.foodMax(),i,it,st,lp
   ovlBody.innerHTML=h;}
 /* ---- the HELP booklet: cover, one page per command (generated from PPSim.COMMANDS), a last page on the loop. Flip with PREV / NEXT or a sideways swipe. ---- */
 var bookPage=0;
-function bookPages(){return CMDS.length+8;}      /* cover + every command + levels + line + editor + inventory + decor + loop */
+function bookPages(){return CMDS.length+9;}      /* cover + every command + levels + line + editor + inventory + decor + loop */
 function icoDraw(cv2,id){var g=cv2.getContext("2d"),r=function(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h);};g.clearRect(0,0,16,16);
   if(id==="cover"){r(2,2,12,12,"#8a5a28");r(3,3,10,10,"#c48a48");r(4,4,8,2,"#e8c070");r(5,8,2,2,"#6a4020");r(9,9,2,2,"#6a4020");r(6,11,2,1,"#6a4020");}
   else if(id==="pace"){r(1,6,3,1,"#8a6a40");r(0,9,4,1,"#8a6a40");r(2,12,3,1,"#8a6a40");r(5,3,3,10,"#c0361e");r(8,5,2,6,"#c0361e");r(10,6,2,4,"#c0361e");r(12,7,2,2,"#c0361e");}
@@ -4893,12 +5363,23 @@ function icoDraw(cv2,id){var g=cv2.getContext("2d"),r=function(x,y,w,h,c){g.fill
   else if(id==="pot"){r(4,5,8,7,"#8a5a28");r(3,6,10,5,"#8a5a28");r(5,4,6,1,"#c48a48");r(5,5,3,1,"#e8c070");r(6,8,1,1,"#4a2810");r(9,9,1,1,"#4a2810");r(7,11,1,1,"#4a2810");r(4,12,8,1,"#4a2810");}
   else if(id==="style"){r(2,10,5,3,"#3a2a20");r(6,8,8,3,"#c8d0d8");r(7,8,7,1,"#f0f4f8");r(12,7,2,1,"#c8d0d8");r(3,3,2,1,"#e8c070");r(6,2,3,1,"#e8c070");r(10,4,2,1,"#e8c070");}
   else if(id==="wake"){r(6,6,4,4,"#ffe066");r(5,7,6,2,"#ffe066");r(7,2,2,2,"#ffd060");r(7,12,2,2,"#ffd060");r(2,7,2,2,"#ffd060");r(12,7,2,2,"#ffd060");r(4,4,1,1,"#ffd060");r(11,4,1,1,"#ffd060");r(4,11,1,1,"#ffd060");r(11,11,1,1,"#ffd060");}
+  else if(id==="rinse"){r(2,9,12,5,"#8a96a2");r(3,10,10,3,"#3a5a7a");r(4,10,6,1,"#7ac0e0");r(10,2,2,7,"#c8d0d8");r(7,2,5,2,"#c8d0d8");r(7,4,1,2,"#7ac0e0");r(7,7,1,1,"#7ac0e0");}
   else if(id==="autob"){r(2,6,9,8,"#7a3a10");r(2,7,9,6,"#e0a040");r(2,6,9,1,"#f0e0b0");r(9,1,5,5,"#c4a020");r(10,2,3,3,"#ffe066");r(11,3,1,1,"#c4a020");}
   else{r(1,7,3,3,"#8a6a40");r(3,6,10,5,"#3a4038");r(4,7,8,3,"#12141a");r(5,3,6,1,"#c0361e");r(7,2,2,1,"#c0361e");r(5,12,6,1,"#3ad070");}}
 function miniSlider(c,v){var mx=c.id==="pot"?Math.max(1,sim.potMax()):c.max,p=(v-c.min)/(mx-c.min),n=Math.max(1,Math.round((mx-c.min)/c.step)),tn=Math.min(n,14),tk="";
   for(var i=0;i<=tn;i++)tk+='<i class="tk" style="left:'+(i/tn*100)+'%"></i>';
   return '<div class="mini"><span class="e">'+esc(c.hi)+'</span><div class="mt"><div class="ln"></div><div class="mf" style="width:'+(p*100)+'%"></div>'+tk+'<div class="mk" style="left:'+((1-p)*100)+'%"></div></div><span class="e r">'+esc(c.lo)+'</span></div>';}
-function pageHtml(pg){var s=sim.s,N=bookPages(),pn='<span class="pn">'+(pg+1)+' / '+N+'</span>';
+/* 0.4.11: one extra page (NEW DECOR, TABLE SINK, MOOD, CLEAN HANDS) sits before THE LOOP */
+function pageHtml(pg){var N=bookPages();if(pg===N-2)return pageNew11(pg,N);var h=pageHtml0(pg===N-1?pg-1:pg);
+  return h.replace(/<span class="pn">\d+ \/ \d+<\/span>/,'<span class="pn">'+(pg+1)+' / '+N+'</span>');}
+function pageNew11(pg,N){var pn='<span class="pn">'+(pg+1)+' / '+N+'</span>';
+  return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="rinse" width="16" height="16"></canvas><b>MORE DECOR + MOOD</b></div>'+
+  '<div class="lb">TABLE SINK + CLEAN HANDS</div><div class="tx">The peel table has a built-in sink. Peeling makes his hands sticky. RINSE WHEN HANDS &lt; sets when he rinses (1 second). Under 25% clean he peels 15% slower.</div>'+
+  '<div class="lb">MOOD</div><div class="tx">Every placed decoration +2 (up to +30), music +8, a watered plant +4, a theme +3. Hunger or energy under 25%, sticky hands and peel mess bring it down. 60%+: works 3% faster. 80%+: 6% faster. Low mood never slows him below normal.</div>'+
+  '<div class="lb">WALL</div><div class="tx">WINDOW: day +4%. STRING LIGHTS: night +4%. SPICE RACK: meals +65. COAT HOOK: QUICK = 4 peels. CALENDAR: 10c each new day. POTS + PANS: food -1c. PHOTOS: lazy at 20%. NEON: +1c every 20th ship. TROPHY SHELF: +1% per cup.</div>'+
+  '<div class="lb">FLOOR + TABLE-TOP</div><div class="tx">SIDE TABLE: 2 table-top slots (the cooler lid has 1 more). FRUIT BOWL, COOKBOOK, AQUARIUM sit on top. COMPOST: sweep 25% faster + coins. SACK PILE: grab 20% faster. BOOKSHELF: levels 10% cheaper. CAT BED: a cat, better naps. STATUE: +5%.</div>'+
+  '<div class="lb">WASH ROOM + THEMES</div><div class="tx">TOWEL RACK, SOAP, MOP BUCKET go on the wash walls / floor (EDIT in the wash room; never on his path). TOY BOAT and BUBBLE MAKER go in the basin from INV. WALLPAPER and FLOOR TILES are cosmetic: change them in INV.</div></div>';}
+function pageHtml0(pg){var s=sim.s,N=bookPages()-1,pn='<span class="pn">'+(pg+1)+' / '+N+'</span>';
   if(pg===0)return '<div id="pg" class="cover"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><div class="t1">PAPA POTATO</div><div class="t2">HANDBOOK</div><button class="go2" type="button" data-act="book:next">OPEN THE BOOK</button><div class="note" style="margin-top:12px;color:#d8b878">'+CMDS.length+' commands, plus levels, the line, the editor, inventory, decor and the wash room</div></div>';
   if(pg===N-1)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE LOOP</b></div><div class="lb">WHAT HE DOES</div><div class="chips"><span>PILE</span><span>&gt; PEEL TABLE</span><span>&gt; KITCHEN SHIP 2c</span><span>&gt; RETURN</span><span>&gt; PILE</span></div><div class="tx">After he peels, he puts potatoes in the hole in the north kitchen wall. Unwashed pay 2c there (3c if already washed in the sink) and come back raw. WASH, a hold on WASH, or AUTO-WASH sends them through that same hole: they come out into the wash-room basin and pile up in the water, and a canal along the right wall pulls them to a ship opening for 3c. The work line uses the same split. Peels land on the floor. CLEAN (or the CLEAN button) sends him to the peels.</div><div class="lb">YOUR COINS GO TO</div><div class="chips"><span>LEVELS</span><span>ITEMS</span><span>FOOD</span><span>POTATOES</span><span>UPGRADES</span></div><div class="tx">Open the SHOP to buy. New items go to your INVENTORY. Equip tools on Papa, or open EDIT and drag furniture and machines into either room. The view always fits the whole room. EDIT moves furniture (not the kitchen pile, return, shipping, or the wash-room hole).</div></div>';
   if(pg===N-7)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>LEVELS</b></div><div class="lb">PAY TO LEVEL UP</div><div class="tx">You start at Level 1. Pay coins in the SHOP to reach the next level (up to 5). Each level UNLOCKS items; you still BUY them in the shop. Bought items go to your inventory first. Lv1 is the starters (room key, better peeler, carry bag, sink, broom, small cooler, cot).</div><div class="lb">UPGRADES</div><div class="tx">Old upgrades (sharp peeler, boots, chute, cooler, broom, soft bed) stay. New ones speed the auto-peeler and belts and grow the carry bag. Unused items stay in the game, just hidden until unlocked.</div></div>';
@@ -5047,13 +5528,16 @@ var OBJECTS=[
 coinIcon();layout();rebuildPanel();rebuildTray();syncZoomLabel();updateHud();migUntil=performance.now()+9000;RT=sim.s.t;showLabels(30000);drawScene(performance.now());
 requestAnimationFrame(frame);
 /* test + debug hooks */
-window.PP={get sim(){return sim;},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:function(seed){sim=PPSim.fresh(seed);focusId=null;hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;kitLayer=null;washLayer=null;roomsPreloaded=false;fading=false;fadeT=0;fadeTo=null;if(editMode)toggleEditor();rebuildPanel();rebuildTray();updateHud();saveGame();layout();},
+window.PP={get sim(){return sim;},cat:function(){return {x:CAT.x,y:CAT.y,mode:CAT.mode};},w2c:function(x,y){var r=cv.getBoundingClientRect(),sc=r.width/cv.width;return {cx:wx(x),cy:wy(y),x:r.left+wx(x)*sc,y:r.top+wy(y)*sc,sc:sc};},trayPg:function(){return {tab:trayTab,page:trayPage,per:trayPer()};},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:function(seed){sim=PPSim.fresh(seed);focusId=null;hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;kitLayer=null;washLayer=null;roomsPreloaded=false;fading=false;fadeT=0;fadeTo=null;if(editMode)toggleEditor();rebuildPanel();rebuildTray();updateHud();saveGame();layout();},
   reload:function(){sim=loadGame();hud={};flights=[];flying={};messVer++;renderAll();updateHud();},focus:function(){return focusId;},
-  pause:function(p){paused=!!p;},layout:function(){return {W:W,H:H,k:k,roomW:roomW,roomH:roomH,offX:offX,offY:offY,detail:DETAIL,fitW:roomW*k,fitH:roomH*k,dpr:DPR,SC:SC};},version:"0.4.10",rotate:function(id){var r=sim.rotateItem(id);staticLayer=null;return r;},info:function(){var el=$("objInfo");return {id:infoId,on:!!el&&el.className!=="off",name:el?$("oiName").textContent:"",desc:el?$("oiDesc").textContent:""};},tapWorld:function(x,y){return hitAny(x,y);},commandNow:function(id){return sim.commandNow(id);},setHold:function(id,on){return sim.setHold(id,on);},setView:function(r,instant){if(instant){sim.s.viewRoom=r;sim.s.followRoom=null;staticLayer=null;roomsPreloaded=false;layout();drawScene(performance.now());return true;}return beginFade(r);},viewRoom:function(){return sim.s.viewRoom;},hasKey:function(){return sim.hasKey();},fade:function(){return {on:fading,t:fadeT,to:fadeTo};},select:function(id){dragId=id;rebuildTray();showInfo(id);},zoom:function(){return {i:1,k:1,panX:0,panY:0,fit:true};},setZoom:function(i){resetView();},edit:function(on){if(on==null)return editMode;if(!!on!==editMode)toggleEditor();return editMode;},move:function(id,x,y){var r=sim.moveItem(id,x,y);if(r){if(id==="washPile"||id==="streetMouth")bustRoomCache();else{staticLayer=null;messLayer=null;}messVer++;saveGame();}return r;},
+  pause:function(p){paused=!!p;},layout:function(){return {W:W,H:H,k:k,roomW:roomW,roomH:roomH,offX:offX,offY:offY,detail:DETAIL,fitW:roomW*k,fitH:roomH*k,dpr:DPR,SC:SC};},version:"0.4.11",rotate:function(id){var r=sim.rotateItem(id);staticLayer=null;return r;},info:function(){var el=$("objInfo");return {id:infoId,on:!!el&&el.className!=="off",name:el?$("oiName").textContent:"",desc:el?$("oiDesc").textContent:""};},tapWorld:function(x,y){return hitAny(x,y);},commandNow:function(id){return sim.commandNow(id);},setHold:function(id,on){return sim.setHold(id,on);},setView:function(r,instant){if(instant){sim.s.viewRoom=r;sim.s.followRoom=null;staticLayer=null;roomsPreloaded=false;layout();drawScene(performance.now());return true;}return beginFade(r);},viewRoom:function(){return sim.s.viewRoom;},hasKey:function(){return sim.hasKey();},fade:function(){return {on:fading,t:fadeT,to:fadeTo};},select:function(id){dragId=id;rebuildTray();showInfo(id);},zoom:function(){return {i:1,k:1,panX:0,panY:0,fit:true};},setZoom:function(i){resetView();},edit:function(on){if(on==null)return editMode;if(!!on!==editMode)toggleEditor();return editMode;},move:function(id,x,y){var r=sim.moveItem(id,x,y);if(r){bustRoomCache();messLayer=null;messVer++;saveGame();}return r;},
   drawAt:function(t){drawScene(t);},animF:function(){return ANIM_F;},sitWorld:sitWorld,setPan:function(x,y){panX=+x||0;panY=+y||0;applyCam();if(playRect)placeTags();syncZoomLabel();},seedSucks:function(arr){sucks=arr||[];},
   setPileMax:function(n){PILEMAX=n;buildPile();pileLayer=null;pileKey=-1;},forcePile:function(n){sim.s.pile=n;},get migrated(){return migrated;},
   stats:function(){return {pileRenders:renders.pile,messRenders:renders.mess,maxVis:MAXVIS,tiers:TIER.slice(),messVis:MESSPOS.length,flights:flights.length,sucks:sucks.length};},
-  giveAll:function(){var s=sim.s,i;s.level=5;s.coins=Math.max(s.coins,999);if(!s.owned)s.owned={};if(!s.place)s.place={};if(!s.equipped)s.equipped={};for(i=0;i<PPSim.ITEMS.length;i++){var it=PPSim.ITEMS[i];s.owned[it.id]=1;if(PPSim.isTool(it.id))s.equipped[it.id]=1;if(PPSim.isPlaceable(it.id))s.place[it.id]=PPSim.defaultPlace(it.id);}s.box.suction=1;s.box.conveyor=2;s.box.apeeler=2;s.box.outbelt=2;s.box.lamp=1;s.box.radio=1;s.box.tv=1;s.box.watch=30;s.box.water=40;s.box.wash=1;s.box.clean=20;s.box.eat=40;s.box.nap=35;sim.syncGeom();sim.rebuildObst();bustRoomCache();rebuildPanel();rebuildTray();changed();},
+  giveAll:function(){var s=sim.s,i;s.level=5;s.coins=Math.max(s.coins,999);if(!s.owned)s.owned={};if(!s.place)s.place={};if(!s.equipped)s.equipped={};for(i=0;i<PPSim.ITEMS.length;i++){var it=PPSim.ITEMS[i];s.owned[it.id]=1;if(PPSim.isTool(it.id))s.equipped[it.id]=1;if(PPSim.isPlaceable(it.id)&&!PPSim.isWashItem(it.id)&&!PPSim.isTop(it.id)&&PPSim.FLOOR11.indexOf(it.id)<0)s.place[it.id]=PPSim.defaultPlace(it.id);}s.box.suction=1;s.box.conveyor=2;s.box.apeeler=2;s.box.outbelt=2;s.box.lamp=1;s.box.radio=1;s.box.tv=1;s.box.watch=30;s.box.water=40;s.box.wash=1;s.box.clean=20;s.box.eat=40;s.box.nap=35;sim.syncGeom();sim.rebuildObst();
+    for(i=0;i<PPSim.FLOOR11.length;i++)if(!sim.placed(PPSim.FLOOR11[i]))sim.placeItem(PPSim.FLOOR11[i]);   /* 0.4.11 floor decor: nearest free spot */
+    for(i=0;i<PPSim.TOPS.length;i++)if(!sim.placed(PPSim.TOPS[i]))sim.placeItem(PPSim.TOPS[i]);
+    sim.syncGeom();sim.rebuildObst();bustRoomCache();rebuildPanel();rebuildTray();changed();},
   radio:function(){return window.PPRadio?PPRadio.state():null;},radioLevel:function(){return window.PPRadio?PPRadio.level():0;},radioAct:radioAct,radioPick:function(){return radioPickInput();},duckPos:function(){return duckPos(RT||0);},
   objects:function(){return OBJECTS;},labels:function(ms,force){showLabels(ms||8000,force);updateLabels();if(playRect)placeTags();},placeTags:function(){if(playRect)placeTags();},ovl:function(){return ovlMode;},book:function(){return {page:bookPage,pages:bookPages()};},flip:flipBook,open:openOvl,close:closeOvl,buy:shopBuy,
   retView:function(){var s=sim.s,kk=s.suck;if(!kk)return [];var sc=PPSim.spill(kk.t0,kk.n),o=[];for(var j=kk.landed;j<kk.n;j++){var q=retPos(kk,sc,j,RT);o.push(q?{j:j,x:q.x,y:q.y,z:q.z,p:q.p,inPipe:q.inPipe,mouthX:q.mouthX,tx:q.tx,ty:q.ty}:{j:j,p:-1});}return o;},spillView:function(){var s=sim.s,kk=s.suck;if(!kk)return [];var sc=PPSim.spill(kk.t0,kk.n),o=[];for(var j=kk.landed;j<kk.n;j++)o.push({j:j,ex:sc.ex[j],ld:sc.ld[j],rt:RT});return o;},
@@ -5080,14 +5564,17 @@ window.__tt={version:1,manual:false,
     coins:s.coins,food:s.food,hunger:Math.round(s.hunger*100)/100,energy:Math.round(s.energy*100)/100,peels:s.peels,pile:s.pile,total:sim.total(),peeled:s.stats.peeled,
     act:a?a.t:"none",then:a&&a.then||"",x:Math.round(g.x*RW*100)/100,y:Math.round(g.y*RH*100)/100,hold:g.hold||"",box:JSON.parse(JSON.stringify(s.box)),viewRoom:s.viewRoom||"kitchen",where:g.where||"kitchen",hasKey:!!sim.hasKey(),wash:s.wash?s.wash.pots.length+(s.wash.bulk|0):0,washedShip:s.stats.washedShip|0,unwashedShip:s.stats.unwashedShip|0,
     table:{x0:GEO.table.x0,y0:GEO.table.y0,r:GEO.table.r|0},loopBreaks:s.stats.loopBreaks|0,
-    decor:ttDecorState()};},
+    decor:ttDecorState(),mood:sim.mood(),hyg:Math.round(sim.hyg()*10)/10,rinses:s.stats.rinses|0,theme:sim.theme(),basin:{toyBoat:sim.basinOn("toyBoat"),bubbles:sim.basinOn("bubbles")},
+    wash11:TT_WASH.filter(function(q){return sim.placed(q);})};},
   step:function(n){n=Math.max(0,Math.min(100000,n|0));for(var i=0;i<n;i++)sim.step(STEP);drawScene(performance.now());},
   setSeed:function(sd){sim=PPSim.fresh((sd>>>0)||1);hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;kitLayer=null;washLayer=null;roomsPreloaded=false;fading=false;fadeT=0;fadeTo=null;focusId=null;rebuildPanel();rebuildTray();updateHud();layout();},
   listCommands:function(){var o=[],i;for(i=0;i<CMDS.length;i++)o.push({name:"set_"+CMDS[i].id,args:[{name:"v",min:CMDS[i].min,max:CMDS[i].id==="pot"?POTS.length-1:CMDS[i].max}]});
     o.push({name:"buyFood"});o.push({name:"move",args:[{name:"i",min:0,max:3},{name:"x",min:0,max:RW},{name:"y",min:0,max:RH}]});o.push({name:"rotate",args:[{name:"i",min:0,max:3}]});
     var nd=TT_DECOR.length-1;
     o.push({name:"giveDecor"});o.push({name:"placeDecor",args:[{name:"i",min:0,max:nd},{name:"x",min:0,max:RW},{name:"y",min:0,max:RH}]});o.push({name:"unplaceDecor",args:[{name:"i",min:0,max:nd}]});o.push({name:"rotateDecor",args:[{name:"i",min:0,max:nd}]});
-    o.push({name:"duck",args:[{name:"on",min:0,max:1}]});o.push({name:"radioPower"});o.push({name:"radioSt",args:[{name:"v",min:0,max:2}]});o.push({name:"radioVol",args:[{name:"v",min:0,max:10}]});o.push({name:"radioNear"});return o;},
+    o.push({name:"duck",args:[{name:"on",min:0,max:1}]});o.push({name:"radioPower"});o.push({name:"radioSt",args:[{name:"v",min:0,max:2}]});o.push({name:"radioVol",args:[{name:"v",min:0,max:10}]});o.push({name:"radioNear"});
+    o.push({name:"washDecor",args:[{name:"i",min:0,max:2},{name:"x",min:0,max:180},{name:"y",min:0,max:400}]});o.push({name:"unplaceWash",args:[{name:"i",min:0,max:2}]});
+    o.push({name:"basin",args:[{name:"i",min:0,max:1},{name:"on",min:0,max:1}]});o.push({name:"theme",args:[{name:"w",min:0,max:1},{name:"v",min:0,max:3}]});return o;},
   runCommand:function(name,args){args=args||[];
     if(name.indexOf("set_")===0){var id=name.slice(4);if(!BOX[id])throw new Error("bad cmd");var v=+args[0];if(!isFinite(v))throw new Error("bad v");sim.setBox(id,v);renderAll();return true;}
     if(name==="buyFood")return sim.buyFood(false);
@@ -5098,6 +5585,10 @@ window.__tt={version:1,manual:false,
       if(name==="placeDecor"){var px=+args[1],py=+args[2];if(!isFinite(px)||!isFinite(py))throw new Error("bad xy");r3=sim.placed(id3)?sim.moveItem(id3,px,py):sim.placeItem(id3,px,py);}
       else if(name==="unplaceDecor")r3=sim.unplace(id3);else r3=sim.rotateItem(id3);
       bustRoomCache();messVer++;rebuildTray();radioSync();return r3;}
+    if(name==="washDecor"||name==="unplaceWash"){var wj2=Math.floor(+args[0]);if(!(wj2>=0&&wj2<TT_WASH.length))throw new Error("bad i");var wid=TT_WASH[wj2],wr;if(!sim.s.owned)sim.s.owned={};sim.s.owned[wid]=1;
+      if(name==="unplaceWash")wr=sim.unplace(wid);else{var wx2=+args[1],wy2=+args[2];if(!isFinite(wx2)||!isFinite(wy2))throw new Error("bad xy");wr=sim.placed(wid)?sim.moveItem(wid,wx2,wy2):sim.placeItem(wid,wx2,wy2);}bustRoomCache();rebuildTray();return wr;}
+    if(name==="basin"){var bj=Math.floor(+args[0]);if(!(bj>=0&&bj<2))throw new Error("bad i");var bid=["toyBoat","bubbles"][bj];sim.s.owned[bid]=1;return sim.putBasin(bid,+args[1]>0);}
+    if(name==="theme"){var tw=+args[0]>0?"floor":"wall",tv=Math.floor(+args[1]);if(!isFinite(tv))throw new Error("bad v");sim.s.owned[tw==="wall"?"wallpaper":"floorTiles"]=1;var trr=sim.setTheme(tw,tv);bustRoomCache();return trr;}
     if(name==="duck"){var on=+args[0];if(!isFinite(on))throw new Error("bad on");return sim.putDuck(on>0);}
     var dd=sim.s.decor;
     if(name==="radioPower"){sim.setBox("radio",sim.s.box.radio>0?0:1);radioSync();return true;}
@@ -5105,7 +5596,9 @@ window.__tt={version:1,manual:false,
     if(name==="radioNear"){dd.radioNear=dd.radioNear?0:1;radioSync();return true;}
     throw new Error("unknown "+name);},
   render:function(){drawScene(performance.now());}};
-var TT_DECOR=["plant","lamp","radio","rug","tvArmchair","kitchenMat","runner","roundRug","clock","poster","fan","shelf"];
+var TT_WASH=["towelRack","soap","mopBucket"];
+var TT_DECOR=["plant","lamp","radio","rug","tvArmchair","kitchenMat","runner","roundRug","clock","poster","fan","shelf",
+  "window","spiceRack","coatHook","calendar","potsPans","photos","stringLights","neonSign","trophyShelf","sideTable","compost","sackPile","bookshelf","catBed","statue","fruitBowl","cookbook","aquarium"];
 function ttDecorState(){var s=sim.s,d=s.decor||{},pl={},i,id,q,f=sim.decorEffects?sim.decorEffects():null;
   for(i=0;i<TT_DECOR.length;i++){id=TT_DECOR[i];if(sim.placed(id)){q=sim.placeOf(id);pl[id]=[Math.round(q.x*10)/10,Math.round(q.y*10)/10,q.r|0];}}
   var m=function(v){return Math.round(v*1000)/1000;};
