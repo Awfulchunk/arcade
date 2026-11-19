@@ -78,7 +78,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 
 (()=>{
 "use strict";
-const VERSION="1.6.15";
+const VERSION="1.6.16";
 // t920: sniper REVERTED to thin white hitscan beam (Jay keep); soft suck/limbs stay.
 // t918: suck snap + limb/gib scale + sniper slug (laser beam kept). Tip-only.
 // t894: local HTML tip only — manual main aim + quiet pixel groove.
@@ -276,6 +276,7 @@ function tryFire(dt){
   }
 }
 
+function drawFlatBlood16(c,b){const a=clamp(b.life*0.95,0,0.92);c.globalAlpha=a;if(b.dot){c.fillStyle="#6a0810";c.fillRect(b.x|0,b.y|0,b.r|0,(b.r*0.7)|0);}else if(b.ring){c.fillStyle="#3a0508";c.beginPath();c.ellipse(b.x,b.y,b.r*1.05,b.r*0.7,b.rot||0,0,6.28);c.fill();c.fillStyle="#7a1018";c.beginPath();c.ellipse(b.x,b.y,b.r*0.7,b.r*0.45,b.rot||0,0,6.28);c.fill();}else{c.fillStyle="#2a0408";c.beginPath();c.ellipse(b.x,b.y+1,b.r*1.08,b.r*0.72,b.rot||0,0,6.28);c.fill();c.fillStyle="#5a0810";c.beginPath();c.ellipse(b.x,b.y,b.r,b.r*0.65,b.rot||0,0,6.28);c.fill();c.fillStyle="#8a1018";c.beginPath();c.ellipse(b.x-b.r*0.15,b.y-b.r*0.12,b.r*0.5,b.r*0.32,b.rot||0,0,6.28);c.fill();c.globalAlpha=a*0.45;c.fillStyle="#c02028";c.beginPath();c.ellipse(b.x-b.r*0.25,b.y-b.r*0.18,b.r*0.22,b.r*0.14,b.rot||0,0,6.28);c.fill();}c.globalAlpha=1;}
 function goreAt(x,y,n,big){
   for(let i=0;i<n;i++){
     const a=rnd(6.28),sp=rnd(50,big?180:110);
@@ -290,8 +291,7 @@ function goreAt(x,y,n,big){
   for(let i=0;i<(big?10:6);i++){
     blood.push({x:x+rnd(-28,28),y:y+rnd(-22,22),r:rnd(2,7),life:1,a:1,rot:0,dot:1});
   }
-  if(blood.length>160)blood.splice(0,blood.length-160);
-  if(gibs.length>180)gibs.splice(0,gibs.length-180);
+  /* 1.6.16: no caps — every death keeps its own gore */
 }
 
 function killEnemy(e,idx){
@@ -568,8 +568,8 @@ function update(dt){
   }
 
   for(let i=gibs.length-1;i>=0;i--){
-    const g=gibs[i];g.age=(g.age||0)+dt;g.z=SUCK>0?0:(g.age<.35?Math.sin(g.age/.35*Math.PI)*10:0);g.x+=g.vx*dt;g.y+=g.vy*dt;g.vx*=(1-3*dt);g.vy*=(1-3*dt);g.life-=dt;
-    if(g.life<=0)gibs.splice(i,1);
+    const g=gibs[i];g.age=(g.age||0)+dt;g.z=SUCK>0?0:(g.age<.35?Math.sin(g.age/.35*Math.PI)*10:0);g.x+=g.vx*dt;g.y+=g.vy*dt;g.vx*=(1-3*dt);g.vy*=(1-3*dt);if(g.life<1)g.life=1;
+    if(!g.settled&&g.age>=0.6){g.settled=1;g.vx=0;g.vy=0;g.vr=0;}
   }
   for(const b of blood)b.life-=dt*0.008;
   blood=blood.filter(b=>b.life>0);
@@ -915,7 +915,7 @@ function drawExtra(){
   // guts: lingering chunks (cheap rects)
   /* t914: guts drawn by px path */;}
 const guts=[];
-const _ga=goreAt;goreAt=function(x,y,n,big){_ga(x,y,Math.round(n*1.5),big);for(let i=0;i<(big?5:2);i++)guts.push({x:x+rnd(-14,14),y:y+rnd(-12,12),w:rnd(2,5),h:rnd(2,4)});if(guts.length>260)guts.splice(0,guts.length-260);if(blood.length>360)blood.splice(0,blood.length-360);if(gibs.length>260)gibs.splice(0,gibs.length-260);};
+const _ga=goreAt;goreAt=function(x,y,n,big){_ga(x,y,Math.round(n*1.5),big);for(let i=0;i<(big?5:2);i++)guts.push({x:x+rnd(-14,14),y:y+rnd(-12,12),w:rnd(2,5),h:rnd(2,4)});};
 
 /* ===== 1.2.0: build tabs, 10 more guns, no crates, ground maps, limbs ===== */
 const bnear=(x,y,r)=>enemies.filter(o=>hypot(o.x-x,o.y-y)<r);
@@ -956,7 +956,7 @@ let GORE_SC=1;
     limbs.push({k,x:e.x,y:e.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,a:rnd(6.28),va:rnd(-10,10),v:.4,
       c:k==="leg"?legs:(k==="arm"?shirt:sk),sk,shirt,legs,side,px:1,sc:scSz});
   }
-  if(limbs.length>220)limbs.splice(0,limbs.length-220);return _k(e,i);};}
+  return _k(e,i);};}
 {const _de=drawExtra;drawExtra=function(){_de();
   // t914: limbs deferred — drawn by __drawPxLimbs in later IIFE (skip sticker rects)
 };}
@@ -1627,7 +1627,7 @@ draw=function(){
   for(let x=-400;x<=400;x+=40){ctx.beginPath();ctx.moveTo(x,-760);ctx.lineTo(x,160);ctx.stroke();}
   for(let y=-760;y<=160;y+=40){ctx.beginPath();ctx.moveTo(-420,y);ctx.lineTo(420,y);ctx.stroke();}
   for(const d of decor)if(d.k==="plate")drawPlate(d);
-  for(const b of blood){if(b.cc0splat||b.pxPool)continue;const a=clamp(b.life*0.95,0,0.92);ctx.globalAlpha=a;if(b.dot){ctx.fillStyle="#6a0810";ctx.fillRect(b.x|0,b.y|0,b.r|0,(b.r*0.7)|0);}else if(b.ring){ctx.fillStyle="#3a0508";ctx.beginPath();ctx.ellipse(b.x,b.y,b.r*1.05,b.r*0.7,b.rot||0,0,6.28);ctx.fill();ctx.fillStyle="#7a1018";ctx.beginPath();ctx.ellipse(b.x,b.y,b.r*0.7,b.r*0.45,b.rot||0,0,6.28);ctx.fill();}else{ctx.fillStyle="#2a0408";ctx.beginPath();ctx.ellipse(b.x,b.y+1,b.r*1.08,b.r*0.72,b.rot||0,0,6.28);ctx.fill();ctx.fillStyle="#5a0810";ctx.beginPath();ctx.ellipse(b.x,b.y,b.r,b.r*0.65,b.rot||0,0,6.28);ctx.fill();ctx.fillStyle="#8a1018";ctx.beginPath();ctx.ellipse(b.x-b.r*0.15,b.y-b.r*0.12,b.r*0.5,b.r*0.32,b.rot||0,0,6.28);ctx.fill();ctx.globalAlpha=a*0.45;ctx.fillStyle="#c02028";ctx.beginPath();ctx.ellipse(b.x-b.r*0.25,b.y-b.r*0.18,b.r*0.22,b.r*0.14,b.rot||0,0,6.28);ctx.fill();}ctx.globalAlpha=1;}
+  for(const b of blood){if(b.cc0splat||b.pxPool)continue;drawFlatBlood16(ctx,b);}
   if(window.__drawGroundGore)window.__drawGroundGore();
   for(const s of slots){
     if(FIELD_PIXEL.has(s.build)){upright(s.x,s.y,()=>drawFieldSprite(s));}
@@ -1927,7 +1927,7 @@ window.__PROOF=()=>{
       }
       if(!blood.length&&!guts.length&&!limbs.length&&!gibs.length){SUCK=0;window.__finishGoreFeed();}
     }
-    if(!SET.gfx.gore){if(blood.length>40)blood.splice(0,blood.length-40);if(guts.length>30)guts.splice(0,guts.length-30);if(limbs.length>40)limbs.splice(0,limbs.length-40);}
+    /* 1.6.16: gore-off trims each new death instead of stealing old parts (see v1.6.16 block) */
     if(!SET.video.shake)shake=0;};}
   // ---------- 9) Grinder defense ----------
   BUILDS.push({id:"grind",nm:"MEATGRINDER",cost:420});TABS.DEFENSE.push("MEATGRINDER");RN.MEATGRINDER=["GRINDER","Sucks in touching zombies · grinds · spits blood"];
@@ -2487,8 +2487,6 @@ const T898_KINDS=["gnasher","tick","dragger","boomer","stitcher","lantern"];
         col:kind==="bone"?"#c7b39a":(kind==="meat"?"#a01820":"#4a080c"),
         side:kind==="bone"?"#8a7a60":"#2a0408", kind, pxGib:1, rot:rnd(6.28), vr:rnd(-8,8), sc:rnd(.7,1.15)*gsc});
     }
-    if(gibs.length>280)gibs.splice(0,gibs.length-280);
-    if(blood.length>400)blood.splice(0,blood.length-400);
   };}
 
   {const _u=update; update=function(dt){
@@ -2515,14 +2513,15 @@ const T898_KINDS=["gnasher","tick","dragger","boomer","stitcher","lantern"];
 /* ===== v1.6.9 — t914/t915: procedural gore/limbs match pxBody + MAIN curved suck hard clear ===== */
 ;(function(){
   // Pixel helpers matching zombie body language
-  function R(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(w)),Math.max(1,Math.round(h))); }
+  let gx=ctx;
+  function R(x,y,w,h,c){ gx.fillStyle=c; gx.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(w)),Math.max(1,Math.round(h))); }
 
   // --- px blood pools: blocky layered pools with ground contact + rim depth (no sheet) ---
   function drawPxPool(b){
     const a=clamp(b.life*0.95,0,0.9), r=Math.min(b.r,18), rot=b.rot||0;
-    ctx.save(); ctx.translate(Math.round(b.x),Math.round(b.y)); ctx.rotate(rot); ctx.globalAlpha=a;
+    gx.save(); gx.translate(Math.round(b.x),Math.round(b.y)); gx.rotate(rot); gx.globalAlpha=a;
     // contact shadow (tight under pool)
-    ctx.globalAlpha=a*0.3; R(-r*0.7, r*0.2, r*1.4, r*0.35, "#000"); ctx.globalAlpha=a;
+    gx.globalAlpha=a*0.3; R(-r*0.7, r*0.2, r*1.4, r*0.35, "#000"); gx.globalAlpha=a;
     // irregular blotch stack (zombie mouth-smear palette) — not one giant sticker rect
     R(-r*0.55, -r*0.25, r*1.1, r*0.7, "#1a0206");
     R(-r*0.7, -r*0.05, r*0.55, r*0.45, "#2a0408");
@@ -2533,15 +2532,15 @@ const T898_KINDS=["gnasher","tick","dragger","boomer","stitcher","lantern"];
     // rim crumbs
     R(-r*0.85, r*0.05, Math.max(1,r*0.16), Math.max(1,r*0.12), "#3a0508");
     R(r*0.55, 0, Math.max(1,r*0.14), Math.max(1,r*0.1), "#3a0508");
-    ctx.globalAlpha=1; ctx.restore();
+    gx.globalAlpha=1; gx.restore();
   }
 
   // --- px gibs: extruded meat/bone chunks ---
   function drawPxGib(g){
     const sc=g.sc||1, rr=g.r*sc;
-    ctx.save(); ctx.translate(Math.round(g.x),Math.round(g.y)); ctx.rotate(g.rot||0); ctx.globalAlpha=clamp(g.life,0,1);
+    gx.save(); gx.translate(Math.round(g.x),Math.round(g.y)); gx.rotate(g.rot||0); gx.globalAlpha=clamp(g.life,0,1);
     // contact shadow
-    if(!(g.z>0)){ctx.globalAlpha=clamp(g.life,0,1)*0.3; R(-rr*0.7, rr*0.35, rr*1.4, rr*0.45, "#000");} ctx.globalAlpha=clamp(g.life,0,1);
+    if(!(g.z>0)){gx.globalAlpha=clamp(g.life,0,1)*0.3; R(-rr*0.7, rr*0.35, rr*1.4, rr*0.45, "#000");} gx.globalAlpha=clamp(g.life,0,1);
     if(g.kind==="bone"){
       R(-rr*0.9, -rr*0.35, rr*1.8, rr*0.7, "#12140f");
       R(-rr*0.8, -rr*0.25, rr*1.5, rr*0.5, g.col||"#c7b39a");
@@ -2555,15 +2554,15 @@ const T898_KINDS=["gnasher","tick","dragger","boomer","stitcher","lantern"];
       R(-rr*0.4, -rr*0.35, rr*0.45, rr*0.35, "#c02028"); // wet highlight
       if(g.kind==="meat"){ R(-rr*0.15, rr*0.1, rr*0.5, rr*0.25, "#5a0810"); }
     }
-    ctx.globalAlpha=1; ctx.restore();
+    gx.globalAlpha=1; gx.restore();
   }
 
   // --- px limbs: same silhouette language as zombie arms/legs/head ---
   function drawPxLimb(l){
     const sc=l.sc||1, sk=l.sk||"#8ca384", shirt=l.shirt||l.c||"#4a5a3a", legs=l.legs||"#3a3028", side=l.side||"#2a3228";
-    ctx.save(); ctx.translate(Math.round(l.x),Math.round(l.y)); ctx.rotate(l.a||0);
+    gx.save(); gx.translate(Math.round(l.x),Math.round(l.y)); gx.rotate(l.a||0);
     // ground contact
-    ctx.globalAlpha=0.28; R(-5*sc, 3*sc, 10*sc, 3*sc, "#000"); ctx.globalAlpha=1;
+    gx.globalAlpha=0.28; R(-5*sc, 3*sc, 10*sc, 3*sc, "#000"); gx.globalAlpha=1;
     if(l.k==="head"){
       R(-5*sc, -5*sc, 11*sc, 11*sc, "#12140f");
       R(3*sc, -4*sc, 2.5*sc, 9*sc, side);
@@ -2588,9 +2587,10 @@ const T898_KINDS=["gnasher","tick","dragger","boomer","stitcher","lantern"];
       R(-2*sc, -7.5*sc, 4.5*sc, 2.5*sc, "#6a0810"); // hip stump
       R(-1*sc, -8*sc, 2.5*sc, 1.5*sc, "#a01820");
     }
-    ctx.restore();
+    gx.restore();
   }
 
+  window.__px16={pool:drawPxPool,gib:drawPxGib,limb:drawPxLimb,R:R,use:c=>{gx=c||ctx;}};
   // t932: limb draw owned by ground queue.
 
   // Remap any remaining sheet-tagged gore every frame (safety)
@@ -2859,7 +2859,7 @@ if(new URLSearchParams(location.search).get('proof945')==='audio')setTimeout(()=
  */
 ;(function(){
 "use strict";
-const S13=window.__S13={ver:"1.6.15",log:[],hits:[],flashNoDmg:0,pb:0,shots:0,errors:0,fired:{}};
+const S13=window.__S13={ver:"1.6.16",log:[],hits:[],flashNoDmg:0,pb:0,shots:0,errors:0,fired:{}};
 // ---------------------------------------------------------------- 0) no Custom Game
 CUSTOM=false;LEARN_AI=false;try{localStorage.removeItem("swarmCustom");localStorage.removeItem("swarmLearnAI");}catch(e){}
 for(const id of ["customChk","learnChk"]){const c=$(id);if(c&&c.parentNode)c.parentNode.remove();}
@@ -2945,7 +2945,7 @@ function bHit13(b,e){
  const d=b.o?Math.hypot(b.x-b.o[0],b.y-b.o[1]):0;b.dmg=b.dmg0*fall13(b.fo13,d)*Math.pow(.85,b.nh13||0);b.nh13=(b.nh13||0)+1;
  if(e.armored&&!e.limbstack){const f=Math.hypot(e.x,e.y)||1;if((b.vx*-e.x/f+b.vy*-e.y/f)/(Math.hypot(b.vx,b.vy)||1)<-.5)b.dmg*=.3;}
  spark13(b.x,b.y*KY-z13(b),b.col||"#ffe066",b.wid);
- A13.hit(e);S13.lastHit=e;return true;}
+ hit16(b.shot16,e,b.dmg);A13.hit(e);S13.lastHit=e;return true;}
 window.bHit13=bHit13;
 
 // ---------------------------------------------------------------- 4) firing the 7 guns (all sources), point-blank from the core
@@ -2953,7 +2953,7 @@ const P13=[]; // own FX in SCREEN units: {k,x,y,...,t,max}
 function p13(o){if(P13.length<260)P13.push(Object.assign({t:0},o));}
 function spark13(sx,sy,c,id){const n=id==="sniper"?7:id==="shotgun"?2:3;for(let i=0;i<n;i++){const a=rnd(6.283),s=rnd(25,id==="sniper"?120:70);p13({k:"spk",x:sx,y:sy,vx:Math.cos(a)*s,vy:Math.sin(a)*s-20,c,max:rnd(.12,.22)});}}
 function lvl(w){return w&&w.lvl||0;}
-function dmg13(e,amt,src){if(!e||e.hp<=0)return false;e.hp-=amt;e.hit=.1;A13.hit(e);return true;}
+function dmg13(e,amt,src){if(!e||e.hp<=0)return false;if(CUR16)hit16(CUR16,e,amt);e.hp-=amt;e.hit=.1;A13.hit(e);return true;}
 function knock13(e,amt,fromX,fromY){if(e.limbstack||e.big)amt*=.35;const dx=e.x-fromX,dy=e.y-fromY,d=Math.hypot(dx,dy)||1;e.x+=dx/d*amt;e.y+=dy/d*amt;}
 let AIM_T13=null; // main AI target (for torso-height aim)
 function aimInfo(src,ox,oy,a,w){ // target distance + target torso height so shots fly to the body, not over it
@@ -2966,7 +2966,7 @@ function huggers13(a,arc){const out=[];for(const e of enemies){if(e.hp<=0)contin
 function pbFx(e,c){const M=muzzle13(aim),B=box13(e);p13({k:"trc",x:M.x,y:M.y*KY-M.z,x2:e.x,y2:e.y*KY+(B.top+B.bot)/2,c,max:.07});spark13(e.x,e.y*KY+(B.top+B.bot)/2,c);}
 function spawnBullet(o,a,sp,w,src,g,extra){const b=Object.assign({x:o.x,y:o.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,dmg:w.dmg*lvlK(w),col:g.col,pierce:Math.floor(lvl(w)/2),
    explode:0,fire:0,life:g.rng/sp+.15,src,wid:w.id,o:[o.x,o.y],rng:g.rng,sg:g.sgrow,k:rnd(-1,1),ea:0,ox:o.x,oy:o.y,z0:o.z,zt:o.zt,zd:o.zd,fo13:g.fo,r13:g.r||1.6},extra||{});
- b.dmg0=b.dmg;bullets.push(b);return b;}
+ b.dmg0=b.dmg;b.shot16=CUR16;bullets.push(b);return b;}
 function rayScreen(ox,oy,oz,a,len,zt,zd){ // straight screen-space line from the muzzle; returns enemies hit in order + end point
  const sx=ox,sy=oy*KY-oz,tx=ox+Math.cos(a)*zd,ty=(oy+Math.sin(a)*zd)*KY-zt;let dx=tx-sx,dy=ty-sy;const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;
  const n=Math.hypot(Math.cos(a),KY*Math.sin(a))||1,maxL=len*n;const hits=[];
@@ -2992,7 +2992,7 @@ const FIRE13={
    for(let i=0;i<3;i++){const q=a+rnd(-.18,.18),s=rnd(200,260);p13({k:"flm",x:o.x,y:o.y,z:o.z,vx:Math.cos(q)*s,vy:Math.sin(q)*s,r:rnd(2.2,3.6),max:R/s*rnd(.85,1.05)});}
    return n;},
  rocket(src,o,a,w,g){const hs=src==="main"?huggers13(a,.7):[];if(hs.length){blast13(hs[0].x,hs[0].y,w,g,null,src);pbFx(hs[0],g.col);S13.pb++;return;}
-   const sp=g.spd*(1+lvl(w)*.05),s=g.spread*STYLE13.spr,b=spawnBullet(o,a+rnd(-s,s),sp,w,src,g,{rk13:1});b.fx=(e)=>{blast13(b.x,b.y,w,g,e,src);b.boomed=1;};},
+   const sp=g.spd*(1+lvl(w)*.05),s=g.spread*STYLE13.spr,b=spawnBullet(o,a+rnd(-s,s),sp,w,src,g,{rk13:1});b.fx=(e)=>{const c0=CUR16;CUR16=b.shot16||null;try{blast13(b.x,b.y,w,g,e,src);}finally{CUR16=c0;}b.boomed=1;};},
  laser(src,o,a,w,g){beam13(src,o,a,w,g,"#ff4a9a",2.2,.16);},
  sniper(src,o,a,w,g){beam13(src,o,a,w,g,"#ffffff",1.1,.12);if(src==="main")p13({k:"smk",x:o.x,y:o.y*KY-o.z,max:.6,r:3});}
 };
@@ -3051,7 +3051,7 @@ function tryShoot13(){const w=curW();if(!G13[w.id]){fireCd=shootRate(w);shootFro
  const a=am(w.id);if(a.rl>0||fireCd>0)return false;
  if(a.mag<=0){if(!startReload(w.id)){if(!hasAmmo(w.id))dryOut(w.id);}return false;}
  a.mag--;fireCd=shootRate(w)*STYLE13.rate;AIS.lastShot=t;shootFrom(Math.cos(aim)*14,Math.sin(aim)*14,aim,w,"main");return true;}
-function dryOut(id){ // never soft-locks: a fully dry gun hands over to a gun with ammo (BASIC is infinite)
+function dryOut(id){ // 1.6.16: a dry gun hands over to a gun with ammo; if every gun is dry the turret is OUT (no free infinite gun)
  const alt=bestGun(true)||"basic";if(alt!==id){setGun(alt,"dry");toast(W_(id).nm+" dry → "+W_(alt).nm);}}
 function situation(){const s={n:0,dN:1e9,big:0,packN:0,nearN:0,inR:{}};let nn=null;
  for(const id of ownedGuns())s.inR[id]=0;
@@ -3115,7 +3115,7 @@ function ai13(dt){const w=curW();
    if(a.mag<=0){let alt=null;if(r>=5&&!AIS.panic){alt=bestGun(true);if(alt===W0.id)alt=null;}if(alt)setGun(alt,"empty→swap");else if(!startReload(W0.id)&&!hasAmmo(W0.id))dryOut(W0.id);}
    else if(r<=3&&idle&&frac<1)startReload(W0.id);
    else if(r<=1&&frac<=.25)startReload(W0.id);}
- if(CFG.reload>=5)for(const id of ownedGuns())if(id!==curW().id){const q=am(id);if(q.mag<gunAmmo(id).mag&&q.rl<=0&&q.res>0){q.rlT=q.rl=gunAmmo(id).reload;}} // holstered guns reload in the background
+ if(CFG.reload>=5)for(const id of ownedGuns())if(id!==curW().id){const q=am(id);if(q.mag<gunAmmo(id).mag&&q.rl<=0&&q.res>0){dump16(id,q);q.rlT=q.rl=gunAmmo(id).reload;}} // holstered guns reload in the background
 }
 {const _tf=tryFire;tryFire=function(dt){
    const w=curW(),manual=!mainAuto();fireCd-=dt;const fc=fireCd,a0=aim,mf=MAIN_INPUT.fire;
@@ -3163,7 +3163,7 @@ const BOX13=[
  {id:"style",nm:"FIRE STYLE",min:0,max:8,step:1,fmt:x=>x===0?"tight bursts":x>=8?"full spray":"bursts of "+(3+x*2),ds:x=>x>=8?"Dumps bullets: fastest rate, widest scatter":"Short controlled bursts with a pause; tighter scatter the lower it is"},
  {id:"panic",nm:"PANIC MODE",min:0,max:120,step:10,danger:1,tog:1,fmt:x=>x===0?"OFF":"breach "+x,ds:x=>x===0?"No close-range override":"A zombie inside "+x+" → dump EVERY owned gun, one at a time ("+(CFG.order?"WEAK→STRONG":"STRONG→WEAK")+"). Ends when the ring is clear"},
  {id:"tag",nm:"TAG",min:10,max:90,step:10,plus:-1,fmt:x=>(TAG13?"TAGGED · ":"tap a zombie · ")+"drop to "+x+"%",ds:x=>TAG13?"Current target → "+x+"%, tagged → "+x+"%, kill current, then kill tagged":"Tap ONE zombie on the field to tag it. Nothing tagged = this box does nothing"},
- {id:"reload",nm:"RELOAD",min:0,max:8,step:1,fmt:x=>x<=1?"top up early":x>=8?"empty → swap gun":x>=5?"empty, swap if loaded":"reload when idle",ds:x=>x>=5?"Shoots the mag dry, then swaps to a loaded gun; holstered guns reload":"Reloads early to keep the mag topped"}
+ {id:"reload",nm:"RELOAD",min:0,max:8,step:1,fmt:x=>x<=1?"top up early":x>=8?"empty → swap gun":x>=5?"empty, swap if loaded":"reload when idle",ds:x=>x>=5?"Shoots the mag dry, then swaps to a loaded gun; holstered guns reload":"Reloads early to keep the mag topped · box mags (BASIC, MINIGUN, LASER) dump the rounds left in them"}
 ];
 const panel=document.createElement("div");panel.id="ai13";panel.innerHTML=`<div class="notch"></div><div class="hdr"><div class="tt"><b>MAIN TURRET · AUTO AI</b><span class="sub"></span></div><button class="au">AUTO</button><button class="x" aria-label="Close and resume">✕</button></div>
 <div class="pre"><button data-p="safe">SAFE</button><button data-p="bal">BALANCED</button><button data-p="aggro">AGGRO</button></div><div class="list"></div><div class="help"></div>`;
@@ -3372,7 +3372,7 @@ function ring13(){const near=[];for(const e of enemies){const d=Math.hypot(e.x,e
   const real=dt;if(PANEL13)dt*=SLOWMO;S13.simDt=dt;S13.realDt=real;
   for(const e of enemies){e._px13=e.x;e._py13=e.y;}
   // rockets airburst at max range
-  for(const b of bullets)if(b.rk13&&!b.boomed&&b.o&&Math.hypot(b.x-b.o[0],b.y-b.o[1])>=b.rng-8){b.boomed=1;b.life=0;blast13(b.x,b.y,W_("rocket"),G13.rocket,null,b.src);}
+  for(const b of bullets)if(b.rk13&&!b.boomed&&b.o&&Math.hypot(b.x-b.o[0],b.y-b.o[1])>=b.rng-8){b.boomed=1;b.life=0;const c0=CUR16;CUR16=b.shot16||null;try{blast13(b.x,b.y,W_("rocket"),G13.rocket,null,b.src);}finally{CUR16=c0;}}
   _u(dt);if(dead||!running)return;
   if(dt>0){for(const e of enemies){if(e._px13!=null){e.vx13=(e.x-e._px13)/dt;e.vy13=(e.y-e._py13)/dt;}}}
   ring13();
@@ -3469,8 +3469,136 @@ function sampleRing14(kind){const r=kind==="panic"?panicR14():rangeR14();if(r<=0
  }catch(err){return{r:r,alpha:VIS14.a,hit:0,peak:0,at:0,errAt:1e9,err:String(err)};}}
 window.__vis14={alpha:function(){return VIS14.a;},panicR:panicR14,rangeR:rangeR14,tagHp:function(){return CFG.tag;},last:function(){return VIS14.last;},tick:tickVis,sample:sampleRing14};
 /*__T13__*/
+// ---------------------------------------------------------------- 11) 1.6.16 AMMO ECONOMY (Jay t1210): every wasted round costs you
+// Ammo is finite for EVERY gun (BASIC too). Misses, overkill, spraying and early box-mag reloads all burn real rounds.
+// Refills: SHOP AMMO (price climbs each buy), AMMO RACK (slow), and EARNED rounds at wave clear (only for shots that connected).
+// No kill drops (Jay t993/t994 kept).
+const AM16={ // mag, reload s, start reserve, max reserve, rack/s, dump=box mag loses leftover rounds on early reload, earn=reserve back per hit at wave clear
+ basic:  {mag:30, reload:1.0,res:150,max:300,rack:.35, dump:1,earn:.25,ration:60, role:"sidearm: cheap, accurate, BASE RATION 60 each wave"},
+ minigun:{mag:120,reload:2.4,res:300,max:600,rack:.5,  dump:1,earn:.20, role:"crowd hose: burns ammo fastest, spray wastes most"},
+ shotgun:{mag:6,  reload:1.7,res:24, max:48, rack:.03, dump:0,earn:.30, role:"shell-fed: close range only, shells load one by one (no dump)"},
+ fire:   {mag:120,reload:2.0,res:240,max:480,rack:.4,  dump:0,earn:.15, role:"fuel tank: flaming empty air still burns fuel"},
+ rocket: {mag:4,  reload:2.2,res:10, max:20, rack:.012,dump:0,earn:.30, role:"rare rounds: save for packs"},
+ laser:  {mag:24, reload:1.8,res:64, max:128,rack:.06, dump:1,earn:.25, role:"cell: early swap drops the charge left"},
+ sniper: {mag:5,  reload:2.5,res:14, max:28, rack:.012,dump:0,earn:.35, role:"rare rounds: overkill on trash is pure waste"}};
+for(const id in AM16)Object.assign(AMMO13.guns[id],AM16[id]);
+// the other 28 guns are hidden in this kit; they still get a role-fitted ammo profile so the economy stays balanced if they come back
+for(const w of WEAPONS){if(AMMO13.guns[w.id])continue;const r=Math.max(.04,w.rate||.4),pel=w.pellets||1,ex=w.explode||0;
+ const mag=Math.max(3,Math.min(150,Math.round(2.6/r/(ex?2:1)/(pel>1?1.6:1))));
+ AMMO13.guns[w.id]={mag,reload:Math.min(2.6,Math.max(1,.8+mag*.01+(ex?.8:0))),res:mag*3,max:mag*6,rack:mag*.004,dump:(pel>1||ex)?0:1,earn:ex?.3:.2,hidden:1};}
+AMMO13.shop.fill=.35;const SHOP16={base:90,step:45};AMMO13.shop.cost=SHOP16.base;
+const NO_OVER16={laser:1,fire:1}; // piercing beam / area cone: leftover damage carries on, not counted as overkill
+let CUR16=null;
+function z16(){return{fired:0,hit:0,over:0,dump:0,g:{}};}
+const ST16={w:z16(),run:z16(),last:null,out:0,outN:0,earned:0};
+function gs16(o,id){return o.g[id]||(o.g[id]={fired:0,hit:0,over:0,dump:0});}
+function hit16(rec,e,amt){if(!rec)return;
+ if(!rec.h){rec.h=1;for(const o of [ST16.w,ST16.run]){o.hit++;gs16(o,rec.g).hit++;}}
+ if(e&&amt>0&&rec.ov<1&&!NO_OVER16[rec.g]&&e.hp>0&&amt>e.hp){const f=Math.min(1-rec.ov,(amt-e.hp)/(rec.rd||amt));rec.ov+=f;for(const o of [ST16.w,ST16.run]){o.over+=f;gs16(o,rec.g).over+=f;}}}
+function dump16(id,a){const g=gunAmmo(id);if(!g.dump||!a||a.mag<=0||a.mag>=g.mag)return 0;const n=a.mag;a.mag=0;
+ for(const o of [ST16.w,ST16.run]){o.dump+=n;gs16(o,id).dump+=n;}
+ floaters.push({x:0,y:-34,t:0,txt:"-"+n+" DUMPED",col:"#ff9a6a"});return n;}
+function wasted16(o){return Math.max(0,o.fired-o.hit)+Math.round(o.over)+o.dump;}
+function acc16(o){return o.fired?Math.round(o.hit/o.fired*100):0;}
+{const _sr=startReload;startReload=function(id){if(!reloadable(id))return false;dump16(id,am(id));return _sr(id);};}
+{const _ts=tryShoot13;tryShoot13=function(){const w=curW();if(!G13[w.id])return _ts();
+  const rec={g:w.id,h:0,ov:0,rd:Math.max(1,w.dmg*lvlK(w)*(G13[w.id].pellets||1))};const c0=CUR16;CUR16=rec;let r;try{r=_ts();}finally{CUR16=c0;}
+  if(r)for(const o of [ST16.w,ST16.run]){o.fired++;gs16(o,w.id).fired++;}return r;};}
+dryOut=function(id){let alt=bestGun(true);if(!alt||am(alt).mag<=0){alt=null;for(const k of ownedGuns())if(hasAmmo(k)){alt=k;break;}}
+ if(alt&&alt!==id){setGun(alt,"dry");toast(W_(id).nm+" dry → "+W_(alt).nm);return;}
+ if(!alt&&!ST16.out){ST16.out=1;ST16.outN++;toast("OUT OF AMMO — buy AMMO or build an AMMO RACK");}};
+{const _u=update;update=function(dt){_u(dt);if(ST16.out&&ownedGuns().some(hasAmmo))ST16.out=0;};}
+{const _sw=startWave;startWave=function(){
+  if(between){const a=am("basic"),g=gunAmmo("basic");if(g.ration&&a.mag+a.res<g.ration)a.res=g.ration-a.mag;}
+  const wasActive=waveActive;const r=_sw.apply(this,arguments);if(waveActive&&!wasActive){ST16.w=z16();ST16.out=0;}return r;};}
+function settle16(){const W=ST16.w;ST16.w=z16();if(!W.fired){return;}let earned=0;
+ for(const id of ownedGuns()){const gg=W.g[id];if(!gg||!gg.hit)continue;const g=gunAmmo(id),a=am(id);if(g.max===Infinity)continue;
+  const add=Math.floor(gg.hit*(g.earn||.2)),k=Math.min(add,Math.max(0,Math.floor(g.max-a.res)));if(k>0){a.res+=k;earned+=k;}}
+ ST16.earned+=earned;
+ ST16.last={wave:wave,fired:W.fired,hit:W.hit,acc:acc16(W),miss:Math.max(0,W.fired-W.hit),over:Math.round(W.over),dump:W.dump,wasted:wasted16(W),earned,g:W.g};
+ const L=ST16.last;setTimeout(()=>{if(!dead&&between)toast("WAVE "+L.wave+": "+L.acc+"% hit · "+L.wasted+" wasted · +"+L.earned+" rounds earned");},2700);}
+{const _ew=endWave;endWave=function(){const r=_ew.apply(this,arguments);try{settle16();}catch(e){}return r;};}
+function line16(L){return L.fired+" shots · "+L.acc+"% hit · <b>"+L.wasted+" wasted</b> ("+L.miss+" missed · "+L.over+" overkill · "+L.dump+" dumped) · +"+L.earned+" earned";}
+{const _bs=buildShop;buildShop=function(){AMMO13.shop.cost=SHOP16.base+SHOP16.step*(S13.ammoBuys||0);_bs();
+  const h=$("hint");if(h&&between&&!placeMode&&ST16.last)h.innerHTML+="<br><span style='color:#ffb08a;font-size:11px'>Last wave: "+line16(ST16.last)+"</span>";};}
+{const _r=resetRun;resetRun=function(){const r=_r.apply(this,arguments);ST16.w=z16();ST16.run=z16();ST16.last=null;ST16.out=0;ST16.outN=0;ST16.earned=0;S13.ammoBuys=0;AMMO13.shop.cost=SHOP16.base;return r;};}
+{const _die=die;die=function(){const r=_die.apply(this,arguments);setTimeout(()=>{const b=$("best"),R=ST16.run;if(!b||!R.fired)return;
+  b.innerHTML+="<br>Ammo: "+R.fired+" shots · "+acc16(R)+"% hit · <b>"+wasted16(R)+" wasted</b> ("+Math.max(0,R.fired-R.hit)+" missed · "+Math.round(R.over)+" overkill · "+R.dump+" dumped)";},1000);return r;};}
+{const _h=drawHud13;drawHud13=function(){_h();if(!running||!$("overlay").classList.contains("off"))return;const w=curW();if(!G13[w.id])return;
+  const W=ST16.w,x=CX,y=TY+16*VS*depthK(0);ctx.save();ctx.setTransform(DPR||1,0,0,DPR||1,0,0);ctx.font="bold 9px monospace";ctx.textAlign="center";
+  const yy=y+(AIS.panic&&mainAuto()?38:26);
+  if(ST16.out){ctx.font="bold 11px monospace";const tx="OUT OF AMMO";const tw=ctx.measureText(tx).width+10;ctx.fillStyle="#000c";ctx.fillRect(x-tw/2,yy-10,tw,14);ctx.fillStyle=((t*4)|0)%2?"#ff3a3a":"#ffd0d0";ctx.fillText(tx,x,yy);}
+  else if(W.fired){const tx="HIT "+acc16(W)+"% · WASTED "+wasted16(W);const tw=ctx.measureText(tx).width+8;ctx.fillStyle="#0009";ctx.fillRect(x-tw/2,yy-9,tw,12);const ac=acc16(W);ctx.fillStyle=ac>=65?"#9fe89a":ac>=40?"#ffe066":"#ff8a6a";ctx.fillText(tx,x,yy);}
+  ctx.restore();};}
+window.__ammo16={ST16,AM16,dump16,acc:()=>acc16(ST16.w),wasted:()=>wasted16(ST16.w),shopCost:()=>AMMO13.shop.cost};
+
 
 })();
+/* ===== v1.6.16 — Jay t1210: every zombie keeps its OWN body parts, gore and blood. No caps, no oldest-first recycling.
+ * Parts stay until the round-end GORE FEED sucks them in (or the run resets).
+ * Performance: anything that has settled is baked once onto two decal layers (blood under, parts over) and drawn as 2 images/frame.
+ * When the feed starts, every baked part is returned to the live lists so the suck still moves each one. Zombie art untouched (t914). */
+;(function(){
+"use strict";
+const X0=-470,Y0=-830,WW=940,HH=1080;
+let BL=null,BX=null,PT=null,PX=null,sx=0,sy=0,has=false,lastGibs=null;
+const ST={blood:[],gibs:[],limbs:[],guts:[]};
+const S={baked:0,rebakes:0,unbakes:0,lite:0};
+const gfxGore=()=>{const s=window.SWARM_SET;return !(s&&s.gfx&&s.gfx.gore===false);};
+function inB(o){return Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>X0+24&&o.x<X0+WW-24&&o.y>Y0+24&&o.y<Y0+HH-24;}
+function want(){const d=(typeof DPR==="number"&&DPR)||1;return[Math.min(2.2,Math.max(.5,VS*d)),Math.min(2.2,Math.max(.35,VS*KY*d))];}
+function mk(c,k){c.width=Math.ceil(WW*sx*k);c.height=Math.ceil(HH*sy*k);const g=c.getContext("2d");g.setTransform(sx*k,0,0,sy*k,-X0*sx*k,-Y0*sy*k);return g;}
+function clearAll(){if(BX){BX.save();BX.setTransform(1,0,0,1,0,0);BX.clearRect(0,0,BL.width,BL.height);BX.restore();}if(PX){PX.save();PX.setTransform(1,0,0,1,0,0);PX.clearRect(0,0,PT.width,PT.height);PX.restore();}has=false;}
+function ensure(){const w=want();if(BL&&Math.abs(w[0]-sx)<.04&&Math.abs(w[1]-sy)<.04)return;sx=w[0];sy=w[1];
+ if(!BL){BL=document.createElement("canvas");PT=document.createElement("canvas");}
+ BX=mk(BL,.75);PX=mk(PT,1);has=false;rebake();}
+function ground(g,o,fn){const k=depthK(o.y);g.save();g.translate(o.x,o.y);g.scale(k,k);g.translate(-o.x,-o.y);fn();g.restore();}
+function bakeOne(kind,o){const P=window.__px16;if(!P)return false;
+ if(kind==="blood"){P.use(BX);try{if(!(o.cc0splat||o.pxPool))drawFlatBlood16(BX,o);if(o.pxPool||o.depth)P.pool(o);}finally{P.use(null);}}
+ else{P.use(PX);try{
+  if(kind==="gibs")ground(PX,o,()=>P.gib(o));
+  else if(kind==="limbs")ground(PX,o,()=>P.limb(o));
+  else ground(PX,o,()=>{P.R(o.x-1,o.y+2,(o.w||3)+2,2,"#0006");P.R(o.x,o.y,o.w||3,o.h||3,"#6a0810");P.R(o.x+(o.w||3)-1,o.y,1.2,o.h||3,"#2a0408");});
+ }finally{P.use(null);}}
+ has=true;return true;}
+function rebake(){clearAll();S.rebakes++;for(const k of ["blood","guts","gibs","limbs"])for(const o of ST[k])bakeOne(k,o);}
+const ready={blood:b=>!b.gas&&!b.cc0splat,gibs:g=>g.settled&&!(g.z>0),limbs:l=>!(l.v>0),guts:()=>true};
+function arr(k){return k==="blood"?blood:k==="gibs"?gibs:k==="limbs"?limbs:guts;}
+function bakeSettled(){ensure();for(const k of ["blood","guts","gibs","limbs"]){const A=arr(k),f=ready[k];let j=0;
+  for(let i=0;i<A.length;i++){const o=A[i];if(f(o)&&inB(o)&&bakeOne(k,o)){ST[k].push(o);S.baked++;}else A[j++]=o;}A.length=j;}}
+function unbakeAll(){let n=0;for(const k of ["blood","guts","gibs","limbs"]){const A=arr(k),L=ST[k];for(let i=0;i<L.length;i++)A.push(L[i]);n+=L.length;L.length=0;}
+ if(n)S.unbakes++;clearAll();}
+function dropAll(){for(const k in ST)ST[k].length=0;clearAll();}
+function storeN(){return ST.blood.length+ST.gibs.length+ST.limbs.length+ST.guts.length;}
+// main loop hook: bake while the wave runs; hand everything back the moment the feed starts
+{const _u=update;update=function(dt){
+  if(gibs!==lastGibs){if(lastGibs)dropAll();lastGibs=gibs;}
+  if((window.SUCK||0)>0&&storeN())unbakeAll();
+  _u(dt);
+  if(gibs!==lastGibs){dropAll();lastGibs=gibs;}
+  if(!((window.SUCK||0)>0))bakeSettled();};}
+// endWave decides the feed from the live lists: return baked parts first
+{const _ew=endWave;endWave=function(){unbakeAll();return _ew.apply(this,arguments);};}
+{const _r=resetRun;resetRun=function(){dropAll();const r=_r.apply(this,arguments);dropAll();lastGibs=gibs;return r;};}
+// gore OFF setting: trim only THIS death's new pieces (never older deaths')
+{const _ga=goreAt;goreAt=function(x,y,n,big){const b0=blood.length,g0=gibs.length,u0=guts.length;_ga(x,y,n,big);
+  if(!gfxGore()){if(blood.length>b0+3)blood.length=b0+3;if(gibs.length>g0+4)gibs.length=g0+4;if(guts.length>u0+1)guts.length=u0+1;}};}
+{const _k=killEnemy;killEnemy=function(e,i){const l0=limbs.length;const r=_k(e,i);if(!gfxGore()&&limbs.length>l0+1)limbs.length=l0+1;return r;};}
+// draw: 2 decal images under the live ground gore; during a very big feed draw pieces the cheap way
+{const _g=window.__drawGroundGore;window.__drawGroundGore=function(){
+  if(has&&BL){ctx.drawImage(BL,X0,Y0,WW,HH);ctx.drawImage(PT,X0,Y0,WW,HH);}
+  const n=blood.length+gibs.length+limbs.length+guts.length;
+  if((window.SUCK||0)>0&&n>700){S.lite++;const P=window.__px16;ctx.globalAlpha=.9;
+   for(const b of blood){if(!(b.pxPool||b.depth))continue;const r=Math.min(b.r,18);ctx.fillStyle="#5a0810";ctx.fillRect(b.x-r*.5,b.y-r*.3,r,r*.6);}
+   for(const g of gibs){if(g.z>0)continue;const r=(g.r||3)*(g.sc||1);ctx.fillStyle=g.col||"#8a1018";ctx.fillRect(g.x-r*.6,g.y-r*.5,r*1.2,r);}
+   for(const g of guts){ctx.fillStyle="#6a0810";ctx.fillRect(g.x,g.y,g.w||3,g.h||3);}
+   ctx.globalAlpha=1;if(P)for(const l of limbs)P.limb(l);return;}
+  _g();};}
+window.__gore16={stats:()=>Object.assign({},S,{stored:storeN(),live:blood.length+gibs.length+limbs.length+guts.length,
+  total:storeN()+blood.length+gibs.length+limbs.length+guts.length,decal:BL?[BL.width,BL.height,PT.width,PT.height]:null}),unbakeAll,bakeSettled};
+console.log("Swarm",VERSION,"1.6.16 own-gore decals + ammo economy");
+})();
+
 })();
 </script>
 </body>
