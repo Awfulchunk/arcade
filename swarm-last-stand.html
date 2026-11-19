@@ -48,7 +48,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c" data-tt-allow-overlap></canvas>
 <div id="ui">
   <div class="hud">
     <div><div class="wl">WAVE <b id="wNum">1</b></div><div class="nx">NEXT: <span id="nNum">—</span></div></div>
@@ -61,19 +61,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
     <div class="bar-inner" id="shop"></div>
   </div>
 </div>
-<div id="overlay">
+<div id="overlay" data-tt-allow-overlap>
   <div class="panel">
     <h1>SWARM</h1>
     <div class="sub">LAST STAND<br>You are the AI core. The swarm wants you dead.<br>Hold the line. Grind the horde.<br>Build anywhere, 7 guns, survive.</div>
     <div class="stats" id="best">Best wave: 0</div>
-    <button class="btn go" id="startBtn">HOLD THE LINE</button>
+    <button class="btn go" id="startBtn" style="min-height:44px">HOLD THE LINE</button>
     <button class="btn grey" id="howBtn">HOW TO PLAY</button>
   </div>
 </div>
 <script>
+/* 1.6.15: if storage is blocked (private mode / disabled), keep the game running on an in-memory store instead of a blank screen */
+(function(){var ok=true;try{var L=window.localStorage;L.setItem("__sw_t","1");L.removeItem("__sw_t");}catch(e){ok=false;}
+ if(ok)return;var m={};var mk=function(){return {getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null;},setItem:function(k,v){m[String(k)]=String(v);},removeItem:function(k){delete m[String(k)];},clear:function(){m={};},key:function(i){var a=Object.keys(m);return i<a.length?a[i]:null;},get length(){return Object.keys(m).length;}};};
+ try{Object.defineProperty(window,"localStorage",{configurable:true,value:mk()});}catch(_){}})();
+
 (()=>{
 "use strict";
-const VERSION="1.6.14";
+const VERSION="1.6.15";
 // t920: sniper REVERTED to thin white hitscan beam (Jay keep); soft suck/limbs stay.
 // t918: suck snap + limb/gib scale + sniper slug (laser beam kept). Tip-only.
 // t894: local HTML tip only — manual main aim + quiet pixel groove.
@@ -2053,7 +2058,7 @@ window.__PROOF=()=>{
   {const _k=killEnemy;killEnemy=function(e,i){sfx("hit");sfx("kill");return _k(e,i);};const _x=explode;explode=function(x,y,r,d){sfx("boom");return _x(x,y,r,d);};}
   // ---------- 12) Swarm settings UI (Graphics / Audio / Video) ----------
   {const ov=$("startBtn")&&$("startBtn").parentNode;const btn=document.createElement("button");btn.id="swSetBtn";btn.textContent="⚙ SETTINGS";
-    btn.style.cssText="display:block;margin:8px auto 0;font:bold 13px monospace;padding:8px 14px;border-radius:8px;border:1px solid #3a5080;background:#1a2438;color:#cde;pointer-events:auto";
+    btn.style.cssText="display:block;margin:8px auto 0;font:bold 13px monospace;padding:8px 14px;min-height:44px;border-radius:8px;border:1px solid #3a5080;background:#1a2438;color:#cde;pointer-events:auto";
     if(ov)ov.appendChild(btn);
     const P=document.createElement("div");P.id="swSet";P.style.cssText="position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:#000c;font:12px monospace;color:#cde";
     document.body.appendChild(P);
@@ -2854,7 +2859,7 @@ if(new URLSearchParams(location.search).get('proof945')==='audio')setTimeout(()=
  */
 ;(function(){
 "use strict";
-const S13=window.__S13={ver:"1.6.14",log:[],hits:[],flashNoDmg:0,pb:0,shots:0,errors:0,fired:{}};
+const S13=window.__S13={ver:"1.6.15",log:[],hits:[],flashNoDmg:0,pb:0,shots:0,errors:0,fired:{}};
 // ---------------------------------------------------------------- 0) no Custom Game
 CUSTOM=false;LEARN_AI=false;try{localStorage.removeItem("swarmCustom");localStorage.removeItem("swarmLearnAI");}catch(e){}
 for(const id of ["customChk","learnChk"]){const c=$(id);if(c&&c.parentNode)c.parentNode.remove();}
@@ -3134,16 +3139,16 @@ let PANEL13=false;const SLOWMO=.5;
 #ai13 .x{width:40px;font-size:15px}#ai13 .au{padding:0 6px;font-size:10px}#ai13 .au.on{border-color:#ffe066;color:#ffe066}
 #ai13 .pre{display:flex;gap:4px;padding:0 2px 5px}#ai13 .pre button{flex:1;padding:5px 0;font:700 10px monospace;border:2px solid #2e4060;border-radius:5px;background:#1a2840;color:#cde}
 #ai13 .pre button.on{border-color:#ffe066;color:#ffe066}
-#ai13 .list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#152038;border:2px solid #2a3a58;border-radius:6px;padding:4px;display:flex;flex-direction:column;gap:4px}
+#ai13 .list{flex:1;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;background:#152038;border:2px solid #2a3a58;border-radius:6px;padding:4px;display:flex;flex-direction:column;gap:4px}
 #ai13 .box{flex:0 0 auto;background:#1a2840;border:2px solid #2e4060;border-radius:5px;padding:3px 4px;box-shadow:inset 0 -3px #0003;display:flex;align-items:center;gap:5px}
 #ai13 .box.focus{border-color:#ffe066}#ai13 .box .mid{flex:1;min-width:0}#ai13 .box.off{opacity:.55}
 #ai13 .top{display:flex;align-items:center;gap:6px;height:15px}#ai13 .nm{font:700 11px monospace;color:#cde;letter-spacing:.05em;white-space:nowrap}
 #ai13 .val{margin-left:auto;font:700 11px monospace;color:#ffe066;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #ai13 .tog{font:700 9px monospace;padding:1px 4px;border:1px solid #ff9a7a;border-radius:3px;background:#2a1a1a;color:#ffb4a0}
 #ai13 .help{font-size:10px;color:#bac9d4;line-height:1.25;padding:4px 3px 0;min-height:28px}#ai13 .help b{color:#ffe066}
-#ai13 .pm{flex:0 0 auto;width:36px;height:34px;border:3px solid #647b8f;border-radius:4px;background:#162434;color:#dbe8e5;font:700 17px/1 monospace;box-shadow:inset 0 -4px #080f1d;touch-action:none}
+#ai13 .pm{flex:0 0 auto;width:36px;height:34px;border:3px solid #647b8f;border-radius:4px;background:#162434;color:#dbe8e5;font:700 17px/1 monospace;box-shadow:inset 0 -4px #080f1d;touch-action:pan-y}
 #ai13 .pm:active{background:#45664f;border-color:#c4e490}
-#ai13 .trk{position:relative;height:22px;touch-action:none;margin:0 8px}#ai13 .ln{position:absolute;left:0;right:0;top:9px;height:5px;background:#0c1220;border:1px solid #2e4060}
+#ai13 .trk{position:relative;height:22px;touch-action:pan-y;margin:0 8px}#ai13 .ln{position:absolute;left:0;right:0;top:9px;height:5px;background:#0c1220;border:1px solid #2e4060}
 #ai13 .fill{position:absolute;right:0;top:9px;height:5px;background:#ffe066}#ai13 .tk{position:absolute;top:16px;width:1px;height:4px;background:#3a4a60}
 #ai13 .kn{position:absolute;top:2px;width:18px;height:18px;margin-left:-9px;border:3px solid #b3d5c1;background:#55746b;box-shadow:inset 0 -4px #304d49}
 #ai13 .box.danger .fill{background:#ff5a3a}#ai13 .box.danger .nm{color:#ffb4a0}
@@ -3178,10 +3183,24 @@ for(const b of BOX13){const el=document.createElement("div");el.className="box"+
  b.el=el;list.appendChild(el);render(b);
  el.querySelectorAll(".pm").forEach(btn=>btn.onclick=e=>{e.stopPropagation();focus(b);CFG[b.id]=clamp(CFG[b.id]+(+btn.dataset.d)*(b.plus||1)*b.step,b.min,b.max);saveCfg();render(b);markPre();});
  if(b.tog)el.querySelector(".tog").onclick=e=>{e.stopPropagation();focus(b);CFG.order=CFG.order?0:1;saveCfg();render(b);markPre();};
- const trk=el.querySelector(".trk");let drag=false;
+ const trk=el.querySelector(".trk");
  const set=e=>{const r=trk.getBoundingClientRect();let q=clamp((e.clientX-r.left)/r.width,0,1);focus(b);const qq=(b.plus||1)>0?1-q:q;CFG[b.id]=clamp(Math.round((b.min+qq*(b.max-b.min))/b.step)*b.step,b.min,b.max);saveCfg();render(b);markPre();};
- trk.addEventListener("pointerdown",e=>{drag=true;try{trk.setPointerCapture(e.pointerId);}catch(_){}set(e);});trk.addEventListener("pointermove",e=>{if(drag)set(e);});
- trk.addEventListener("pointerup",()=>drag=false);trk.addEventListener("pointercancel",()=>drag=false);}
+ /* 1.6.15 scroll-safe slider (Jay t1015; same direction lock as Pixel War 0.4.6): a vertical drag scrolls the list and never moves a slider.
+    Only a mostly-horizontal drag that STARTS on the track, past a 12px direction lock, changes the value. A short tap on the track still sets it. +/- always work. */
+ let st=null;const TH=12,RATIO=1.15;
+ trk.addEventListener("pointerdown",e=>{st={id:e.pointerId,x:e.clientX,y:e.clientY,ly:e.clientY,mode:0};});
+ trk.addEventListener("pointermove",e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
+  if(st.mode===0){if(dx*dx+dy*dy<TH*TH)return;if(Math.abs(dx)>Math.abs(dy)*RATIO){st.mode=1;try{trk.setPointerCapture(e.pointerId);}catch(_){}}else st.mode=2;}
+  if(st.mode===2){if(e.cancelable)e.preventDefault();list.scrollTop+=st.ly-e.clientY;st.ly=e.clientY;return;}
+  if(e.cancelable)e.preventDefault();set(e);},{passive:false});
+ trk.addEventListener("pointerup",e=>{if(st&&e.pointerId===st.id&&st.mode===0)set(e);st=null;});
+ trk.addEventListener("pointercancel",()=>{st=null;});}
+ /* 1.6.15: a drag that starts on +/- or a box scrolls the list too, and a scroll never counts as a +/- tap */
+ {let ps=null;list.addEventListener("pointerdown",e=>{if(e.target.closest(".trk"))return;ps={id:e.pointerId,x:e.clientX,y:e.clientY,ly:e.clientY,mv:false};},true);
+  list.addEventListener("pointermove",e=>{if(!ps||e.pointerId!==ps.id)return;const dx=e.clientX-ps.x,dy=e.clientY-ps.y;if(!ps.mv&&dx*dx+dy*dy>=144)ps.mv=true;
+   if(ps.mv){list.scrollTop+=ps.ly-e.clientY;}ps.ly=e.clientY;},true);
+  const pend=e=>{if(ps&&e.pointerId===ps.id&&ps.mv){list.__noClick=performance.now();}ps=null;};list.addEventListener("pointerup",pend,true);list.addEventListener("pointercancel",e=>{if(ps&&e.pointerId===ps.id)list.__noClick=performance.now();ps=null;},true);
+  list.addEventListener("click",e=>{if(list.__noClick&&performance.now()-list.__noClick<400){e.stopPropagation();e.preventDefault();list.__noClick=0;}},true);}
 focus(BOX13[0]);markPre();
 panel.querySelectorAll(".pre button").forEach(btn=>btn.onclick=e=>{e.stopPropagation();Object.assign(CFG,PRESET13[btn.dataset.p]);saveCfg();BOX13.forEach(render);markPre();});
 panel.addEventListener("pointerdown",e=>e.stopPropagation());
