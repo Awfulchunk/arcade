@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>PIXEL WAR 0.4.9</title>
+<title>PIXEL WAR 0.4.10</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d1c;color:#dfe3ff;font:600 13px/1.2 system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 #app{display:flex;flex-direction:column;height:100%}
@@ -112,7 +112,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
   <div id="result"><h2 id="rTitle">-</h2><div id="rBody"></div><div class="rb"><button id="btnRev">AI REVIEW</button><button id="btnAgain" class="go">PLAY AGAIN</button></div></div>
  </div>
 </div>
-<div class="view" id="menu"><h1>PIXEL WAR 0.4.9</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
+<div class="view" id="menu"><h1>PIXEL WAR 0.4.10</h1><p class="sub">You vs the AI. Destroy the enemy circle with streams of pixels.</p>
  <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff" style="display:none">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
 <div class="view" id="stages"><h1>STAGES</h1><p class="sub">Four stages unlock the mechanics one step at a time. QUICK MATCH and CUSTOM GAME have everything.</p><div class="btns" id="stlist" style="flex:1;overflow-y:auto"></div><div class="btns" style="padding-top:0"><button id="stBack">BACK</button></div></div>
 <div class="view" id="editor"><h1>SHAPE EDITOR</h1><p class="sub">Draw ONE closed outline with your finger; the top edge is the FRONT. The outline is the shape's yellow hitbox: its pixels wander freely inside it. Saved shapes are abilities in the SHAPE tab (the AI designs its own).</p><div id="edwrap"><canvas id="edc"></canvas></div><div id="edmsg"></div><div id="edlist"></div>
@@ -124,7 +124,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 'use strict';
 (function(){
 /* =====================================================================
-   PIXEL WAR 0.4.9 — full game on the 0.1.1 density engine (0.4.2 lane-fill mixed with 0.4.3 steady flow and smooth motion; the path is a direction guide only, not a rail; short random ricochet; in-lane chip/knock; widening end cone). 0.4.9: longer branch meter (280) so wraps around wall ends can reach; moving the circle in prep clears the defense line with a refund (locked after START); no defense-line building at all during the match (player and AI); detour merge — a branch drawn into the main path (or simply into another of your branches) reconnects and pixels continue on that path; pixels about 23% faster (paceMax 38); branch SHARE + AUTO SHARE on the HUD. 0.4.8: defense line locks once drawn; the hitbox is a road (direction + edges only) — no path-line attraction or lateral remap, width 10 = circle diameter, widen by wander not by snapping to the sides; smarter AI planning and branching. 0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
+   PIXEL WAR 0.4.10 — full game on the 0.1.1 density engine (0.4.2 lane-fill mixed with 0.4.3 steady flow and smooth motion; the path is a direction guide only, not a rail; short random ricochet; in-lane chip/knock; widening end cone). 0.4.10: the AI aims its main path at your circle, routes through the weakest part of your defense (or around an end), cuts flow on a losing clash and reroutes, surges when your flow is split, and remembers the plans that hit it. Branch meter 400 and path meter 640 so an around-the-end route can finish on the circle. Loop-connect: ending a branch anywhere in your main lane (finger-sized snap, including back upstream) CONNECTS with a short flash; pixels rejoin and keep going; a loop cannot recirculate forever. 0.4.9: longer branch meter (280) so wraps around wall ends can reach; moving the circle in prep clears the defense line with a refund (locked after START); no defense-line building at all during the match (player and AI); detour merge — a branch drawn into the main path (or simply into another of your branches) reconnects and pixels continue on that path; pixels about 23% faster (paceMax 38); branch SHARE + AUTO SHARE on the HUD. 0.4.8: defense line locks once drawn; the hitbox is a road (direction + edges only) — no path-line attraction or lateral remap, width 10 = circle diameter, widen by wander not by snapping to the sides; smarter AI planning and branching. 0.4.1: shapes are free-wander soft hitbox AREAS with knock-out and recall, wide/thin/arrow lanes, outline editor, AI shapes, gates, full hybrid ricochet, difficulty, stages, stats, AI review).
    Layers: CONFIG/CUSTOM · RNG · STATE (struct-of-arrays) · SIDE API (shared by player + AI)
    · SHAPES (squads) · AI (plan + live learning, memory kept between matches) · MATCH · PIXELS · COLLISION · RENDER · VIEWS/HUD · INPUT · __tt hook
    Pixel states: 1 exit, 2 follow path, 3 end (straight + drift, leash), 4 area member (wanders inside its shape's soft hitbox), 5 knocked out of the area (comes back, or is recalled past the leash).
@@ -133,13 +133,13 @@ const W=360,H=500,STEP=1/60,CELL=4,GW=Math.ceil(W/CELL)+2,GH=Math.ceil(H/CELL)+2
 // pool 10000 = HP / reserve; at most 200..1000 pixels per side are on the field at once
 const POOL=10000,CAPMAX=POOL,NP=POOL*2,CAPMIN=200,CAPSTEP=50,PERFCAP=1000,MAXP=6,MAXSQ=40,PSP=4,LGX=9,LGY=12;
 const WST=3,WALL_HALF=2,MAX_STROKES=12,CONTACT=3.5,LOOK=14,EXIT_T=14,STUN=24,CD_HIT=10,CD_WALL=8;
-const KEY='pixelwar.v49',KEYC='pixelwar.v49.custom',KEYF='pixelwar.v49.forms',KEY48='pixelwar.v48',KEYC48='pixelwar.v48.custom',KEYF48='pixelwar.v48.forms',KEY47='pixelwar.v47',KEYC47='pixelwar.v47.custom',KEYF47='pixelwar.v47.forms',KEY46='pixelwar.v46',KEYC46='pixelwar.v46.custom',KEYF46='pixelwar.v46.forms',KEY45='pixelwar.v45',KEYC45='pixelwar.v45.custom',KEYF45='pixelwar.v45.forms',KEY44='pixelwar.v44',KEYC44='pixelwar.v44.custom',KEYF44='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
+const KEY='pixelwar.v410',KEYC='pixelwar.v410.custom',KEYF='pixelwar.v410.forms',KEY49='pixelwar.v49',KEYC49='pixelwar.v49.custom',KEYF49='pixelwar.v49.forms',KEY48='pixelwar.v48',KEYC48='pixelwar.v48.custom',KEYF48='pixelwar.v48.forms',KEY47='pixelwar.v47',KEYC47='pixelwar.v47.custom',KEYF47='pixelwar.v47.forms',KEY46='pixelwar.v46',KEYC46='pixelwar.v46.custom',KEYF46='pixelwar.v46.forms',KEY45='pixelwar.v45',KEYC45='pixelwar.v45.custom',KEYF45='pixelwar.v45.forms',KEY44='pixelwar.v44',KEYC44='pixelwar.v44.custom',KEYF44='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
 const MAXCUS=6,NSH=7+MAXCUS,POLYMAX=24,MX=22,MY=18;
 const SHAPES=['LINE','ARROW','WEDGE','RING','DIAMOND','DOUBLE','SPIRAL','C1','C2','C3','C4','C5','C6'];
 const LANES=['NORMAL','WIDE','NARROW','TAPERED','ARROW'],LMAX=[1,2.0,0.4,2.0,1.2];
 // ---------- CONFIG: every constant a rule (quick match uses DEFCFG; CUSTOM GAME edits a copy)
 const DEFCFG={poolSize:POOL,lives:20,burn:20,circleDmg:1,circleR:22,pixHP:2,pixDmg:1,missP:20,ricoP:45,ricoMode:3,leash:108,fadeSec:1.2,shapesOn:0,sbxEnd:0,
- paceMax:38,pathMax:520,brMax:280,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
+ paceMax:38,pathMax:640,brMax:400,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
  sqN:300,tint:0,borrowSec:2,shapeCD:10,armSec:7,sqPull:50,shapeLane:0.8,shapeLen:3,ring:0,rhoRef:10,kSurv:0.9,kPush:0.8,survMax:0.85,pushMax:0.9,aiLevel:4,aiLearn:1,liveBr:1,liveWall:1,converge:0,momentum:0,orient:0,bias:0,autoDist:0,pattern:0,duel:0,halo:1,reveal:1,capDef:PERFCAP,relMul:120,
  laneDef:0,brWaste:0,koMargin:5,knockK:24,gate:1,arrowFront:60,reformSec:2.5,shockK:3,breakLive:20,kSpeed:100,aiForms:1,aiReview:1,stage:0,stageAll:1};
 let CFG=Object.assign({},DEFCFG);
@@ -215,7 +215,7 @@ function cleanForm(f){if(!f||typeof f!=='object')return null;let poly=[];
   if(r.length<3||Math.abs(polyArea(r))<0.03)return null;
   return{name:String(typeof f.name==='string'&&f.name?f.name:'FORM').slice(0,10),poly:r.map(a=>[Math.round(a[0]*1000)/1000,Math.round(a[1]*1000)/1000])};}
 function cloneForms(){return PRESETS.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));}
-function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF48)||localStorage.getItem(KEYF47)||localStorage.getItem(KEYF46)||localStorage.getItem(KEYF45)||localStorage.getItem(KEYF44)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
+function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF49)||localStorage.getItem(KEYF48)||localStorage.getItem(KEYF47)||localStorage.getItem(KEYF46)||localStorage.getItem(KEYF45)||localStorage.getItem(KEYF44)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
   if(Array.isArray(raw))for(const f of raw){if(a.length>=MAXCUS)break;const c=cleanForm(f);if(c)a.push(c);}PRESETS=a;}
 function saveForms(){try{localStorage.setItem(KEYF,JSON.stringify(PRESETS.map(f=>({name:f.name,poly:f.poly}))));}catch(e){}}
 function syncForms(){if(!S)return;for(const sd of S.sides)if(sd.human){sd.forms=cloneForms();for(let t=7;t<NSH;t++)sd.shReady[t]=0;}}
@@ -228,7 +228,7 @@ let S=null,CR=22,ME=0;
 const px=new Float32Array(NP),py=new Float32Array(NP),pvx=new Float32Array(NP),pvy=new Float32Array(NP),pox=new Float32Array(NP),poy=new Float32Array(NP);
 const php=new Int8Array(NP),pst=new Uint8Array(NP),pcnt=new Uint8Array(NP),pcd=new Uint8Array(NP),pwc=new Uint8Array(NP),pstun=new Uint8Array(NP);
 const pps=new Float32Array(NP),poff=new Float32Array(NP),pdr=new Float32Array(NP),pspm=new Float32Array(NP),pend=new Float32Array(NP);
-const pfree=new Uint8Array(NP),pfade=new Uint8Array(NP),pid=new Uint8Array(NP),pcap=new Uint8Array(NP),pdec=new Uint8Array(NP),psh=new Uint8Array(NP),pmom=new Uint8Array(NP),pdst=new Uint8Array(NP);
+const pfree=new Uint8Array(NP),pfade=new Uint8Array(NP),pid=new Uint8Array(NP),pcap=new Uint8Array(NP),pdec=new Uint8Array(NP),psh=new Uint8Array(NP),pmom=new Uint8Array(NP),pdst=new Uint8Array(NP),ploop=new Uint8Array(NP);
 const psq=new Int16Array(NP).fill(-1),pslot=new Int16Array(NP),pgc=new Uint8Array(NP),plu=new Float32Array(NP),plv=new Float32Array(NP);
 const gHead=new Int32Array(GW*GH),gNext=new Int32Array(NP),cntA=[new Uint16Array(GW*GH),new Uint16Array(GW*GH)];
 let wGrid=new Array(WGW*WGH);
@@ -256,7 +256,7 @@ function newGame(sd,keepSet){
   ME=0;selP=0;
   const e=S.sides[1].circle;e.x=clamp(40+rnd()*(W-80),CR+6,W-CR-6);e.y=28+Math.round(rnd()*(CFG.zoneH*0.6));
   for(const sd2 of S.sides)sd2.paths[0].p=[sd2.circle.x,sd2.circle.y];
-  pgc.fill(0);pfree.fill(0);pfade.fill(0);pst.fill(0);php.fill(0);pcd.fill(0);pwc.fill(0);pstun.fill(0);psq.fill(-1);pid.fill(0);pcap.fill(0);pdec.fill(0);psh.fill(0);pmom.fill(0);pdst.fill(0);pbnc.fill(0);vpN=0;bN=0;
+  pgc.fill(0);pfree.fill(0);pfade.fill(0);pst.fill(0);php.fill(0);pcd.fill(0);pwc.fill(0);pstun.fill(0);psq.fill(-1);pid.fill(0);pcap.fill(0);pdec.fill(0);psh.fill(0);pmom.fill(0);pdst.fill(0);ploop.fill(0);pbnc.fill(0);vpN=0;bN=0;
   wGrid=new Array(WGW*WGH);resetFree();
   stat={ticks:0,ms:0,maxMs:0};
   if(!CFG.duel)aiPrepPlan();
@@ -316,23 +316,28 @@ function branchExtend(side,P,tx,ty){const sd=S.sides[side];if(!P||sd.paths[P.id]
   for(let g=0;g<300;g++){const lx=p[p.length-2],ly=p[p.length-1],dx=tx-lx,dy=ty-ly,d=Math.hypot(dx,dy);if(d<PSP)break;if(PSP>brLeft(sd,P)+1e-6)break;
     const nx=lx+dx/d*PSP,ny=ly+dy/d*PSP;if(crossesOwnWall(sd,lx,ly,nx,ny)||(sd.strokes.length&&nearOwnWall(sd,nx,ny,clrOf(sd))))break;p.push(nx,ny);n++;}
   if(n)rejoinOf(sd,P);return n;}
-function branchEnd(side,P){const sd=S.sides[side];if(!P||sd.paths[P.id]!==P)return;if(pathN(P)<3)removeBranch(sd,P.id);else rejoinOf(sd,P);}
-function mergeRad(sd,Q,t){return Math.max(14,laneHalf(pset(sd,Q),Q.lane||0,clamp(t,0,1))+8);}
+function branchEnd(side,P){const sd=S.sides[side];if(!P||sd.paths[P.id]!==P)return;if(pathN(P)<3)removeBranch(sd,P.id);else if(rejoinOf(sd,P))flashConn(sd,P);}
+const FINGER=28,LOOP_CAP=2;   // finger-sized snap past the lane edge (Jay t1172); a pixel may rejoin at most LOOP_CAP times so a loop cannot recirculate forever
+function mergeRad(sd,Q,t){return laneHalf(pset(sd,Q),Q.lane||0,clamp(t,0,1))+FINGER;}   // connect if the end is inside the dest lane hitbox, or within a finger of its edge — not only hugging the black line
 function nearestOnPath(Q,ex,ey,k0,k1){const p=Q.p,n=pathN(Q);k0=Math.max(1,k0|0);k1=Math.min(n-1,k1|0);let best=-1,bd=1e9;
   for(let k=k0;k<=k1;k++){const d=Math.hypot(p[k*2]-ex,p[k*2+1]-ey);if(d<bd){bd=d;best=k;}
     if(k>k0){const ds=distPtSeg(ex,ey,p[(k-1)*2],p[(k-1)*2+1],p[k*2],p[k*2+1]);if(ds<bd){bd=ds;best=k;}}}
   return{k:best,d:bd};}
-// DETOUR MERGE (Jay t1164 / 042 C2): a branch end that touches or comes near the same side's main path (or, simply, another of its own branches) CONNECTS. Pixels rejoin there and keep going on that path.
-function rejoinOf(sd,P){P.rj=-1;P.rjTo=0;if(!P||pathN(P)<3)return false;
-  const ex=P.p[P.p.length-2],ey=P.p[P.p.length-1],M=sd.paths[0];
-  if(M&&pathN(M)>4){const n=pathN(M),k0=P.par===0?(P.fk+4):4,sameDest=Math.hypot(ex-M.p[n*2-2],ey-M.p[n*2-1])<50,k1=sameDest?n-11:n-1;
-    if(k1>=k0){const hit=nearestOnPath(M,ex,ey,k0,k1),rad=mergeRad(sd,M,hit.k>=0?hit.k/Math.max(1,n-1):1);
-      if(hit.k>=0&&hit.d<=rad){P.rj=hit.k;P.rjTo=0;return true;}}}
+// DETOUR / LOOP MERGE (Jay t1164 / t1172): a branch end anywhere inside (or a finger from) the same side's main-lane hitbox CONNECTS — downstream detours and upstream loops. Pixels rejoin and keep going. Attack branches that only meet at the same destination (near the path tip) still do not snap-merge.
+function rejoinHit(Q,ex,ey,k0,k1,sd){if(k1<k0)return null;const n=pathN(Q),hit=nearestOnPath(Q,ex,ey,k0,k1);if(!(hit.k>=0))return null;const rad=mergeRad(sd,Q,hit.k/Math.max(1,n-1));return hit.d<=rad?hit:null;}
+function rejoinOf(sd,P){P.rj=-1;P.rjTo=0;P.loop=0;if(!P||pathN(P)<3)return false;
+  const ex=P.p[P.p.length-2],ey=P.p[P.p.length-1],M=sd.paths[0],traveled=pathLen(P);
+  if(M&&pathN(M)>4){const n=pathN(M),sameDest=Math.hypot(ex-M.p[n*2-2],ey-M.p[n*2-1])<50,tipSkip=Math.max(11,Math.ceil((mergeRad(sd,M,1)+24)/PSP)),kEnd=sameDest?n-1-tipSkip:n-1;
+    let hit=null;
+    if(P.par===0){const down=rejoinHit(M,ex,ey,P.fk+4,kEnd,sd);const up=(traveled>=36)?rejoinHit(M,ex,ey,1,Math.max(1,P.fk-3),sd):null;
+      if(up&&down)hit=up.d<down.d?up:down;else hit=down||up;}
+    else hit=rejoinHit(M,ex,ey,4,kEnd,sd);
+    if(hit){P.rj=hit.k;P.rjTo=0;if(P.par===0&&hit.k<P.fk)P.loop=1;return true;}}
   for(let b=1;b<sd.paths.length;b++){const Q=sd.paths[b];if(!Q||Q===P||pathN(Q)<4)continue;if((Q.rjTo||0)===P.id&&Q.rj>=0)continue;
-    const n=pathN(Q),sameDest=Math.hypot(ex-Q.p[n*2-2],ey-Q.p[n*2-1])<50,k1=sameDest?n-8:n-1;
-    if(k1<3)continue;const hit=nearestOnPath(Q,ex,ey,3,k1),rad=mergeRad(sd,Q,hit.k>=0?hit.k/Math.max(1,n-1):1);
-    if(hit.k>=0&&hit.d<=rad){P.rj=hit.k;P.rjTo=b;return true;}}
+    const n=pathN(Q),sameDest=Math.hypot(ex-Q.p[n*2-2],ey-Q.p[n*2-1])<50,tipSkip=Math.max(8,Math.ceil((mergeRad(sd,Q,1)+24)/PSP)),k1=sameDest?n-1-tipSkip:n-1;
+    const hit=rejoinHit(Q,ex,ey,3,k1,sd);if(hit){P.rj=hit.k;P.rjTo=b;return true;}}
   return false;}
+function flashConn(sd,P){if(!P||P.rj<0)return;const T=sd.paths[P.rjTo||0];if(!T||pathN(T)<2)return;const k=Math.min(P.rj,(T.p.length>>1)-1);S.connFlash={x:T.p[k*2],y:T.p[k*2+1],t:42,col:brCol(P.id),loop:!!P.loop};}
 function removeBranch(sd,id){const P=sd.paths[id];if(!P)return;brErased(sd,pathLen(P));const M=sd.paths[0];M.kids=M.kids.filter(b=>b.id!==id);sd.paths[id]=null;
   while(sd.paths.length>1&&!sd.paths[sd.paths.length-1])sd.paths.pop();
   const base=sd.id*POOL;for(let i=base;i<base+POOL;i++)if(pst[i]&&pid[i]===id)recall(i);
@@ -469,32 +474,72 @@ function compact(sd,q){let m=0;for(let k=0;k<q.n;k++){const i=q.slot[k];if(i>=0)
 function bez(a,b,c,d,t){const u=1-t;return u*u*u*a+3*u*u*t*b+3*u*t*t*c+t*t*t*d;}
 function aiOpenMem(){if(!AIMEM.open||typeof AIMEM.open!=='object')AIMEM.open={L:0,R:0,gap:0};return AIMEM.open;}
 function aiMarkOpen(kind,ok){const m=aiOpenMem();if(kind!=='L'&&kind!=='R')kind='gap';m[kind]=clamp((m[kind]||0)+(ok?1:-0.4),-6,12);}
+function aiMirror(){if(!AIMEM.mirror||typeof AIMEM.mirror!=='object')AIMEM.mirror={hits:0,detour:0,offense:0,aimX:0,aimN:0,split:0};return AIMEM.mirror;}
+function aiNotePlayer(){const pl=S.sides[0],m=aiMirror();if(!(pl.stats.circleDmg>0))return;
+  m.hits++;let det=0,off=0;for(let b=1;b<pl.paths.length;b++){const P=pl.paths[b];if(!P)continue;if(P.rj>=0)det=1;if((pl.pathCirc[b]||0)>0)off=1;}
+  if(det)m.detour++;if(off)m.offense++;if(brCount(pl)>=2)m.split++;
+  let best=0,bh=pl.pathCirc[0]||0;for(let b=1;b<pl.paths.length;b++)if((pl.pathCirc[b]||0)>bh){bh=pl.pathCirc[b];best=b;}
+  const P=pl.paths[best];if(P&&pathN(P)>=2){const x=P.p[P.p.length-2];m.aimX=(m.aimX*m.aimN+x)/(m.aimN+1);m.aimN++;}}
 function aiFoeApproach(side){const foe=S.sides[1-side];let best=null,bd=1e9;
   for(const F of foe.paths){if(!F||pathN(F)<3)continue;for(let k=2;k<pathN(F)-1;k++){const x=F.p[k*2],y=F.p[k*2+1];if(!inWallZone(side,x,y))continue;const tx=F.p[(k+1)*2]-F.p[(k-1)*2],ty=F.p[(k+1)*2+1]-F.p[(k-1)*2+1],tl=Math.hypot(tx,ty)||1;
     const d=Math.hypot(x-S.sides[side].circle.x,y-S.sides[side].circle.y);if(d<bd){bd=d;best={x:x,y:y,tx:tx/tl,ty:ty/tl,nx:-ty/tl,ny:tx/tl,pid:F.id,k:k};}break;}}
   if(best)return best;const M=foe.paths[0];if(M&&pathN(M)>=2){const k=pathN(M)-1,x=M.p[k*2],y=M.p[k*2+1],tx=x-M.p[0],ty=y-M.p[1],tl=Math.hypot(tx,ty)||1;return{x:x,y:y,tx:tx/tl,ty:ty/tl,nx:-ty/tl,ny:tx/tl,pid:0,k:k};}
   const fc=foe.circle,c=S.sides[side].circle,dx=c.x-fc.x,dy=c.y-fc.y,tl=Math.hypot(dx,dy)||1;return{x:c.x,y:(c.y+fc.y)*0.5,tx:dx/tl,ty:dy/tl,nx:-dy/tl,ny:dx/tl,pid:-1,k:0};}
-function aiWallEnds(foe){const ends=[];for(const st of foe.strokes){if(st.gate||!st.pts||st.pts.length<4)continue;ends.push({x:st.pts[0],y:st.pts[1]});ends.push({x:st.pts[st.pts.length-2],y:st.pts[st.pts.length-1]});}
-  const n0=ends.length;for(let i=0;i<n0;i+=2)for(let j=i+2;j<n0;j+=2){for(const a of[ends[i],ends[i+1]])for(const b of[ends[j],ends[j+1]]){if(!a||!b)continue;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>14&&d<140)ends.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,gap:1});}}
+function aiWallEnds(foe){const ends=[];for(const st of foe.strokes){if(st.gate||!st.pts||st.pts.length<4)continue;ends.push({x:st.pts[0],y:st.pts[1],len:plen(st.pts)});ends.push({x:st.pts[st.pts.length-2],y:st.pts[st.pts.length-1],len:plen(st.pts)});}
+  const n0=ends.length;for(let i=0;i<n0;i+=2)for(let j=i+2;j<n0;j+=2){for(const a of[ends[i],ends[i+1]])for(const b of[ends[j],ends[j+1]]){if(!a||!b)continue;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d>14&&d<140)ends.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,gap:1,gapW:d});}}
   return ends;}
-function aiBestOpening(side){const foe=S.sides[1-side],fc=foe.circle,mem=aiOpenMem(),cands=[],ends=aiWallEnds(foe);
-  for(const e of ends){const tag=e.gap?'gap':(e.x<W/2?'L':'R'),d=Math.hypot(e.x-fc.x,e.y-fc.y),edge=Math.min(e.x,W-e.x);cands.push({x:e.x,y:e.y,kind:tag,score:(e.gap?70:0)+(220-d)+edge*0.15+(mem[tag]||0)*24});}
-  if(!cands.length){cands.push({x:40,y:(S.sides[side].circle.y+fc.y)*0.5,kind:'L',score:(mem.L||0)*24+30});cands.push({x:W-40,y:(S.sides[side].circle.y+fc.y)*0.5,kind:'R',score:(mem.R||0)*24+30});}
-  cands.sort((a,b)=>b.score-a.score);return cands[0];}
+function aiPathMinDist(F,x,y){if(!F||pathN(F)<2)return 1e9;let bd=1e9;for(let k=0;k<pathN(F);k++){const d=Math.hypot(F.p[k*2]-x,F.p[k*2+1]-y);if(d<bd)bd=d;}return bd;}
+function aiWallSpan(foe){let lo=1e9,hi=-1e9;for(const st of foe.strokes){if(st.gate||!st.pts||st.pts.length<4)continue;for(let q=0;q<st.pts.length;q+=2){const x=st.pts[q];if(x<lo)lo=x;if(x>hi)hi=x;}}return hi>-1e9?{lo,hi}:null;}
+function aiWrapX(foe,sideHint){const sp=aiWallSpan(foe);if(!sp)return sideHint<W/2?16:W-16;return sideHint<W/2?Math.max(10,sp.lo-24):Math.min(W-10,sp.hi+24);}
+// Prep route: go through the thinnest/shortest part of the foe defense, or around an end — and avoid the corridor the player's own path already occupies.
+function aiDefenseRoute(side){const foe=S.sides[1-side],fc=foe.circle,mem=aiOpenMem(),mir=aiMirror(),cands=[],ends=aiWallEnds(foe),FM=foe.paths[0];
+  for(const e of ends){const tag=e.gap?'gap':(e.x<W/2?'L':'R'),dC=Math.hypot(e.x-fc.x,e.y-fc.y),edge=Math.min(e.x,W-e.x);
+    let score=(e.gap?55:18)+(240-dC)+edge*0.2+(mem[tag]||0)*24;
+    if(e.gap){const w=e.gapW||40;score+=w>=20&&w<=80?36:(w<20?8:16);}
+    if(e.len&&e.len<90)score+=28;
+    if(FM){const np=aiPathMinDist(FM,e.x,e.y);if(np<28)score-=90;else if(np<50)score-=30;else score+=12;}
+    if(mir.aimN>0)score+= (Math.abs((mir.aimX||W/2)-e.x)<80?18:-6);
+    cands.push({x:e.x,y:e.y,kind:tag,score:score,gap:!!e.gap});}
+  if(!cands.length){cands.push({x:36,y:(S.sides[side].circle.y+fc.y)*0.5,kind:'L',score:(mem.L||0)*24+40,gap:0});cands.push({x:W-36,y:(S.sides[side].circle.y+fc.y)*0.5,kind:'R',score:(mem.R||0)*24+40,gap:0});}
+  cands.sort((a,b)=>b.score-a.score);let best=cands[0];
+  const our=S.sides[side].circle,dir=S.sides[side].dir;
+  if(best&&FM&&!best.outer&&Math.abs(our.x-W/2)>70){const pts=[[our.x,our.y],[best.x,best.y],[fc.x,fc.y]];let close=0,n=0;for(let i=0;i<pts.length-1;i++){const x0=pts[i][0],y0=pts[i][1],x1=pts[i+1][0],y1=pts[i+1][1],d=Math.hypot(x1-x0,y1-y0),steps=Math.max(2,Math.ceil(d/18));for(let k=0;k<=steps;k++){const u=k/steps;n++;if(aiPathMinDist(FM,x0+(x1-x0)*u,y0+(y1-y0)*u)<16)close++;}}const ov=n?close/n:0;
+    if(ov>=0.55){const span=aiWallSpan(foe);let wrap=null,bestL=1e9;for(const e of ends){const outer=!e.gap&&span&&(Math.abs(e.x-span.lo)<10||Math.abs(e.x-span.hi)<10);if(!outer)continue;const wx=aiWrapX(foe,e.x),wpts=[[our.x,our.y],[wx,e.y],[wx,e.y+dir*56],[fc.x,fc.y]];let L=0;for(let i=1;i<wpts.length;i++)L+=Math.hypot(wpts[i][0]-wpts[i-1][0],wpts[i][1]-wpts[i-1][1]);if(L<bestL){bestL=L;wrap={x:wx,y:e.y,kind:e.x<W/2?'L':'R',score:best.score+1,gap:0,outer:true};}}if(wrap)best=wrap;}}
+  return best;}
+function aiBestOpening(side){return aiDefenseRoute(side);}
+function aiFillDens(){const GX=LGX,GY=LGY;if(!S._dg0){S._dg0=new Int16Array(GX*GY);S._dg1=new Int16Array(GX*GY);}const a=S._dg0,b=S._dg1;a.fill(0);b.fill(0);const xs=W/GX,ys=H/GY;S._dgW=xs;S._dgH=ys;
+  for(let i=0;i<NP;i++){if(!pst[i]||pst[i]>=5)continue;let cx=(px[i]/xs)|0,cy=(py[i]/ys)|0;if(cx<0)cx=0;else if(cx>=GX)cx=GX-1;if(cy<0)cy=0;else if(cy>=GY)cy=GY-1;(i<POOL?a:b)[cy*GX+cx]++;}}
+function aiDens(side,x,y){const GX=LGX,GY=LGY,g=side?S._dg1:S._dg0;if(!g||!S._dgW)return 0;let cx=(x/S._dgW)|0,cy=(y/S._dgH)|0,s=0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){let ix=cx+dx,iy=cy+dy;if(ix<0||iy<0||ix>=GX||iy>=GY)continue;s+=g[iy*GX+ix];}return s;}
+function aiZoneFoeDom(side,x,y){const foe=aiDens(1-side,x,y),me=aiDens(side,x,y);return foe>=10&&foe>me*1.3;}
+function aiPathClash(sd,P){const n=pathN(P);if(n<4)return{losing:false,our:0,foe:0,kl:0,ls:0};
+  let our=0,foe=0;for(let k=n>>1;k<n;k+=3){const x=P.p[k*2],y=P.p[k*2+1];our+=aiDens(sd.id,x,y);foe+=aiDens(1-sd.id,x,y);}
+  const kl=sd.pathKill[P.id]||0,ls=sd.pathLoss[P.id]||0;
+  const losing=(foe>our*1.2&&foe>=12)||(ls>kl+12&&ls>=18&&(kl+0.1)/(ls+0.1)<0.7);
+  return{our,foe,kl,ls,losing};}
 function aiRevisePlan(){const sd=S.sides[1];if(sd.human||CFG.duel||sd.defLocked||S.phase!=='prep')return false;
   const c=sd.circle,m=mkPath(0,-1,0);m.p=[c.x,c.y];if(sd.paths[0]){m.sh=sd.paths[0].sh;m.lane=sd.paths[0].lane;}const forms=sd.forms||[];
   sd.paths=[m];sd.strokes=[];sd.segs=[];sd.forms=forms;aiPlan(1);sd.planned=true;if(S.aiRev>=1)S.aiRev=1;return true;}
+function aiSteerTo(side,sd,x,y,lim){for(let i=0;i<(lim||80);i++){if(pathExtend(side,x,y)===0)break;const p=sd.paths[0].p,n=p.length>>1;if(n>=2&&Math.hypot(p[n*2-2]-x,p[n*2-1]-y)<PSP+1)break;}}
 function aiPlan(side){const sd=S.sides[side],foe=S.sides[1-side],fc=foe.circle,c=sd.circle,dir=sd.dir,lv=Math.max(1,CFG.aiLevel||1);if(!sd.human&&!sd.forms.length&&AIMEM.forms.length)sd.forms=aiMemForms();
   S.planInfo[side]={style:2,walls:0,gates:0,branches:0,lane:0,forms:[],open:null};
-  const open=aiBestOpening(side);S.planInfo[side].open=open&&open.kind;
-  let swing=open?open.x:c.x+(rnd()-.5)*90;const FM=foe.paths[0];if((!open||!open.kind)&&FM&&pathN(FM)>3){const fx=FM.p[FM.p.length-2];swing=fx<W/2?W*0.7:W*0.3;if((aiOpenMem()[fx<W/2?'R':'L']||0)<(aiOpenMem()[fx<W/2?'L':'R']||0)-1)swing=fx<W/2?W*0.3:W*0.7;}
-  swing=clamp(swing,28,W-28);
-  const ap=aiFoeApproach(side);
-  const c1x=c.x+(swing-c.x)*0.45,c1y=c.y+dir*Math.min(90,Math.abs(fc.y-c.y)*0.35);
-  const c2x=swing,c2y=(c.y+fc.y)*0.5+dir*10;
-  const tx=clamp(fc.x+(swing-fc.x)*0.18+(rnd()-.5)*12,20,W-20),ty=clamp(fc.y-dir*8+(rnd()-.5)*8,8,H-8);
-  for(let i=1;i<=170;i++){const t=i/170;if(pathExtend(side,bez(c.x,c1x,c2x,tx,t),bez(c.y,c1y,c2y,ty,t))===0&&pathUsed(sd)+PSP>CFG.pathMax)break;}
+  const route=aiDefenseRoute(side);S.planInfo[side].open=route&&route.kind;S.planInfo[side].outer=!!(route&&route.outer);
+  let wxp=route?route.x:c.x;const mir=aiMirror();if(mir.aimN>=2&&Math.abs((mir.aimX||0)-wxp)>120&&(!route||!route.gap))wxp=clamp(mir.aimX,28,W-28);
+  wxp=clamp(wxp,22,W-22);
+  if(route&&route.outer)wxp=clamp(aiWrapX(foe,route.x),10,W-10);
+  // offense first: hook through the weak point of their line, then finish ON the player's circle (a true outer wrap walks past the wall first)
+  const c1x=c.x+(wxp-c.x)*0.4,c1y=c.y+dir*Math.min(80,Math.abs(fc.y-c.y)*0.28);
+  const c2x=wxp,c2y=route?route.y:(c.y+fc.y)*0.5;
+  for(let i=1;i<=90;i++){const t=i/90;if(pathExtend(side,bez(c.x,c1x,c2x,wxp,t),bez(c.y,c1y,c2y,c2y,t))===0&&pathUsed(sd)+PSP>CFG.pathMax)break;}
+  aiSteerTo(side,sd,wxp,c2y,40);
+  const tx=clamp(fc.x,16,W-16),ty=clamp(fc.y,8,H-8);
+  if(route&&route.outer){aiSteerTo(side,sd,wxp,clamp(c2y+dir*56,8,H-8),50);aiSteerTo(side,sd,tx,ty,90);}
+  else{const ex0=sd.paths[0].p,n0=ex0.length>>1,sx=n0>=2?ex0[n0*2-2]:c.x,sy=n0>=2?ex0[n0*2-1]:c.y;
+    const m1x=sx+(tx-sx)*0.45,m1y=sy+(ty-sy)*0.35;
+    for(let i=1;i<=100;i++){const t=i/100;if(pathExtend(side,bez(sx,m1x,tx,tx,t),bez(sy,m1y,ty,ty,t))===0&&pathUsed(sd)+PSP>CFG.pathMax)break;}
+    aiSteerTo(side,sd,tx,ty,90);}
   // defense across the player's likely approach, with a gap at our own path
+  const ap=aiFoeApproach(side);
   let wx=clamp(ap.x,50,W-50),wy;if(side===0)wy=clamp(ap.y,H/2+18,H-36);else wy=clamp(ap.y,36,H/2-18);
   if(!inWallZone(side,wx,wy))wy=c.y+dir*(70+rnd()*24);
   let gapX=c.x;const M0=sd.paths[0];if(pathN(M0)>4){let bd=1e9;for(let k=1;k<pathN(M0);k++){const d=Math.abs(M0.p[k*2+1]-wy);if(d<bd){bd=d;gapX=M0.p[k*2];}}}
@@ -525,49 +570,84 @@ function aiForkAt(sd,foe,job,opt){const M=sd.paths[0],n=pathN(M);if(n<8)return -
   else{let hit=-1;for(let k=4;k<n-3;k++){const x=M.p[k*2],y=M.p[k*2+1];let near=false;for(const st of foe.strokes){if(st.gate||st.pts.length<4)continue;for(let q=0;q<st.pts.length;q+=2)if(Math.hypot(x-st.pts[q],y-st.pts[q+1])<52){near=true;break;}if(near)break;}
     if(near){hit=k;break;}}if(hit>=4)fork=Math.max(4,hit-4);}
   return clamp(fork|0,4,n-4);}
+function aiPickCoolOpen(side,forkX,forkY){const foe=S.sides[1-side],ends=aiWallEnds(foe),fc=foe.circle;let best=null,bs=-1e9;
+  const list=ends.length?ends:[{x:28,y:(forkY+fc.y)*0.5,kind:'L'},{x:W-28,y:(forkY+fc.y)*0.5,kind:'R'}];
+  for(const e of list){const tag=e.gap?'gap':(e.x<W/2?'L':'R'),ox=e.x<W/2?Math.max(10,e.x-30):Math.min(W-10,e.x+30);
+    if(aiZoneFoeDom(side,e.x,e.y)&&aiZoneFoeDom(side,ox,e.y))continue;
+    let score=(e.gap?20:30)+(200-Math.hypot(ox-fc.x,e.y-fc.y))+Math.min(e.x,W-e.x)*0.3;
+    if(aiZoneFoeDom(side,ox,(e.y+fc.y)*0.5))score-=50;
+    if(score>bs){bs=score;best={x:ox,y:e.y,kind:tag,gap:!!e.gap};}}
+  if(!best){const sign=forkX<W/2?-1:1;best={x:clamp(forkX+sign*90,16,W-16),y:(forkY+fc.y)*0.45,kind:sign<0?'L':'R',gap:0};}
+  return best;}
 function aiOpenBranch(side,job,opt){const sd=S.sides[side],foe=S.sides[1-side],fc=foe.circle,M=sd.paths[0],n=pathN(M);job=job||'flank';opt=opt||{};
-  if(!(CFG.maxBr>0&&n>8&&canBr(sd)))return null;if(job!=='intercept'){let same=0;for(let b=1;b<sd.paths.length;b++){const P=sd.paths[b];if(P&&P.job===job)same++;}if(same>=1&&job!=='punch')return null;}const fork=aiForkAt(sd,foe,job,opt);if(fork<4)return null;
-  const bx=M.p[fork*2],by=M.p[fork*2+1],B=branchBegin(side,bx,by);if(!B)return null;
-  let vx,vy,kind='gap';
-  if(job==='intercept'&&opt.path&&pathN(opt.path)>=3){const F=opt.path,j=Math.max(2,Math.floor(pathN(F)*0.55));vx=F.p[j*2];vy=F.p[j*2+1];kind=vx<W/2?'L':'R';}
-  else{const open=aiBestOpening(side);kind=(open&&open.kind)||(bx<W/2?'L':'R');const ox=(kind==='L'?-32:kind==='R'?32:0);vx=clamp((open?open.x:bx)+ox,18,W-18);vy=open?open.y:(by+fc.y)*0.5;}
-  if(job==='detour'){let rk=-1;for(let k=fork+8;k<n-1;k++){const x=M.p[k*2],y=M.p[k*2+1];if(Math.hypot(x-fc.x,y-fc.y)<Math.hypot(bx-fc.x,by-fc.y)-8&&Math.hypot(x-vx,y-vy)>28){rk=k;break;}}if(rk<0)rk=n-2;
+  if(!(CFG.maxBr>0&&n>8&&canBr(sd)))return null;if(job!=='intercept'&&!opt.force){let same=0;for(let b=1;b<sd.paths.length;b++){const P=sd.paths[b];if(P&&(P.job===job||((job==='punch'||job==='around')&&P.job==='punch')))same++;}if(same>=1&&job!=='punch'&&job!=='around'&&job!=='detour')return null;}let fork=aiForkAt(sd,foe,job,opt);if(fork<4)return null;
+  let vx,vy,kind='gap',open=null;
+  if(job==='intercept'&&opt.path&&pathN(opt.path)>=3){const F=opt.path,j=Math.max(2,Math.floor(pathN(F)*0.55));vx=F.p[j*2];vy=F.p[j*2+1];kind=vx<W/2?'L':'R';if(aiZoneFoeDom(side,vx,vy)&&!opt.force)return null;}
+  else{open=aiPickCoolOpen(side,M.p[fork*2],M.p[fork*2+1]);kind=(open&&open.kind)||(M.p[fork*2]<W/2?'L':'R');vx=open?open.x:clamp(M.p[fork*2]+(M.p[fork*2]<W/2?-40:40),18,W-18);vy=open?open.y:(M.p[fork*2+1]+fc.y)*0.5;
+    // fork as close as possible to the opening so the 280-400 meter can finish on the circle
+    if(job==='around'||job==='punch'||job==='flank'||job==='block'){let bd=1e9,bk=fork;for(let k=4;k<n-3;k++){const d=Math.hypot(M.p[k*2]-vx,M.p[k*2+1]-vy);if(d<bd){bd=d;bk=k;}}fork=bk;}}
+  const bx=M.p[fork*2],by=M.p[fork*2+1];
+  if(job!=='detour'&&job!=='intercept'&&aiZoneFoeDom(side,bx,by)&&job!=='around')job=job==='block'?'block':'around';
+  const B=branchBegin(side,bx,by);if(!B)return null;
+  if(job==='detour'){let rk=-1;for(let k=fork+8;k<n-1;k++){const x=M.p[k*2],y=M.p[k*2+1];if(Math.hypot(x-fc.x,y-fc.y)<Math.hypot(bx-fc.x,by-fc.y)-8&&Math.hypot(x-vx,y-vy)>28&&!aiZoneFoeDom(side,x,y)){rk=k;break;}}if(rk<0)rk=n-2;
     if(rk<fork+8){if(sd.paths[B.id]===B)removeBranch(sd,B.id);return null;}
     const rx=M.p[rk*2],ry=M.p[rk*2+1],x1=bx+(vx-bx)*0.4,y1=by+(vy-by)*0.4;
     for(let i=1;i<=90;i++){const t=i/90;branchExtend(side,B,bez(bx,x1,vx,rx,t),bez(by,y1,vy,ry,t));}
     branchEnd(side,B);if(sd.paths[B.id]!==B||!(B.rj>=0)){if(sd.paths[B.id]===B)removeBranch(sd,B.id);return null;}
     B.set=B.set||{};B.job='detour';B.openKind=kind;B.set.width=clamp(sd.set.width,3,8);B.set.density=sd.set.density;B.set.speed=sd.set.speed;B.set.release=clamp(Math.round(Math.max(420,sd.set.release*0.75)),200,1000);if(!CFG.autoDist)B.share=40;
-    aiArmBranch(side,B,'detoured around your defense and rejoined the main path');if(S.ai){if(!S.ai.opened)S.ai.opened=[];S.ai.opened.push({id:B.id,kind:kind,job:'detour'});}return B;}
-  const ex=clamp(fc.x+(vx-fc.x)*0.12,16,W-16),ey=fc.y;
-  const x1=bx+(vx-bx)*0.35,y1=by+(vy-by)*0.35,x2=vx,y2=vy;
-  for(let i=1;i<=80;i++){const t=i/80;branchExtend(side,B,bez(bx,x1,x2,ex,t),bez(by,y1,y2,ey,t));}
+    aiArmBranch(side,B,'detoured around a losing clash and rejoined the main path');if(S.ai){if(!S.ai.opened)S.ai.opened=[];S.ai.opened.push({id:B.id,kind:kind,job:'detour'});}return B;}
+  // offense branches finish ON the player's circle; punch/around/flank hook through a cool opening first
+  const ex=clamp(fc.x,16,W-16),ey=clamp(fc.y,8,H-8);
+  if(job==='around'||job==='punch'||job==='flank'||job==='block'){
+    const x1=bx+(vx-bx)*0.5,y1=by+(vy-by)*0.4,x2=vx,y2=vy+(ey-vy)*0.25;
+    for(let i=1;i<=90;i++){const t=i/90;branchExtend(side,B,bez(bx,x1,x2,ex,t),bez(by,y1,y2,ey,t));}
+  }else{
+    const x1=bx+(vx-bx)*0.35,y1=by+(vy-by)*0.35,x2=vx,y2=vy;
+    for(let i=1;i<=80;i++){const t=i/80;branchExtend(side,B,bez(bx,x1,x2,ex,t),bez(by,y1,y2,ey,t));}}
+  // last stretch all the way to the circle
+  for(let k=0;k<40;k++){const p=B.p,m=p.length>>1;if(m<2||Math.hypot(p[m*2-2]-ex,p[m*2-1]-ey)<6)break;if(!branchExtend(side,B,ex,ey))break;}
   branchEnd(side,B);if(sd.paths[B.id]!==B||aiBranchPointless(sd,B)){if(sd.paths[B.id]===B)removeBranch(sd,B.id);return null;}
-  const set=sd.set;B.set=B.set||{};B.job=job;B.openKind=kind;
-  if(job==='punch'){B.set.width=2;B.set.density=8;B.set.speed=clamp((set.speed||5)+2,1,10);B.set.release=clamp(Math.round(Math.max(480,set.release*0.85)),200,1000);if(!CFG.autoDist)B.share=55;}
-  else if(job==='block'){B.set.width=9;B.set.density=7;B.set.speed=set.speed;B.set.release=clamp(Math.round(Math.max(360,set.release*0.7)),200,1000);if(!CFG.autoDist)B.share=35;}
-  else if(job==='intercept'){B.set.width=4;B.set.density=7;B.set.speed=clamp((set.speed||5)+1,1,10);B.set.release=clamp(Math.round(Math.max(420,set.release*0.75)),200,1000);if(!CFG.autoDist)B.share=45;}
-  else{B.set.width=clamp(set.width,3,8);B.set.density=set.density;B.set.speed=set.speed;B.set.release=clamp(Math.round(Math.max(420,set.release*0.75)),200,1000);if(!CFG.autoDist)B.share=30;}
-  aiArmBranch(side,B,(job==='punch'?'punched through a gap':job==='block'?'widened a branch to block':job==='intercept'?'cut off your new branch':'flanked around your defense')+' toward your circle');
-  if(S.ai){if(!S.ai.opened)S.ai.opened=[];S.ai.opened.push({id:B.id,kind:kind,job:job});}
+  const set=sd.set;B.set=B.set||{};B.job=job==='around'?'punch':job;B.openKind=kind;
+  if(B.job==='punch'){B.set.width=2;B.set.density=8;B.set.speed=clamp((set.speed||5)+2,1,10);B.set.release=clamp(Math.round(Math.max(520,set.release*0.9)),200,1000);if(!CFG.autoDist)B.share=55;}
+  else if(B.job==='block'){B.set.width=9;B.set.density=7;B.set.speed=set.speed;B.set.release=clamp(Math.round(Math.max(360,set.release*0.7)),200,1000);if(!CFG.autoDist)B.share=35;}
+  else if(B.job==='intercept'){B.set.width=4;B.set.density=7;B.set.speed=clamp((set.speed||5)+1,1,10);B.set.release=clamp(Math.round(Math.max(420,set.release*0.75)),200,1000);if(!CFG.autoDist)B.share=45;}
+  else{B.set.width=clamp(set.width,3,8);B.set.density=set.density;B.set.speed=set.speed;B.set.release=clamp(Math.round(Math.max(460,set.release*0.8)),200,1000);if(!CFG.autoDist)B.share=40;}
+  aiArmBranch(side,B,(B.job==='punch'?'went around the end toward your circle':B.job==='block'?'widened a branch to block':B.job==='intercept'?'cut off your new branch':'flanked around your defense')+' toward your circle');
+  if(S.ai){if(!S.ai.opened)S.ai.opened=[];S.ai.opened.push({id:B.id,kind:kind,job:B.job});}
   return B;}
 function aiTactics(side,lv,near){const sd=S.sides[side],ai=S.ai,foe=S.sides[1-side];if(!ai)return;
+  aiFillDens();
   ai.ph=((ai.ph||0)+1)%4;const lead=sd.pool-foe.pool,losing=lead<-600,winning=lead>600,fc=foe.circle;
   const step=(P,key,v,why)=>{const cur=P.id?P.set[key]:sd.set[key],nv=key==='release'?migRelease(v):clamp(v,1,10);if(nv===cur)return false;setPathSetting(side,P.id,key,nv);if(why)aiLearn(why);return true;};
+  const M=sd.paths[0],clash=M?aiPathClash(sd,M):{losing:false};
+  // 2) clash evaluator: a stream that is losing gets its flow cut, then we reroute around the fight instead of feeding it
+  if(clash.losing&&M){const set=pset(sd,M);if(set.release>280)step(M,'release',Math.max(240,set.release-80),'this clash is losing: cut flow and reroute');
+    if(S.tick-(ai.lastReroute|0)>=180&&brCount(sd)<CFG.maxBr&&canBr(sd)){let B=aiOpenBranch(side,'detour',{force:1});if(!B)B=aiOpenBranch(side,'around',{force:1});if(B){ai.lastReroute=S.tick;ai.lastBr=S.tick;aiLearn('rerouted around a dominated clash');}}}
+  // 4) timing: hold a build-up, then surge when their flow is split across branches
+  const foeBr=brCount(foe);let foeSplit=foeBr>=2;if(foeSplit){let live=0;for(let b=1;b<foe.paths.length;b++)if(foe.paths[b]&&pathN(foe.paths[b])>=3)live++;foeSplit=live>=2;}
+  if(foeSplit&&!ai.surged){ai.surged=1;if(M){step(M,'release',Math.min(1000,(pset(sd,M).release||400)+160),'your flow is split: surge the main');if((pset(sd,M).speed||5)<8)step(M,'speed',(pset(sd,M).speed||5)+1);}}
   for(const P of sd.paths){if(!P||(P.id&&pathN(P)<2))continue;const set=pset(sd,P),ex=P.p[P.p.length-2],ey=P.p[P.p.length-1],dC=Math.hypot(ex-fc.x,ey-fc.y),kl=sd.pathKill[P.id]||0,ls=sd.pathLoss[P.id]||0,ch=sd.pathCirc[P.id]||0,tr=kl+ls;
     if(P.id===0){
-      if((ch>0||dC<90||near>=40)&&set.release<900&&ai.ph===0)step(P,'release',set.release+50,'this path is landing: more flow on the main');
-      else if((losing||ls>kl+20)&&ai.ph===1){if(set.width>3)step(P,'width',set.width-2,'thin the main lane to punch through');else if(set.density<9)step(P,'density',set.density+1,'behind: pack tighter');}
+      if(!clash.losing&&(ch>0||dC<90||near>=40)&&set.release<900&&ai.ph===0)step(P,'release',set.release+50,'this path is landing: more flow on the main');
+      else if((losing||ls>kl+20)&&ai.ph===1&&!clash.losing){if(set.width>3)step(P,'width',set.width-2,'thin the main lane to punch through');else if(set.density<9)step(P,'density',set.density+1,'behind: pack tighter');}
       else if(winning&&ai.ph===2&&set.width<8)step(P,'width',set.width+1,'ahead: wider lane to block');
-      else if(near<12&&dC>140&&set.release>280&&ai.ph===3&&ch===0)step(P,'release',set.release-30);}
+      else if(near<12&&dC>140&&set.release>280&&ai.ph===3&&ch===0&&!foeSplit)step(P,'release',set.release-30);}
     else if(tr>=16||ch>0){const q=(kl+ch*4)/Math.max(1,ls);if((q>1.1||ch>0||dC<110)&&set.release<900)step(P,'release',set.release+60,'branch '+P.id+' is getting through: more flow');
       else if(q<0.65&&ch===0&&set.release>260)step(P,'release',set.release-50,'branch '+P.id+' is getting chipped: starve it');
-      if(P.job==='punch'&&set.width>3)step(P,'width',2);if(P.job==='block'&&set.width<8)step(P,'width',9);}}
-  const foeBr=brCount(foe);if((ai.seenBr|0)<foeBr){ai.seenBr=foeBr;ai.needInt=S.tick+90;let nb=null;for(let b=foe.paths.length-1;b>=1;b--)if(foe.paths[b]&&pathN(foe.paths[b])>=3){nb=foe.paths[b];break;}ai.intPath=nb;}
+      if(P.job==='punch'&&set.width>3)step(P,'width',2);if(P.job==='block'&&set.width<8)step(P,'width',9);}
+    // drop a branch that has been feeding a dominated zone for a while with no circle hits
+    if(P.id&&ch===0&&S.tick-(P.born||0)>360&&ls>kl+20&&(kl+ls)>=40){removeBranch(sd,P.id);aiLearn('dropped branch '+P.id+' (stuck in a losing clash)');}}
+  // 3) mirror: if this player has hit us with a detour + offense before, try that back
+  if(S.tick>=120&&!ai.didMirror&&AIMEM.mirror&&AIMEM.mirror.hits>0&&canBr(sd)){ai.didMirror=1;
+    if(AIMEM.mirror.detour>0)aiOpenBranch(side,'detour');
+    if(AIMEM.mirror.offense>0||AIMEM.mirror.hits>0)aiOpenBranch(side,'punch');
+    aiLearn('trying back a plan that hit me last time');}
+  if((ai.seenBr|0)<foeBr){ai.seenBr=foeBr;ai.needInt=S.tick+90;let nb=null;for(let b=foe.paths.length-1;b>=1;b--)if(foe.paths[b]&&pathN(foe.paths[b])>=3){nb=foe.paths[b];break;}ai.intPath=nb;}
   if(ai.needInt&&S.tick>=ai.needInt&&brCount(sd)<CFG.maxBr&&canBr(sd)){ai.needInt=0;const B=aiOpenBranch(side,'intercept',{path:ai.intPath});if(B)ai.lastInt=S.tick;}
-  if(S.tick>=150&&S.tick-(ai.lastBr|0)>=(ai.lastBr?300:150)&&brCount(sd)<Math.min(CFG.maxBr,3)&&canBr(sd)){
-    let B=null;if((sd.pathLoss[0]||0)>(sd.pathKill[0]||0)+10)B=aiOpenBranch(side,'detour');
+  if(S.tick>=120&&S.tick-(ai.lastBr|0)>=(ai.lastBr?240:90)&&brCount(sd)<Math.min(CFG.maxBr,3)&&canBr(sd)){
+    let B=null;if(clash.losing)B=aiOpenBranch(side,'around',{force:1});
     if(!B){const job=losing||(sd.pathLoss[0]||0)>(sd.pathKill[0]||0)+15?'punch':(winning?'block':'flank');B=aiOpenBranch(side,job);}
-    if(B)ai.lastBr=S.tick;else ai.lastBr=Math.max(1,S.tick-120);}
+    if(B)ai.lastBr=S.tick;else ai.lastBr=Math.max(1,S.tick-90);}
 }
 const aiEvery=lv=>lv>=4?60:lv>=3?150:240;
 // AI shape designer: builds a custom OUTLINE (polygon) from a template family + random mutation (same 6-shape cap and same cooldowns as the player)
@@ -581,19 +661,20 @@ function aiDesignForm(sd){if(sd.forms.length>=MAXCUS)return null;const fam=(rnd(
   for(const p of pts){p[0]=clamp(p[0]+(rnd()-.5)*0.05,0,1);p[1]=clamp(p[1]+(rnd()-.5)*0.05,0,1);}
   const f=cleanForm({name:names[fam],poly:pts});if(!f)return null;sd.forms.push(f);if(S.ai&&S.ai.designs)S.ai.designs.push(f.name);return f;}
 // ---- AI MEMORY: kept between matches on this device (lessons, best shape, designed shapes, where its stream keeps dying, the slider setup that worked). DELETE AI MEMORY in the menu clears it.
-const KEYAI='pixelwar.v49.aimem',KEYAI48='pixelwar.v48.aimem',KEYAI47='pixelwar.v47.aimem',KEYAI46='pixelwar.v46.aimem',KEYAI45='pixelwar.v45.aimem',KEYAI44='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
-const aiMemEmpty=()=>({matches:0,wins:0,losses:0,lessons:[],best:-1,forms:[],loss:[],tune:null,open:{L:0,R:0,gap:0}});
+const KEYAI='pixelwar.v410.aimem',KEYAI49='pixelwar.v49.aimem',KEYAI48='pixelwar.v48.aimem',KEYAI47='pixelwar.v47.aimem',KEYAI46='pixelwar.v46.aimem',KEYAI45='pixelwar.v45.aimem',KEYAI44='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
+const aiMemEmpty=()=>({matches:0,wins:0,losses:0,lessons:[],best:-1,forms:[],loss:[],tune:null,open:{L:0,R:0,gap:0},mirror:{hits:0,detour:0,offense:0,aimX:0,aimN:0,split:0}});
 let AIMEM=aiMemEmpty();
-function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localStorage.getItem(KEYAI48)||localStorage.getItem(KEYAI47)||localStorage.getItem(KEYAI46)||localStorage.getItem(KEYAI45)||localStorage.getItem(KEYAI44)||localStorage.getItem(KEYAI43)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
+function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localStorage.getItem(KEYAI49)||localStorage.getItem(KEYAI48)||localStorage.getItem(KEYAI47)||localStorage.getItem(KEYAI46)||localStorage.getItem(KEYAI45)||localStorage.getItem(KEYAI44)||localStorage.getItem(KEYAI43)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
   m.matches=fin(+v.matches)?clamp(v.matches|0,0,1e6):0;m.wins=fin(+v.wins)?clamp(v.wins|0,0,1e6):0;m.losses=fin(+v.losses)?clamp(v.losses|0,0,1e6):0;
   m.lessons=Array.isArray(v.lessons)?v.lessons.filter(x=>typeof x==='string').slice(-60).map(x=>x.slice(0,140)):[];m.best=fin(+v.best)?clamp(v.best|0,-1,NSH-1):-1;
   m.forms=Array.isArray(v.forms)?v.forms.slice(0,MAXCUS).map(cleanForm).filter(Boolean):[];
   m.loss=Array.isArray(v.loss)&&v.loss.length===LGX*LGY?v.loss.map(x=>fin(+x)?clamp(+x,0,1e4):0):[];
   if(v.tune&&typeof v.tune==='object'){const t={};let ok=true;for(const k of['speed','density','release','width']){if(!fin(+v.tune[k])){ok=false;break;}t[k]=k==='release'?migRelease(v.tune[k]):clamp(Math.round(+v.tune[k]),1,10);}m.tune=ok?t:null;}
   if(v.open&&typeof v.open==='object'){m.open={L:0,R:0,gap:0};for(const k of['L','R','gap'])if(fin(+v.open[k]))m.open[k]=clamp(+v.open[k],-6,12);}else m.open={L:0,R:0,gap:0};
+  if(v.mirror&&typeof v.mirror==='object'){const mr=m.mirror;for(const k of['hits','detour','offense','aimN','split'])if(fin(+v.mirror[k]))mr[k]=clamp(v.mirror[k]|0,0,1e6);if(fin(+v.mirror.aimX))mr.aimX=+v.mirror.aimX;} 
   AIMEM=m;}catch(e){}}
 function saveAiMem(){try{localStorage.setItem(KEYAI,JSON.stringify(AIMEM));}catch(e){}}
-function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI47);localStorage.removeItem(KEYAI46);localStorage.removeItem(KEYAI45);localStorage.removeItem(KEYAI44);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
+function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI49);localStorage.removeItem(KEYAI48);localStorage.removeItem(KEYAI47);localStorage.removeItem(KEYAI46);localStorage.removeItem(KEYAI45);localStorage.removeItem(KEYAI44);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
 const aiMemForms=()=>AIMEM.forms.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));
 function aiLearn(note){const ai=S.ai;if(!ai)return;const L=ai.lessons;if(L.length&&L[L.length-1]===note)return;if(L.length>=60)L.shift();L.push(note);}
 function eraseStroke(sd,st){if(!st||(!st.gate&&!sbx()))return;const i=sd.strokes.indexOf(st);if(i>=0){sd.strokes.splice(i,1);if(S.phase==='battle')rebuildSegs(sd);}}
@@ -662,9 +743,10 @@ function startBattle(){if(S.phase!=='prep')return false;S.aiRev=1;
   for(const sd of S.sides)if(!sd.human)aiCounterStart(sd.id);
   for(const sd of S.sides){sd.locked=true;sd.defLocked=true;for(const st of sd.strokes)sealStroke(sd,st);rebuildSegs(sd);sd.openQ=zeros(MAXP).map(()=>-1);}
   S.phase='battle';S.aiSummary=null;if(S.tool==='wall'&&!sbx())S.tool='branch';
-  S.ai=(CFG.aiLearn&&CFG.aiLevel>=2&&!S.sides[1].human)?{lessons:AIMEM.lessons.slice(),adapts:0,last:0,best:AIMEM.best,designs:[],lastBr:0,reacts:0,mem0:AIMEM.lessons.length,seenBr:0,needInt:0,opened:[],intPath:null}:null;
+  S.ai=(CFG.aiLearn&&CFG.aiLevel>=2&&!S.sides[1].human)?{lessons:AIMEM.lessons.slice(),adapts:0,last:0,best:AIMEM.best,designs:[],lastBr:0,reacts:0,mem0:AIMEM.lessons.length,seenBr:0,needInt:0,opened:[],intPath:null,didMirror:0,surged:0,lastReroute:0}:null;
   if(S.ai){const sd1=S.sides[1];if(AIMEM.loss.length===sd1.lossGrid.length)for(let k=0;k<AIMEM.loss.length;k++)sd1.lossGrid[k]=AIMEM.loss[k];
-    if(AIMEM.tune){for(const k of['speed','density','release','width'])sd1.set[k]=AIMEM.tune[k];sd1.set.release=Math.max(sd1.set.release,289);sd1.set.width=Math.max(sd1.set.width,5);}}
+    if(AIMEM.tune){for(const k of['speed','density','release','width'])sd1.set[k]=AIMEM.tune[k];sd1.set.release=Math.max(sd1.set.release,400);sd1.set.width=Math.max(sd1.set.width,5);}else{sd1.set.release=Math.max(sd1.set.release,440);}sd1.set.release=clamp(sd1.set.release,200,1000);
+    if(S.planInfo[1]&&S.planInfo[1].outer){sd1.set.speed=clamp((sd1.set.speed||5)+1,1,10);sd1.set.release=clamp((sd1.set.release||440)+80,200,1000);}}
   for(const sd of S.sides)for(let k=1;k<sd.paths.length;k++)if(sd.paths[k])sd.paths[k].born=0;
   return true;}
 function buildWallGrid(){wGrid=new Array(WGW*WGH);
@@ -680,9 +762,10 @@ function endMatch(w){S.over=true;S.winner=w;S.phase='over';
     AIMEM.matches++;if(w===1)AIMEM.wins++;else if(w===0)AIMEM.losses++;AIMEM.lessons=S.ai.lessons.slice(-60);AIMEM.best=S.ai.best;
     if(!sd.human){AIMEM.forms=sd.forms.map(f=>({name:f.name,poly:f.poly.map(c=>[+(+c[0]).toFixed(3),+(+c[1]).toFixed(3)])}));AIMEM.loss=Array.from(sd.lossGrid,x=>+(+x).toFixed(1));
       const t={speed:sd.set.speed,density:sd.set.density,release:sd.set.release,width:sd.set.width};
-      if(w===0){t.density=clamp(t.density+1,1,10);t.width=clamp(t.width-1,2,10);t.release=clamp(migRelease(t.release)+40,200,800);}
+      if(w===0){t.density=clamp(t.density+1,1,10);t.width=clamp(t.width-1,2,10);t.release=clamp(migRelease(t.release)+40,200,1000);}
       AIMEM.tune=t;}
     if(S.ai&&S.ai.opened){for(const o of S.ai.opened)aiMarkOpen(o.kind||'gap',(sd.pathCirc[o.id]||0)>0);}
+    aiNotePlayer();
     saveAiMem();}
   S.ai=null;if(!sd.human){sd.forms=[];}   // the match state is cleared; the AI's memory (AIMEM) is NOT
   if(w===0&&(CFG.stage|0)>0&&!S.sides[1].human&&prefs.stage<CFG.stage){prefs.stage=CFG.stage;}
@@ -724,7 +807,7 @@ function release(side,dest,ago){const sd=S.sides[side];if(sd.active>=sd.set.cap|
   const po0=clamp((sd.gr*2-1)*0.5+(rnd()*2-1)*0.5,-1,1),hw0=Math.min(c.r*0.95,laneHalf(sd.set,sd.paths[0].lane,0)),lat=po0*hw0,fwd0=Math.min(c.r*0.6,Math.sqrt(Math.max(0,c.r*c.r*0.9-lat*lat)))+sp*STEP*clamp(ago||0,0,3);
   let bx,by,tx,ty;if(n0>=2){pathAt(p0,fwd0,tmp);bx=tmp[0];by=tmp[1];tx=tmp[2];ty=tmp[3];}else{const d=dirOut(sd);tx=d[0];ty=d[1];bx=c.x+tx*fwd0;by=c.y+ty*fwd0;}
   px[i]=bx-ty*lat;py[i]=by+tx*lat;pvx[i]=tx*sp;pvy[i]=ty*sp;pox[i]=px[i];poy[i]=py[i];
-  php[i]=CFG.pixHP;pst[i]=1;pbnc[i]=0;pcnt[i]=Math.min(90,Math.round(EXIT_T*tkOf(speedOf(sd.set))));pps[i]=n0>=2?fwd0:0;poff[i]=po0;pdr[i]=(rnd()-.5)*1.8;pspm[i]=spm;pend[i]=0;pcd[i]=0;pwc[i]=0;pstun[i]=0;pid[i]=0;pcap[i]=0;pdec[i]=0;psh[i]=0;pmom[i]=0;psq[i]=-1;pfade[i]=0;pfree[i]=0;pdst[i]=dest|0;
+  php[i]=CFG.pixHP;pst[i]=1;pbnc[i]=0;pcnt[i]=Math.min(90,Math.round(EXIT_T*tkOf(speedOf(sd.set))));pps[i]=n0>=2?fwd0:0;poff[i]=po0;pdr[i]=(rnd()-.5)*1.8;pspm[i]=spm;pend[i]=0;pcd[i]=0;pwc[i]=0;pstun[i]=0;pid[i]=0;pcap[i]=0;pdec[i]=0;psh[i]=0;pmom[i]=0;ploop[i]=0;psq[i]=-1;pfade[i]=0;pfree[i]=0;pdst[i]=dest|0;
   sd.active++;sd.stats.released++;return true;}
 function pathAt(p,s,out){const n=p.length>>1;let f=s/PSP;if(f<0)f=0;if(f>n-1)f=n-1;let k=Math.floor(f);if(k>n-2)k=Math.max(0,n-2);const t=f-k;
   const ax=p[k*2],ay=p[k*2+1],bx=p[Math.min(n-1,k+1)*2],by=p[Math.min(n-1,k+1)*2+1];out[0]=ax+(bx-ax)*t;out[1]=ay+(by-ay)*t;
@@ -786,7 +869,7 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
         if(pcap[i]===0&&pps[i]>=pF[pi]){pcap[i]=1;if(pps[i]<pF[pi]+24&&rnd()*100<P.sh.pull)capture(sd,i,P);}
         if(pst[i]===4){pvx[i]=vx;pvy[i]=vy;continue;}
         if(best>=n-1&&pi===pid[i]){
-          if(pi>0&&P.rj>=0){const dest=P.rjTo||0,T=paths[dest];if(T){pid[i]=dest;pps[i]=P.rj*PSP;pcap[i]=1;pathAt(T.p,pps[i],tmp);pvx[i]=tmp[2]*spd;pvy[i]=tmp[3]*spd;continue;}}
+          if(pi>0&&P.rj>=0){const dest=P.rjTo||0,T=paths[dest];if(T){if((ploop[i]|0)>=LOOP_CAP){pst[i]=3;pend[i]=0;vx=pTx[pi]*spd;vy=pTy[pi]*spd;}else{ploop[i]=(ploop[i]|0)+1;pid[i]=dest;pps[i]=P.rj*PSP;pcap[i]=1;pathAt(T.p,pps[i],tmp);pvx[i]=tmp[2]*spd;pvy[i]=tmp[3]*spd;continue;}}}
           pst[i]=3;pend[i]=0;vx=pTx[pi]*spd;vy=pTy[pi]*spd;}   // keep the stream's width; head the path's final direction only (Jay t1154)
         else{const ps=pset(sd,P),lw=laneHalf(pset(sd,P),P.lane,pps[i]/pL[pi]),th=clamp((5-ps.width)/4,0,1),wob=(0.90-(ps.density-1)/9*0.56)*(1-0.55*th);freeFwd(i,p,pps[i],lw,spd,stun,vx,vy,wob);vx=fv[0];vy=fv[1];}   // DENSITY: higher = tighter wander / more packed (spacing folded in). Thin hitbox: less wander so packing rises (t1132), still no pull to the line
       }else if(cur===4||cur===5){ // AREA MEMBER: wanders freely inside its shape's soft hitbox (spring to its own wander spot); a hard knock can push it out (5), it re-enters or goes home past the leash
@@ -904,6 +987,7 @@ function collide(){
       if(psq[i]>=0){shock(side,i);knock(i,nx,ny);}deflect(i,nx,ny,0.25,true);px[i]=bqx+nx*(WALL_HALF+1.6);py[i]=bqy+ny*(WALL_HALF+1.6);pwc[i]=CD_WALL;}}
 }
 function tick(){
+  if(S.connFlash&&S.connFlash.t>0)S.connFlash.t--;
   if(S.phase!=='battle')return;
   const t0=performance.now();
   S.tick++;
@@ -996,6 +1080,7 @@ function draw(){
     // detour junction marker: a small ring+dot where a branch reconnects
     for(const P of sd.paths){if(!P||!P.id||P.rj<0)continue;const T=sd.paths[P.rjTo||0];if(!T||pathN(T)<2)continue;const k=Math.min(P.rj,(T.p.length>>1)-1),jx=T.p[k*2],jy=T.p[k*2+1];
       ctx.strokeStyle=brCol(P.id);ctx.fillStyle=brCol(P.id);ctx.lineWidth=Math.max(1,1.5*sc);ctx.beginPath();ctx.arc(X(jx),Y(jy),3.6*sc,0,6.2832);ctx.stroke();ctx.beginPath();ctx.arc(X(jx),Y(jy),1.5*sc,0,6.2832);ctx.fill();}}
+    const fl=S.connFlash;if(fl&&fl.t>0){const a=Math.min(1,fl.t/14);ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=fl.col||'#f4f6ff';ctx.lineWidth=Math.max(1.5,2.2*sc);ctx.beginPath();ctx.arc(X(fl.x),Y(fl.y),(8+(42-fl.t)*0.12)*sc,0,6.2832);ctx.stroke();ctx.fillStyle='#f4f6ff';ctx.font='700 '+Math.max(10,12*sc)+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('CONNECTED',X(fl.x),Y(fl.y)-10*sc);ctx.restore();}
   if(S.phase==='prep'&&(S.tool==='main'||S.tool==='branch')){const sd=S.sides[ME],P=S.tool==='main'?sd.paths[0]:(sd.paths[selP]||sd.paths[0]),p=P.p;ctx.strokeStyle=P.id?brCol(P.id):'#161616';ctx.lineWidth=Math.max(1,1.2*sc);ctx.beginPath();ctx.arc(X(p[p.length-2]),Y(p[p.length-1]),6*sc,0,6.2832);ctx.stroke();}
   // circles (ring + hp arc)
   for(const sd of S.sides){const c=sd.circle,col=sd.id===0?'#12b5d6':'#e0261c',f=clamp(c.hp/poolN(),0,1);
@@ -1034,11 +1119,11 @@ const HELP=[
 'PREP, STEP 1: draw your ATTACK PATH. Drag from your circle toward the enemy. The enemy draws its own plan at the same time, and you can see it.',
 'PREP, STEP 2: draw a DEFENSE LINE of walls across your side. You need both before START lights up. Leave a gap if you want your own pixels to get through. You can place more than one piece for a gap. If you MOVE CIRCLE in prep, the defense line is cleared and the wall meter is refunded so you can redraw it. Once START is pressed the line is locked: ERASE ignores it, you cannot draw over it, and you cannot redraw it. Walls can go all the way to the screen edge.',
 'The match is slow on purpose. Pixels flow like a river, so there is time to think and change things.',
-'IN THE MATCH you can add BRANCHES. Press BRANCH, then drag out from your main path. Every branch has its own color and its own meter. ERASE is free for branches, so try and redraw those as often as you like. Every branch has enough meter to wrap around a wall end. If you draw a branch back into your main path (touching the line or its lane), the two CONNECT: pixels at the end of the branch rejoin the main path and keep going, so you can detour around a wall without losing that flow. A small marker shows the junction. The defense line cannot be built or rebuilt once the match starts — the button is gone, and the AI follows the same rule.',
+'IN THE MATCH you can add BRANCHES. Press BRANCH, then drag out from your main path. Every branch has its own color and its own meter. ERASE is free for branches, so try and redraw those as often as you like. Every branch has enough meter to wrap around a wall end. If you draw a branch back into your main path — anywhere inside the lane, not just on the black line, including back upstream for a loop — the two CONNECT (a short flash says so). Pixels at the end rejoin and keep going, so you can detour or loop without losing that flow. A loop will not recirculate forever. A small marker shows the junction. The defense line cannot be built or rebuilt once the match starts — the button is gone, and the AI follows the same rule.',
 'TAP any path (the main path or a branch) and its SLIDERS open. Each path keeps its own settings: PACE (how fast), DENSITY (higher means tighter spacing and a more packed stream — they never hug the drawn line), LANE WIDTH (1 thin, 10 = the circle diameter; the stream stays inside that hitbox) and FLOW (how many are on the field at once, 200 to 1000, a steady stream; every branch has its own). On a branch, SHARE is how many main-path pixels peel onto it; AUTO SHARE splits that for you. The big - and + buttons are easy to hit. A vertical swipe on the slider panel scrolls it and will not move a slider; only a sideways drag on the track changes the value.',
 'When pixels from both sides touch, they bounce or get destroyed. A destroyed pixel breaks into tiny bits that fade away. A bounced pixel keeps flying straight and does not turn back.',
 'Past the end of a path or a branch, pixels keep going in that last direction as one loose, wide group — they do not fan out, taper to a point, or loop back — then fade. While they fade they can still hit things, a little less each moment.',
-'The AI always plays at full smart (there is no difficulty picker). It reads your paths, branches and walls, counters them, flanks, and remembers matches. It uses the same rules and meters you do.',
+'The AI always plays at full smart (there is no difficulty picker). It aims its main path at your circle, routes through the weakest part of your defense or around an end, cuts flow on a losing clash and reroutes, surges when your flow is split, and remembers the plans that hit it. It uses the same rules and meters you do.',
 'SANDBOX (in the menu): a free play area. Both sides are yours to edit at any time: move circles, draw paths and walls, change the sliders. Use SIDE to switch sides, STEP to move forward a little, REFILL to reset the pixels. Nobody wins or loses.',
 'Shapes (arrows, blocks and so on) are hidden for now. You can turn them back on in CUSTOM GAME.'];
 const PW=['crawl','very slow','slow','easy','steady','steady','brisk','brisk','quick','top'],DW=v=>v<=3?'loose':v<=7?'medium':'tight',SW=v=>v<=3?'close':v<=7?'medium':'far',WW=v=>v>=10?'circle':v<=3?'narrow':v<=7?'medium':'wide';
@@ -1168,7 +1253,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){
 window.addEventListener('popstate',()=>{S.paused=true;});
 // menu / custom / help
 let CUS=Object.assign({},DEFCFG);
-function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC48)||localStorage.getItem(KEYC47)||localStorage.getItem(KEYC46)||localStorage.getItem(KEYC45)||localStorage.getItem(KEYC44)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
+function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC49)||localStorage.getItem(KEYC48)||localStorage.getItem(KEYC47)||localStorage.getItem(KEYC46)||localStorage.getItem(KEYC45)||localStorage.getItem(KEYC44)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
 function schemaOf(k){for(const r of CUSTOM)if(r[0]===k)return r;return null;}
 function clampCus(k,v){const r=schemaOf(k);if(!r)return v;if(r[3]==='b')return v?1:0;if(r[3]==='e')return clamp(Math.round(v),0,(LBL[k]||[0,1]).length-1);return clamp(v,r[4],r[5]);}
 function saveCustom(){try{localStorage.setItem(KEYC,JSON.stringify(CUS));}catch(e){}}
@@ -1226,7 +1311,7 @@ $('cBack').addEventListener('click',()=>showView('menu'));$('hBack').addEventLis
 $('hbody').innerHTML=HELP.map(t=>'<p>'+t+'</p>').join('');
 // ---------- prefs (validated, never throws)
 const prefs={wins:0,losses:0,stage:0,diff:3,autoDist:0};
-function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY48)||localStorage.getItem(KEY47)||localStorage.getItem(KEY46)||localStorage.getItem(KEY45)||localStorage.getItem(KEY44)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
+function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY49)||localStorage.getItem(KEY48)||localStorage.getItem(KEY47)||localStorage.getItem(KEY46)||localStorage.getItem(KEY45)||localStorage.getItem(KEY44)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
   for(const k of['speed','sdens','compact','width'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
   if(fin(+v.density)||fin(+v.spacing))setSetting(0,'density',migDensity(v.density,v.spacing));
   if(fin(+v.release))setSetting(0,'release',migRelease(v.release));
@@ -1309,7 +1394,7 @@ window.__pw={get S(){return S;},get CFG(){return CFG;},set CFG(v){CFG=v;},get ME
  C:{W,H,CAPMAX,PSP,CONTACT,STUN,MAXP,MAXSQ,DEFCFG,SHAPES,NSH,MAXCUS,POLYMAX,MX,MY},
  px,py,pvx,pvy,pox,poy,php,pst,pstun,pps,pcd,pwc,pid,psq,pslot,plu,plv,pcnt,pspm,psh,pcap,release,recall,collide,movePixels,tick,startBattle,aiPlan,aiAdapt,placeCircle,pathExtend,pathTrim,wallBegin,wallExtend,wallEnd,eraseAt,eraseStroke,
  branchBegin,branchExtend,rateOf,flowPS,onField,flowRate,clearAiMem,saveAiMem,loadAiMem,get AIMEM(){return AIMEM;},aiAdapt,aiOpenBranch,toolDown,toolMove,toolUp,wallSmooth,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},sbx,sandboxRefill,sandboxStep,setPathSetting,pfree,freePix,pfade,FADE_T,VFX,vfxStep,pbnc,get vpN(){return vpN;},VPMAX,vAdd,vX,vY,vLife,vKind,prepNeeds,tryStart,autoDefense,aiPrepPlan,wallLen,MINPATH,MINWALL,vkOf,tkOf,PACE_REF,
- setRnd(f){rnd=f;},useShape,shapeLeft,cdTicks,shapeOk,rhoAt,burnPool,loseLife,plife,qN,cntA,nearOwnWall,nearOwnPath,clrOf,cellHP,aiShapes,aiOpenBranch,brCol,BRCOL,pset,selectAt,POOL,get qHead(){return qHead;},newGame,buildWallGrid,wallsLeft,prefs,endMatch,autoStart,startWith,showView,buildCustom,get CUS(){return CUS;},CUSTOM,pathAt,restart,canWall,canDef,canBr,canMain,nearDefense,laneHW,laneHalf,aiRevisePlan,aiOpenBranch,aiBestOpening,rebuildSegs,crossesOwnWall,compact,rejoinOf,nearestOnPath,mergeRad};
+ setRnd(f){rnd=f;},useShape,shapeLeft,cdTicks,shapeOk,rhoAt,burnPool,loseLife,plife,qN,cntA,nearOwnWall,nearOwnPath,clrOf,cellHP,aiShapes,aiOpenBranch,brCol,BRCOL,pset,selectAt,POOL,get qHead(){return qHead;},newGame,buildWallGrid,wallsLeft,prefs,endMatch,autoStart,startWith,showView,buildCustom,get CUS(){return CUS;},CUSTOM,pathAt,restart,canWall,canDef,canBr,canMain,nearDefense,laneHW,laneHalf,aiRevisePlan,aiOpenBranch,aiBestOpening,aiDefenseRoute,aiPathClash,aiFillDens,aiZoneFoeDom,aiMirror,aiNotePlayer,rebuildSegs,crossesOwnWall,compact,rejoinOf,nearestOnPath,mergeRad,flashConn,FINGER,LOOP_CAP,get ploop(){return ploop;}};
 // ---------- boot
 newGame(((Math.random()*4294967296)>>>0)||1,false);
 loadPrefs();loadCustom();loadForms();syncForms();loadAiMem();

@@ -2,13 +2,13 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Papa Potato 0.4.2</title>
+<title>Papa Potato 0.4.9</title>
 <style>
-/* Papa Potato 0.4.1 (Tough & J's Arcade). Art lock: 0.3.1 Papa (sleep locked) + 0.4 machines/decor. Swarm DPR. */
+/* Papa Potato 0.4.9 (Tough & J's Arcade). Art lock: 0.3.1 Papa (sleep locked) + 0.4 machines/decor. Swarm DPR. */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;font-family:"Courier New",Courier,monospace;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 :root{--hud-w:100px;--rail-w:48px;--cmd-pad:6px;--gap:4px;--tap:44px;--box-h:48px;--buy-h:44px;--tray-h:0px;
-  --cmd-h:calc(var(--cmd-pad)*2 + var(--buy-h) + var(--gap) + var(--box-h)*3 + var(--gap)*2)}
+  --now-h:44px;--cmd-h:calc(var(--cmd-pad)*2 + var(--now-h) + var(--gap) + var(--buy-h) + var(--gap) + var(--box-h)*3 + var(--gap)*2)}
 @media (min-height:700px){:root{--hud-w:108px}}
 #app{position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) var(--hud-w);grid-template-rows:minmax(0,1fr) var(--tray-h) var(--cmd-h);
   grid-template-areas:"stage hud" "tray hud" "cmd cmd";background:#0c1220}
@@ -21,8 +21,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 #play .tag.off{opacity:0}
 /* t1072: in-game name labels are hidden (not deleted). They did not follow objects in the editor. */
 #play .tag{display:none!important}
-#hint{position:absolute;z-index:3;left:8px;right:8px;top:8px;font:700 10px/1.3 "Courier New",monospace;color:#fff3c0;background:rgba(10,14,24,.88);border:1px solid #6a5020;border-radius:4px;padding:5px 7px;pointer-events:none;transition:opacity .4s;text-align:center}
-#hint.off{opacity:0}
+#hint{display:block;margin:0 0 6px;font:700 10px/1.3 "Courier New",monospace;color:#fff3c0;background:rgba(10,14,24,.88);border:1px solid #6a5020;border-radius:4px;padding:5px 7px;pointer-events:none;text-align:center}
+#hint.off{display:none}
 .pop{position:absolute;z-index:3;font:700 11px/1 "Courier New",monospace;color:#ffe066;text-shadow:1px 1px 0 #000;pointer-events:none;white-space:nowrap}
 #hud{grid-area:hud;overflow:hidden;background:#0c1220;border-left:2px solid #2a3a58;display:flex;flex-direction:column;padding:8px 6px;min-width:0}
 #hud>*{margin-bottom:8px}
@@ -34,6 +34,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 .stat .k{display:block;color:#9ab;font:700 8px/1 monospace;letter-spacing:.1em;margin-bottom:4px}
 .stat .coins{color:#ffe066;font:700 18px/1 monospace;letter-spacing:.02em;display:flex;align-items:center}
 .stat .coins canvas{width:14px;height:14px;image-rendering:pixelated;flex:0 0 auto;margin-right:5px}
+.stat .shipc{display:flex;flex-direction:row;flex-wrap:wrap;gap:2px 8px;font:700 9px/1.1 monospace;letter-spacing:.02em;margin-top:3px}
+.stat .shipc .wsh{color:#9fd86a}
+.stat .shipc .unw{color:#e0c070}
+.stat .shipc b{font-weight:700}
+#nowBtns button.hold{border-color:#ffe066;color:#ffe066;background:#2a2410}
+#nowBtns button.need{border-color:#6a4860;color:#c090a0}
 .stat .food{color:#f0c890;font:700 13px/1 monospace;display:flex;align-items:center}
 .stat .food canvas{width:14px;height:14px;image-rendering:pixelated;flex:0 0 auto;margin-right:5px}
 .stat .food.out{color:#ff7a5a}
@@ -60,6 +66,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 #cmd{grid-area:cmd;overflow-x:auto;overflow-y:auto;background:#0c1220;border-top:3px solid #3a5080;padding:var(--cmd-pad);
   touch-action:none;box-shadow:0 -8px 18px rgba(0,0,0,.4);scrollbar-width:none;overscroll-behavior:contain}
 #cmd::-webkit-scrollbar{display:none}
+
+#nowBtns{display:flex;gap:4px;margin:0 0 4px;flex:0 0 auto}
+#nowBtns button{flex:1 1 0;height:var(--now-h);min-height:var(--now-h);border:3px solid #3a5080;border-radius:4px;background:#14203a;color:#cde;
+  font:700 11px/1 monospace;letter-spacing:.04em;box-shadow:inset 0 -3px #0a1226;padding:0;touch-action:none}
+#nowBtns button.press{background:#1f3150;border-color:#ffe066;color:#ffe066;box-shadow:inset 0 2px #0a1226}
+#nowBtns button.off{opacity:.42;color:#8aa}
+#nowBtns button.need{border-color:#6a5020;color:#d8b878}
+
 .box{height:var(--box-h);background:#1a2840;border:2px solid #2e4060;border-radius:5px;box-shadow:inset 0 -3px rgba(0,0,0,.2);
   display:flex;align-items:center;padding:0 4px;margin-bottom:var(--gap);position:relative}
 .box.focus{border-color:#ffe066;background:#1f3150}
@@ -163,9 +177,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
 #bkNav .dots i{display:inline-block;width:7px;height:7px;margin:0 2px;background:#3a4a60;border-radius:1px}
 #bkNav .dots i.on{background:#ffe066}
 .note{font:700 10px/1.4 monospace;color:#9ab;margin:2px 2px 8px}
+@media (max-height:640px){
+  /* 0.4.3: the instant-command row would shrink the stage on short screens and drive STATE/EDIT together. Reserve 2 slider boxes (they already scroll) so the HUD still fits. */
+  :root{--cmd-h:calc(var(--cmd-pad)*2 + var(--now-h) + var(--gap) + var(--buy-h) + var(--gap) + var(--box-h)*2 + var(--gap)*2)}
+}
 @media (max-height:600px){
   #hud{padding:6px 5px}#hud>*{margin-bottom:6px}
   .stat .coins{font-size:16px}
+  .stat .shipc{font-size:8px;margin-top:2px;gap:2px 6px}
+  /* 0.4.5: the SHIPPED counts live under COINS; hide the live-action line on short screens so it cannot sit on EDIT (the STATE chip still shows). Hidden, not deleted. Buttons try 44px. */
+  #doing{display:none}
   .st{padding:3px 3px;font-size:8px;margin-bottom:2px}
   .box .nm,.box .val{font-size:9px}
   #bar button{font-size:12px}
@@ -250,7 +271,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
       <div class="tag off" id="tagLine">TO SHIP</div>
       <div class="tag off" id="tagSink">SINK</div>
       <div class="tag off" id="tagTV">TV + CHAIR</div>
-      <div id="hint" class="off" data-tt-allow-overlap></div>
     </div>
     <aside id="rightRail" class="rail" aria-label="Zoom and editor">
       <div id="zoomRail">
@@ -262,9 +282,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
     </aside>
   </div>
   <aside id="hud">
-    <div class="brand"><b>PAPA<br>POTATO</b><span>v0.4.2</span></div>
+    <div class="brand"><b>PAPA<br>POTATO</b><span>v0.4.9</span></div>
     <div class="stat"><span class="k">LEVEL</span><div class="lv" id="level">1 / 5</div></div>
-    <div class="stat"><span class="k">COINS</span><div class="coins"><canvas id="coinIco" width="14" height="14"></canvas><span id="coins">0</span></div></div>
+    <div class="stat"><span class="k">COINS</span><div class="coins"><canvas id="coinIco" width="14" height="14"></canvas><span id="coins">0</span></div>
+      <div class="shipc" title="Washed vs unwashed shipped"><span class="wsh">3c <b id="washedN">0</b></span><span class="unw">2c <b id="unwashedN">0</b></span></div>
+    </div>
     <div class="two">
       <div class="stat"><span class="k">FOOD</span><div class="food" id="foodRow"><canvas id="foodIco" width="14" height="14"></canvas><span id="food">0</span></div></div>
       <div class="stat"><span class="k">PEELS</span><div class="food peels" id="peelRow"><canvas id="peelIco" width="14" height="14"></canvas><span id="peels">0</span></div></div>
@@ -294,13 +316,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#12141a;color:#eee;f
     </div>
   </div>
   <section id="cmd" data-tt-allow-overlap>
+    <div id="hint" class="off" data-tt-allow-overlap></div>
+    <div id="nowBtns"></div>
     <div id="boxes"></div>
     <div id="bar"><button id="invBtn" type="button" data-act="inv">INV</button><button id="shopBtn" type="button" data-act="shop">SHOP</button><button id="helpBtn" type="button" data-act="help">? HELP</button></div>
   </section>
   <div id="ovl"><div id="ovlHead"><span class="tt" id="ovlTitle"></span><span class="cn" id="ovlCoins"></span><button class="x" id="ovlClose" type="button" data-act="close" aria-label="Close">X</button></div><div id="ovlBody"></div></div>
 </div>
 <script>
-/* ===== Papa Potato 0.4.2 — simulation (0.4.2: grid-safe routing, exact arrival, any-side table stand, rotate, sack on the floor, sink dump, anti-loop). Was 0.4.1 — (no DOM; runs headless for tests). Built on 0.4 + inventory, solid furniture, peel clusters, table children. Save v4. ===== */
+/* ===== Papa Potato 0.4.9 — simulation (0.4.9: stacked basin heap; kitchen pile locked at 9999, POTATOES IN PLAY slider hidden). Was 0.4.8. Save v11, loads v1-v10. ===== */
 var PPSim=(function(){
   var RW=108,RH=280;                    /* 0.4: longer and slightly wider. x,y in the save are fractions of this */
   var PACE=["CHILL","EASY","STEADY","BRISK","GRIND"];
@@ -314,7 +338,7 @@ var PPSim=(function(){
     hungerDrain:0.30, hungerDrainNap:0.10,
     energyDrain:0.42,
     napRegen:6.0, lazyNapRegen:4.0, napWake:98,
-    value:2, sloppyValue:1,
+    value:2, sloppyValue:1, washValue:3, sloppyWashValue:2,   /* 0.4.3: unwashed 2c (same as 0.4.2), washed (pool or sink) 3c full pay; sloppy 1c / 2c */
     lazyLow:25, lazySpeed:0.5,
     startCoins:0, startFood:1,
     chuteCap:6, tPipe:1.6,              /* a full chute's batch spends tPipe in the pipe, then spills out of the return chute */
@@ -325,13 +349,15 @@ var PPSim=(function(){
   };
   var POTS=[4,8,12,16,24,32,48,64,96,128,160,200,250,300,400,500,650,800];
   var POT_MAX=POTS.length-1;
+  var POT_LOCK=9999; /* t1193: kitchen raw-pile stock is locked very high; visual draw stays capped */
+  var POT_SLIDER=false; /* t1193: hide the POTATOES IN PLAY slider; command stays in the table */
   /* ---- room geometry (units; room = 100 wide x 240 tall). The renderer draws from these; the router avoids OBST. ---- */
   var GEO={WALL:7,INFL:9,
     ship:{x:54,lip:22,top:2,mouth:18},                 /* FIXED: shipping chute hangs from the top wall */
     /* 0.4.1 default layout: work loop uses the mid-room so a fitted view is not a long empty hallway */
     table:{x0:36,y0:112,x1:70,y1:130},
     cooler:{x0:80,y0:108,x1:94,y1:118},
-    stool:{x:87,y:130},
+    stool:{x:87,y:154},   /* 0.4.3: sits clear of the cooler so he can eat at the cooler front */
     mat:{x:74,y:200,w:32,h:18},
     pile:{cx:54,base:258,rx:45,rz:14},                 /* FIXED */
     ret:{wallX:101,mouthX:86,y:244,w:9},               /* FIXED: return chute */
@@ -389,7 +415,7 @@ var PPSim=(function(){
   function freePtX(x,y,skip){for(var j=0;j<OBST.length;j++){var o=OBST[j];if(o.id===skip)continue;var I=GEO.INFL;if(x>o.x0-I&&x<o.x1+I&&y>o.y0-I&&y<o.y1+I)return false;}return true;}
   var OBST=[{id:"table",x0:GEO.table.x0,y0:GEO.table.y0,x1:GEO.table.x1,y1:GEO.table.y1},{id:"cooler",x0:GEO.cooler.x0,y0:GEO.cooler.y0,x1:GEO.cooler.x1,y1:GEO.cooler.y1}];
   var SPOT={
-    ship:{x:60,y:40,dir:3},
+    ship:{x:54,y:32,dir:0},  /* 0.4.7: right at the belt end, facing the scanner */
     table:{x:53,y:140,dir:0},
     food:{x:87,y:130,dir:0},
     mat:{x:74,y:221,dir:0},
@@ -424,8 +450,8 @@ var PPSim=(function(){
       range:"OFF, 5 to 90 peels (step 5)"},
     {id:"pot",does:"How many potatoes are in the loop.",affects:"More = bigger pile, no waiting. The top of the slider is what you own (buy more in the SHOP).",hi:"OWNED",lo:"4",name:"POTATOES IN PLAY",min:0,max:POT_MAX,step:1,def:6,dyn:"potCap",
       what:"How many potatoes are in the loop (pile + hands + chute + pipe).",
-      effect:"More potatoes = a bigger pile and he never waits for the pipe. Fewer = a small pile. The top of the slider is what you own: buy more in the SHOP.",
-      range:"4 up to the amount you own (4, 8, 12 ... 800)"},
+      effect:"The kitchen pile is fully stocked (9999 potatoes in the loop). The POTATOES IN PLAY slider is hidden, not deleted. Visual pile drawing stays capped for perf.",
+      range:"Locked at 9999 (slider hidden)"},
     {id:"style",does:"How carefully he peels.",affects:"NEAT: slow, 2 peels. NORMAL: 3 peels. QUICK: fast, 5 peels (messy).",hi:"QUICK",lo:"NEAT",name:"PEEL STYLE",min:0,max:2,step:1,def:1,
       what:"How carefully he peels.",
       effect:"NEAT x0.8 speed, 2 peels per potato (clean floor). NORMAL x1.0, 3 peels. QUICK x1.3 speed, 5 peels per potato (fast but very messy).",
@@ -476,7 +502,11 @@ var PPSim=(function(){
       range:"OFF, 10 to 90 dryness (step 10)"},
     {id:"wash",does:"Sends him to the sink with a raw potato for a cleaner peel.",affects:"ON = he washes a potato at the sink before peeling (worth +1c). Needs the sink.",hi:"ON",lo:"OFF",name:"WASH BEFORE PEEL",min:0,max:1,step:1,def:0,fmt:"onoff",need:"sink",
       what:"When ON, he walks a raw potato to the sink and washes it before he peels.",
-      effect:"A washed potato is worth 3c instead of 2c (still 1c if sloppy). Takes a few seconds at the sink. Needs the sink bought.",
+      effect:"A washed potato ships at full pay (3c) instead of 2c (still 1c / 2c if sloppy) from the kitchen chute. Takes a few seconds at the sink. Needs the sink bought.",
+      range:"OFF or ON"},
+    {id:"awash",does:"After peeling, he places potatoes in the kitchen scanner; they come out the wash-room machine into the basin.",affects:"ON = he drops peeled potatoes in the kitchen wall hole and they come out into the wash-room pool (3c through the ship hole). OFF = they pay 2c at that same kitchen hole. Needs AUTO-WASH and the key.",hi:"ON",lo:"OFF",name:"AUTO-WASH",min:0,max:1,step:1,def:0,fmt:"onoff",need:"autoWash",
+      what:"When ON, he places peeled potatoes in the kitchen X-ray scanner; they come out the matching wash-room machine into the basin and the canal carries them to the ship opening at full pay.",
+      effect:"ON = 3c washed path, on his own, after each peel (and for the auto-line too). OFF = kitchen chute at 2c (or 3c if already sink-washed). Needs AUTO-WASH bought and the ROOM KEY.",
       range:"OFF or ON"}
   ];
   var BOX={};for(var ci=0;ci<COMMANDS.length;ci++){var cm=COMMANDS[ci];BOX[cm.id]={min:cm.min,max:cm.max,step:cm.step,def:cm.def};}
@@ -490,14 +520,16 @@ var PPSim=(function(){
     {id:"mat",name:"SOFT BED",max:2,prices:[30,90],fx:"Naps restore energy 35% faster per level."},
     {id:"apeeler",name:"FASTER AUTO-PEELER",max:3,prices:[50,140,300],fx:"Auto-peeler works 20% faster and holds 1 more potato per level."},
     {id:"belts",name:"BETTER BELTS",max:3,prices:[40,120,260],fx:"All conveyor belts run 15% faster per level."},
-    {id:"bag",name:"BIGGER CARRY BAG",max:2,prices:[25,80],fx:"He can carry 1 extra potato per level (2, then 3)."}
+    {id:"bag",name:"BIGGER CARRY BAG",max:2,prices:[25,80],fx:"He can carry 1 extra potato per level (2, then 3)."},
+    {id:"channel",name:"WIDER CHANNEL",max:2,prices:[70,180],fx:"The canal is very slow at first. Each level makes the current meaningfully faster and the canal a little wider. Level 2 also pulls nearby potatoes in from farther."}
   ];
 
   /* ---- 0.4 shop items (unlocked by level, then bought). Unused stay in the table, hidden in the shop until unlocked. ---- */
   var ITEMS=[
+    {id:"roomKey",name:"ROOM KEY",lv:1,price:40,group:"starter",kind:"key",fx:"Unlocks the metal door. Behind it is a wash room. Peeled potatoes go into the kitchen X-ray scanner, which sends them through the wall; they come out a matching machine at the bottom of the wash room into a basin, and a canal along the right wall carries them to a ship opening (3c). Unwashed still ship at the kitchen scanner for 2c."},
     {id:"betterPeeler",name:"BETTER PEELER",lv:1,price:20,group:"starter",kind:"tool",fx:"Goes to your inventory. Equip it on Papa. Peeling is 10% faster while equipped."},
     {id:"carryBag",name:"SMALL CARRY BAG",lv:1,price:18,group:"starter",kind:"tool",fx:"Goes to your inventory. Equip it on Papa to carry 2 potatoes at a time (3 / 4 with upgrades)."},
-    {id:"sink",name:"SINK",lv:1,price:25,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. WASH BEFORE PEEL sends him here for a +1c clean potato."},
+    {id:"sink",name:"SINK",lv:1,price:25,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. WASH BEFORE PEEL dumps raw potatoes here so they already count as washed and ship at full pay (3c) from the kitchen chute."},
     {id:"broomDustpan",name:"SMALL BROOM + DUSTPAN",lv:1,price:16,group:"starter",kind:"tool",fx:"Goes to your inventory. Equip it on Papa. He sweeps at the peel mess, broom on the peels. Stiff Broom still upgrades speed."},
     {id:"smallCooler",name:"SMALL COOLER",lv:1,price:22,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Adds 2 food slots. Hums when stocked."},
     {id:"basicCot",name:"BASIC COT",lv:1,price:28,group:"starter",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. A second bed he can nap on (enters from the side)."},
@@ -509,7 +541,8 @@ var PPSim=(function(){
     {id:"outConveyor",name:"OUT-CONVEYOR",lv:3,price:80,group:"machine",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. Belt into the shipping intake."},
     {id:"radio",name:"RADIO",lv:3,price:22,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. He walks over to tune it now and then."},
     {id:"rug",name:"RUG",lv:3,price:18,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. A rug he will stand on."},
-    {id:"tvArmchair",name:"TV + ARMCHAIR",lv:4,price:90,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. He sits in the chair when you set WATCH WHEN ENERGY <."}
+    {id:"tvArmchair",name:"TV + ARMCHAIR",lv:4,price:90,group:"decor",kind:"place",fx:"Goes to your inventory. Drag it into the room from EDIT. He sits in the chair when you set WATCH WHEN ENERGY <."},
+    {id:"autoWash",name:"AUTO-WASH",lv:4,price:220,group:"machine",kind:"toggle",fx:"An expensive late upgrade. Once bought, the AUTO-WASH command appears. When ON, he places peeled potatoes in the kitchen X-ray scanner; they come out the matching wash-room machine into the basin, then ride the canal to the ship opening (3c). Needs the ROOM KEY."}
   ];
   var ITEMI={};for(var ii=0;ii<ITEMS.length;ii++)ITEMI[ITEMS[ii].id]=ITEMS[ii];
   var LEVEL_PRICE=[0,0,80,160,280,450]; /* cost to BUY that level (reach Lv N). Max 5. */
@@ -517,6 +550,92 @@ var PPSim=(function(){
   var SPEED_NAME=["OFF","SLOW","STEADY","FAST"];
   var UPI={};for(var ui=0;ui<UPS.length;ui++)UPI[UPS[ui].id]=UPS[ui];
   function upsFresh(){var o={};for(var i=0;i<UPS.length;i++)o[UPS[i].id]=0;return o;}
+  /* ---- 0.4.8 wash room: peeled heap accumulates in the basin water under the outlet; the current peels it into the canal. Wash scanner is scaled to the same on-screen size as the kitchen scanner (world * WH/RH). Old dry west pile stays hidden (t1191). Top half stays empty (t1187). ---- */
+  var WW=180,WH=400,WASH_LIVE=48,WASH_R=3.2,HEAP_VIS=36,HEAP_SPILL=24;
+  var WASH={
+    door:{x0:22,y0:7-0.6,w:24,h:20},
+    intake:{x:90,y:32},          /* 0.4.3 north intake; hidden */
+    ship:{x:150,y:32},           /* 0.4.3 north ship-out; hidden */
+    pile:{cx:64,cy:230,rx:52,rz:50}, /* 0.4.x dry west pile; hidden in 0.4.8, not deleted */
+    pool:{x:148,y:200,rx:16,ry:12}, /* 0.4.3 circular pool; hidden */
+    mouth:{x:112,y:230},           /* 0.4.4 diagonal mouth; hidden */
+    inlet:{x:90,y:400-7,r:14},     /* 0.4.5 south-wall inlet hole; hidden, not deleted */
+    outlet:{x:90,boxW:23,boxH:21}, /* 0.4.8: same on-screen size as the 16x15 kitchen scanner (scale WH/RH) */
+    land:{x:90,y:342,rx:36,ry:22}, /* basin just north of the larger outlet mouth, with a clear pour gap */
+    bench:{y:352,x0:54,x1:126},    /* 0.4.5 floating bench; hidden, not deleted */
+    elbow:{x:164,y:342},           /* canal turns north; same x as the ship opening (no diagonal stub) */
+    hole:{x:164,y:20,r:14,w:30,h:20}, /* square ship opening, wider than lv2 canal, top-right */
+    showProps:false,               /* t1187: top half stays empty for future machinery/decor; props stay, hidden */
+    showDryPile:false,             /* t1191: old dry west pile stays in the file, hidden */
+    crate:{x:30,y:88},             /* west-wall utility crates; hidden while showProps is false */
+    crate2:{x:38,y:106},
+    bucket:{x:28,y:150},           /* mop bucket; hidden while showProps is false */
+    grate:{x:114,y:126,s:16},      /* floor drain; hidden while showProps is false */
+    shelf:{x:100,y:16,w:28,h:8},   /* short north-wall shelf; hidden while showProps is false */
+    doorSpot:{x:34,y:32,dir:0},
+    kitDoor:{x0:17,y0:7-0.6,w:20,h:18.5},
+    kitDoorSpot:{x:27,y:30,dir:0}
+  };
+  var WASH0=JSON.parse(JSON.stringify(WASH));
+  function canalWidth(up){return 12+6*(up|0);}
+  function streetWidth(up){return canalWidth(up);}
+  function currentReach(up){return (up|0)<=0?0:((up|0)===1?12:22);}
+  function streetFlow(up){return (up|0)<=0?10:((up|0)===1?32:62);}
+  function heapPullRate(up){return (up|0)<=0?1.6:((up|0)===1?5:11);} /* potatoes/sec from the basin heap onto the canal */
+  function heapCenter(){var L=WASH.land;return {x:L.x,y:L.y+L.ry*0.34};}
+  function inCanalProper(x,y,up){if(inLanding(x,y))return false;var p=projectCanal(x,y);return !!(p&&p.d<=canalWidth(up)/2);}
+  function inHeap(p){return !!(p&&!p.onStreet&&inLanding(p.x,p.y));}
+  function washHeapCount(w){w=w||{pots:[],bulk:0};var n=w.bulk|0,i;for(i=0;i<(w.pots||[]).length;i++)if(inHeap(w.pots[i]))n++;return n;}
+  function clampToBasin(p){if(!p||p.onStreet)return;var L=WASH.land,dx=(p.x-L.x)/L.rx,dy=(p.y-L.y)/L.ry,m=dx*dx+dy*dy;if(m>0.92){var sc=Math.sqrt(0.92/m);p.x=L.x+dx*L.rx*sc;p.y=L.y+dy*L.ry*sc;p.vx*=0.4;p.vy*=0.4;}}
+  function canalPts(){return [{x:WASH.land.x,y:WASH.land.y},{x:WASH.elbow.x,y:WASH.elbow.y},{x:WASH.hole.x,y:WASH.hole.y}];}
+  function mouthOf(){return {x:WASH.land.x,y:WASH.land.y};}
+  function streetSeg(){var p=canalPts();return {x0:p[0].x,y0:p[0].y,x1:p[p.length-1].x,y1:p[p.length-1].y};}
+  function distToSeg(x,y,s){var dx=s.x1-s.x0,dy=s.y1-s.y0,l=dx*dx+dy*dy||1,t=((x-s.x0)*dx+(y-s.y0)*dy)/l;t=t<0?0:t>1?1:t;var px=s.x0+dx*t,py=s.y0+dy*t,len=Math.sqrt(l);return {d:Math.hypot(x-px,y-py),px:px,py:py,t:t,nx:dx/len,ny:dy/len};}
+  function projectCanal(x,y){
+    var pts=canalPts(),best=null,acc=0,i,s,len,total=0,j;
+    for(j=0;j<pts.length-1;j++)total+=Math.hypot(pts[j+1].x-pts[j].x,pts[j+1].y-pts[j].y)||1;
+    for(i=0;i<pts.length-1;i++){
+      len=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y)||1;
+      s=distToSeg(x,y,{x0:pts[i].x,y0:pts[i].y,x1:pts[i+1].x,y1:pts[i+1].y});
+      s.seg=i;s.len=len;s.progress=(acc+s.t*len)/total;s.total=total;
+      /* at the elbow, prefer the segment farther along so potatoes turn the corner instead of pinning to the wall */
+      if(!best||s.d<best.d-1.2||(s.d<=best.d+1.2&&s.progress>best.progress))best=s;
+      acc+=len;
+    }
+    return best;
+  }
+  function pointAlongCanal(u){
+    var pts=canalPts(),total=0,j,len,acc=0,t,d;
+    u=u<0?0:u>1?1:u;
+    for(j=0;j<pts.length-1;j++)total+=Math.hypot(pts[j+1].x-pts[j].x,pts[j+1].y-pts[j].y)||1;
+    d=u*total;
+    for(j=0;j<pts.length-1;j++){
+      len=Math.hypot(pts[j+1].x-pts[j].x,pts[j+1].y-pts[j].y)||1;
+      if(acc+len>=d||j===pts.length-2){
+        t=(d-acc)/len;t=t<0?0:t>1?1:t;
+        return {x:pts[j].x+(pts[j+1].x-pts[j].x)*t,y:pts[j].y+(pts[j+1].y-pts[j].y)*t};
+      }
+      acc+=len;
+    }
+    return {x:pts[pts.length-1].x,y:pts[pts.length-1].y};
+  }
+  function inLanding(x,y){var L=WASH.land,dx=(x-L.x)/L.rx,dy=(y-L.y)/L.ry;return dx*dx+dy*dy<=1;}
+  function inStreet(x,y,up){var p=projectCanal(x,y);return !!(p&&p.d<=canalWidth(up)/2)||inLanding(x,y);}
+  function inPool(x,y){return inLanding(x,y);}
+  function washFresh(){return {pots:[],bulk:0,bulkW:0,bulkS:0,bulkSW:0,splash:[],heapSplash:[],pullAcc:0};}
+  function shipPay(p){
+    if(p&&p.sloppy)return p.washed?C.sloppyWashValue:C.sloppyValue;
+    return (p&&p.washed)?C.washValue:C.value;
+  }
+  function washCount(w){w=w||{pots:[],bulk:0};return (w.pots?w.pots.length:0)+(w.bulk|0);}
+  function ensureWash(s){if(!s.wash||typeof s.wash!=="object")s.wash=washFresh();
+    if(!Array.isArray(s.wash.pots))s.wash.pots=[];if(!Array.isArray(s.wash.splash))s.wash.splash=[];if(!Array.isArray(s.wash.heapSplash))s.wash.heapSplash=[];
+    s.wash.bulk=Math.max(0,s.wash.bulk|0);s.wash.bulkW=Math.max(0,s.wash.bulkW|0);
+    s.wash.bulkS=Math.max(0,s.wash.bulkS|0);s.wash.bulkSW=Math.max(0,s.wash.bulkSW|0);
+    if(s.viewRoom!=="wash")s.viewRoom="kitchen";if(s.followRoom==null)s.followRoom=null;
+    if(!s.g)s.g={};if(s.g.where!=="wash")s.g.where="kitchen";
+    if(!isFinite(+s.g.wx))s.g.wx=WASH.doorSpot.x;if(!isFinite(+s.g.wy))s.g.wy=WASH.doorSpot.y;
+    if(!s.placeWash||typeof s.placeWash!=="object")s.placeWash={};}
   function hash(a,b){var x=Math.imul((Math.round(a*1000)|0)^0x9e3779b9,0x85ebca6b)^Math.imul((b|0)+1,0xc2b2ae35);x^=x>>>13;x=Math.imul(x,0x27d4eb2f);x^=x>>>15;x=Math.imul(x,0x165667b1);x^=x>>>16;return (x>>>0)/4294967296;}
   /* the spill schedule of one batch: when potato j leaves the return chute (ex) and when it comes to rest on the pile (ld). Pure function of (t0,n): sim and renderer share it. */
   function spill(t0,n){var ex=[],ld=[],t=t0+C.tPipe,pl=0;
@@ -601,16 +720,17 @@ var PPSim=(function(){
   }
   function fresh(seed){
     seed=(seed>>>0)||((Math.random()*4294967295)>>>0);
-    var b={};for(var id in BOX)b[id]=BOX[id].def;
-    return {v:4,seed:seed,rs:0,rr:seed|0,t:0,level:1,
+    var b={};for(var id in BOX)b[id]=BOX[id].def;b.pot=POT_MAX;
+    return {v:11,seed:seed,rs:0,rr:seed|0,t:0,level:1,
       coins:C.startCoins,food:C.startFood,hunger:100,energy:100,
-      box:b,potCap:C.potBase,up:upsFresh(),
+      box:b,potCap:POT_MAX,up:upsFresh(),
       owned:{},place:{},equipped:{},line:lineFresh(),
       decor:{lamp:0,radio:0,tv:0,plant:0,plantT:0,radioTune:0},
-      pile:POTS[BOX.pot.def],chute:0,suck:null,peels:0,mess:[],
+      wash:washFresh(),viewRoom:"kitchen",followRoom:null,placeWash:{},
+      pile:POT_LOCK,chute:0,suck:null,peels:0,mess:[],
       stats:{peeled:0,earned:0,meals:0,naps:0,lazyNaps:0,bought:0,spent:0,lazyTime:0,eatTime:0,napTime:0,firstBuyT:-1,
-        sucks:0,swept:0,sweeps:0,peelsMade:0,maxPeels:0,cleanTime:0,waitTime:0,boughtPot:0,boughtUp:0,autoBuys:0},
-      g:{x:0.5,y:0.20,dir:2,hold:null,held:0,washed:false,job:"pile",peel:0,pgot:0,sloppy:false,lazy:false,act:null,walkPh:0},
+        sucks:0,swept:0,sweeps:0,peelsMade:0,maxPeels:0,cleanTime:0,waitTime:0,boughtPot:0,boughtUp:0,autoBuys:0,washedShip:0,unwashedShip:0},
+      g:{x:0.5,y:0.20,dir:2,hold:null,held:0,washed:false,job:"pile",peel:0,pgot:0,sloppy:false,lazy:false,act:null,walkPh:0,where:"kitchen",wx:WASH.doorSpot.x,wy:WASH.doorSpot.y,force:null},
       ev:[]};
   }
   function Sim(st){
@@ -623,7 +743,7 @@ var PPSim=(function(){
       if(g0.miss&&!Array.isArray(g0.miss))g0.miss=[];if(Array.isArray(g0.miss))g0.miss=g0.miss.filter(function(m){return m&&isFinite(+m.x)&&isFinite(+m.y)&&isFinite(+m.t);}).slice(-8);
       if(g0.lp&&typeof g0.lp!=="object")g0.lp=null;if(g0.sweepTo&&!(isFinite(+g0.sweepTo.x)&&isFinite(+g0.sweepTo.y)))g0.sweepTo=null;}
     for(var pk in this.s.place){var pp=this.s.place[pk];if(!pp||typeof pp!=="object"||!isFinite(+pp.x)||!isFinite(+pp.y)){delete this.s.place[pk];continue;}if(pp.r!=null){pp.r=(Math.floor(+pp.r)||0)&3;}}
-    this.syncGeom();this.rebuildObst();
+    ensureWash(this.s);this.syncGeom();this.syncWashGeom();this.rebuildObst();
     if(!this.s.g.act)this.decide();
   }
   var P=Sim.prototype;
@@ -642,8 +762,8 @@ var PPSim=(function(){
   P.sweepRate=function(){return C.sweepRate*(1+0.5*this.up("broom"));};
   P.napRegen=function(){return C.napRegen*(1+0.35*this.up("mat"));};
   P.potMax=function(){return Math.max(0,Math.min(POT_MAX,this.s.potCap));};
-  P.target=function(){return POTS[this.s.box.pot];};
-  P.total=function(){var s=this.s,k=s.suck,L=s.line;var ln=L?((L.beltIn?L.beltIn.length:0)+(L.peeler?1:0)+(L.beltOut?L.beltOut.length:0)):0;return s.pile+this.heldN()+s.chute+(k?k.n-k.landed:0)+ln;};
+  P.target=function(){return POT_LOCK;}; /* 0.4.9: kitchen stock is locked; box.pot stays in the save */
+  P.total=function(){var s=this.s,k=s.suck,L=s.line;var ln=L?((L.beltIn?L.beltIn.length:0)+(L.peeler?1:0)+(L.beltOut?L.beltOut.length:0)):0;return s.pile+this.heldN()+s.chute+(k?k.n-k.landed:0)+ln+washCount(s.wash);};
   /* a full chute (or an empty pile) sends the batch up the pipe; it spills out of the return chute onto the pile */
   P.startSuck=function(){var s=this.s;if(s.suck||s.chute<=0)return false;s.suck={t0:s.t,n:s.chute,landed:0};s.chute=0;s.stats.sucks++;this.emit({k:"suck"});return true;};
   P.retarget=function(){var s=this.s,d=this.target()-this.total();if(d>0){s.pile+=d;return;}
@@ -678,7 +798,15 @@ var PPSim=(function(){
     return true;};
   P.decide=function(){
     var s=this.s,g=s.g,n=this.needState();
-    if(n.wantEat){g.lazy=false;this.walkTo(SPOT.food.x,SPOT.food.y,SPOT.food.dir,"eat","to the food");return;}
+    if(g.where==="wash"){this.decideWash();return;}
+    if(g.force==="eat"&&s.food>0){g.lazy=false;this.walkTo(SPOT.food.x,SPOT.food.y,SPOT.food.dir,"eat","to the cooler");return;}
+    if(g.force==="nap"){g.lazy=false;this.walkTo(SPOT.mat.x,SPOT.mat.y,SPOT.mat.dir,"nap","to the bed");return;}
+    if(g.force==="clean"&&s.peels>0){var swf=this.sweepSpot();if(swf.n){this.walkTo(swf.x,swf.y,swf.dir,"sweep","to sweep");return;}g.force=null;}
+    if(g.force==="washPool"){if(!this.hasKey()){if(!g.holdRepeat)g.force=null;}
+      else if(g.hold==="peeled"&&this.heldN()>0){this.walkTo(SPOT.ship.x,SPOT.ship.y,SPOT.ship.dir,"drop","to the scanner");return;}
+      else if(this.washUnwashed()>0){this.goToWashRoom();return;}
+      else if(!(g.holdRepeat==="wash"||this.wantsAutoWash())){if(!g.holdRepeat)g.force=null;}}
+    if(n.wantEat){g.lazy=false;this.walkTo(SPOT.food.x,SPOT.food.y,SPOT.food.dir,"eat","to the cooler");return;}
     if(n.wantNap){g.lazy=false;this.walkTo(SPOT.mat.x,SPOT.mat.y,SPOT.mat.dir,"nap","to the bed");return;}
     g.lazy=n.lazy;
     if(n.wantClean){var sw=this.sweepSpot();
@@ -694,6 +822,7 @@ var PPSim=(function(){
     }
     /* if the full work line is running, leave the peeling to the machines and do a little living */
     if(this.lineRunning()&&!g.hold){
+      if(this.wantsAutoWash()&&this.washUnwashed()>0){this.goToWashRoom();return;}
       if(this.placed("radio")&&s.box.radio>0&&this.rand()<0.08){var rd=this.placeOf("radio");this.walkTo(rd.x-7.5,rd.y,1,"tune","to tune the radio");return;}
       g.act={t:"idle",d:1.2+this.rand()*2.0,e:0,label:"watching the line"};return;
     }
@@ -701,7 +830,7 @@ var PPSim=(function(){
     else if(g.job==="wash"&&this.placed("sink")&&!this.cooling("wash")&&this.loopGuard("wash")){this.walkTo(SPOT.sink.x,SPOT.sink.y,SPOT.sink.dir,"wash","to the sink");}
     else if(g.job==="wash"){g.job="table";this.walkTo(SPOT.table.x,SPOT.table.y,SPOT.table.dir,"peel","to the table");}
     else if(g.job==="table"||g.job==="peel"){this.walkTo(SPOT.table.x,SPOT.table.y,SPOT.table.dir,"peel","to the table");}
-    else this.walkTo(SPOT.ship.x,SPOT.ship.y,SPOT.ship.dir,"drop","to the chute");
+    else this.walkTo(SPOT.ship.x,SPOT.ship.y,SPOT.ship.dir,"drop","to the scanner");
   };
   P.startAt=function(kind){
     var g=this.s.g;
@@ -716,10 +845,17 @@ var PPSim=(function(){
     else if(kind==="watch"){var sp=this.sitSpot();g.x=sp.x/RW;g.y=sp.y/RH;g.dir=sp.dir;g.act={t:"watch",e:0,label:"watching TV"};}
     else if(kind==="water")g.act={t:"water",e:0,label:"watering the plant"};
     else if(kind==="tune")g.act={t:"tune",e:0,label:"tuning the radio"};
-    else if(kind==="drop")g.act={t:"drop",e:0,label:this.heldN()>1?"shipping them":"shipping it"};
-    else if(kind==="eat")g.act={t:"eat",e:0,label:"eating"};
+    else if(kind==="drop")g.act={t:"drop",e:0,label:this.wantsWashDivert()?(this.heldN()>1?"sending them through the scanner":"placing it in the scanner"):(this.heldN()>1?"shipping them":"placing it in the scanner")};
+    else if(kind==="eat"){
+      /* 0.4.3: food comes out of the cooler, so he eats standing at it, facing it */
+      if(!this.atCooler()){g.emiss=(g.emiss|0)+1;if(g.emiss<=3){this.walkTo(SPOT.food.x,SPOT.food.y,SPOT.food.dir,"eat","to the cooler");return;}}
+      g.emiss=0;g.dir=SPOT.food.dir;g.act={t:"eat",e:0,label:"eating at the cooler"};}
     else if(kind==="sweep"){var tg=this.s.g.sweepTo;g.act={t:"sweep",e:0,acc:0,label:"sweeping up the peels",cx:tg?tg.x:null,cy:tg?tg.y:null};}
     else if(kind==="nap"){g.x=GEO.mat.x/RW;g.y=GEO.mat.y/RH;g.dir=1;g.act={t:"nap",label:"napping on the bed"};this.s.stats.naps++;this.emit({k:"nap"});}
+    else if(kind==="enterWash")this.enterWashRoom();
+    else if(kind==="leaveWash")this.leaveWashRoom();
+    else if(kind==="scoop")this.doScoop();
+    else if(kind==="dumpPool")this.doDumpPool();
   };
   P.peelEmit=function(n,src){var s=this.s;if(!s.mess)s.mess=[];src=src||"table";
     for(var i=0;i<n;i++){if(s.mess.length>=C.peelMax)break;
@@ -761,6 +897,7 @@ var PPSim=(function(){
     if(!s.suck&&s.chute>=this.chuteCap())this.startSuck();
     this.lineStep(dt);
     this.decorStep(dt);
+    this.washStep(dt);
     if(s.box.autob>0&&s.food<s.box.autob&&s.food<this.foodMax()&&s.coins>=this.price()){this.buyFood(true);}
     if(a&&(a.t==="sweep"||(a.t==="walk"&&a.then==="sweep")))s.stats.cleanTime+=dt;
     var resting=a&&(a.t==="nap"||a.t==="lazynap"),eating=a&&a.t==="eat";
@@ -770,6 +907,7 @@ var PPSim=(function(){
     if(g.lazy)s.stats.lazyTime+=dt;
     if(eating||(a&&a.t==="walk"&&a.then==="eat"))s.stats.eatTime+=dt;
     if(resting||(a&&a.t==="walk"&&a.then==="nap"))s.stats.napTime+=dt;
+    if(g.where==="wash"){this.washGuyStep(dt,wsp);return;}
     if(!a){this.decide();return;}
     switch(a.t){
       case "walk":{
@@ -794,28 +932,35 @@ var PPSim=(function(){
           this.emit({k:"peeled",n:nHold});this.decide();}
         break;}
       case "drop":a.e+=dt*wsp;if(a.e>=this.dropTime()){
-          if(s.chute>=this.chuteCap()){a.e=this.dropTime();a.label="waiting for the chute";s.stats.waitTime+=dt;break;}
-          var v=g.sloppy?C.sloppyValue:(g.washed?C.value+1:C.value);s.chute++;s.coins+=v;s.stats.earned+=v;s.stats.peeled++;
-          if(s.chute>=this.chuteCap())this.startSuck();
-          g.held=this.heldN()-1;this.emit({k:"coin",v:v,sloppy:g.sloppy});
-          if(g.held<=0){g.hold=null;g.held=0;g.job="pile";g.peel=0;g.sloppy=false;this.decide();}
+          if(this.wantsWashDivert()){
+            this.intakeWash({washed:true,sloppy:!!g.sloppy,fromHole:true});s.stats.peeled++;
+            this.emit({k:"toWash",washed:true,sloppy:!!g.sloppy,fromHole:true});
+            g.held=this.heldN()-1;
+            if(g.held<=0){g.hold=null;g.held=0;g.job="pile";g.peel=0;g.sloppy=false;g.washed=false;if(!g.holdRepeat)g.force=g.force==="washPool"&&!this.wantsAutoWash()?null:g.force;this.decide();}
+            else{a.e=0;a.label="sending them through";}
+            break;}
+          if(s.chute>=this.chuteCap()){if(!s.suck)this.startSuck();a.e=this.dropTime();a.label="waiting for the hole";s.stats.waitTime+=dt;break;}
+          this.kitchenShipOne({washed:!!g.washed,sloppy:!!g.sloppy});
+          g.held=this.heldN()-1;this.emit({k:"ship",washed:!!g.washed,sloppy:!!g.sloppy});
+          if(g.held<=0){g.hold=null;g.held=0;g.job="pile";g.peel=0;g.sloppy=false;g.washed=false;this.decide();}
           else{a.e=0;a.label="shipping them";}}break;
       case "eat":a.e+=dt;if(a.e>=C.eat){
           if(s.food>0){s.food--;s.hunger=Math.min(100,s.hunger+C.meal);s.stats.meals++;this.emit({k:"ate"});}
+          if(g.force==="eat"){if(g.holdRepeat==="eat"&&s.food>0&&s.hunger<98){a.e=0;break;}g.force=null;this.decide();break;}
           var n=this.needState();if(n.wantEat){a.e=0;}else this.decide();}break;
-      case "nap":{s.energy=Math.min(100,s.energy+this.napRegen()*dt);var wk=s.box.wake>=100?C.napWake:s.box.wake;if(s.energy>=wk){var bs=bedside();g.x=bs.x/RW;g.y=bs.y/RH;g.dir=bs.dir;this.decide();}break;}
+      case "nap":{s.energy=Math.min(100,s.energy+this.napRegen()*dt);var wk=s.box.wake>=100?C.napWake:s.box.wake;if(g.force==="nap"&&(wk<80||g.holdRepeat==="nap"))wk=100;if(s.energy>=wk){var bs=bedside();g.x=bs.x/RW;g.y=bs.y/RH;g.dir=bs.dir;if(g.force==="nap")g.force=null;this.decide();}break;}
       case "lazynap":s.energy=Math.min(100,s.energy+C.lazyNapRegen*dt);if(s.energy>=a.until)this.decide();break;
       case "idle":a.e+=dt;if(a.e>=a.d)this.decide();break;
       case "sweep":{
         var nn=this.needState();
-        if(s.box.clean<=0||nn.wantEat||nn.wantNap||nn.lazy){this.decide();break;}
+        if((s.box.clean<=0&&g.force!=="clean")||(g.force!=="clean"&&(nn.wantEat||nn.wantNap||nn.lazy))){if(g.force==="clean"&&s.peels<=0)g.force=null;this.decide();break;}
         a.e+=dt*sp;
         if(a.e>C.sweepWind){a.acc+=dt*sp*this.sweepRate();var kk=Math.floor(a.acc);if(kk>0){a.acc-=kk;var got=this.sweepNear(g.x*RW,g.y*RH,kk,a.reach||16);
           if(got===0&&!a.reach){a.reach=26;got=this.sweepNear(g.x*RW,g.y*RH,kk,26);}   /* 0.4.2: stretch the broom once before giving up on this spot */
-          var tidy=Math.floor(s.box.clean*C.sweepTidy);
+          var tidy=g.force==="clean"?0:Math.floor(s.box.clean*C.sweepTidy);
           if(got>0){a.swept=(a.swept|0)+got;}
           if(got===0&&s.peels>tidy){if(!a.swept)this.missAt(a.cx!=null?a.cx:g.x*RW,a.cy!=null?a.cy:g.y*RH);this.decide();break;}}}
-        if(s.peels<=Math.floor(s.box.clean*C.sweepTidy)){s.stats.sweeps++;this.emit({k:"swept"});this.decide();}
+        if(s.peels<=(g.force==="clean"?0:Math.floor(s.box.clean*C.sweepTidy))){s.stats.sweeps++;if(g.force==="clean")g.force=null;this.emit({k:"swept"});this.decide();}
         break;}
       case "wash":{
         a.e+=dt*sp;if(a.e>=1.6+0.3*Math.max(1,this.heldN())){g.washed=true;g.job="table";this.decide();}break;}
@@ -840,7 +985,7 @@ var PPSim=(function(){
     v=Math.max(b.min,Math.min(mx,Math.round((v-b.min)/b.step)*b.step+b.min));if(this.s.box[id]===v)return false;this.s.box[id]=v;if(id==="pot")this.retarget();this.poke();return true;};
   P.buyFood=function(auto){var s=this.s,pr=this.price();if(s.food>=this.foodMax())return "full";if(s.coins<pr)return "poor";
     s.coins-=pr;s.food++;s.stats.bought++;s.stats.spent+=pr;if(auto)s.stats.autoBuys++;if(s.stats.firstBuyT<0)s.stats.firstBuyT=s.t;this.poke();return "ok";};
-  P.potPrice=function(){var i=this.s.potCap+1;if(i>POT_MAX)return null;return Math.round(C.potPrice0*Math.pow(C.potPriceGrow,i-C.potBase));};
+  P.potPrice=function(){if(POT_LOCK)return null; /* 0.4.9: stock is locked, shop row hidden */ var i=this.s.potCap+1;if(i>POT_MAX)return null;return Math.round(C.potPrice0*Math.pow(C.potPriceGrow,i-C.potBase));};
   /* buying potatoes raises the limit to the next stop and puts them in play right away */
   P.buyPotatoes=function(){var s=this.s,pr=this.potPrice();if(pr===null)return "max";if(s.coins<pr)return "poor";
     s.coins-=pr;s.potCap++;s.box.pot=s.potCap;s.stats.boughtPot++;s.stats.spent+=pr;this.retarget();this.poke();return "ok";};
@@ -855,6 +1000,11 @@ var PPSim=(function(){
     if(a.t==="water"||(a.t==="walk"&&a.then==="water"))return "WATERING";
     if(a.t==="tune"||(a.t==="walk"&&a.then==="tune"))return "TUNING";
     if(a.t==="wash"||(a.t==="walk"&&a.then==="wash"))return "WASHING";
+    if(a.t==="scoop"||a.t==="dumpPool"||a.t==="wdump"||(a.t==="wwalk"&&(a.then==="scoop"||a.then==="dumpPool"||a.then==="enterWash")))return "WASHING";
+    if(g.force==="washPool"||g.holdRepeat==="wash"||this.wantsAutoWash()){
+      if(a.t==="drop"||(a.t==="walk"&&a.then==="drop")||(a.t==="idle"&&g.where==="wash"))return "WASHING";}
+    if(g.where==="wash"&&!(a.t==="wwalk"&&a.then==="leaveWash"))return "WASHING";
+    if(a.t==="wwalk"&&a.then==="leaveWash")return "PEELING";
     return "PEELING";};
 
   P.owned=function(id){return !!(this.s.owned&&this.s.owned[id]);};
@@ -884,7 +1034,7 @@ var PPSim=(function(){
     delete this.s.place[id];this.refresh();this.replan();this.poke();return "ok";};
   P.invList=function(){var out=[],i,it;
     for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(!this.owned(it.id))continue;
-      out.push({id:it.id,name:it.name,kind:isTool(it.id)?"tool":"place",equipped:this.equipped(it.id),placed:this.placed(it.id),inInv:this.inInv(it.id)});
+      out.push({id:it.id,name:it.name,kind:it.kind||(isTool(it.id)?"tool":"place"),equipped:this.equipped(it.id),placed:this.placed(it.id),inInv:this.inInv(it.id)});
     }return out;};
   P.trayList=function(){var out=[],i,it;
     for(i=0;i<ITEMS.length;i++){it=ITEMS[i];if(isPlaceable(it.id)&&this.owned(it.id)&&!this.placed(it.id))out.push({id:it.id,name:it.name});}
@@ -903,6 +1053,7 @@ var PPSim=(function(){
         if(px<lo||px>hx||py<lo||py>hy)continue;if(freePt(px,py)&&reach(px,py))return {x:px,y:py,dir:0};}}
     return {x:Math.max(lo,Math.min(hx,x)),y:Math.max(lo,Math.min(hy,y)),dir:0};
   };
+  P.atCooler=function(){var g=this.s.g,x=g.x*RW,y=g.y*RH,K=GEO.cooler,dx=Math.max(K.x0-x,0,x-K.x1),dy=Math.max(K.y0-y,0,y-K.y1);return Math.hypot(dx,dy)<=GEO.INFL+4;};
   P.atTable=function(){var g=this.s.g,x=g.x*RW,y=g.y*RH,T=GEO.table,dx=Math.max(T.x0-x,0,x-T.x1),dy=Math.max(T.y0-y,0,y-T.y1);return Math.hypot(dx,dy)<=GEO.INFL+4;};
   P.sackSpot=function(){var st=tableKids().stand,o=rot(8,4,st.side===0?0:st.side===1?2:st.side===2?1:3),x=st.x+o[0],y=st.y+o[1];
     x=Math.max(GEO.WALL+3,Math.min(RW-GEO.WALL-3,x));y=Math.max(GEO.WALL+3,Math.min(RH-GEO.WALL-3,y));return {x:x,y:y};};
@@ -956,8 +1107,8 @@ var PPSim=(function(){
     if(pl.cooler||cr){var cc=pl.cooler||{x:(GEO.cooler.x0+GEO.cooler.x1)/2,y:(GEO.cooler.y0+GEO.cooler.y1)/2},chx=(cr&1)?5:7,chy=(cr&1)?7:5;
       GEO.cooler.x0=cc.x-chx;GEO.cooler.x1=cc.x+chx;GEO.cooler.y0=cc.y-chy;GEO.cooler.y1=cc.y+chy;}
     if(pl.stool){GEO.stool.x=pl.stool.x;GEO.stool.y=pl.stool.y;}
-    else{GEO.stool.x=(GEO.cooler.x0+GEO.cooler.x1)/2;GEO.stool.y=GEO.cooler.y1+12;}
-    SPOT.food.x=GEO.stool.x;SPOT.food.y=GEO.stool.y+8;SPOT.food.dir=0;
+    else{GEO.stool.x=GEO0.stool.x;GEO.stool.y=GEO0.stool.y;}   /* 0.4.3: the seat is its own object; it never follows the cooler */
+    SPOT.food.x=(GEO.cooler.x0+GEO.cooler.x1)/2;SPOT.food.y=GEO.cooler.y1+GEO.INFL+1;SPOT.food.dir=0;   /* refined to a free cooler side in pickStand */
     if(pl.mat||pl.bed){var m=pl.mat||pl.bed;GEO.mat.x=m.x;GEO.mat.y=m.y;}
     if(mr&1){var mw0=GEO0.mat.w,mh0=GEO0.mat.h;GEO.mat.w=mh0;GEO.mat.h=mw0;}
     bs=bedside();SPOT.mat.x=bs.x;SPOT.mat.y=bs.y;SPOT.mat.dir=bs.dir;
@@ -996,11 +1147,15 @@ var PPSim=(function(){
   var FOOT={table:[17,9],cooler:[7,5],stool:[5,5],mat:[16,9],bed:[16,9],autoPeeler:[12,12],sink:[8,8],basicCot:[14,8],tvArmchair:[16,8],smallCooler:[7,6],plant:[6,6],lamp:[5,6],radio:[5,5],suction:[8,8],conveyor:[6,18],outConveyor:[14,6],rug:[12,8]};
   Sim.FOOT=FOOT;
   P.rotOf=function(id){if(id==="bed")id="mat";var p=this.s.place&&this.s.place[id];if(p&&typeof p.r==="number")return p.r&3;return 0;};
-  P.centerOf=function(id){if(id==="table")return {x:(GEO.table.x0+GEO.table.x1)/2,y:(GEO.table.y0+GEO.table.y1)/2};
+  P.centerOf=function(id){
+    if(id==="washPile"){this.syncWashGeom();return {x:WASH.pile.cx,y:WASH.pile.cy};}
+    if(id==="streetMouth"){this.syncWashGeom();return {x:WASH.mouth.x,y:WASH.mouth.y};}
+    if(id==="table")return {x:(GEO.table.x0+GEO.table.x1)/2,y:(GEO.table.y0+GEO.table.y1)/2};
     if(id==="cooler")return {x:(GEO.cooler.x0+GEO.cooler.x1)/2,y:(GEO.cooler.y0+GEO.cooler.y1)/2};
     if(id==="stool")return {x:GEO.stool.x,y:GEO.stool.y};if(id==="mat"||id==="bed")return {x:GEO.mat.x,y:GEO.mat.y};
     return this.placeOf(id);};
-  P.footOf=function(id,x,y,r){var f=FOOT[id]||[6,6],hx=f[0],hy=f[1];if(r&1){hx=f[1];hy=f[0];}return {x0:x-hx,y0:y-hy,x1:x+hx,y1:y+hy,hx:hx,hy:hy};};
+  P.footOf=function(id,x,y,r){if(id==="washPile"||id==="streetMouth"){var wf=this.washFoot(id,x,y);wf.hx=(wf.x1-wf.x0)/2;wf.hy=(wf.y1-wf.y0)/2;return wf;}
+    var f=FOOT[id]||[6,6],hx=f[0],hy=f[1];if(r&1){hx=f[1];hy=f[0];}return {x0:x-hx,y0:y-hy,x1:x+hx,y1:y+hy,hx:hx,hy:hy};};
   /* can this object sit here? inside the room, off the fixed pile / return / shipping, off the shipping X, and not on top of another object */
   P.fits=function(id,x,y,r){var f=this.footOf(id,x,y,r),W0=GEO.WALL+1;
     if(f.x0<W0||f.y0<W0||f.x1>RW-W0||f.y1>RH-W0)return false;
@@ -1008,7 +1163,6 @@ var PPSim=(function(){
     if(id!=="rug"){
       var sp=SPOT.ship,I=GEO.INFL+0.5;if(f.x0<sp.x+I&&f.x1>sp.x-I&&f.y0<sp.y+I&&f.y1>sp.y-I)return false;   /* keep his shipping X clear */
       for(var j=0;j<OBST.length;j++){var o=OBST[j];if(o.id===id||(id==="mat"&&o.id==="bed")||o.id==="ship"||o.id==="ret")continue;
-        if(id==="cooler"&&o.id==="stool")continue;
         if(f.x0<o.x1-0.01&&f.x1>o.x0+0.01&&f.y0<o.y1-0.01&&f.y1>o.y0+0.01)return false;}
       var g=this.s.g,gx=g.x*RW,gy=g.y*RH;   /* never drop furniture on top of Papa */
       if(gx>f.x0-1&&gx<f.x1+1&&gy>f.y0-1&&gy<f.y1+1&&!(g.act&&(g.act.t==="nap"||g.act.t==="watch")))return false;
@@ -1019,7 +1173,8 @@ var PPSim=(function(){
     if(this.fits(id,x,y,r))return {x:x,y:y};
     for(ra=2;ra<=14;ra+=2)for(i=0;i<12;i++){a=i*Math.PI/6;px=x+Math.cos(a)*ra;py=y+Math.sin(a)*ra;if(this.fits(id,px,py,r))return {x:px,y:py};}
     return null;};
-  P.canMove=function(id){if(FIXED.indexOf(id)>=0)return false;
+  P.canMove=function(id){if(id==="washPile")return false; /* 0.4.8: dry pile hidden; basin heap stays with the basin */ if(id==="streetMouth")return false;
+    if(FIXED.indexOf(id)>=0)return false;
     if(id==="pile"||id==="ret"||id==="ship"||id==="return"||id==="shipping")return false;
     if(isTool(id))return false;
     if(isPlaceable(id))return this.placed(id);
@@ -1030,14 +1185,14 @@ var PPSim=(function(){
     if(!this.s.place)this.s.place={};
     var key=id,old=this.s.place[key]?JSON.parse(JSON.stringify(this.s.place[key])):null,oldStool=this.s.place.stool?JSON.parse(JSON.stringify(this.s.place.stool)):null;
     var c0=this.centerOf(id);
-    if(id==="cooler"){var dx=x-c0.x,dy=y-c0.y;this.s.place.stool={x:GEO.stool.x+dx,y:GEO.stool.y+dy};}
     this.s.place[key]={x:x,y:y};if(r)this.s.place[key].r=r;
     this.refresh();
     if(!this.connected()){if(old)this.s.place[key]=old;else delete this.s.place[key];
-      if(id==="cooler"){if(oldStool)this.s.place.stool=oldStool;else delete this.s.place.stool;}
       this.refresh();return false;}
     this.replan();return true;};
   P.moveItem=function(id,x,y){
+    if(id==="streetMouth")return "bad"; /* 0.4.5: mouth is hidden; inlet/canal/hole stay on the walls */
+    if(id==="washPile")return "bad"; /* 0.4.8: do not drag the hidden dry pile; moveWashItem stays in the file */
     x=+x;y=+y;if(!isFinite(x)||!isFinite(y))return false;
     if(!this.canMove(id))return false;
     var key=id==="bed"?"mat":id,r=this.rotOf(key);
@@ -1046,6 +1201,7 @@ var PPSim=(function(){
   };
   /* ROTATE (0.4.2): a quarter turn clockwise. If the turned shape does not fit where it is, it shifts a little; if it cannot fit at all it stays. */
   P.rotateItem=function(id){
+    if(id==="washPile"||id==="streetMouth")return false;
     if(!this.canMove(id))return false;
     var key=id==="bed"?"mat":id,r=(this.rotOf(key)+1)&3,c=this.centerOf(key);
     for(var tries=0;tries<4;tries++){var sp=this.findFree(key,c.x,c.y,r);if(sp&&this.applyPlace(key,sp.x,sp.y,r))return true;r=(r+1)&3;if(r===this.rotOf(key))break;}
@@ -1069,7 +1225,7 @@ var PPSim=(function(){
     list.push({id:"cooler",x0:GEO.cooler.x0,y0:GEO.cooler.y0,x1:GEO.cooler.x1,y1:GEO.cooler.y1});
     list.push({id:"stool",x0:GEO.stool.x-5,y0:GEO.stool.y-5,x1:GEO.stool.x+5,y1:GEO.stool.y+5});
     list.push({id:"bed",x0:m.x-m.w/2,y0:m.y-m.h/2,x1:m.x+m.w/2,y1:m.y+m.h/2});
-    list.push({id:"ship",x0:sh.x-10,y0:GEO.WALL,x1:sh.x+12,y1:sh.lip+6});
+    list.push({id:"ship",x0:sh.x-10,y0:GEO.WALL,x1:sh.x+12,y1:GEO.WALL+16}); /* 0.4.7: housing only; belt stays walkable */
     list.push({id:"ret",x0:rt.mouthX,y0:rt.y-rt.w/2-1,x1:RW-GEO.WALL,y1:rt.y+rt.w/2+1});
     function add(id,hx,hy){if(!this.placed(id))return;p=this.placeOf(id);if((p.r|0)&1){var tq=hx;hx=hy;hy=tq;}list.push({id:id,x0:p.x-hx,y0:p.y-hy,x1:p.x+hx,y1:p.y+hy});}
     add.call(this,"autoPeeler",12,12);
@@ -1109,6 +1265,15 @@ var PPSim=(function(){
         if(!freePt(bx,by))continue;cell=gcell(bx,by);if(D[cell[1]*GNX+cell[0]]<0)continue;bb={x:bx,y:by};break;}}
     this.bedOk=!!bb;GEO.bedSide=bb||{x:B[0][0],y:B[0][1]};
     SPOT.mat.x=GEO.bedSide.x;SPOT.mat.y=GEO.bedSide.y;SPOT.mat.dir=0;
+    /* 0.4.3: he eats AT THE COOLER (Jay t1174), from its front if that is open, else the nearest free side he can reach */
+    var K=GEO.cooler,kx=(K.x0+K.x1)/2,ky=(K.y0+K.y1)/2,kd=GEO.INFL+1,kr=(K.r|0)&3;
+    var KS=[{s:0,x:kx,y:K.y1+kd,dir:0},{s:1,x:kx,y:K.y0-kd,dir:2},{s:2,x:K.x0-kd,y:ky,dir:1},{s:3,x:K.x1+kd,y:ky,dir:3}];
+    var KO=[[0,2,3,1],[2,0,1,3],[1,3,2,0],[3,1,0,2]][kr],kb=null;
+    for(i=0;i<4&&!kb;i++){c=KS[KO[i]];for(f=0;f<FR.length;f++){
+        q={side:c.s,dir:c.dir,x:c.s>=2?c.x:kx+FR[f]*(K.x1-K.x0),y:c.s<2?c.y:ky+FR[f]*(K.y1-K.y0)};
+        if(!freePt(q.x,q.y))continue;cell=gcell(q.x,q.y);if(D[cell[1]*GNX+cell[0]]<0)continue;kb=q;break;}}
+    this.foodOk=!!kb;if(!kb)kb={x:KS[KO[0]].x,y:KS[KO[0]].y,dir:KS[KO[0]].dir,side:KO[0]};
+    GEO.coolerSide=kb;SPOT.food.x=kb.x;SPOT.food.y=kb.y;SPOT.food.dir=kb.dir;
   };
   P.shipSpot=function(){return {x:SPOT.ship.x,y:SPOT.ship.y};};
   /* every place he must reach, for the editor's no-trap check */
@@ -1120,7 +1285,7 @@ var PPSim=(function(){
     if(!freePt(sp[0].x,sp[0].y))return false;
     var c0=gnear(sp[0].x,sp[0].y);if(c0<0)return false;var cp0=cellPt(c0);
     if(Math.hypot(cp0[0]-sp[0].x,cp0[1]-sp[0].y)>GC*1.5||!clearSeg(cp0[0],cp0[1],sp[0].x,sp[0].y))return false;   /* the shipping X itself must be walkable, not just something near it */
-    if(!this.standOk||!this.bedOk)return false;   /* he must be able to stand AT the table and get to the bed */
+    if(!this.standOk||!this.bedOk||!this.foodOk)return false;   /* he must be able to stand AT the table, AT the cooler, and get to the bed */
     for(i=1;i<sp.length;i++){ok=false;
       if(sp[i].wide){for(x=SPOT.pile.x0;x<=SPOT.pile.x1&&!ok;x+=2){c=gcell(x,sp[i].y);if(D[c[1]*GNX+c[0]]>=0)ok=true;}}
       else{for(j=0;j<=12&&!ok;j+=2){for(var a=0;a<16&&!ok;a++){var px=sp[i].x+Math.cos(a*0.3927)*j,py=sp[i].y+Math.sin(a*0.785)*j;if(!freePt(px,py))continue;c=gcell(px,py);if(D[c[1]*GNX+c[0]]>=0)ok=true;if(j===0)break;}}}
@@ -1180,12 +1345,9 @@ var PPSim=(function(){
     if(vOut>0){
       for(i=0;i<L.beltOut.length;i++)L.beltOut[i].p=Math.min(1,L.beltOut[i].p+vOut);
       if(L.beltOut.length&&L.beltOut[0].p>=1){
-        L.beltOut.shift();
-        var v=C.value;s.coins+=v;s.stats.earned+=v;s.stats.peeled++;L.shipped=(L.shipped||0)+1;L.shipQ++;
-        this.emit({k:"coin",v:v,sloppy:false,auto:true});
-        /* auto-shipped potatoes skip the manual chute and go straight out; they still return via the pipe when a batch fills */
-        s.chute++;
-        if(s.chute>=this.chuteCap())this.startSuck();
+        L.beltOut.shift();L.shipped=(L.shipped||0)+1;L.shipQ++;
+        if(this.wantsWashDivert()){this.intakeWash({washed:true,sloppy:false,auto:true,fromHole:true});s.stats.peeled++;this.emit({k:"toWash",washed:true,sloppy:false,auto:true,fromHole:true});}
+        else{this.kitchenShipOne({washed:false,sloppy:false,auto:true});this.emit({k:"ship",washed:false,sloppy:false,auto:true});}
       }
     }
   };
@@ -1196,20 +1358,291 @@ var PPSim=(function(){
   };
   P.lineTotals=function(){
     var s=this.s,L=s.line||lineFresh(),k=s.suck;
-    var n=s.pile+this.heldN()+s.chute+(k?k.n-k.landed:0)+(L.beltIn?L.beltIn.length:0)+(L.peeler?1:0)+(L.beltOut?L.beltOut.length:0);
-    return {potatoes:n,pile:s.pile,hold:this.heldN(),chute:s.chute,pipe:k?k.n-k.landed:0,beltIn:L.beltIn.length,peeler:L.peeler?1:0,beltOut:L.beltOut.length,shipped:L.shipped||0,peels:s.peels};
+    var n=s.pile+this.heldN()+s.chute+(k?k.n-k.landed:0)+(L.beltIn?L.beltIn.length:0)+(L.peeler?1:0)+(L.beltOut?L.beltOut.length:0)+washCount(s.wash);
+    return {potatoes:n,pile:s.pile,hold:this.heldN(),chute:s.chute,pipe:k?k.n-k.landed:0,beltIn:L.beltIn.length,peeler:L.peeler?1:0,beltOut:L.beltOut.length,shipped:L.shipped||0,peels:s.peels,wash:washCount(s.wash)};
   };
+
+  P.hasKey=function(){return this.owned("roomKey");};
+  P.wantsAutoWash=function(){return this.hasKey()&&this.owned("autoWash")&&this.s.box.awash>0;};
+  P.wantsWashDivert=function(){var g=this.s.g;return this.hasKey()&&(g.force==="washPool"||g.holdRepeat==="wash"||this.wantsAutoWash());};
+  P.setHold=function(id,on){
+    var g=this.s.g;
+    if(on){g.holdRepeat=id;if(id==="work"){g.force=null;return "ok";}return this.commandNow(id);}
+    g.holdRepeat=null;return "ok";};
+  P.kitchenShipOne=function(opt){
+    opt=opt||{};var s=this.s,p={washed:!!opt.washed,sloppy:!!opt.sloppy};
+    if(s.chute>=this.chuteCap()&&!s.suck)this.startSuck();
+    if(s.chute>=this.chuteCap())return false;
+    var v=shipPay(p);
+    s.chute++;s.coins+=v;s.stats.earned+=v;s.stats.peeled++;
+    if(p.washed)s.stats.washedShip=(s.stats.washedShip|0)+1;else s.stats.unwashedShip=(s.stats.unwashedShip|0)+1;
+    if(s.chute>=this.chuteCap())this.startSuck();
+    this.emit({k:"coin",v:v,sloppy:!!p.sloppy,washed:!!p.washed,from:"kitchen"});
+    return true;};
+  P.syncWashGeom=function(){
+    var pl=this.s.placeWash||{},P=WASH0.pile,M=WASH0.mouth;
+    if(pl.washPile&&isFinite(+pl.washPile.x)&&isFinite(+pl.washPile.y)){WASH.pile.cx=+pl.washPile.x;WASH.pile.cy=+pl.washPile.y;}
+    else{WASH.pile.cx=P.cx;WASH.pile.cy=P.cy;}
+    if(pl.streetMouth&&isFinite(+pl.streetMouth.x)&&isFinite(+pl.streetMouth.y)){WASH.mouth.x=+pl.streetMouth.x;WASH.mouth.y=+pl.streetMouth.y;}
+    else{WASH.mouth.x=M.x;WASH.mouth.y=M.y;}
+  };
+  P.washFoot=function(id,x,y){
+    if(id==="washPile")return {x0:x-16,y0:y-14,x1:x+16,y1:y+14};
+    if(id==="streetMouth")return {x0:x-10,y0:y-10,x1:x+10,y1:y+10};
+    return {x0:x-8,y0:y-8,x1:x+8,y1:y+8};};
+  P.fitsWash=function(id,x,y){
+    var f=this.washFoot(id,x,y),W0=GEO.WALL+2,h=WASH.hole,D=WASH.door,L=WASH.land,I=WASH.inlet,O=WASH.outlet,hit,ox0,oy0;
+    if(f.x0<W0||f.x1>WW-W0||f.y0<W0||f.y1>WH-W0)return false;
+    if(!(f.x1<h.x-h.r-4||f.x0>h.x+h.r+4||f.y1<h.y-h.r-6||f.y0>h.y+h.r+6))return false;
+    if(!(f.x1<D.x0-2||f.x0>D.x0+D.w+2||f.y1<D.y0-2||f.y0>D.y0+D.h+6))return false;
+    if(!(f.x1<L.x-L.rx-6||f.x0>L.x+L.rx+6||f.y1<L.y-L.ry-6||f.y0>L.y+L.ry+6))return false;
+    if(Math.hypot(x-I.x,y-I.y)<28)return false;
+    if(O){ox0=O.x-(O.boxW||16)/2;oy0=WH-GEO.WALL-(O.boxH||15);if(!(f.x1<ox0-2||f.x0>ox0+(O.boxW||16)+2||f.y1<oy0-2||f.y0>WH-GEO.WALL+2))return false;}
+    hit=projectCanal(x,y);if(hit&&hit.d<canalWidth(2)/2+10)return false;
+    if(id==="streetMouth"&&Math.hypot(x-h.x,y-h.y)<40)return false;
+    return true;};
+  P.moveWashItem=function(id,x,y){
+    if(id!=="washPile"&&id!=="streetMouth")return "bad";
+    x=+x;y=+y;if(!isFinite(x)||!isFinite(y))return "bad";
+    if(!this.fitsWash(id,x,y))return "blocked";
+    if(!this.s.placeWash)this.s.placeWash={};
+    this.s.placeWash[id]={x:x,y:y};this.syncWashGeom();this.poke();return "ok";};
+  P.heapCount=function(){return washHeapCount(this.s.wash);};
+  P.washUnwashed=function(){var w=this.s.wash||washFresh(),n=0,i,p,up=this.up("channel");
+    for(i=0;i<(w.pots||[]).length;i++){p=w.pots[i];if(p&&!p.washed&&!p.onStreet&&!inStreet(p.x,p.y,up))n++;}
+    return n+Math.max(0,(w.bulk|0)-(w.bulkW|0));};
+  P.commandNow=function(id){
+    var g=this.s.g,s=this.s;
+    if(id==="work"){g.force=null;if(g.where==="wash"){this.leaveWashRoom();return "ok";}this.decide();this.poke();return "ok";}
+    if(id==="eat"){if(s.food<=0)return "nofood";g.force="eat";g.lazy=false;if(g.where==="wash"){this.leaveWashRoom();return "ok";}this.walkTo(SPOT.food.x,SPOT.food.y,SPOT.food.dir,"eat","to the cooler");this.poke();return "ok";}
+    if(id==="nap"){g.force="nap";g.lazy=false;if(g.where==="wash"){this.leaveWashRoom();return "ok";}this.walkTo(SPOT.mat.x,SPOT.mat.y,SPOT.mat.dir,"nap","to the bed");this.poke();return "ok";}
+    if(id==="clean"){if(s.peels<=0)return "none";g.force="clean";if(g.where==="wash"){this.leaveWashRoom();return "ok";}var sw=this.sweepSpot();if(!sw.n)return "none";this.walkTo(sw.x,sw.y,sw.dir,"sweep","to sweep");this.poke();return "ok";}
+    if(id==="wash"){
+      if(!this.hasKey())return "nokey";
+      g.force="washPool";g.lazy=false;
+      if(g.hold==="peeled"&&this.heldN()>0){
+        if(g.where==="wash"){this.dumpHandsOnStreet();this.poke();return "ok";}
+        this.walkTo(SPOT.ship.x,SPOT.ship.y,SPOT.ship.dir,"drop","to the scanner");this.poke();return "ok";}
+      if(this.washUnwashed()>0){if(g.where!=="wash"){this.goToWashRoom();this.poke();return "ok";}this.startScoop();this.poke();return "ok";}
+      this.poke();return "ok";}
+    return "bad";};
+  P.goToWashRoom=function(){var g=this.s.g,d=WASH.kitDoorSpot;
+    if(g.where==="wash"){if(g.hold==="peeled"&&this.heldN()>0){this.dumpHandsOnStreet();return;}this.startScoop();return;}
+    this.walkTo(d.x,d.y,0,"enterWash","to the door");};
+  P.enterWashRoom=function(){var g=this.s.g,s=this.s,d=WASH.doorSpot;
+    g.where="wash";g.wx=d.x;g.wy=d.y;g.dir=2;g.act=null;s.followRoom="wash";this.emit({k:"room",room:"wash"});
+    if(g.hold==="peeled"&&this.heldN()>0){this.dumpHandsOnStreet();return;}
+    if(g.force==="washPool"||this.wantsAutoWash())this.startScoop();else this.decideWash();};
+  P.leaveWashRoom=function(){var g=this.s.g,s=this.s,d=WASH.kitDoorSpot;
+    g.where="kitchen";g.x=d.x/RW;g.y=d.y/RH;g.dir=2;g.act=null;s.followRoom="kitchen";this.emit({k:"room",room:"kitchen"});
+    this.decide();};
+  P.decideWash=function(){
+    var s=this.s,g=s.g,n=this.needState();
+    if(g.force==="eat"||g.force==="nap"||g.force==="clean"||n.wantEat||n.wantNap){this.wwalkTo(WASH.doorSpot.x,WASH.doorSpot.y,0,"leaveWash","to the door");return;}
+    var want=g.force==="washPool"||g.holdRepeat==="wash"||this.wantsAutoWash();
+    if(want&&g.hold==="peeled"&&this.heldN()>0){this.dumpHandsOnStreet();return;}
+    if(want&&this.hasKey()&&this.washUnwashed()>0){this.startScoop();return;}
+    if(want&&(g.holdRepeat==="wash"||this.wantsAutoWash())){g.act={t:"idle",d:0.5,e:0,label:"waiting on potatoes"};return;}
+    if(g.force==="washPool")g.force=null;
+    this.wwalkTo(WASH.doorSpot.x,WASH.doorSpot.y,0,"leaveWash","to the door");};
+  P.wwalkTo=function(x,y,dir,then,label){var g=this.s.g;
+    g.act={t:"wwalk",x:x,y:y,dir:dir,then:then,label:label};};
+  P.startScoop=function(){
+    var g=this.s.g,n=this.washUnwashed();
+    if(n<=0){if(g.holdRepeat==="wash"||this.wantsAutoWash()){g.act={t:"idle",d:0.5,e:0,label:"waiting on potatoes"};return;}if(!g.holdRepeat)g.force=null;this.decideWash();return;}
+    var t=this.nearestUnwashed();
+    if(!t){this.releaseBulk(Math.min(6,n));t=this.nearestUnwashed();}
+    if(!t){g.act={t:"idle",d:0.6,e:0,label:"waiting on potatoes"};return;}
+    this.wwalkTo(t.x,t.y,0,"scoop","to the peeled pile");};
+  P.startDumpPool=function(){   /* 0.4.3 name kept; dumps into the landing pool */
+    var g=this.s.g,m=mouthOf();
+    if(!(g.whold>0)){this.startScoop();return;}
+    this.wwalkTo(m.x-18,m.y-2,1,"dumpPool","to the landing pool");};
+  P.startDumpStreet=P.startDumpPool;
+  P.doScoop=function(){
+    var g=this.s.g,take=Math.min(4,this.washUnwashed()),got=0,w=this.s.wash,i,p,up=this.up("channel");
+    if(take<=0){if(!g.holdRepeat)g.force=null;this.decideWash();return;}
+    for(i=w.pots.length-1;i>=0&&got<take;i--){p=w.pots[i];if(!p||p.washed||p.onStreet||inStreet(p.x,p.y,up))continue;w.pots.splice(i,1);got++;}
+    while(got<take&&(w.bulk-w.bulkW)>0){w.bulk--;if(w.bulkS>w.bulkSW)w.bulkS--;got++;}
+    g.whold=got;g.act={t:"wdump",e:0,n:got,label:got>1?"carrying them to the landing pool":"carrying one to the landing pool"};
+    if(got<=0){if(!g.holdRepeat)g.force=null;this.decideWash();return;}
+    this.startDumpPool();};
+  P.doDumpPool=function(){
+    var g=this.s.g,L=WASH.land,n=g.whold|0,i,off;
+    for(i=0;i<n;i++){off=(this.rand()-0.5)*10;
+      this.spawnWash({x:L.x+off,y:L.y+(this.rand()-0.5)*8,vx:10+this.rand()*10,vy:(this.rand()-0.5)*8,washed:true,sloppy:!!g.sloppy,age:0,onStreet:false});}
+    g.whold=0;if(n>0)this.heapLandSplash();this.emit({k:"dumpStreet",n:n});
+    if(this.washUnwashed()>0&&(g.force==="washPool"||g.holdRepeat==="wash"||this.wantsAutoWash()))this.startScoop();
+    else{if(!g.holdRepeat&&!this.wantsAutoWash())g.force=null;this.decideWash();}};
+  P.dumpHandsOnStreet=function(){
+    var g=this.s.g,n=this.heldN(),L=WASH.land,i,off;
+    if(n<=0){this.decideWash();return;}
+    for(i=0;i<n;i++){off=(this.rand()-0.5)*10;
+      this.spawnWash({x:L.x+off,y:L.y+(this.rand()-0.5)*8,vx:10+this.rand()*10,vy:(this.rand()-0.5)*8,washed:true,sloppy:!!g.sloppy,age:0,onStreet:false});}
+    g.hold=null;g.held=0;g.job="pile";g.peel=0;g.washed=false;g.sloppy=false;
+    if(n>0)this.heapLandSplash();this.emit({k:"dumpStreet",n:n,from:"hands"});
+    if(this.washUnwashed()>0&&(g.force==="washPool"||g.holdRepeat==="wash"||this.wantsAutoWash()))this.startScoop();
+    else this.decideWash();};
+  P.nearestUnwashed=function(){var w=this.s.wash,g=this.s.g,best=null,bd=1e9,i,p,d,up=this.up("channel");
+    for(i=0;i<(w.pots||[]).length;i++){p=w.pots[i];if(!p||p.washed||p.onStreet||inStreet(p.x,p.y,up))continue;d=Math.hypot((p.x-g.wx),(p.y-g.wy));if(d<bd){bd=d;best=p;}}
+    return best;};
+  P.washGuyStep=function(dt,wsp){
+    var s=this.s,g=s.g,a=g.act,mv,dx,dy,d;
+    if(!a){this.decideWash();return;}
+    if(a.t==="wwalk"){
+      dx=a.x-g.wx;dy=a.y-g.wy;d=Math.sqrt(dx*dx+dy*dy);mv=C.walk*wsp*this.walkMul()*dt;
+      g.walkPh+=mv*0.35;
+      if(Math.abs(dx)>Math.abs(dy)*0.8)g.dir=dx>0?1:3;else g.dir=dy>0?2:0;
+      if(d<=mv||d<0.01){g.wx=a.x;g.wy=a.y;g.dir=a.dir;this.startAt(a.then);}
+      else{g.wx+=dx/d*mv;g.wy+=dy/d*mv;}
+      return;}
+    if(a.t==="scoop"){this.doScoop();return;}
+    if(a.t==="dumpPool"){this.doDumpPool();return;}
+    if(a.t==="wdump"){a.e=(a.e||0)+dt;if(a.e>=0.15)this.doDumpPool();return;}
+    if(a.t==="idle"){a.e+=dt;if(a.e>=a.d)this.decideWash();return;}
+    this.decideWash();};
+  P.heapLandSplash=function(){
+    var w=this.s.wash,H=heapCenter();
+    if(!w)return;
+    if(!w.heapSplash)w.heapSplash=[];
+    w.heapSplash.push({x:H.x,y:H.y,t:this.s.t});
+    if(w.heapSplash.length>8)w.heapSplash.shift();
+    this.emit({k:"heapLand",x:H.x,y:H.y});
+  };
+  P.intakeWash=function(opt){
+    opt=opt||{};ensureWash(this.s);
+    var w=this.s.wash,L=WASH.land,O=WASH.outlet,mouthY=WH-GEO.WALL-(O&&O.boxH||15);
+    if((w.pots.length>=WASH_LIVE)){
+      w.bulk++;if(opt.washed)w.bulkW++;if(opt.sloppy)w.bulkS++;if(opt.washed&&opt.sloppy)w.bulkSW++;
+      return;}
+    this.spawnWash({x:L.x+(this.rand()-0.5)*10,y:Math.min(L.y+L.ry-5,mouthY-8)+(this.rand()-0.5)*3,vx:(this.rand()-0.5)*8,vy:-10-this.rand()*8,washed:opt.washed!==false,sloppy:!!opt.sloppy,age:0,auto:!!opt.auto,onStreet:false,fromHole:!!opt.fromHole});
+    this.heapLandSplash();};
+  P.spawnWash=function(p){
+    var w=this.s.wash;if(!w.pots)w.pots=[];
+    p.r=WASH_R;p.age=p.age||0;p.vx=p.vx||0;p.vy=p.vy||0;
+    if(w.pots.length>=WASH_LIVE){w.bulk++;if(p.washed)w.bulkW++;if(p.sloppy)w.bulkS++;if(p.washed&&p.sloppy)w.bulkSW++;return;}
+    w.pots.push(p);};
+  P.releaseBulk=function(n){
+    var w=this.s.wash,H=heapCenter(),L=WASH.land,i,washed,sloppy,ang,r;
+    n=Math.max(0,n|0);if(!n||w.bulk<=0)return;
+    for(i=0;i<n&&w.bulk>0&&w.pots.length<WASH_LIVE;i++){
+      w.bulk--;washed=true;sloppy=false; /* basin potatoes count as washed */
+      if(w.bulkW>0){w.bulkW--;if(w.bulkSW>0){w.bulkSW--;sloppy=true;}}
+      else if(w.bulkS>0){w.bulkS--;sloppy=true;}
+      /* 0.4.8: bulk lives in the basin heap, not the hidden dry west pile */
+      ang=this.rand()*6.283;r=this.rand()*Math.min(L.rx,L.ry)*0.45;
+      this.spawnWash({x:H.x+Math.cos(ang)*r,y:H.y+Math.sin(ang)*r*0.7,vx:(this.rand()-0.5)*4,vy:(this.rand()-0.5)*4,washed:true,sloppy:sloppy,age:0.8,onStreet:false});}};
+  P.shipWashOne=function(p){
+    var s=this.s,v=shipPay(p);
+    if(s.chute>=this.chuteCap()&&!s.suck)this.startSuck();
+    if(s.chute>=this.chuteCap())return false;   /* hold it until the pipe takes a batch */
+    s.chute++;s.coins+=v;s.stats.earned+=v;
+    if(p.washed)s.stats.washedShip=(s.stats.washedShip|0)+1;else s.stats.unwashedShip=(s.stats.unwashedShip|0)+1;
+    if(s.chute>=this.chuteCap())this.startSuck();
+    this.emit({k:"coin",v:v,sloppy:!!p.sloppy,washed:!!p.washed,from:"wash"});
+    return true;};
+  P.washStep=function(dt){
+    var s=this.s;ensureWash(s);this.syncWashGeom();
+    var w=s.wash,i,p,H=heapCenter(),hole=WASH.hole,lo=GEO.WALL+4,hx=WW-GEO.WALL-4,hy=WH-GEO.WALL-4;
+    var j,q,dx,dy,d,nx,ny,sp,push,gx,gy,up=this.up("channel"),wid=streetWidth(up),reach=currentReach(up),flow=streetFlow(up),hit,on,keep,best,bd,east,score;
+    if(w.bulk>0&&w.pots.length<WASH_LIVE-4)this.releaseBulk(Math.min(4,WASH_LIVE-4-w.pots.length));
+    if(s.g.where==="wash"){gx=s.g.wx;gy=s.g.wy;}
+    /* current peels potatoes off the basin heap into the canal; faster at higher channel levels */
+    w.pullAcc=(w.pullAcc||0)+heapPullRate(up)*dt;
+    while(w.pullAcc>=1){
+      w.pullAcc-=1;
+      best=null;bd=-1e9;
+      for(i=0;i<w.pots.length;i++){
+        p=w.pots[i];if(!inHeap(p))continue;
+        score=(p.x-WASH.land.x)+this.rand()*2;
+        if(score>bd){bd=score;best=p;}
+      }
+      if(best){
+        east=WASH.land.x+WASH.land.rx-3;
+        best.onStreet=true;best.washed=true;
+        if(best.x<east-4)best.x=Math.min(east,best.x+8);
+        best.vx+=(12+flow*0.15);best.vy*=0.5;
+      }else if(w.bulk>0){
+        this.releaseBulk(1);
+        p=w.pots[w.pots.length-1];
+        if(p&&!p.onStreet){p.onStreet=true;p.washed=true;p.x=WASH.land.x+WASH.land.rx-3;p.y=WASH.land.y+(this.rand()-0.5)*4;p.vx=12+flow*0.15;p.vy=(this.rand()-0.5)*4;}
+        else{w.pullAcc+=1;break;}
+      }else{w.pullAcc+=1;break;}
+    }
+    for(i=w.pots.length-1;i>=0;i--){
+      p=w.pots[i];if(!p){w.pots.splice(i,1);continue;}
+      p.age=(p.age||0)+dt;
+      if(inLanding(p.x,p.y)&&!p.onStreet)p.washed=true;
+      on=!!p.onStreet||inCanalProper(p.x,p.y,up);
+      if(on)p.onStreet=true;
+      if(!on&&inLanding(p.x,p.y)){
+        /* settle into a heap under the outlet, in the water */
+        dx=H.x-p.x;dy=H.y-p.y;d=Math.hypot(dx,dy)||1;
+        if(d>3){p.vx+=dx/d*22*dt;p.vy+=dy/d*22*dt;}
+      }else if(!on){
+        var mouthY=WH-GEO.WALL-(WASH.outlet&&WASH.outlet.boxH||15);
+        if(Math.abs(p.x-WASH.land.x)<WASH.land.rx+4&&p.y>=WASH.land.y-2&&p.y<=mouthY+4){
+          /* still in the pour under the machine: pull into the basin heap, do not fall onto the dry floor */
+          dx=H.x-p.x;dy=H.y-p.y;d=Math.hypot(dx,dy)||1;
+          p.vx+=dx/d*28*dt;p.vy+=dy/d*28*dt;p.washed=true;
+        }else{
+          /* leftover on the dry floor: the hidden west pile no longer attracts them; a nearby current can still catch them */
+          if(p.age<0.55)p.vy+=40*dt;
+          if(reach>0){hit=projectCanal(p.x,p.y);if(hit.d<wid/2+reach&&hit.d>0.2){p.vx+=(hit.px-p.x)/hit.d*16*dt;p.vy+=(hit.py-p.y)/hit.d*16*dt;}}
+        }
+      }
+      if(on){
+        if(!p.washed){p.washed=true;w.splash.push({x:p.x,y:p.y,t:s.t});if(w.splash.length>12)w.splash.shift();this.emit({k:"streetWash",x:p.x,y:p.y});}
+        p.onStreet=true;
+        hit=projectCanal(p.x,p.y);
+        var look=pointAlongCanal(Math.min(1,hit.progress+Math.max(0.03,10/(hit.total||1)))),ddx=look.x-p.x,ddy=look.y-p.y,dd=Math.hypot(ddx,ddy)||1;
+        p.vx+=ddx/dd*flow*dt;p.vy+=ddy/dd*flow*dt;
+        keep=inLanding(p.x,p.y)?Math.max(wid/2,WASH.land.rx-3):wid/2-1;
+        if(hit.d>keep){var side=hit.d||1,sx=(hit.px-p.x)/side,sy=(hit.py-p.y)/side;p.vx+=sx*40*dt;p.vy+=sy*40*dt;}
+      }
+      if(s.g.where==="wash"){dx=p.x-gx;dy=p.y-gy;d=Math.hypot(dx,dy);if(d<11&&d>0.2){push=(11-d)*18;p.vx+=dx/d*push*dt*8;p.vy+=dy/d*push*dt*8;}}
+      p.vx*=Math.pow(0.55,dt);p.vy*=Math.pow(0.55,dt);
+      sp=Math.hypot(p.vx,p.vy);if(sp>160){p.vx*=160/sp;p.vy*=160/sp;}
+      p.x+=p.vx*dt;p.y+=p.vy*dt;
+      if(p.x<lo){p.x=lo;p.vx=Math.abs(p.vx)*0.4;}if(p.x>hx){p.x=hx;p.vx=-Math.abs(p.vx)*0.4;}
+      if(p.y<lo){p.y=lo;p.vy=Math.abs(p.vy)*0.4;}if(p.y>hy){p.y=hy;p.vy=-Math.abs(p.vy)*0.4;}
+      if(!p.onStreet&&inLanding(p.x,p.y))clampToBasin(p);
+      /* the hole ships washed potatoes that arrived on the water; unwashed never leave through it */
+      if(p.washed&&Math.hypot(p.x-hole.x,p.y-hole.y)<hole.r+3){
+        if(this.shipWashOne(p)){w.pots.splice(i,1);continue;}
+        else{p.vx*=0.2;p.vy*=0.2;p.x=hole.x-hole.r-6;}
+      }
+    }
+    for(i=0;i<w.pots.length;i++){
+      p=w.pots[i];
+      for(j=i+1;j<w.pots.length;j++){
+        q=w.pots[j];dx=q.x-p.x;dy=q.y-p.y;d=Math.hypot(dx,dy);if(d<0.01)d=0.01;
+        if(d<WASH_R*2-0.2){nx=dx/d;ny=dy/d;var ov=(WASH_R*2-d)*0.5;p.x-=nx*ov;p.y-=ny*ov;q.x+=nx*ov;q.y+=ny*ov;}
+      }
+      if(!p.onStreet&&inLanding(p.x,p.y))clampToBasin(p);
+    }
+  };
+  P.setView=function(room){
+    if(room!=="kitchen"&&room!=="wash")return false;
+    if(room==="wash"&&!this.hasKey())return false;
+    if(this.s.viewRoom===room)return true;
+    this.s.followRoom=room;this.s.viewRoom=room;this.emit({k:"view",room:room});return true;};
+  P.doorHit=function(x,y,room){
+    var D=(room==="wash")?WASH.door:WASH.kitDoor;
+    return x>=D.x0-2&&x<=D.x0+D.w+2&&y>=D.y0-2&&y<=D.y0+D.h+4;};
+
   P.visibleCommands=function(){
     var out=[],i,c;
     for(i=0;i<COMMANDS.length;i++){
       c=COMMANDS[i];
+      if(c.id==="pot"&&!POT_SLIDER)continue; /* 0.4.9: hide POTATOES IN PLAY; command stays in COMMANDS */
       if(c.need&&!this.owned(c.need))continue;
       out.push(c);
     }
     return out;
   };
 
-  P.serialize=function(){var s=this.s;var o=JSON.parse(JSON.stringify(s));o.ev=[];o.v=4;return JSON.stringify(o);};
+  P.serialize=function(){var s=this.s;var o=JSON.parse(JSON.stringify(s));o.ev=[];o.v=11;return JSON.stringify(o);};
 
   function synthMess(n,seed){
     var out=[],i,k,sp,ang,r,x,y;
@@ -1249,9 +1682,70 @@ var PPSim=(function(){
     if(!Array.isArray(o.mess))o.mess=synthMess(Math.max(0,o.peels|0),o.seed||1);
     o.peels=o.mess.length;
   }
-  /* accepts a 0.4 save (v:4), a 0.3 save (v:3), a 0.2 save (v:2) or a 0.1 save (v:1). Older saves are migrated in memory; the old keys are never written. */
-  Sim.load=function(str){try{var o=JSON.parse(str);if(!o||(o.v!==1&&o.v!==2&&o.v!==3&&o.v!==4)||typeof o.coins!=="number"||!o.g||typeof o.g!=="object"||!o.box||typeof o.box!=="object")return null;
-      var old=o.v<3,from1=o.v===1,from3=o.v===3;o.v=4;ensure04(o);
+  function ensure05(o){
+    ensure04(o);o.v=5;ensureWash(o);
+    if(typeof o.stats.washedShip!=="number")o.stats.washedShip=0;
+    if(typeof o.stats.unwashedShip!=="number")o.stats.unwashedShip=0;
+    if(o.g.force!=null&&o.g.force!=="eat"&&o.g.force!=="nap"&&o.g.force!=="clean"&&o.g.force!=="washPool")o.g.force=null;
+    if(typeof o.g.whold!=="number")o.g.whold=0;
+  }
+  function ensure06(o){
+    ensure05(o);o.v=6;
+    if(!o.placeWash||typeof o.placeWash!=="object")o.placeWash={};
+    if(typeof o.box.awash!=="number")o.box.awash=0;
+    if(!o.up||typeof o.up!=="object")o.up=upsFresh();
+    if(typeof o.up.channel!=="number")o.up.channel=0;
+    if(o.g){if(typeof o.g.holdRepeat!=="string")o.g.holdRepeat=null;
+      /* v5 potatoes mid-path to the old wash-room ship exit stay on the pile; they do not auto-ship unwashed */
+      var w=o.wash,ii,pp;
+      if(w&&w.pots){for(ii=0;ii<w.pots.length;ii++){pp=w.pots[ii];if(!pp)continue;if(pp.shipping&&!pp.washed&&!pp.onStreet){pp.shipping=false;pp.vx=0;pp.vy=0;}}}
+    }
+  }
+  function ensure07(o){
+    ensure06(o);o.v=7;
+    var w=o.wash,ii,pp,L=WASH.land;
+    if(w&&w.pots){
+      for(ii=0;ii<w.pots.length;ii++){
+        pp=w.pots[ii];if(!pp)continue;
+        /* v6 potatoes mid-diagonal or at the old mid-east hole land in the new pool; they do not auto-ship out the new hole */
+        if(pp.onStreet||pp.washed||Math.hypot((pp.x||0)-(180-7),(pp.y||0)-148)<22){
+          pp.x=L.x+((ii%5)-2)*4;pp.y=L.y+((ii%3)-1)*3;pp.vx=0;pp.vy=0;pp.onStreet=true;pp.shipping=false;pp.washed=true;
+        }else{pp.shipping=false;pp.vx=pp.vx||0;pp.vy=pp.vy||0;}
+      }
+    }
+  }
+  function ensure08(o){ensure07(o);o.v=8;}
+  function ensure09(o){ensure08(o);o.v=9;}
+  function ensure10(o){
+    ensure09(o);o.v=10;
+    var w=o.wash,ii,pp,L=WASH.land,P=WASH.pile,H=heapCenter(),hit,onDry,inLand,onCanal;
+    if(w&&typeof w.pullAcc!=="number")w.pullAcc=0;
+    if(w&&w.pots){
+      for(ii=0;ii<w.pots.length;ii++){
+        pp=w.pots[ii];if(!pp)continue;
+        onDry=Math.hypot((pp.x||0)-P.cx,(pp.y||0)-P.cy)<=Math.max(P.rx,P.rz)*0.85;
+        inLand=inLanding(pp.x,pp.y);
+        hit=projectCanal(pp.x,pp.y);
+        onCanal=!!(hit&&hit.d<=canalWidth(2)/2+2&&!inLand&&((pp.x||0)>L.x+L.rx-2||(pp.y||0)<L.y-L.ry-4));
+        if(onDry){
+          /* old dry-pile leftovers move into the basin heap and count as washed */
+          pp.x=H.x+((ii%7)-3)*3.2;pp.y=H.y+((ii%5)-2)*2.4;
+          pp.vx=0;pp.vy=0;pp.onStreet=false;pp.shipping=false;pp.washed=true;
+        }else if(inLand){
+          pp.onStreet=false;pp.shipping=false;pp.washed=true;pp.vx=0;pp.vy=0;
+        }else if(onCanal&&(pp.onStreet||pp.washed)){pp.washed=true;pp.onStreet=true;}
+      }
+    }
+  }
+  function ensure11(o){
+    ensure10(o);o.v=11;
+    if(!o.box||typeof o.box!=="object")o.box={};
+    o.box.pot=POT_MAX;o.potCap=POT_MAX;
+    var w=o.wash;if(w&&!Array.isArray(w.heapSplash))w.heapSplash=[];
+  }
+  /* accepts a 0.4.9 save (v:11), a 0.4.8 save (v:10), a 0.4.7 save (v:9), a 0.4.6 save (v:8), a 0.4.5 save (v:7), a 0.4.4 save (v:6), a 0.4.3 save (v:5), a 0.4 save (v:4), a 0.3 save (v:3), a 0.2 save (v:2) or a 0.1 save (v:1). Older saves are migrated in memory; the old keys are never written. */
+  Sim.load=function(str){try{var o=JSON.parse(str);if(!o||(o.v!==1&&o.v!==2&&o.v!==3&&o.v!==4&&o.v!==5&&o.v!==6&&o.v!==7&&o.v!==8&&o.v!==9&&o.v!==10&&o.v!==11)||typeof o.coins!=="number"||!o.g||typeof o.g!=="object"||!o.box||typeof o.box!=="object")return null;
+      var old=o.v<3,from1=o.v===1,from3=o.v===3;ensure11(o);
       var f=fresh(o.seed);for(var k in f)if(!(k in o))o[k]=f[k];
       if(!o.stats||typeof o.stats!=="object")o.stats={};for(var k2 in f.stats)if(typeof o.stats[k2]!=="number"||!isFinite(o.stats[k2]))o.stats[k2]=f.stats[k2];
       var oldPot=+o.box.pot;
@@ -1270,7 +1764,7 @@ var PPSim=(function(){
       var kk=o.suck;if(kk&&typeof kk==="object"&&isFinite(+kk.t0)&&+kk.n>0&&+kk.n<=cmx&&+kk.landed>=0&&+kk.landed<=+kk.n){o.suck={t0:+kk.t0,n:Math.floor(+kk.n),landed:Math.floor(+kk.landed)};if(o.suck.t0>o.t)o.suck.t0=o.t;}else o.suck=null;
       var g=o.g;if(g.act&&typeof g.act!=="object")g.act=null;
       if(old)g.act=null;      /* geometry changed in 0.3: let him re-decide from where he stands */
-      var ok={walk:1,grab:1,peel:1,drop:1,eat:1,nap:1,lazynap:1,idle:1,sweep:1,wash:1,watch:1,water:1,tune:1};if(g.act&&!ok[g.act.t])g.act=null;
+      var ok={walk:1,wwalk:1,grab:1,peel:1,drop:1,eat:1,nap:1,lazynap:1,idle:1,sweep:1,wash:1,watch:1,water:1,tune:1,scoop:1,dumpPool:1,wdump:1};if(g.act&&!ok[g.act.t])g.act=null;
       if(g.act&&g.act.t==="walk"&&!(isFinite(+g.act.x)&&isFinite(+g.act.y)))g.act=null;
       if(typeof g.x!=="number"||!(g.x>=0&&g.x<=1))g.x=0.5;if(typeof g.y!=="number"||!(g.y>=0&&g.y<=1))g.y=0.2;if(typeof g.dir!=="number"||!(g.dir>=0&&g.dir<=3))g.dir=2;
       if(old){g.x=Math.max(0.12,Math.min(0.88,g.x));g.y=Math.max(0.08,Math.min(0.92,g.y));}
@@ -1278,18 +1772,18 @@ var PPSim=(function(){
       if(!g.hold)g.held=0;else{var hn=Math.floor(+g.held||0);g.held=(hn>=1&&hn<=6)?hn:1;}
       var h=g.hold;g.job=h==="raw"?(g.job==="wash"||g.job==="peel"?g.job:"table"):(h==="peeled"?"chute":"pile");
       if(g.act){var at=g.act,wt=at.t==="walk"?at.then:null;
-        var walkOk=["grab","peel","drop","eat","nap","sweep","wash","watch","water","tune"];
+        var walkOk=["grab","peel","drop","eat","nap","sweep","wash","watch","water","tune","enterWash","leaveWash","scoop","dumpPool"];
         if((at.t==="peel"&&h!=="raw")||(at.t==="drop"&&h!=="peeled")||(at.t==="wash"&&h!=="raw")||(at.t==="grab"&&h!==null)||(at.t==="sweep"&&h!==null)||((at.t==="watch"||at.t==="water"||at.t==="tune")&&h!==null)||
            (at.t==="walk"&&(walkOk.indexOf(wt)<0||(wt==="peel"&&h!=="raw")||(wt==="drop"&&h!=="peeled")||(wt==="wash"&&h!=="raw")||(wt==="grab"&&h!==null)||(wt==="sweep"&&h!==null)||((wt==="watch"||wt==="water"||wt==="tune")&&h!==null))))g.act=null;}
       if(g.peel!==0&&!(g.peel>0&&g.peel<=1))g.peel=0;
       g.pgot=Math.max(0,Math.min(5,Math.floor(+g.pgot||0)));
       if(g.act&&g.act.t==="walk"){var rr=routeSafe(g.x*RW,g.y*RH,g.act.x*RW,g.act.y*RH),wp=[];for(var ri=0;ri<rr.length-1;ri++)wp.push([rr[ri][0]/RW,rr[ri][1]/RH]);g.act.wp=wp;}
       var sim=new Sim(o);sim.rebuildObst();
-      var want=POTS[o.box.pot],have=sim.total();
+      var want=POT_LOCK,have=sim.total();
       if(from1||have!==want){if(have>want){o.pile=Math.max(0,o.pile-(have-want));}else o.pile+=want-have;}
       return sim;}catch(e){return null;}};
   Sim.fresh=function(seed){return new Sim(fresh(seed));};
-  Sim.C=C;Sim.POTS=POTS;Sim.BOX=BOX;Sim.PACE=PACE;Sim.SPOT=SPOT;Sim.SPD=SPD;Sim.DRN=DRN;Sim.GEO=GEO;Sim.OBST=OBST;Sim.RW=RW;Sim.RH=RH;
+  Sim.C=C;Sim.POTS=POTS;Sim.BOX=BOX;Sim.PACE=PACE;Sim.SPOT=SPOT;Sim.SPD=SPD;Sim.DRN=DRN;Sim.GEO=GEO;Sim.OBST=OBST;Sim.RW=RW;Sim.RH=RH;Sim.WW=WW;Sim.WH=WH;Sim.WASH=WASH;Sim.WASH0=WASH0;Sim.shipPay=shipPay;Sim.inPool=inPool;Sim.inStreet=inStreet;Sim.inLanding=inLanding;Sim.streetWidth=streetWidth;Sim.canalWidth=canalWidth;Sim.streetSeg=streetSeg;Sim.canalPts=canalPts;Sim.projectCanal=projectCanal;Sim.pointAlongCanal=pointAlongCanal;Sim.currentReach=currentReach;Sim.streetFlow=streetFlow;Sim.heapPullRate=heapPullRate;Sim.heapCenter=heapCenter;Sim.inCanalProper=inCanalProper;Sim.inHeap=inHeap;Sim.washHeapCount=washHeapCount;Sim.HEAP_VIS=HEAP_VIS;Sim.HEAP_SPILL=HEAP_SPILL;Sim.POT_LOCK=POT_LOCK;Sim.POT_SLIDER=POT_SLIDER;
   Sim.COMMANDS=COMMANDS;Sim.UPS=UPS;Sim.STYLE=STYLE;Sim.ITEMS=ITEMS;Sim.ITEMI=ITEMI;Sim.LEVEL_PRICE=LEVEL_PRICE;Sim.SPEED_NAME=SPEED_NAME;Sim.FIXED=FIXED;Sim.TOOLS=TOOLS;Sim.PLACEABLES=PLACEABLES;Sim.STARTER=STARTER;Sim.isTool=isTool;Sim.isPlaceable=isPlaceable;Sim.tableKids=tableKids;Sim.bedside=bedside;Sim.spill=spill;Sim.route=route;Sim.INFL=function(){return INF;};Sim.defaultPlace=defaultPlace;Sim.rot=rot;Sim.routeSafe=routeSafe;Sim.gridRoute=gridRoute;Sim.freePt=freePt;
   return Sim;
 })();
@@ -2284,15 +2778,23 @@ if(typeof module!=="undefined")module.exports=PPSim;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);
 
-/* ===== Papa Potato 0.4.2 — renderer (0.4.2: ROTATE, tap-for-info on the right HUD, sack on the floor, sink dump, rotated drawing). Was 0.4.1 — HUD, fit-to-screen (pan/zoom hidden), room editor + inventory, shop + help, save v4 ===== */
+/* ===== Papa Potato 0.4.9 — renderer (0.4.9: stacked basin heap with height, bobbing edges and land splash; kitchen pile locked, POTATOES IN PLAY slider hidden). Was 0.4.8. Save v11, loads v1-v10. ===== */
 (function(){
 "use strict";
-var SAVE_KEY="papaPotato.save.v4",KEY_V3="papaPotato.save.v3",KEY_V2="papaPotato.save.v2",KEY_V1="papaPotato.save.v1";   /* older keys are only ever READ */
+var SAVE_KEY="papaPotato.save.v11",KEY_V10="papaPotato.save.v10",KEY_V9="papaPotato.save.v9",KEY_V8="papaPotato.save.v8",KEY_V7="papaPotato.save.v7",KEY_V6="papaPotato.save.v6",KEY_V5="papaPotato.save.v5",KEY_V4="papaPotato.save.v4",KEY_V3="papaPotato.save.v3",KEY_V2="papaPotato.save.v2",KEY_V1="papaPotato.save.v1";   /* older keys are only ever READ */
 var C=PPSim.C,BOX=PPSim.BOX,SPOT=PPSim.SPOT,PACE=PPSim.PACE,GEO=PPSim.GEO,RW=PPSim.RW,RH=PPSim.RH,CMDS=PPSim.COMMANDS,UPS=PPSim.UPS,STYLE=PPSim.STYLE,SPD=PPSim.SPD,POTS=PPSim.POTS;
 var sim=null;
 var migrated=false;
-/* 0.4 save first; else carry over a 0.3 / 0.2 / 0.1 save (those keys are never written). */
+var WW=PPSim.WW,WH=PPSim.WH,WASH=PPSim.WASH;
+/* 0.4.9 save first; else carry over a 0.4.8 / 0.4.7 / 0.4.6 / 0.4.5 / 0.4.4 / 0.4.3 / 0.4.2 / 0.3 / 0.2 / 0.1 save (those keys are never written). */
 function loadGame(){var s=null;try{var raw=localStorage.getItem(SAVE_KEY);if(raw)s=PPSim.load(raw);}catch(e){}
+  if(!s){try{var o10=localStorage.getItem(KEY_V10);if(o10){s=PPSim.load(o10);if(s)migrated="0.4.8";}}catch(e){}}
+  if(!s){try{var o9=localStorage.getItem(KEY_V9);if(o9){s=PPSim.load(o9);if(s)migrated="0.4.7";}}catch(e){}}
+  if(!s){try{var o8=localStorage.getItem(KEY_V8);if(o8){s=PPSim.load(o8);if(s)migrated="0.4.6";}}catch(e){}}
+  if(!s){try{var o7=localStorage.getItem(KEY_V7);if(o7){s=PPSim.load(o7);if(s)migrated="0.4.5";}}catch(e){}}
+  if(!s){try{var o6=localStorage.getItem(KEY_V6);if(o6){s=PPSim.load(o6);if(s)migrated="0.4.4";}}catch(e){}}
+  if(!s){try{var o5=localStorage.getItem(KEY_V5);if(o5){s=PPSim.load(o5);if(s)migrated="0.4.3";}}catch(e){}}
+  if(!s){try{var o4=localStorage.getItem(KEY_V4);if(o4){s=PPSim.load(o4);if(s)migrated="0.4.2";}}catch(e){}}
   if(!s){try{var o3=localStorage.getItem(KEY_V3);if(o3){s=PPSim.load(o3);if(s)migrated="0.3";}}catch(e){}}
   if(!s){try{var o2=localStorage.getItem(KEY_V2);if(o2){s=PPSim.load(o2);if(s)migrated="0.2";}}catch(e){}}
   if(!s){try{var o1=localStorage.getItem(KEY_V1);if(o1){s=PPSim.load(o1);if(s)migrated="0.1";}}catch(e){}}
@@ -2309,6 +2811,7 @@ var W=0,H=0,SC=1,DPR=1,k=1,camX=0,camY=0,offX=0,offY=0,roomW=RW,roomH=RH,WALL=GE
 var ZOOM_STEPS=[0.75,1,1.25,1.5,2,2.5,3],zoomI=1,panX=0,panY=0,editMode=false,dragId=null;
 var OUT="#1a1410",ANIM_F=0,ANIM_T=0;
 var staticLayer=null,gx=0,gy=0,table=null,chute=null,playRect=null;
+var fadeT=0,fadeTo=null,fading=false,kitLayer=null,washLayer=null,roomsPreloaded=false;
 var pops=[];
 var pileLayer=null,pileKey=-1,messLayer=null,messKey="",POS=[],ORDER=[],MESSPOS=[],SPR=null,SPRS=null,PEELSPR=null,TIER=[],renders={pile:0,mess:0};
 var MAXVIS=400,PILEMAX=POTS[POTS.length-1],LIFT=1.1,MESSVIS=140;
@@ -2345,17 +2848,20 @@ var TAGDEF=[
   {id:"tagLine",x:GEO.outBeltX0+10,y:GEO.outBeltY-8,al:"c"},
   {id:"tagSink",x:GEO.sink.x,y:GEO.sink.y-10,al:"c"},
   {id:"tagTV",x:GEO.tv.x,y:GEO.tv.y-12,al:"c"}];
-function fitK(){return Math.min(W/RW,H/RH)*0.98;}
+function viewIsWash(){return !!(sim&&sim.s&&sim.s.viewRoom==="wash");}
+function syncRoomSize(){roomW=viewIsWash()?WW:RW;roomH=viewIsWash()?WH:RH;}
+function fitK(){return Math.min(W/roomW,H/roomH)*0.98;}
 function clampPan(){
-  var maxX=Math.max(0,(RW*k-W)/(2*k)+10), maxY=Math.max(0,(RH*k-H)/(2*k)+10);
+  var maxX=Math.max(0,(roomW*k-W)/(2*k)+10), maxY=Math.max(0,(roomH*k-H)/(2*k)+10);
   panX=Math.max(-maxX,Math.min(maxX,panX));
   panY=Math.max(-maxY,Math.min(maxY,panY));
 }
 function applyCam(){
   /* 0.4.1: pan and zoom stay in the code but are hidden and locked. The whole room always fits the screen. */
   zoomI=1;panX=0;panY=0;
+  syncRoomSize();
   k=fitK();
-  offX=(W-RW*k)/2;offY=(H-RH*k)/2;
+  offX=(W-roomW*k)/2;offY=(H-roomH*k)/2;
   camX=-offX/k;camY=-offY/k;
 }
 function syncZoomLabel(){
@@ -2369,6 +2875,29 @@ function zoomBy(d){
 function panBy(dx,dy){/* hidden: panning is off (t1069) */resetView();}
 function resetView(){zoomI=1;panX=0;panY=0;applyCam();staticLayer=null;pileLayer=null;messLayer=null;if(playRect)placeTags();syncZoomLabel();}
 function fitStates(){var b=document.querySelector(".states");if(!b)return;b.classList.remove("tight");if(b.scrollHeight>b.clientHeight+1)b.classList.add("tight");}
+
+function bustRoomCache(){staticLayer=null;kitLayer=null;washLayer=null;roomsPreloaded=false;}
+function beginFade(to){
+  if(to!=="kitchen"&&to!=="wash")return false;
+  if(to==="wash"&&!sim.hasKey())return false;
+  if(viewIsWash()?(to==="wash"):(to==="kitchen"))return false;
+  fadeTo=to;fadeT=0.001;fading=true;return true;
+}
+function tickFade(dt){
+  if(!fading)return;
+  fadeT+=dt/0.14;
+  if(fadeT>=1&&fadeTo){sim.s.viewRoom=fadeTo;sim.s.followRoom=null;fadeTo=null;staticLayer=null;pileLayer=null;messLayer=null;layout();}
+  if(fadeT>=2){fading=false;fadeT=0;}
+}
+function copyLayer(){var c=document.createElement("canvas");c.width=cv.width;c.height=cv.height;var g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(cv,0,0);return c;}
+function preloadRooms(){
+  if(!sim||W<2||H<2)return;
+  var cur=sim.s.viewRoom||"kitchen";
+  sim.s.viewRoom="kitchen";syncRoomSize();applyCam();drawStatic();kitLayer=copyLayer();
+  sim.s.viewRoom="wash";syncRoomSize();applyCam();drawStatic();washLayer=copyLayer();
+  sim.s.viewRoom=cur;syncRoomSize();applyCam();staticLayer=(cur==="wash"?washLayer:kitLayer);roomsPreloaded=true;
+}
+
 function layout(){
   var r=document.getElementById("play").getBoundingClientRect();playRect=r;
   var cssW=Math.max(1,r.width),cssH=Math.max(1,r.height);
@@ -2382,6 +2911,7 @@ function layout(){
   table={x:gx,y:gy,w:GEO.table.x1-GEO.table.x0,h:GEO.table.y1-GEO.table.y0};
   chute={cx:GEO.ship.x,mouthW:GEO.ship.mouth*2,lip:GEO.ship.lip};
   staticLayer=null;pileLayer=null;messLayer=null;buildPile();buildMess();buildSprites();placeTags();fitStates();
+  if(!roomsPreloaded)preloadRooms();
 }
 function clampTag(el,play,pad){
   var r=el.getBoundingClientRect();var left=parseFloat(el.style.left)||0,top=parseFloat(el.style.top)||0;
@@ -2399,7 +2929,7 @@ function placeTags(){var play=playRect;
 var labelsUntil=0;
 function showLabels(ms,force){labelsUntil=force?performance.now()+ms:Math.max(labelsUntil,performance.now()+ms);}
 var labelsOn=null;
-function updateLabels(){var on=performance.now()<labelsUntil&&!ovlMode;if(on===labelsOn)return;labelsOn=on;
+function updateLabels(){var on=performance.now()<labelsUntil&&!ovlMode&&!viewIsWash();if(on===labelsOn)return;labelsOn=on;
   for(var i=0;i<TAGDEF.length;i++){var el=document.getElementById(TAGDEF[i].id);if(el)el.className="tag"+(on?"":" off");}}
 function potato(x,y,s,peeled,flip,spots,pal){
   var body=pal||(peeled?["#a88830","#c8a848","#e8c868","#f0d890"]:["#4a2810","#6a4020","#8a5a28","#c48a48"]);
@@ -2423,7 +2953,7 @@ function drawFloor(){R(0,0,W,H,"#2a2820");var ix=wx(WALL),iy=wy(WALL),ix2=wx(roo
   ctx.strokeStyle="rgba(60,55,40,0.28)";ctx.lineWidth=1;ctx.beginPath();
   for(var x2=ix;x2<=ix+fw;x2+=step){ctx.moveTo(x2+0.5,iy);ctx.lineTo(x2+0.5,iy+fh);}for(var y2=iy;y2<=iy+fh;y2+=step){ctx.moveTo(ix,y2+0.5);ctx.lineTo(ix+fw,y2+0.5);}ctx.stroke();
   /* 0.3: the dashed centre stripe had no use and is hidden (drawCentreStripe, not called) */
-  var lcx=wx(gx),lcy=wy(gy);for(var j=0;j<7;j++){ctx.fillStyle="rgba(255,240,180,"+(0.07-j*0.009)+")";ctx.beginPath();ctx.ellipse(lcx,lcy,ws(22+j*6),ws(15+j*4.5),0,0,6.28);ctx.fill();}}
+  if(!viewIsWash()){var lcx=wx(gx),lcy=wy(gy);for(var j=0;j<7;j++){ctx.fillStyle="rgba(255,240,180,"+(0.07-j*0.009)+")";ctx.beginPath();ctx.ellipse(lcx,lcy,ws(22+j*6),ws(15+j*4.5),0,0,6.28);ctx.fill();}}}
 function drawCentreStripe(){var cx=wx(roomW*0.5);for(var y3=wy(WALL+8);y3<wy(roomH*0.72);y3+=Math.max(5,ws(5)))R(cx-ws(3.5),y3,ws(7),1,"#8a846c");}
 
 function drawWalls(){var x0=wx(0),y0=wy(0),x1=wx(roomW),y1=wy(roomH);var ix=wx(WALL),iy=wy(WALL),ix2=wx(roomW-WALL),iy2=wy(roomH-WALL);
@@ -2540,9 +3070,29 @@ function drawShipChute(){
   /* small side panel on the east face of the box */
   wr(boxX0+boxW,boxY0+4,2.4,6,"#3a4038");wr(boxX0+boxW,boxY0+4.3,2,1.1,"#1a1c18");wr(boxX0+boxW+0.4,boxY0+7,1.4,1.4,"#2a2010");
   }
+function drawKitchenDropHole(){
+  /* 0.4.5: a dark arch in the north wall — the kitchen side of the shared drop hole (matches the wash-room inlet). The old X-ray scanner (drawShipChute) is hidden, not deleted. */
+  var cx=GEO.ship.x, wall=GEO.WALL, r=14;
+  /* cut a deep recess into the north wall so the hole reads even when he stands near it */
+  wr(cx-r-6, 0, (r+6)*2, wall+3.2, "#2a2820");
+  wr(cx-r-4.2, 0.4, (r+4.2)*2, wall+2.2, "#1a1814");
+  wr(cx-r-2.6, 0.8, (r+2.6)*2, wall+1.4, "#0a0c10");
+  wr(cx-r-1.4, 1.2, (r+1.4)*2, wall+0.6, "#000000");
+  oval(wx(cx),wy(wall+1.2),ws(r+2.4),ws(r*0.78),"#0a0c10");
+  oval(wx(cx),wy(wall+0.4),ws(r+0.8),ws(r*0.58),"#000000");
+  oval(wx(cx),wy(wall-1.0),ws(r-2.4),ws(r*0.34),"#000000");
+  /* wooden posts + sill, same trim as the table / wash bench */
+  wr(cx-r-5.2, wall-0.4, 2.4, 5.2, "#4a3018");wr(cx+r+2.8, wall-0.4, 2.4, 5.2, "#4a3018");
+  wr(cx-r-4.8, wall-0.2, 1.6, 4.6, "#7a5a30");wr(cx+r+3.2, wall-0.2, 1.6, 4.6, "#7a5a30");
+  wr(cx-r-5, wall+2.2, (r+5)*2, 2.8, "#4a3018");
+  wr(cx-r-4.2, wall+2.4, (r+4.2)*2, 2.0, "#7a5a30");
+  wr(cx-r-4.2, wall+2.2, (r+4.2)*2, 0.6, "#9a7a48");
+  ctx.strokeStyle="#8a6a40";ctx.lineWidth=Math.max(1,ws(1.8));ctx.beginPath();ctx.ellipse(wx(cx),wy(wall+1.4),ws(r+1.8),ws(r*0.62),0,0.12,Math.PI-0.12);ctx.stroke();
+  ctx.strokeStyle="#5a5648";ctx.lineWidth=Math.max(1,ws(1.2));ctx.beginPath();ctx.ellipse(wx(cx),wy(wall-0.2),ws(r+0.4),ws(r*0.46),0,Math.PI+0.2,Math.PI*2-0.2);ctx.stroke();
+}
 function drawDoor(){
-  /* giant industrial door, west of the scanner, flush to the north wall. Decoration only. */
-  var x0=17,y0=GEO.WALL-0.6,w=20,h=18.5;
+  /* giant industrial door, west of the drop hole (or the wash-room twin), flush to the north wall. */
+  var D=viewIsWash()?WASH.door:WASH.kitDoor,x0=D.x0,y0=D.y0,w=D.w,h=D.h;
   wr(x0+0.8,y0+0.8,w,h,"rgba(0,0,0,0.34)");
   wr(x0,y0,w,h,"#2a2c30");wr(x0+0.6,y0+0.6,w-1.2,h-1.2,"#4a5058");
   wr(x0+0.6,y0+0.6,w-1.2,1.4,"#8a9098");wr(x0,y0,0.8,h,"#6a7078");wr(x0+w-0.8,y0,0.8,h,"#1a1c20");
@@ -2554,35 +3104,47 @@ function drawDoor(){
     wr(x0+rx,y0+ry,1.1,1.1,"#1a1c20");wr(x0+rx+0.2,y0+ry+0.15,0.7,0.7,"#c0c8c0");}
   /* hinges on the west edge */
   for(var i=0;i<3;i++){var hy=y0+3+i*5.5;wr(x0-1.2,hy,2.2,2.2,"#3a4038");wr(x0-0.9,hy+0.3,1.6,1.6,"#8a9088");}
-  /* heavy bar lock + padlock at the seam */
-  wr(x0+w/2-4,y0+h*0.58,8,2.2,"#2a2018");wr(x0+w/2-3.6,y0+h*0.58+0.3,7.2,1.6,"#5a4a38");
-  var px=x0+w/2,py=y0+h*0.36;
-  wr(px-1.4,py-3.6,0.8,2.4,"#c0c8c0");wr(px+0.6,py-3.6,0.8,2.4,"#c0c8c0");wr(px-1.4,py-3.8,2.8,0.8,"#d0d8d0");
-  wr(px-2.4,py-1.2,4.8,4.0,"#1a1410");wr(px-2.1,py-0.9,4.2,3.4,"#6a5a40");wr(px-1.7,py-0.5,3.4,2.6,"#8a7a58");
-  wr(px-0.55,py+0.35,1.1,1.5,"#1a1410");wr(px-0.35,py+0.55,0.7,0.7,"#c8b890");
+  /* heavy bar lock + padlock at the seam (hidden, not deleted, once the KEY is bought) */
+  if(!(sim&&sim.hasKey&&sim.hasKey())){
+    wr(x0+w/2-4,y0+h*0.58,8,2.2,"#2a2018");wr(x0+w/2-3.6,y0+h*0.58+0.3,7.2,1.6,"#5a4a38");
+    var px=x0+w/2,py=y0+h*0.36;
+    wr(px-1.4,py-3.6,0.8,2.4,"#c0c8c0");wr(px+0.6,py-3.6,0.8,2.4,"#c0c8c0");wr(px-1.4,py-3.8,2.8,0.8,"#d0d8d0");
+    wr(px-2.4,py-1.2,4.8,4.0,"#1a1410");wr(px-2.1,py-0.9,4.2,3.4,"#6a5a40");wr(px-1.7,py-0.5,3.4,2.6,"#8a7a58");
+    wr(px-0.55,py+0.35,1.1,1.5,"#1a1410");wr(px-0.35,py+0.55,0.7,0.7,"#c8b890");
+  }else{
+    /* open leaves: a slightly parted seam */
+    wr(x0+w/2-0.9,y0+0.6,1.8,h-1.2,"#1a1c20");
+  }
   /* lamp housing on the north (top) edge — the bulb is drawn pulsing in drawShipAnim */
   wr(x0+w/2-2,y0-2.2,4,2.4,"#3a4038");wr(x0+w/2-1.6,y0-1.8,3.2,1.6,"#2a2c28");
-  /* bigger LOCKED plate + 3x5 bitmap letters in world units */
-  wr(x0+w/2-6.6,y0+h-5.4,13.2,4.2,"#1a0808");wr(x0+w/2-6.2,y0+h-5.1,12.4,3.6,"#4a1818");wr(x0+w/2-5.8,y0+h-4.8,11.6,3.0,"#6a2020");
-  var glyphs={L:["100","100","100","100","111"],O:["111","101","101","101","111"],C:["111","100","100","100","111"],K:["101","101","110","101","101"],E:["111","100","110","100","111"],D:["110","101","101","101","110"]};
-  var word="LOCKED",uu=0.48,gap=0.26,tw=6*(3*uu+gap)-gap,lx=x0+w/2-tw/2,ly=y0+h-4.55;
+  /* plate: LOCKED (red) until the KEY is bought, then OPEN (green) */
+  var open=sim&&sim.hasKey&&sim.hasKey();
+  wr(x0+w/2-6.6,y0+h-5.4,13.2,4.2,open?"#081a0c":"#1a0808");wr(x0+w/2-6.2,y0+h-5.1,12.4,3.6,open?"#184a20":"#4a1818");wr(x0+w/2-5.8,y0+h-4.8,11.6,3.0,open?"#206a28":"#6a2020");
+  var glyphs={L:["100","100","100","100","111"],O:["111","101","101","101","111"],C:["111","100","100","100","111"],K:["101","101","110","101","101"],E:["111","100","110","100","111"],D:["110","101","101","101","110"],P:["111","101","111","100","100"],N:["101","111","111","101","101"]};
+  var word=open?"OPEN":"LOCKED",uu=0.48,gap=0.26,tw=word.length*(3*uu+gap)-gap,lx=x0+w/2-tw/2,ly=y0+h-4.55,col=open?"#d8ffd0":"#ffd0d8";
   for(var gi=0;gi<word.length;gi++){var rows=glyphs[word[gi]],bx=lx+gi*(3*uu+gap);
-    for(var r=0;r<5;r++)for(var c=0;c<3;c++)if(rows[r][c]==="1")wr(bx+c*uu,ly+r*uu,uu*0.9,uu*0.9,"#ffd0d8");}
+    for(var r=0;r<5;r++)for(var c=0;c<3;c++)if(rows[r][c]==="1")wr(bx+c*uu,ly+r*uu,uu*0.9,uu*0.9,col);}
   }
 function drawShipAnim(now){
+  if(!viewIsWash()){
   var cx=GEO.ship.x, boxY1=GEO.WALL+15, beltX0=cx-4.5, beltW=9, beltY0=boxY1+1.4, beltY1=GEO.ship.lip+6.5;
   var period=3.2, off=(ANIM_F/4)*period;
-  /* slats travel north (toward the scanner), 4 discrete frames */
+  /* slats travel north (toward the scanner), 4 discrete frames — restored 0.4.4 */
   for(var y=beltY0-period+off;y<beltY1;y+=period){
     var y0=Math.max(beltY0,y), y1=Math.min(beltY1,y+1.3);if(y1<=y0)continue;
     wr(beltX0+0.3,y0,beltW-0.6,y1-y0,"#6a6a58");wr(beltX0+0.3,y0,beltW-0.6,0.35,"#8a8a70");}
   /* scanner window glow, stepped with the frame clock */
   var g=[0.08,0.12,0.16,0.11][ANIM_F];ctx.globalAlpha=g;wr(cx-4.6,GEO.WALL+3.4,9.2,8.2,"#40a0ff");ctx.globalAlpha=1;
-  /* door lock lamp: 4-frame red pulse (LOCKED) */
-  var dx=17+10, dy=GEO.WALL-0.6-1.1, pulse=[0.35,0.65,1,0.55][ANIM_F];
-  ctx.globalAlpha=0.30+0.50*pulse;oval(wx(dx),wy(dy),ws(2.2),ws(1.6),"#ff2030");
-  ctx.globalAlpha=0.65+0.35*pulse;oval(wx(dx),wy(dy),ws(1.3),ws(1.0),"#ff8090");
-  ctx.globalAlpha=1;oval(wx(dx),wy(dy),ws(0.6),ws(0.5),"#ffe8e8");
+  }else if(WASH.outlet){
+  /* matching glow in the wash-room outlet window */
+  var O=WASH.outlet,cx=O.x,boxH=O.boxH||15,boxY0=WH-GEO.WALL-boxH;
+  var g2=[0.08,0.12,0.16,0.11][ANIM_F];ctx.globalAlpha=g2;wr(cx-4.6,boxY0+3.4,9.2,8.2,"#40a0ff");ctx.globalAlpha=1;
+  }
+  /* door lock lamp: red pulse while locked, steady green when the KEY is owned */
+  var open=sim&&sim.hasKey&&sim.hasKey();
+  var dx=(viewIsWash()?WASH.door.x0+WASH.door.w/2:17+10), dy=(viewIsWash()?WASH.door.y0:GEO.WALL-0.6)-1.1, pulse=[0.35,0.65,1,0.55][ANIM_F];
+  if(open){ctx.globalAlpha=0.55;oval(wx(dx),wy(dy),ws(2.2),ws(1.6),"#20ff50");ctx.globalAlpha=0.9;oval(wx(dx),wy(dy),ws(1.3),ws(1.0),"#80ff90");ctx.globalAlpha=1;oval(wx(dx),wy(dy),ws(0.6),ws(0.5),"#e8ffe8");}
+  else{ctx.globalAlpha=0.30+0.50*pulse;oval(wx(dx),wy(dy),ws(2.2),ws(1.6),"#ff2030");ctx.globalAlpha=0.65+0.35*pulse;oval(wx(dx),wy(dy),ws(1.3),ws(1.0),"#ff8090");ctx.globalAlpha=1;oval(wx(dx),wy(dy),ws(0.6),ws(0.5),"#ffe8e8");}
   }
 function drawCoolerHum(){
   var G=GEO.cooler,lx=wx(G.x1)-ws(2.3),ly=wy(G.y0)+ws(2.4);
@@ -2733,7 +3295,431 @@ var flying={},messVer=0;
 function renderMess(n){buildMess();if(!messLayer||messLayer.width!==cv.width||messLayer.height!==cv.height){messLayer=document.createElement("canvas");messLayer.width=cv.width;messLayer.height=cv.height;messKey="";}
   var key=(sim&&sim.s?sim.s.peels:n)+"|"+messVer+"|"+MESSPOS.length;if(messKey===key)return;messKey=key;renders.mess++;var c=messLayer.getContext("2d");c.imageSmoothingEnabled=false;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);
   for(var i=0;i<MESSPOS.length;i++){if(flying[i])continue;var p=MESSPOS[i],spr=PEELSPR[p.q];if(!spr)continue;c.drawImage(spr,Math.round((wx(p.x)-spr.cx)*DPR),Math.round((wy(p.y)-spr.cy)*DPR));}}
+
+function streetUp(){return sim&&sim.up?sim.up("channel"):0;}
+function peelSz(){return Math.max(2.8,4.0*k*0.82);} /* same on-screen size as the potato he peels */
+function drawStreetTrough(fill,widAdd){   /* 0.4.4 diagonal helper kept, hidden */
+  var seg=PPSim.streetSeg(),wid=ws(PPSim.streetWidth(streetUp())+(widAdd||0)),x0=wx(seg.x0),y0=wy(seg.y0),x1=wx(seg.x1),y1=wy(seg.y1);
+  ctx.save();ctx.strokeStyle=fill;ctx.lineWidth=Math.max(4,wid);ctx.lineCap="round";ctx.lineJoin="round";
+  ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.restore();
+}
+function drawCanalTrough(fill,widAdd){   /* 0.4.5 helper kept, hidden; 0.4.6 draws a recessed trench instead */
+  var pts=PPSim.canalPts(),wid=ws(PPSim.streetWidth(streetUp())+(widAdd||0)),i;
+  if(!pts||pts.length<2)return;
+  ctx.save();ctx.strokeStyle=fill;ctx.lineWidth=Math.max(4,wid);ctx.lineCap="round";ctx.lineJoin="round";
+  ctx.beginPath();ctx.moveTo(wx(pts[0].x),wy(pts[0].y));
+  for(i=1;i<pts.length;i++)ctx.lineTo(wx(pts[i].x),wy(pts[i].y));
+  ctx.stroke();ctx.restore();
+}
+/* visual canal path starts at the basin's east rim so the trench opens out of the pool instead of a line pasted across it */
+function canalFilletR(){return 18;}
+function canalDrawPts(){
+  var L=WASH.land,E=WASH.elbow,H=WASH.hole,r=canalFilletR(),c={x:E.x-r,y:E.y-r},n=10,i,a,pts;
+  pts=[{x:L.x+L.rx-8,y:L.y},{x:E.x-r,y:E.y}];
+  for(i=1;i<n;i++){a=(Math.PI/2)*(1-i/n);pts.push({x:c.x+r*Math.cos(a),y:c.y+r*Math.sin(a)});}
+  pts.push({x:E.x,y:E.y-r});pts.push({x:H.x,y:H.y});
+  return pts;
+}
+function strokeCanalPath(worldW,color,cap,join){
+  var L=WASH.land,E=WASH.elbow,H=WASH.hole,r=canalFilletR();
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=Math.max(2,ws(worldW));ctx.lineCap=cap||"butt";ctx.lineJoin=join||"round";
+  ctx.beginPath();ctx.moveTo(wx(L.x+L.rx-8),wy(L.y));ctx.arcTo(wx(E.x),wy(E.y),wx(H.x),wy(H.y),ws(r));ctx.lineTo(wx(H.x),wy(H.y));
+  ctx.stroke();ctx.restore();
+}
+function strokeCanalPts(pts,worldW,color,cap,join){
+  var i;if(!pts||pts.length<2)return;
+  ctx.save();ctx.strokeStyle=color;ctx.lineWidth=Math.max(2,ws(worldW));ctx.lineCap=cap||"butt";ctx.lineJoin=join||"round";ctx.miterLimit=2.4;
+  ctx.beginPath();ctx.moveTo(wx(pts[0].x),wy(pts[0].y));
+  for(i=1;i<pts.length;i++)ctx.lineTo(wx(pts[i].x),wy(pts[i].y));
+  ctx.stroke();ctx.restore();
+}
+function forCanalSamples(pts,step,fn){
+  var i,dx,dy,len,nx,ny,px,py,t,acc=0;
+  for(i=0;i<pts.length-1;i++){
+    dx=pts[i+1].x-pts[i].x;dy=pts[i+1].y-pts[i].y;len=Math.hypot(dx,dy)||1;nx=dx/len;ny=dy/len;px=-ny;py=nx;
+    for(t=0;t<=len;t+=step)fn(pts[i].x+nx*t,pts[i].y+ny*t,nx,ny,px,py,acc+t);
+    acc+=len;
+  }
+}
+function offsetCanalPts(pts,dist){
+  var i,dx,dy,len,px,py,out=[];
+  for(i=0;i<pts.length;i++){
+    if(i===0){dx=pts[1].x-pts[0].x;dy=pts[1].y-pts[0].y;}
+    else if(i===pts.length-1){dx=pts[i].x-pts[i-1].x;dy=pts[i].y-pts[i-1].y;}
+    else{dx=pts[i+1].x-pts[i-1].x;dy=pts[i+1].y-pts[i-1].y;}
+    len=Math.hypot(dx,dy)||1;px=-dy/len;py=dx/len;
+    out.push({x:pts[i].x+px*dist,y:pts[i].y+py*dist});
+  }
+  return out;
+}
+function drawCanalTrench(){
+  var pts=canalDrawPts(),up=streetUp(),ww=PPSim.streetWidth(up),stone=ww+10,cols=["#3a3830","#4a4638","#5a5648","#322e28"];
+  /* damp earth cut in the tiles, then a stone bed, then brick lips — water sits down in this */
+  strokeCanalPath(stone+7,"#2a2218","butt","round");
+  strokeCanalPath(stone+4.2,"#3a3228","butt","round");
+  strokeCanalPath(stone,"#4a4638","butt","round");
+  /* brick marks follow the lip as short tangent strokes so the elbow stays smooth */
+  ctx.save();ctx.lineCap="butt";
+  forCanalSamples(pts,5.0,function(x,y,nx,ny,px,py,d){
+    var side=stone/2-0.35,c=cols[(Math.floor(d/5.0)+Math.round(x*0.2+y*0.2))&3],hx=nx*2.15,hy=ny*2.15;
+    ctx.strokeStyle=c;ctx.lineWidth=Math.max(1.5,ws(2.3));
+    ctx.beginPath();ctx.moveTo(wx(x+px*side-hx),wy(y+py*side-hy));ctx.lineTo(wx(x+px*side+hx),wy(y+py*side+hy));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(wx(x-px*side-hx),wy(y-py*side-hy));ctx.lineTo(wx(x-px*side+hx),wy(y-py*side+hy));ctx.stroke();
+    ctx.strokeStyle="#7a7460";ctx.lineWidth=Math.max(1,ws(0.7));
+    ctx.beginPath();ctx.moveTo(wx(x-px*(side-0.9)-hx*0.8),wy(y-py*(side-0.9)-hy*0.8));ctx.lineTo(wx(x-px*(side-0.9)+hx*0.8),wy(y-py*(side-0.9)+hy*0.8));ctx.stroke();
+  });
+  ctx.restore();
+  /* deep inner bed stays visible around the water */
+  strokeCanalPath(ww+6.2,"#1c1812","butt","round");
+  strokeCanalPath(ww+4.2,"#0a0c10","butt","round");
+}
+function drawBasinRim(){
+  var L=WASH.land,up=streetUp(),ww=PPSim.streetWidth(up),n=22,i,a,x,y,c,skip;
+  skip=Math.atan2(ww*0.5+6,L.rx);
+  oval(wx(L.x),wy(L.y),ws(L.rx+7.2),ws(L.ry+5.8),"#2a2218");
+  oval(wx(L.x),wy(L.y),ws(L.rx+5.6),ws(L.ry+4.4),"#3a3830");
+  for(i=0;i<n;i++){
+    a=-Math.PI+i*(Math.PI*2/n);
+    if(Math.abs(a)<skip)continue;
+    x=L.x+Math.cos(a)*(L.rx+3.6);y=L.y+Math.sin(a)*(L.ry+2.8);
+    c=i%3===0?"#4a4638":(i%3===1?"#5a5648":"#3a3830");
+    wr(x-2.5,y-1.6,5.0,3.2,c);wr(x-2.1,y-1.6,4.2,0.65,"#7a7460");
+  }
+  /* inner lip shadow — the water sits below this ring */
+  oval(wx(L.x),wy(L.y),ws(L.rx+1.8),ws(L.ry+1.2),"#1a1814");
+  oval(wx(L.x),wy(L.y),ws(L.rx+0.6),ws(L.ry+0.3),"#0a0c10");
+}
+function drawHoleStatic(){
+  var h=WASH.hole,cx=h.x,cy=h.y,hw=(h.w||30)/2,hh=(h.h||20)/2;
+  /* square doorway the canal meets flush: earth cut, stone, chunky wooden jambs and a clear south sill */
+  wr(cx-hw-4.4,cy-hh-3.2,(hw+4.4)*2,(hh+3.2)*2+5.4,"#2a2218");
+  wr(cx-hw-3.0,cy-hh-2.0,(hw+3.0)*2,(hh+2.0)*2+4.2,"#3a3830");
+  wr(cx-hw-1.6,cy-hh-1.0,(hw+1.6)*2,(hh+1.0)*2+2.4,"#4a4638");
+  wr(cx-hw-1.6,cy-hh-1.0,(hw+1.6)*2,1.4,"#7a7460");
+  /* posts that stand out into the room, south of the mouth */
+  wr(cx-hw-2.8,cy-hh-1.4,3.6,hh*2+6.0,"#3a200c");wr(cx-hw-2.4,cy-hh-1.0,2.6,hh*2+5.2,"#4a3018");wr(cx-hw-2.0,cy-hh-0.6,1.4,hh*2+4.4,"#7a5a30");
+  wr(cx+hw-0.8,cy-hh-1.4,3.6,hh*2+6.0,"#3a200c");wr(cx+hw-0.4,cy-hh-1.0,2.6,hh*2+5.2,"#4a3018");wr(cx+hw+0.2,cy-hh-0.6,1.4,hh*2+4.4,"#7a5a30");
+  /* lintel */
+  wr(cx-hw-2.8,cy-hh-1.8,(hw+2.8)*2,2.4,"#4a3018");wr(cx-hw-2.2,cy-hh-1.6,(hw+2.2)*2,1.2,"#9a7a48");
+  /* dark square tunnel, stopped short of the sill */
+  wr(cx-hw+1.4,cy-hh+1.0,(hw-1.4)*2,hh*2-2.4,"#1a1814");
+  wr(cx-hw+2.6,cy-hh+1.6,(hw-2.6)*2,hh*2-3.6,"#0a0c10");
+  wr(cx-hw+4.0,cy-hh+2.2,(hw-4.0)*2,hh*2-5.0,"#000000");
+  wr(cx-hw+5.0,cy-hh+2.8,(hw-5.0)*2,hh*0.6,"#000000");
+  /* chunky south sill the canal runs square into */
+  wr(cx-hw-2.8,cy+hh-0.4,(hw+2.8)*2,3.8,"#3a200c");
+  wr(cx-hw-2.2,cy+hh-0.2,(hw+2.2)*2,2.8,"#4a3018");
+  wr(cx-hw-1.6,cy+hh-0.2,(hw+1.6)*2,1.2,"#9a7a48");
+  wr(cx-hw-1.6,cy+hh+1.8,(hw+1.6)*2,0.8,"#3a200c");
+}
+
+function drawInletStatic(){
+  var I=WASH.inlet,r=I.r,cx=I.x,wallY=WH-GEO.WALL;
+  /* matching tunnel in the south wall, with a short sill so water can pour into the basin */
+  wr(cx-r-7, wallY-3.2, (r+7)*2, GEO.WALL+4.2, "#2a2820");
+  wr(cx-r-5, wallY-1.8, (r+5)*2, GEO.WALL+3.0, "#1a1814");
+  wr(cx-r-3.2, wallY-0.6, (r+3.2)*2, GEO.WALL+2.0, "#0a0c10");
+  wr(cx-r-1.8, wallY+0.6, (r+1.8)*2, GEO.WALL+1.0, "#000000");
+  oval(wx(cx),wy(wallY+0.8),ws(r+2.2),ws(r*0.7),"#0a0c10");
+  oval(wx(cx),wy(wallY+1.8),ws(r+0.2),ws(r*0.48),"#000000");
+  oval(wx(cx),wy(wallY+3.0),ws(r-3.0),ws(r*0.26),"#000000");
+  wr(cx-r-6.2, wallY-6.2, 2.8, 6.4, "#4a3018");wr(cx+r+3.4, wallY-6.2, 2.8, 6.4, "#4a3018");
+  wr(cx-r-5.6, wallY-5.6, 1.8, 5.2, "#7a5a30");wr(cx+r+4.0, wallY-5.6, 1.8, 5.2, "#7a5a30");
+  wr(cx-r-6, wallY-4.4, (r+6)*2, 2.6, "#4a3018");
+  wr(cx-r-5.2, wallY-4.1, (r+5.2)*2, 1.8, "#7a5a30");
+  wr(cx-r-5.2, wallY-4.4, (r+5.2)*2, 0.6, "#9a7a48");
+  ctx.strokeStyle="#8a6a40";ctx.lineWidth=Math.max(1,ws(1.8));ctx.beginPath();ctx.ellipse(wx(cx),wy(wallY-0.8),ws(r+2),ws(r*0.5),0,Math.PI+0.1,Math.PI*2-0.1);ctx.stroke();
+}
+function drawWashShelf(){
+  var S=WASH.shelf;if(!S)return;
+  wr(S.x-S.w/2,S.y,S.w,S.h,"#4a3018");wr(S.x-S.w/2,S.y,S.w,0.8,"#9a7a48");wr(S.x-S.w/2,S.y+S.h-0.8,S.w,0.8,"#3a200c");
+  wr(S.x-S.w/2,S.y,0.8,S.h,"#6a4a28");wr(S.x+S.w/2-0.8,S.y,0.8,S.h,"#3a200c");
+  wr(S.x-8,S.y-6.2,4.2,6.2,"#3a6a9a");wr(S.x-7.2,S.y-7.2,2.6,1.2,"#8ab8e0");wr(S.x-6.6,S.y-4.6,1.4,2.2,"#c8e0f0");
+  wr(S.x+2,S.y-1.6,8,1.6,"#8a5a40");wr(S.x+3,S.y-2.2,6,1.2,"#c48a68");
+}
+function drawWashGrate(){
+  var G=WASH.grate,s=G.s,x=G.x-s/2,y=G.y-s/2,i;
+  oval(wx(G.x),wy(G.y),ws(s*0.85),ws(s*0.7),"rgba(40,36,28,0.28)");
+  wr(x-1.2,y-1.2,s+2.4,s+2.4,"#2a2820");wr(x,y,s,s,"#3a4038");wr(x+0.8,y+0.8,s-1.6,s-1.6,"#1a1c18");
+  for(i=1;i<5;i++)wr(x+1,y+i*(s/5),s-2,0.7,"#5a6058");
+  for(i=1;i<5;i++)wr(x+i*(s/5),y+1,0.7,s-2,"#4a5048");
+  wr(x,y,s,0.6,"#8a9088");wr(x,y,0.6,s,"#6a7068");
+}
+function drawWashMop(){
+  var B=WASH.bucket;if(!B)return;
+  oval(wx(B.x)+ws(0.6),wy(B.y)+ws(0.8),ws(5.2),ws(2.4),"rgba(0,0,0,0.18)");
+  drawBucket(B.x,B.y,5.4,"#2a4a58");
+  ctx.save();ctx.strokeStyle="#5a3a20";ctx.lineWidth=Math.max(2,ws(1.6));ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(wx(B.x+2),wy(B.y-2));ctx.lineTo(wx(B.x+10),wy(B.y-28));ctx.stroke();
+  ctx.strokeStyle="#8a6a40";ctx.lineWidth=Math.max(1.2,ws(1.1));
+  ctx.beginPath();ctx.moveTo(wx(B.x+2),wy(B.y-2));ctx.lineTo(wx(B.x+10),wy(B.y-28));ctx.stroke();
+  ctx.restore();
+  wr(B.x+8.4,B.y-30,4.2,3.2,"#6a7068");wr(B.x+8.6,B.y-29.4,3.6,2.2,"#c0c8c0");
+}
+function drawWashOutlet(){
+  var O=WASH.outlet;if(!O)return;
+  var cx=O.x,wall=WH-GEO.WALL,boxW=O.boxW||16,boxH=O.boxH||15;
+  var boxX0=cx-boxW/2,boxY1=wall,boxY0=boxY1-boxH;
+  /* matching 0.4.4 X-ray scanner, flipped onto the south wall; mouth faces north into the basin */
+  wr(boxX0+0.6,boxY0+0.6,boxW,boxH,"rgba(0,0,0,0.32)");
+  wr(boxX0,boxY0,boxW,boxH,"#3a4038");wr(boxX0+0.6,boxY0+0.6,boxW-1.2,boxH-1.2,"#5a6258");
+  wr(boxX0+0.6,boxY1-1.8,boxW-1.2,1.2,"#9aa49a");wr(boxX0+0.6,boxY0+0.6,boxW-1.2,1,"#2a2c28");
+  wr(boxX0,boxY0,0.8,boxH,"#8a9088");wr(boxX0+boxW-0.8,boxY0,0.8,boxH,"#2a2c28");
+  wr(boxX0+3.2,boxY0+3,boxW-6.4,boxH-6.5,"#12141a");wr(boxX0+3.6,boxY0+3.4,boxW-7.2,boxH-7.3,"#1a2030");
+  wr(boxX0+3.6,boxY0+3.4,boxW-7.2,0.6,"#3a5068");
+  var bolts=[[0.8,0.8],[boxW-1.6,0.8],[0.8,boxH-1.6],[boxW-1.6,boxH-1.6]],i;
+  for(i=0;i<bolts.length;i++){wr(boxX0+bolts[i][0],boxY0+bolts[i][1],1.1,1.1,"#2a2c28");wr(boxX0+bolts[i][0]+0.2,boxY0+bolts[i][1]+0.2,0.7,0.7,"#c0c8c0");}
+  /* lead curtains at the north mouth (into the room / basin) */
+  var mx0=cx-4.2;for(var s=0;s<6;s++)wr(mx0+s*1.4,boxY0-1.0,1.1,2.2,s%2?"#2a2c28":"#3a4038");
+  /* hazard lip just north of the mouth */
+  var bl=1.6,hy=boxY0-1.6,hx0=cx-5,x,n;for(x=0,n=0;x<10;x+=bl,n++)wr(hx0+x,hy,bl,1.1,n%2?"#2a2a24":"#e0b020");
+  /* short metal lip into the basin, not a long belt */
+  wr(cx-5.2,boxY0-3.4,10.4,1.8,"#3a4038");wr(cx-4.6,boxY0-3.0,9.2,1.1,"#6a7068");
+  wr(boxX0+boxW,boxY0+4,2.4,6,"#3a4038");wr(boxX0+boxW,boxY0+4.3,2,1.1,"#1a1c18");wr(boxX0+boxW+0.4,boxY0+7,1.4,1.4,"#2a2010");
+}
+function drawWashProps(){
+  /* t1187: top half stays empty; flag off, drawers stay */
+  if(!WASH.showProps)return;
+  drawWashShelf();
+  drawCrate(WASH.crate.x,WASH.crate.y,18,14,false,true);
+  drawCrate(WASH.crate2.x,WASH.crate2.y,16,12,false,false);
+  drawWashGrate();
+  drawWashMop();
+}
+function drawWashStatic(){
+  var P=WASH.pile;
+  drawDoor();
+  /* 0.4.3/0.4.4/0.4.5 intake, circular pool, mouth, diagonal street and floating bench stay in the file (hidden, not deleted). */
+  drawWashProps();
+  drawCanalTrench();
+  drawBasinRim();
+  /* 0.4.5 inlet-hole art (drawInletStatic) stays in the file, hidden. */
+  /* outlet machine and ship-opening frame are drawn in the live layer so water does not cover them */
+}
+function drawWashWater(){
+  var L=WASH.land,h=WASH.hole,I=WASH.inlet,pts=canalDrawPts(),up=streetUp(),ww=PPSim.streetWidth(up);
+  var deep="#163858",mid="#1f6e98",lit="#3a94b8",i,j,t,x,y,nx,ny,len,acc,total=0,u,d,flow,nRip,spl,ph,drop;
+  /* one water body: deep bed, mid channel, lit core — inset so the inner stone shadow stays */
+  strokeCanalPath(ww-0.1,deep,"butt","round");
+  oval(wx(L.x),wy(L.y),ws(L.rx-0.4),ws(L.ry-0.2),deep);
+  strokeCanalPath(Math.max(3.2,ww-3.4),mid,"butt","round");
+  oval(wx(L.x)-ws(1.2),wy(L.y)-ws(1.4),ws(L.rx-2.4),ws(L.ry-2.2),mid);
+  strokeCanalPath(Math.max(1.8,ww-6.2),lit,"butt","round");
+  /* south/east shadow in the basin so the water sits down in the stone */
+  ctx.globalAlpha=0.38;oval(wx(L.x)+ws(2),wy(L.y)+ws(6),ws(L.rx-6),ws(L.ry-9),"#0a2030");
+  /* NW surface highlight */
+  ctx.globalAlpha=0.42;oval(wx(L.x)-ws(9),wy(L.y)-ws(8),ws(16),ws(9),"#c8ecff");
+  ctx.globalAlpha=0.22;oval(wx(L.x)-ws(11),wy(L.y)-ws(10),ws(8),ws(4),"#eef8ff");
+  /* far-bank (inner/NW) highlight along the trench, near-bank dark */
+  strokeCanalPts(offsetCanalPts(pts,-(ww*0.28)),Math.max(1.4,ww*0.16),"rgba(210,238,255,0.55)","butt","round");
+  strokeCanalPts(offsetCanalPts(pts,ww*0.30),Math.max(1.6,ww*0.22),"rgba(8,24,40,0.45)","butt","round");
+  ctx.globalAlpha=1;
+  /* moving flow ripples — chevrons traveling land -> elbow -> hole, faster at higher channel */
+  for(j=0;j<pts.length-1;j++)total+=Math.hypot(pts[j+1].x-pts[j].x,pts[j+1].y-pts[j].y)||1;
+  flow=0.14+0.22*up;nRip=14+up*5;
+  ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+  for(i=0;i<nRip;i++){
+    u=((i/nRip)+(ANIM_T*flow)%1)%1;d=u*total;acc=0;
+    for(j=0;j<pts.length-1;j++){
+      len=Math.hypot(pts[j+1].x-pts[j].x,pts[j+1].y-pts[j].y)||1;
+      if(acc+len>=d||j===pts.length-2){
+        t=(d-acc)/len;t=t<0?0:t>1?1:t;nx=(pts[j+1].x-pts[j].x)/len;ny=(pts[j+1].y-pts[j].y)/len;
+        x=pts[j].x+nx*len*t;y=pts[j].y+ny*len*t;
+        ctx.strokeStyle="rgba(226,244,255,"+(0.32+0.4*((i+ANIM_F)%4)/4)+")";
+        ctx.lineWidth=Math.max(1,ws(1.15+(i%3===0?0.35:0)));
+        if(i%3===1){
+          /* short surface dash */
+          ctx.beginPath();ctx.moveTo(wx(x-nx*2.4),wy(y-ny*2.4));ctx.lineTo(wx(x+nx*2.8),wy(y+ny*2.8));ctx.stroke();
+        }else{
+          /* small flow chevron */
+          ctx.beginPath();
+          ctx.moveTo(wx(x-nx*2.2+ny*1.7),wy(y-ny*2.2-nx*1.7));
+          ctx.lineTo(wx(x+nx*2.6),wy(y+ny*2.6));
+          ctx.lineTo(wx(x-nx*2.2-ny*1.7),wy(y-ny*2.2+nx*1.7));
+          ctx.stroke();
+        }
+        break;
+      }
+      acc+=len;
+    }
+  }
+  ctx.restore();ctx.globalAlpha=1;
+  /* water comes out the outlet machine mouth into the basin, with rings and a small splash */
+  var mouthX=(WASH.outlet?WASH.outlet.x:I.x), mouthY=WH-GEO.WALL-(WASH.outlet&&WASH.outlet.boxH||15);
+  ctx.save();ctx.strokeStyle="rgba(200,230,250,0.92)";ctx.lineWidth=Math.max(2,ws(2.8));ctx.lineCap="round";
+  for(i=0;i<3;i++){
+    ctx.globalAlpha=0.85-i*0.2;
+    ctx.lineWidth=Math.max(1.6,ws(3.0-i*0.6));
+    ctx.beginPath();ctx.moveTo(wx(mouthX-1.6+i*1.5),wy(mouthY-1.2));ctx.lineTo(wx(mouthX-2.2+i*1.7+((ANIM_F+i)%3)*0.45),wy(L.y+L.ry*0.35));ctx.stroke();
+  }
+  ctx.restore();
+  spl=1.0+0.4*((ANIM_F%4)/3);
+  ctx.globalAlpha=0.55;oval(wx(mouthX),wy(L.y+L.ry*0.55),ws(8*spl),ws(3.6*spl),"#d8eefc");
+  ctx.globalAlpha=0.35;oval(wx(mouthX+3.4),wy(L.y+L.ry*0.4),ws(3.4),ws(1.7),"#eef8ff");
+  ctx.save();ctx.strokeStyle="rgba(210,236,255,0.7)";ctx.lineWidth=Math.max(1,ws(1.15));
+  for(i=0;i<3;i++){
+    ph=(ANIM_T*0.85+i/3)%1;ctx.globalAlpha=0.5*(1-ph);
+    ctx.beginPath();ctx.ellipse(wx(mouthX),wy(L.y+L.ry*0.55),ws(5+ph*16),ws(2.4+ph*8),0,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+  for(i=0;i<5;i++){
+    ph=(ANIM_T*1.1+i*0.17)%1;drop=4+ph*9;
+    ctx.globalAlpha=0.55*(1-ph);
+    oval(wx(mouthX+Math.cos(i*1.4)*drop*0.55),wy(L.y+L.ry*0.55-ph*5+Math.sin(i*1.7)*drop*0.2),ws(1.3),ws(1.0),"#e8f6ff");
+  }
+  ctx.globalAlpha=1;
+  /* water runs straight into the square ship opening */
+  var hw=(h.w||20)/2,hh=(h.h||16)/2;
+  ctx.save();ctx.strokeStyle="rgba(160,210,240,0.8)";ctx.lineWidth=Math.max(1.5,ws(2.3));ctx.lineCap="round";
+  for(i=0;i<3;i++){
+    ctx.globalAlpha=0.72-i*0.18;
+    ctx.beginPath();ctx.moveTo(wx(h.x-3+i*1.4),wy(h.y+hh+1));ctx.lineTo(wx(h.x-2+i*1.2),wy(h.y-hh*0.2+((ANIM_F+i)%4)*0.3));ctx.stroke();
+  }
+  ctx.restore();ctx.globalAlpha=1;
+  var w=sim.s.wash,s;
+  if(w&&w.splash){for(i=0;i<w.splash.length;i++){s=w.splash[i];if(sim.s.t-s.t>0.8)continue;
+    ctx.globalAlpha=Math.max(0,1-(sim.s.t-s.t)/0.8);oval(wx(s.x),wy(s.y),ws(4+(sim.s.t-s.t)*8),ws(2.5+(sim.s.t-s.t)*5),"#d0e8f8");ctx.globalAlpha=1;}}
+}
+
+function drawWashPots(){
+  var w=sim.s.wash,i,p,bulk,P=WASH.pile,n,j,ang,r,sz=peelSz();
+  if(!w)return;
+  /* 0.4.8: old dry-pile rendering stays in the file, hidden (t1191) */
+  if(WASH.showDryPile){
+    bulk=w.bulk|0;
+    n=Math.min(bulk,80);
+    for(j=0;j<n;j++){ang=srng(j*3)*6.283;r=Math.sqrt(srng(j*7))*P.rz*0.62;potato(wx(P.cx+Math.cos(ang)*r*0.9),wy(P.cy+Math.sin(ang)*r*0.68),Math.max(2.6,sz*0.92),true,j%2===0,0,null);}
+  }
+  drawCanalPots();
+}
+function heapVisN(w){
+  var live=0,i,p,cap=(PPSim.HEAP_VIS||36)+(PPSim.HEAP_SPILL||24);
+  if(!w)return 0;
+  for(i=0;i<(w.pots||[]).length;i++){p=w.pots[i];if(p&&!p.onStreet&&PPSim.inLanding&&PPSim.inLanding(p.x,p.y))live++;}
+  return Math.min(cap,live+(w.bulk|0));
+}
+/* build a rising, layered mound (back-to-front). layer 0 sits in the water; the middle lifts. */
+var _heapCache=null,_heapCacheN=-1;
+function buildBasinHeapSprites(){
+  var w=sim.s.wash,L=WASH.land,H,n,caps,i,t,c,j,ang,u,r,sc,base,hx,hy,lift,shade,out=[],bobN=0;
+  if(!w)return out;
+  n=heapVisN(w);
+  if(_heapCache&&_heapCacheN===n)return _heapCache;
+  H=PPSim.heapCenter?PPSim.heapCenter():{x:L.x,y:L.y+L.ry*0.34};
+  if(n<=0){_heapCache=out;_heapCacheN=0;return out;}
+  /* cone of layers so a small heap still rises (not one flat ring) */
+  var nLayers=n<=2?1:n<=5?2:n<=11?3:n<=20?4:n<=32?5:n<=48?6:7,weights=[],sumW=0,acc=0,wts;
+  for(i=0;i<nLayers;i++){wts=Math.pow(0.60,i);weights.push(wts);sumW+=wts;}
+  caps=[];acc=0;
+  for(i=0;i<nLayers;i++){
+    c=(i===nLayers-1)?(n-acc):Math.max(1,Math.round(n*weights[i]/sumW));
+    if(acc+c>n)c=n-acc;
+    if(c>0){caps.push(c);acc+=c;}
+    if(acc>=n)break;
+  }
+  base=0.30+0.52*Math.min(1,n/44);
+  for(t=0;t<caps.length;t++){
+    sc=1-t*0.14;
+    for(j=0;j<caps[t];j++){
+      ang=(j+0.37)*2.399963+t*0.55;
+      u=Math.sqrt((j+0.5)/Math.max(caps[t],1));
+      r=u*sc*base*(0.52+0.48*Math.min(1,caps[t]/16));
+      hx=H.x+Math.cos(ang)*L.rx*r;
+      hy=H.y+Math.sin(ang)*L.ry*r*0.95;
+      lift=t*2.05+(1-u)*0.5;
+      /* NW faces catch the light; SE faces sit in shade so the mound reads as height */
+      shade=0.70+0.22*t/Math.max(1,caps.length-1)+0.16*(-Math.cos(ang)*0.35-Math.sin(ang)*0.65);
+      shade=Math.max(0.58,Math.min(1.18,shade));
+      out.push({x:hx,y:hy,lift:lift,t:t,r:u,ang:ang,shade:shade,flip:((t*13+j)*7)%2===0,bob:false,sz:1-0.04*u});
+    }
+  }
+  /* a few of the outermost base potatoes bob in the water */
+  out.sort(function(a,b){return (b.t===0&&a.t!==0)?-1:(a.t===0&&b.t!==0)?1:b.r-a.r;});
+  for(i=0;i<out.length&&bobN<Math.min(5,Math.max(2,Math.floor(n/8)));i++){
+    if(out[i].t===0&&out[i].r>0.62){out[i].bob=true;bobN++;}
+  }
+  out.sort(function(a,b){return a.y!==b.y?a.y-b.y:(a.lift-b.lift);});
+  _heapCache=out;_heapCacheN=n;return out;
+}
+function peeledShade(f){return [shadeHex("#a88830",f),shadeHex("#c8a848",f),shadeHex("#e8c868",f),shadeHex("#f0d890",f)];}
+function drawBasinHeapBase(){
+  var w=sim.s.wash,L=WASH.land,H,spr,i,n,sz=peelSz(),bob,pal,sh;
+  if(!w)return;
+  H=PPSim.heapCenter?PPSim.heapCenter():{x:L.x,y:L.y+L.ry*0.34};
+  spr=buildBasinHeapSprites();n=spr.length;
+  if(n<=0)return;
+  /* contact shadow under the mound — grows with heap height */
+  sh=0.55+0.35*Math.min(1,n/48);
+  ctx.globalAlpha=0.34+0.16*Math.min(1,n/40);
+  oval(wx(H.x)+ws(1.6),wy(H.y)+ws(3.2),ws(L.rx*sh),ws(L.ry*sh*0.88),"#061018");
+  ctx.globalAlpha=0.22;oval(wx(H.x)+ws(2.4),wy(H.y)+ws(4.2),ws(L.rx*sh*0.62),ws(L.ry*sh*0.55),"#040c12");
+  ctx.globalAlpha=1;
+  for(i=0;i<spr.length;i++){
+    if(spr[i].t>0)continue;
+    bob=spr[i].bob?Math.sin(ANIM_T*2.3+spr[i].ang)*0.55:0;
+    pal=peeledShade(spr[i].shade*0.92);
+    potato(wx(spr[i].x),wy(spr[i].y)+ws(0.55+bob),Math.max(2.5,sz*spr[i].sz),true,spr[i].flip,0,pal);
+  }
+}
+function drawBasinHeapTop(){
+  var spr=buildBasinHeapSprites(),i,sz=peelSz(),pal;
+  for(i=0;i<spr.length;i++){
+    if(spr[i].t<=0)continue;
+    pal=peeledShade(spr[i].shade);
+    potato(wx(spr[i].x),wy(spr[i].y)-ws(spr[i].lift),Math.max(2.5,sz*spr[i].sz),true,spr[i].flip,0,pal);
+  }
+}
+function drawBasinWaterFilm(){
+  var L=WASH.land;
+  /* a light surface film around the base of the heap; the peak sits above it */
+  ctx.save();
+  ctx.globalAlpha=0.16;oval(wx(L.x),wy(L.y)+ws(1),ws(L.rx-1.0),ws(L.ry-1.2),"#165a7c");
+  ctx.globalAlpha=0.12;oval(wx(L.x)-ws(8),wy(L.y)-ws(6),ws(16),ws(9),"#d4eefc");
+  ctx.globalAlpha=0.08;oval(wx(L.x)+ws(2),wy(L.y)+ws(5),ws(L.rx-7),ws(L.ry-9),"#0c283c");
+  ctx.restore();ctx.globalAlpha=1;
+}
+function drawHeapLandSplash(){
+  var w=sim.s.wash,H,L=WASH.land,i,s,ph,age,n,lift,px,py;
+  if(!w)return;
+  H=PPSim.heapCenter?PPSim.heapCenter():{x:L.x,y:L.y+L.ry*0.34};
+  n=heapVisN(w);
+  lift=Math.min(7,Math.max(1,Math.ceil(Math.sqrt(n))))*1.85;
+  px=wx(H.x);py=wy(H.y)-ws(lift*0.72);
+  if(w.heapSplash){
+    for(i=0;i<w.heapSplash.length;i++){
+      s=w.heapSplash[i];age=sim.s.t-s.t;if(age<0||age>0.7)continue;
+      ph=age/0.7;
+      ctx.save();ctx.strokeStyle="rgba(210,236,255,"+(0.7*(1-ph))+")";ctx.lineWidth=Math.max(1.1,ws(1.3));
+      ctx.beginPath();ctx.ellipse(px,py,ws(3+ph*11),ws(1.6+ph*5.5),0,0,Math.PI*2);ctx.stroke();
+      ctx.restore();
+    }
+  }
+  ctx.globalAlpha=1;
+}
+function drawCanalPots(){
+  var w=sim.s.wash,i,p,sz=peelSz();
+  if(!w)return;
+  for(i=0;i<(w.pots||[]).length;i++){
+    p=w.pots[i];if(!p)continue;
+    if(!p.onStreet&&PPSim.inLanding&&PPSim.inLanding(p.x,p.y))continue;
+    potato(wx(p.x),wy(p.y),sz,true,i%2===0,p.sloppy?3:0,null);
+  }
+}
+function drawWashScene(now){
+  drawWashWater();
+  drawBasinHeapBase();
+  drawBasinWaterFilm();
+  drawBasinHeapTop();
+  drawHeapLandSplash();
+  drawWashOutlet();
+  drawHoleStatic();
+  drawCanalPots();
+  if(sim.s.g.where==="wash")drawGuy(now);
+  drawShipAnim(now);
+}
+
 function drawStatic(){drawFloor();drawWalls();
+  if(viewIsWash()){drawWashStatic();return;}
   /* hidden props (0.2.1 t1027, still hidden): drawPipes drawShelf drawToolRack drawMachinePad x3 drawDrain drawPeelBin drawBucket drawSack x4 drawCrate x3 drawLamp; 0.3 also hides drawCentreStripe and the old drawChuteBase/drawCooler/drawMat/drawTable */
   drawPileBay();drawPileShadow();drawDoor();   /* 0.4.2: the wall door first, so furniture pushed against the back wall sits in front of it */
   drawBedR(drawBed);drawRectR(GEO.table,drawTable2);drawRectR(GEO.cooler,drawCooler2);drawStool();drawReturnChute();}
@@ -2776,7 +3762,8 @@ function drawCrown(useO,x,y,hr,u){
 }
 function drawGuy(now){
   var g=sim.s.g,a=g.act||{t:"idle"};
-  GX=wx(g.x*roomW);GY=wy(g.y*roomH);GD=g.dir|0;
+  if((viewIsWash()&&g.where!=="wash")||(!viewIsWash()&&g.where==="wash"))return;
+  if(g.where==="wash"){GX=wx(g.wx);GY=wy(g.wy);}else{GX=wx(g.x*RW);GY=wy(g.y*RH);}GD=g.dir|0;
   /* slimmer than 0.3, a hair larger than the too-tiny 0.3.1 so detail reads; sizes in CSS px via k */
   var u=k*0.82;
   var hr=6.4*u,shW=14.2*u,shH=6.0*u;
@@ -3038,17 +4025,27 @@ function drawPeelerPeels(){
   for(var i=0;i<peels.length;i++)S.peelFlake(wx(peels[i].x),wy(peels[i].y),peels[i].ang,ws(peels[i].settled?1.7:2.0));
 }
 var EDIT_IDS=["table","cooler","stool","mat","sink","smallCooler","basicCot","plant","lamp","radio","rug","tvArmchair","autoPeeler"];
-function editRect(id){var c=sim.centerOf(id);if(!c)return null;var f=sim.footOf(id,c.x,c.y,id==="table"?(GEO.table.r|0):id==="cooler"?(GEO.cooler.r|0):id==="mat"?(GEO.mat.r|0):(c.r|0));return f;}
+var WASH_EDIT_IDS=[]; /* 0.4.8: basin heap stays with the basin; dry pile is hidden, not draggable */
+function editIds(){return viewIsWash()?WASH_EDIT_IDS:EDIT_IDS;}
+function editRect(id){var c=sim.centerOf(id);if(!c)return null;if(id==="washPile"||id==="streetMouth")return sim.footOf(id,c.x,c.y,0);var f=sim.footOf(id,c.x,c.y,id==="table"?(GEO.table.r|0):id==="cooler"?(GEO.cooler.r|0):id==="mat"?(GEO.mat.r|0):(c.r|0));return f;}
 function drawEditOverlay(){
   ctx.save();ctx.globalAlpha=0.9;
-  for(var i=0;i<EDIT_IDS.length;i++){
-    var id=EDIT_IDS[i];
-    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
-    var f=editRect(id);if(!f)continue;
+  var ids=editIds(),i,id,f;
+  for(i=0;i<ids.length;i++){
+    id=ids[i];
+    if(!viewIsWash()&&["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
+    f=editRect(id);if(!f)continue;
     ctx.strokeStyle=dragId===id?"#ffe066":"#9fc0ff";ctx.lineWidth=dragId===id?2:1;
     ctx.strokeRect(wx(f.x0)+0.5,wy(f.y0)+0.5,Math.max(2,wx(f.x1)-wx(f.x0)-1),Math.max(2,wy(f.y1)-wy(f.y0)-1));
   }
-  /* the shipping X stays clear */
+  if(viewIsWash()){
+    var h=WASH.hole,xx=wx(h.x),yy=wy(h.y),q=Math.max(3,ws(2.4));
+    ctx.strokeStyle="#1a1010";ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(xx,yy,ws(h.r+2),ws(h.r),0,0,6.28);ctx.stroke();
+    ctx.restore();
+    ctx.font="700 10px Courier New,monospace";ctx.fillStyle="#ffe066";ctx.textAlign="left";
+    ctx.fillText("EDITOR: the basin heap, machines, canal and ship opening stay put.",8,16);
+    return;
+  }
   var sp=SPOT.ship,xx=wx(sp.x),yy=wy(sp.y),q=Math.max(3,ws(2.4));ctx.strokeStyle="#ff8a5a";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xx-q,yy-q);ctx.lineTo(xx+q,yy+q);ctx.moveTo(xx+q,yy-q);ctx.lineTo(xx-q,yy+q);ctx.stroke();
   ctx.restore();
   ctx.font="700 10px Courier New,monospace";ctx.fillStyle="#ffe066";ctx.textAlign="left";
@@ -3060,20 +4057,29 @@ function worldFromEvent(e){
   return {x:sx/k+camX,y:sy/k+camY};
 }
 function hitEditItem(wx0,wy0){
-  var best=null,bestA=1e9;
-  for(var i=0;i<EDIT_IDS.length;i++){
-    var id=EDIT_IDS[i];
-    if(["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
-    var f=editRect(id);if(!f)continue;var m=4;
-    if(wx0>=f.x0-m&&wx0<=f.x1+m&&wy0>=f.y0-m&&wy0<=f.y1+m){var ar=(f.x1-f.x0)*(f.y1-f.y0);if(ar<bestA){bestA=ar;best=id;}}
+  /* 0.4.3: a tap on the cooler body is the cooler, even if the seat's margin overlaps the cooler. Strict hits first, then the nearest centre. */
+  var hits=[],i,id,f,m=3,strict,d,ids=editIds();
+  for(i=0;i<ids.length;i++){
+    id=ids[i];
+    if(!viewIsWash()&&["table","cooler","stool","mat"].indexOf(id)<0&&!sim.placed(id))continue;
+    f=editRect(id);if(!f)continue;
+    if(wx0>=f.x0-m&&wx0<=f.x1+m&&wy0>=f.y0-m&&wy0<=f.y1+m){
+      strict=wx0>=f.x0&&wx0<=f.x1&&wy0>=f.y0&&wy0<=f.y1;
+      d=Math.hypot(wx0-(f.x0+f.x1)/2,wy0-(f.y0+f.y1)/2);
+      hits.push({id:id,strict:strict,d:d});}
   }
+  if(!hits.length)return null;
+  var pool=[],best=null,bestD=1e9;
+  for(i=0;i<hits.length;i++)if(hits[i].strict)pool.push(hits[i]);
+  if(!pool.length)pool=hits;
+  for(i=0;i<pool.length;i++)if(pool[i].d<bestD){bestD=pool[i].d;best=pool[i].id;}
   return best;
 }
 /* 0.4.2: tap anything in the room for its name and what it does (right HUD) */
 var INFO={
   table:["PEEL TABLE","He stands at it and peels on the board. Works wherever you put it."],
-  cooler:["FOOD COOLER","Holds the food cans. EAT WHEN HUNGER < sends him here."],
-  stool:["SEAT","Where he stands to eat. Moves with the cooler."],
+  cooler:["FOOD COOLER","Holds the food cans. He stands at the cooler to eat. EAT WHEN HUNGER < or the EAT button sends him here."],
+  stool:["SEAT","A seat. It is its own object — it does not move with the cooler, and he eats at the cooler, not here."],
   mat:["BED","NAP WHEN ENERGY < sends him here. He gets in from a free side."],
   sink:["SINK","He dumps the potatoes in it and washes them: +1c each. WASH BEFORE PEEL."],
   smallCooler:["SMALL COOLER","+2 food slots. Hums when stocked."],
@@ -3085,28 +4091,72 @@ var INFO={
   tvArmchair:["TV + ARMCHAIR","WATCH WHEN ENERGY < sits him in the chair."],
   autoPeeler:["AUTO-PEELER","Peels potatoes from the conveyor. AUTO-PEELER SPEED."],
   pile:["POTATO PILE","Raw potatoes. He grabs here. Fixed in place."],
-  ship:["SHIPPING","He drops peeled potatoes on the belt at the X. Fixed in place."],
-  ret:["RETURN CHUTE","Shipped batches come back here raw. Fixed in place."]};
-function hitAny(x,y){var h=hitEditItem(x,y);if(h)return h;
+  ship:["SHIP IN (X-ray)","He walks up to this machine and places each peeled potato on the belt. Unwashed pay 2c here. A sink-washed potato pays 3c. WASH or AUTO-WASH sends them through the scanner into the wash-room machine (3c at the ship opening). Fixed in place."],
+  ret:["RETURN CHUTE","Shipped batches come back here raw. Fixed in place."],
+  door:["METAL DOOR",""],
+  pool:["WATER POOL","Hidden. The landing pool and canal replaced this small pool."],
+  street:["CANAL","A recessed trench in the floor. It carries washed potatoes from the basin up the right wall to the ship hole (3c). WIDER CHANNEL makes the current faster."],
+  streetMouth:["CHANNEL MOUTH","Hidden. The landing pool replaced this basin."],
+  land:["LANDING BASIN","A stone-rimmed basin just past the wash-room scanner. Potatoes come out of that machine and stack into a heap in this water, with the middle rising. The current pulls them into the canal along the right wall."],
+  inlet:["OUTLET SCANNER","The wash-room twin of the kitchen X-ray scanner. Potatoes come out of this machine into the basin. Fixed in place."],
+  washOutlet:["OUTLET SCANNER","The wash-room twin of the kitchen X-ray scanner. Potatoes come out of this machine into the basin. Fixed in place."],
+  hole:["SHIP OPENING","A square opening at the top-right. The canal runs straight into it. Washed potatoes ship through it at 3c and come back raw to the kitchen."],
+  washPile:["BASIN HEAP","Peeled potatoes stack into a heap in the basin water under the wash-room scanner. The current slowly pulls them into the canal. The old dry pile is hidden. The basin stays put in EDIT."],
+  washIn:["INTAKE","Hidden. Potatoes now come out the south inlet hole."],
+  washOut:["SHIP OUT","Hidden. The hole in the wall replaced this north exit."],
+  washCrate:["CRATES","Spare kitchen crates stacked against the wall."],
+  washGrate:["FLOOR DRAIN","A metal grate in the floor."],
+  washBucket:["MOP BUCKET","A mop and a bucket of water."],
+  washShelf:["SHELF","A short shelf on the north wall."]};
+function doorInfoText(){return sim.hasKey()?["METAL DOOR","OPEN. Tap to go to the wash room (short fade). Peeled potatoes come out a matching scanner at the bottom, pile up in the basin water, and a canal along the right wall pulls them to a ship opening."]:["METAL DOOR (LOCKED)","Buy a ROOM KEY in the SHOP to unlock it. Behind it is a wash room. The kitchen X-ray scanner sends peeled potatoes through the wall to a matching machine there."];}
+function hitAny(x,y){
+  if(viewIsWash()){
+    var pl=WASH.pile,I=WASH.inlet,h=WASH.hole,L=WASH.land,up=sim.up?sim.up("channel"):0;
+    if(editMode){var he=hitEditItem(x,y);if(he)return he;}
+    if(sim.doorHit(x,y,"wash"))return "door";
+    if(Math.hypot(x-h.x,y-h.y)<=(h.r||12)+6)return "hole";
+    if(WASH.outlet){var ow=WASH.outlet.boxW||16,oh=WASH.outlet.boxH||15,oy0=WH-GEO.WALL-oh;
+      if(x>=WASH.outlet.x-ow/2-2&&x<=WASH.outlet.x+ow/2+4&&y>=oy0-4&&y<=WH-GEO.WALL+2)return "washOutlet";}
+    if(Math.hypot(x-I.x,y-I.y)<=I.r+6)return "inlet";
+    if(PPSim.inLanding&&PPSim.inLanding(x,y))return "land";
+    if(PPSim.inStreet(x,y,up))return "street";
+    if(WASH.showDryPile&&Math.abs(x-pl.cx)<=pl.rx&&Math.abs(y-pl.cy)<=pl.rz)return "washPile";
+    if(WASH.showProps){
+      if(WASH.grate&&Math.abs(x-WASH.grate.x)<=WASH.grate.s/2+2&&Math.abs(y-WASH.grate.y)<=WASH.grate.s/2+2)return "washGrate";
+      if(WASH.bucket&&Math.hypot(x-WASH.bucket.x,y-WASH.bucket.y)<=10)return "washBucket";
+      if((WASH.crate&&Math.hypot(x-WASH.crate.x,y-WASH.crate.y)<=12)||(WASH.crate2&&Math.hypot(x-WASH.crate2.x,y-WASH.crate2.y)<=11))return "washCrate";
+      if(WASH.shelf&&Math.abs(x-WASH.shelf.x)<=WASH.shelf.w/2&&Math.abs(y-WASH.shelf.y)<=8)return "washShelf";
+    }
+    return null;
+  }
+  var h=hitEditItem(x,y);if(h)return h;
+  if(sim.doorHit(x,y,"kitchen"))return "door";
   var G=GEO.pile;if(Math.abs(x-G.cx)<=G.rx&&y>=G.base-G.rz-4&&y<=RH-GEO.WALL)return "pile";
   if(x>=GEO.ship.x-12&&x<=GEO.ship.x+14&&y>=GEO.WALL-2&&y<=GEO.ship.lip+8)return "ship";
   if(x>=GEO.ret.mouthX-3&&y>=GEO.ret.y-8&&y<=GEO.ret.y+8)return "ret";
   return null;}
 var infoUntil=0,infoId=null;
-function showInfo(id){var el=$("objInfo");if(!el)return;var d=INFO[id];if(!d){el.className="off";infoId=null;return;}
+function showInfo(id){var el=$("objInfo");if(!el)return;var d=id==="door"?doorInfoText():INFO[id];if(!d){el.className="off";infoId=null;return;}
   infoId=id;$("oiName").textContent=d[0];$("oiDesc").textContent=d[1];el.className="";infoUntil=performance.now()+(editMode?600000:5000);}
 function tickInfo(){var el=$("objInfo");if(el&&infoId&&performance.now()>infoUntil){el.className="off";infoId=null;}}
 function rotateSelected(){var btn=$("rotBtn");if(!dragId){if(btn)flashBtn(btn,"PICK ONE");return;}
   if(sim.rotateItem(dragId)){staticLayer=null;messLayer=null;messVer++;changed();showInfo(dragId);}else if(btn)flashBtn(btn,"NO ROOM");}
 function flashBtn(btn,txt){var old=btn.getAttribute("data-label")||btn.textContent;btn.setAttribute("data-label",old);btn.textContent=txt;setTimeout(function(){btn.textContent=old;},700);}
+function drawFade(){if(!fading&&fadeT<=0)return;var a=0;
+  if(fading){if(fadeT<=1)a=Math.min(1,fadeT);else a=Math.max(0,2-fadeT);}
+  if(a<=0)return;ctx.save();ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalAlpha=a;ctx.fillStyle="#0c1220";ctx.fillRect(0,0,W,H);ctx.restore();resetXform();}
 function drawScene(now){if(W<2||H<2)return;tickAnim(now);ensureStatic();var s=sim.s;blitLayer(staticLayer);
-  drawWorkLine04();
-  drawShipChute();
-  renderMess(Math.min(s.peels,MESSVIS));blitLayer(messLayer);
-  if(sim.owned("autoPeeler"))drawPeelerPeels();
-  renderPile(Math.min(s.pile,MAXVIS));blitLayer(pileLayer);
-  drawItems04();
-  drawGuy(now);drawFlights();drawDust();drawShipAnim(now);drawCoolerHum();drawReturnRattle();drawSucks();drawReturn();}
+  if(viewIsWash()){drawWashScene(now);}
+  else{
+    drawWorkLine04();
+    drawShipChute();  /* 0.4.7: 0.4.4 X-ray scanner restored; drawKitchenDropHole stays hidden */
+    renderMess(Math.min(s.peels,MESSVIS));blitLayer(messLayer);
+    if(sim.owned("autoPeeler"))drawPeelerPeels();
+    renderPile(Math.min(s.pile,MAXVIS));blitLayer(pileLayer);
+    drawItems04();
+    drawGuy(now);drawFlights();drawDust();drawShipAnim(now);drawCoolerHum();drawReturnRattle();drawSucks();drawReturn();
+  }
+  drawFade();}
 
 /* ---------- HUD ---------- */
 var $=function(id){return document.getElementById(id);};
@@ -3121,7 +4171,9 @@ function setText(id,v){if(hud[id]!==v){hud[id]=v;$(id).textContent=v;}}
 var boxSnap="";
 function messPct(){return Math.round((1-sim.messF())*100);}
 function updateHud(){var s=sim.s;var bs="",ci;for(ci=0;ci<CMDS.length;ci++)bs+=s.box[CMDS[ci].id]+",";bs+=s.potCap+","+s.up.chute;if(bs!==boxSnap){boxSnap=bs;renderAll();}
-  setText("coins",String(s.coins));setText("peels",String(s.peels));if($("level"))setText("level",s.level+" / 5");var mp=messPct();
+  setText("coins",String(s.coins));setText("peels",String(s.peels));if($("level"))setText("level",s.level+" / 5");
+  if($("washedN"))setText("washedN",String(s.stats.washedShip|0));if($("unwashedN"))setText("unwashedN",String(s.stats.unwashedShip|0));
+  var mp=messPct();
   var pe=$("peelRow"),pc="food peels"+(mp>=22?" filthy":(mp>=8?" messy":""));if(hud.pc!==pc){hud.pc=pc;pe.className=pc;}
   var mt=mp>=1?"MESS: "+mp+"% SLOWER":"";if(hud.mt!==mt){hud.mt=mt;var me=$("mess");me.textContent=mt;me.className="mess"+(mp>=8?" on":"");}setText("food",s.food+(s.food>=sim.foodMax()?" MAX":""));
   $("foodRow").className="food"+(s.food<=0?" out":"");
@@ -3131,13 +4183,14 @@ function updateHud(){var s=sim.s;var bs="",ci;for(ci=0;ci<CMDS.length;ci++)bs+=s
   var st=sim.stateName();if(hud.st!==st){hud.st=st;var els=document.querySelectorAll(".st");for(var i=0;i<els.length;i++)els[i].classList.toggle("on",els[i].getAttribute("data-s")===st);fitStates();}
   var a=s.g.act;setText("doing",a&&a.label?a.label:"");
   /* object labels carry live numbers */
-  tagText("tagFood","FOOD x"+s.food);tagText("tagPot","POTATOES "+POTS[s.box.pot]);tagText("tagRet",s.chute>0?"RETURN "+s.chute+"/"+sim.chuteCap():"RETURN");
+  tagText("tagFood","FOOD x"+s.food);tagText("tagPot","POTATOES "+(PPSim.POT_LOCK||POTS[s.box.pot]));tagText("tagRet",s.chute>0?"RETURN "+s.chute+"/"+sim.chuteCap():"RETURN");
   var hasP=sim.owned("autoPeeler"),hasL=sim.owned("outConveyor"),hasS=sim.owned("sink"),hasT=sim.owned("tvArmchair");
   function tagOn(id,on){var el=$(id);if(!el)return;el.className="tag"+(on&&(performance.now()<labelsUntil)?" ":" off");}
   tagOn("tagPeeler",hasP);tagOn("tagLine",hasL);tagOn("tagSink",hasS);tagOn("tagTV",hasT);
 
   var can=s.coins>=Math.min(sim.price(),sim.potPrice()||9999)?" can":"";var sb=$("shopBtn");var sc2="shopb"+can;if(hud.sb!==sc2){hud.sb=sc2;sb.className=can?"can":"";}
   if(ovlMode){$("ovlCoins").textContent=ovlMode==="shop"?s.coins+"c":"";if(ovlDirty){ovlDirty=false;buildOvl();}}
+  var nb=$("nowBtns");if(nb){var bts=nb.querySelectorAll("button"),bi,act,st;for(bi=0;bi<bts.length;bi++){act=(bts[bi].getAttribute("data-act")||"").slice(4);st=nowBtnState(act);bts[bi].className=st;}}
   updateHint();}
 function tagText(id,t){var key="t"+id;if(hud[key]!==t){hud[key]=t;var el=$(id);el.textContent=t;if(playRect)placeTagsSoon();}}
 var tagTimer=0;function placeTagsSoon(){if(tagTimer)return;tagTimer=setTimeout(function(){tagTimer=0;if(playRect)placeTags();},60);}
@@ -3151,8 +4204,11 @@ function updateHint(){var s=sim.s,msg="";
   else if(s.g.lazy&&s.box.nap===0&&s.energy<C.lazyLow)msg="Tired and no NAP box set: he naps wherever.";
   if(msg!==hintShown){hintShown=msg;var el=$("hint");if(msg){el.textContent=msg;el.className="";}else el.className="off";}}
 function popCoin(v,sloppy){var el=document.createElement("div");el.className="pop";el.textContent="+"+v+"c"+(sloppy?" sloppy":"");
-  var x=(wx(chute.cx)/W)*playRect.width,y=(wy(chute.lip+6)/H)*playRect.height;el.style.left=Math.round(x+8)+"px";el.style.top=Math.round(y)+"px";$("play").appendChild(el);pops.push({el:el,t:0,y:y});}
-function tickPops(dt){for(var i=pops.length-1;i>=0;i--){var p=pops[i];p.t+=dt;p.el.style.transform="translateY("+(-p.t*22)+"px)";p.el.style.opacity=String(Math.max(0,1-p.t/1.2));if(p.t>1.2){p.el.parentNode&&p.el.parentNode.removeChild(p.el);pops.splice(i,1);}}}
+  var n=pops.length,col=n%3,row=(n/3)|0;
+  var cx=viewIsWash()?WASH.hole.x-24:chute.cx,cy=viewIsWash()?WASH.hole.y+24:chute.lip+14;
+  var x=(wx(cx)/W)*playRect.width+(col-1)*42,y=(wy(cy)/H)*playRect.height+row*22+(col===1?8:0);
+  el.style.left=Math.round(x)+"px";el.style.top=Math.round(y)+"px";$("play").appendChild(el);pops.push({el:el,t:0,y:y,lift:20+col*8});}
+function tickPops(dt){for(var i=pops.length-1;i>=0;i--){var p=pops[i];p.t+=dt;p.el.style.transform="translateY("+(-p.t*(p.lift||22))+"px)";p.el.style.opacity=String(Math.max(0,1-p.t/1.2));if(p.t>1.2){p.el.parentNode&&p.el.parentNode.removeChild(p.el);pops.splice(i,1);}}}
 
 /* ---------- command panel: scroll-safe (Jay t1015) ----------
    Built from PPSim.COMMANDS, the same table the HELP screen reads, so the two can never drift apart.
@@ -3173,12 +4229,28 @@ function fmt(id,v){
   return v>0?"< "+v+"%":"OFF";}
 function bmax(id){return id==="pot"?Math.max(1,sim.potMax()):BOX[id].max;}
 function pct(id,v){var b=BOX[id];return (v-b.min)/(bmax(id)-b.min);}
-var UNSET={eat:1,nap:1,clean:1,autob:1,suction:1,conveyor:1,apeeler:1,outbelt:1,lamp:1,radio:1,tv:1,watch:1,water:1,wash:1};
+var UNSET={eat:1,nap:1,clean:1,autob:1,suction:1,conveyor:1,apeeler:1,outbelt:1,lamp:1,radio:1,tv:1,watch:1,water:1,wash:1,awash:1};
 function visCmds(){return sim.visibleCommands?sim.visibleCommands():CMDS;}
+function nowBtnState(id){
+  var s=sim.s,st="ok";
+  if(id==="eat"&&s.food<=0)st="off";
+  if(id==="clean"&&s.peels<=0)st="off";
+  if(id==="wash"&&!sim.hasKey())st="need";
+  if(s.g&&s.g.holdRepeat===id)st="hold";
+  return st;}
+function buildNowBtns(){var el=$("nowBtns");if(!el)return;var ids=[["eat","EAT"],["nap","NAP"],["clean","CLEAN"],["wash","WASH"],["work","WORK"]],h="",i,st;
+  for(i=0;i<ids.length;i++){st=nowBtnState(ids[i][0]);h+='<button type="button" data-act="now:'+ids[i][0]+'" class="'+st+'">'+ids[i][1]+'</button>';}
+  el.innerHTML=h;}
+function flashNow(id,txt){var el=$("nowBtns")&&$("nowBtns").querySelector('[data-act="now:'+id+'"]');if(!el)return;var old=el.textContent;el.textContent=txt;setTimeout(function(){if(el)el.textContent=old;},700);}
+function doNow(id){var r=sim.commandNow(id);if(r==="ok"){changed();return;}
+  if(r==="nofood")flashNow("eat","NO FOOD");
+  else if(r==="nokey")flashNow("wash","NEED KEY");
+  else if(r==="none"&&id==="clean")flashNow("clean","NO PEELS");
+  else if(r==="none"&&id==="wash")flashNow("wash","NONE");}
 function buildPanel(){var h="",list=visCmds(),i,c;
   for(i=0;i<list.length;i++){c=list[i];
     h+='<div class="box" data-id="'+c.id+'"><button class="pm" data-d="1" aria-label="'+c.name+' up">+</button><div class="mid"><div class="top"><span class="nm">'+c.name.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span><span class="lk"></span><span class="val"></span></div><div class="trk"><div class="ln"></div><div class="fill"></div><div class="kn"></div></div></div><button class="pm" data-d="-1" aria-label="'+c.name+' down">&minus;</button></div>';}
-  $("boxes").innerHTML=h;}
+  $("boxes").innerHTML=h;buildNowBtns();}
 function renderTicks(id){var el=cmd.querySelector('.box[data-id="'+id+'"]'),trk=el.querySelector(".trk"),b=BOX[id],mx=bmax(id),old=trk.querySelectorAll(".tk");for(var j=0;j<old.length;j++)trk.removeChild(old[j]);
   var n=Math.max(1,Math.round((mx-b.min)/b.step)),tn=Math.min(n,14);for(var i=0;i<=tn;i++){var t=document.createElement("i");t.className="tk";t.style.left=(i/tn*100)+"%";trk.appendChild(t);}}
 function renderBox(id){var el=cmd.querySelector('.box[data-id="'+id+'"]'),v=sim.s.box[id],p=pct(id,v);
@@ -3205,6 +4277,7 @@ function doAct(a){
   else if(a==="pan:up")panBy(0,-18);else if(a==="pan:down")panBy(0,18);
   else if(a==="pan:left")panBy(-14,0);else if(a==="pan:right")panBy(14,0);
   else if(a==="pan:reset")resetView();
+  else if(a&&a.indexOf("now:")===0)doNow(a.slice(4));
   else if(a&&a.indexOf("buy:")===0)shopBuy(a.slice(4));
   else if(a&&a.indexOf("equip:")===0){sim.equip(a.slice(6));if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();}
   else if(a&&a.indexOf("unequip:")===0){sim.unequip(a.slice(8));if(ovlMode==="inv")ovlDirty=true;changed();rebuildTray();}
@@ -3226,17 +4299,23 @@ function rebuildTray(){
   for(i=0;i<list.length;i++)h+='<button class="invchip" type="button" data-place="'+list[i].id+'">'+esc(list[i].name)+'<b>DRAG IN</b></button>';
   el.innerHTML=h;
   if(away)away.className=dragId&&PPSim.isPlaceable(dragId)&&sim.placed(dragId)?"on":"";
-  var rb=$("rotBtn");if(rb)rb.className=dragId?"on":"";
+  var rb=$("rotBtn");if(rb)rb.className=(dragId&&dragId!=="washPile"&&dragId!=="streetMouth")?"on":"";
 }
 function putAwaySelected(){
   if(!dragId||!PPSim.isPlaceable(dragId)||!sim.placed(dragId))return;
   sim.unplace(dragId);dragId=null;staticLayer=null;messLayer=null;changed();rebuildTray();layout();
 }
 
+var holdT=null,holdOn=false,holdId=null;
+function clearHoldTimer(){if(holdT){clearTimeout(holdT);holdT=null;}}
+function stopHold(){clearHoldTimer();if(holdOn){holdOn=false;if(sim&&sim.setHold)sim.setHold(holdId,false);changed();}holdId=null;}
+function armHold(id){clearHoldTimer();holdId=id;holdOn=false;
+  holdT=setTimeout(function(){holdT=null;if(!G||G.mode)return;holdOn=true;if(sim&&sim.setHold)sim.setHold(id,true);changed();},380);}
 cmd.addEventListener("pointerdown",function(e){if(G&&G.id!==e.pointerId)return;
-  var t=e.target,box=t.closest?t.closest(".box"):null,pm=t.closest?t.closest(".pm"):null,trk=t.closest?t.closest(".trk"):null,btn=t.closest?t.closest("#bar button"):null;
+  var t=e.target,box=t.closest?t.closest(".box"):null,pm=t.closest?t.closest(".pm"):null,trk=t.closest?t.closest(".trk"):null,btn=t.closest?t.closest("#bar button, #nowBtns button"):null;
   G={id:e.pointerId,x0:e.clientX,y0:e.clientY,st0:cmd.scrollTop,box:box,bid:box?box.getAttribute("data-id"):null,pm:pm,trk:trk,btn:btn,mode:null};
   if(pm)pm.classList.add("press");if(btn)btn.classList.add("press");
+  if(btn){var act=btn.getAttribute("data-act")||"";if(act.indexOf("now:")===0){var nid=act.slice(4);if(nid==="eat"||nid==="nap"||nid==="clean"||nid==="wash")armHold(nid);}}
   try{cmd.setPointerCapture(e.pointerId);}catch(x){}
   e.preventDefault();});
 cmd.addEventListener("pointermove",function(e){if(!G||G.id!==e.pointerId)return;var dx=e.clientX-G.x0,dy=e.clientY-G.y0;
@@ -3244,10 +4323,13 @@ cmd.addEventListener("pointermove",function(e){if(!G||G.id!==e.pointerId)return;
     if(Math.abs(dy)>=Math.abs(dx)*0.75)G.mode="scroll";
     else if(G.bid&&G.bid===focusId&&G.trk)G.mode="slide";   /* 0.4.2: only a sideways drag that starts ON the focused slider's track */
     else G.mode="none";
-    if(G.pm)G.pm.classList.remove("press");if(G.btn)G.btn.classList.remove("press");}
+    if(G.pm)G.pm.classList.remove("press");if(G.btn)G.btn.classList.remove("press");
+    if(G.mode==="scroll"||G.mode==="none")stopHold();}
   if(G.mode==="scroll")cmd.scrollTop=G.st0-dy;
   else if(G.mode==="slide"){var trk=G.box.querySelector(".trk");if(sim.setBox(G.bid,valFromX(G.bid,trk,e.clientX)))changed();}});
 function endG(e,cancel){if(!G||G.id!==e.pointerId)return;var g=G;G=null;if(g.pm)g.pm.classList.remove("press");if(g.btn)g.btn.classList.remove("press");
+  if(holdOn){stopHold();return;}
+  clearHoldTimer();
   /* a slide ends where the finger lifts: a slow WebView may not deliver a final move */
   if(!cancel&&g.mode==="slide"){var tk=g.box.querySelector(".trk");if(sim.setBox(g.bid,valFromX(g.bid,tk,e.clientX)))changed();return;}
   if(cancel||g.mode!==null)return;
@@ -3272,12 +4354,13 @@ $("play").addEventListener("pointerdown",function(e){
     var w=w0,hit=hitEditItem(w.x,w.y);
     if(hit){dragId=hit;showInfo(hit);PE={id:e.pointerId,act:"drag",item:hit,keepSel:true,x0:e.clientX,y0:e.clientY,moved:false,ox:w.x-sim.centerOf(hit).x,oy:w.y-sim.centerOf(hit).y};try{e.currentTarget.setPointerCapture(e.pointerId);}catch(x){}e.preventDefault();rebuildTray();}
     else{var h2=hitAny(w.x,w.y);if(h2)showInfo(h2);}
-  }else{var h3=hitAny(w0.x,w0.y);showInfo(h3);}
+  }else{var h3=hitAny(w0.x,w0.y);showInfo(h3);
+    if(h3==="door"){if(sim.hasKey())beginFade(viewIsWash()?"kitchen":"wash");}}
 });
 $("play").addEventListener("pointermove",function(e){
   if(!PE||PE.id!==e.pointerId)return;
   if(PE.act==="drag"&&dragId){if(!PE.moved&&Math.abs(e.clientX-PE.x0)<6&&Math.abs(e.clientY-PE.y0)<6)return;PE.moved=true;
-    var w=worldFromEvent(e);if(sim.moveItem(dragId,w.x-(PE.ox||0),w.y-(PE.oy||0))){staticLayer=null;messLayer=null;messVer++;if(playRect)placeTags();}}
+    var w=worldFromEvent(e);if(sim.moveItem(dragId,w.x-(PE.ox||0),w.y-(PE.oy||0))){if(dragId==="washPile"||dragId==="streetMouth")bustRoomCache();else{staticLayer=null;messLayer=null;}messVer++;if(playRect)placeTags();}}
 });
 function endPE(e){
   if(!PE||PE.id!==e.pointerId)return;
@@ -3348,6 +4431,10 @@ function buildInv(){
     h+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>'+(it.placed?"IN ROOM":"IN INV")+'</b></div><div class="fx">'+(it.placed?"In the room. PUT AWAY sends it back to the inventory.":"In your inventory. Open EDIT and drag it into the room.")+'</div></div>'+btn+'</div>';
   }
   if(!places)h+='<div class="row"><div class="tx"><div class="nm">NOTHING TO PLACE</div><div class="fx">Buy machines, a sink, a cot or decorations in the SHOP. They wait here until you place them.</div></div></div>';
+  var keys=0,kh='<div class="sec">KEYS</div>';
+  for(i=0;i<list.length;i++){it=list[i];if(it.kind!=="key")continue;keys++;
+    kh+='<div class="row"><div class="tx"><div class="nm">'+esc(it.name)+' <b>OWNED</b></div><div class="fx">Unlocks the metal door. Tap the door to go to the wash room and its landing pool and canal.</div></div><button class="go done" type="button">UNLOCKED</button></div>';}
+  if(keys)h+=kh;
   if(!list.length)h='<div class="sec">INVENTORY</div><div class="row"><div class="tx"><div class="nm">EMPTY</div><div class="fx">Buy items in the SHOP. They come here first. Tools get equipped on Papa. Everything else is placed from EDIT.</div></div></div>';
   ovlBody.innerHTML=h;
 }
@@ -3366,15 +4453,16 @@ function buildShop(){var s=sim.s,h="",pr=sim.price(),fm=sim.foodMax(),i,it,st,lp
   if(locked)h+='<div class="row"><div class="tx"><div class="nm">LOCKED</div><div class="fx">'+locked+' more item'+(locked>1?"s":"")+' unlock at higher levels. (They are hidden, not deleted.)</div></div></div>';
   h+='<div class="sec">FOOD</div>';
   h+='<div class="row"><div class="tx"><div class="nm">FOOD CAN <b>'+s.food+' / '+fm+'</b></div><div class="fx">One can = +55 hunger when he eats. The price climbs a little with each can and slowly over time.</div></div>'+(s.food>=fm?goBtn("buy:food",pr,"done"):goBtn("buy:food",pr,s.coins<pr?"poor":""))+'</div>';
-  h+='<div class="sec">POTATOES</div>';var pp=sim.potPrice(),cap=s.potCap;
-  h+='<div class="row"><div class="tx"><div class="nm">MORE POTATOES <b>'+POTS[cap]+(pp===null?'':' &rarr; '+POTS[cap+1])+'</b></div><div class="fx">You own '+POTS[cap]+'. Buying raises your limit to the next stop and puts the new potatoes on the pile. The POTATOES IN PLAY slider goes up to what you own.</div></div>'+(pp===null?goBtn("buy:pot",0,"done"):goBtn("buy:pot",pp,s.coins<pp?"poor":""))+'</div>';
+  if(PPSim.POT_SLIDER){h+='<div class="sec">POTATOES</div>';var pp=sim.potPrice(),cap=s.potCap;
+  h+='<div class="row"><div class="tx"><div class="nm">MORE POTATOES <b>'+POTS[cap]+(pp===null?'':' &rarr; '+POTS[cap+1])+'</b></div><div class="fx">You own '+POTS[cap]+'. Buying raises your limit to the next stop and puts the new potatoes on the pile. The POTATOES IN PLAY slider goes up to what you own.</div></div>'+(pp===null?goBtn("buy:pot",0,"done"):goBtn("buy:pot",pp,s.coins<pp?"poor":""))+'</div>';}
+  /* 0.4.9: MORE POTATOES shop row hidden (stock locked at 9999). The buyPotatoes path stays in the file. */
   h+='<div class="sec">UPGRADES</div>';
   for(var i=0;i<UPS.length;i++){var u=UPS[i],lv=sim.up(u.id),p2=sim.upPrice(u.id);
     h+='<div class="row"><div class="tx"><div class="nm">'+esc(u.name)+' <b>LV '+lv+'/'+u.max+'</b></div><div class="fx">'+esc(u.fx)+'</div></div>'+(p2===null?goBtn("buy:up:"+u.id,0,"done"):goBtn("buy:up:"+u.id,p2,s.coins<p2?"poor":""))+'</div>';}
   ovlBody.innerHTML=h;}
 /* ---- the HELP booklet: cover, one page per command (generated from PPSim.COMMANDS), a last page on the loop. Flip with PREV / NEXT or a sideways swipe. ---- */
 var bookPage=0;
-function bookPages(){return CMDS.length+7;}      /* cover + every command + levels + line + editor + inventory + decor + loop */
+function bookPages(){return CMDS.length+8;}      /* cover + every command + levels + line + editor + inventory + decor + loop */
 function icoDraw(cv2,id){var g=cv2.getContext("2d"),r=function(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h);};g.clearRect(0,0,16,16);
   if(id==="cover"){r(2,2,12,12,"#8a5a28");r(3,3,10,10,"#c48a48");r(4,4,8,2,"#e8c070");r(5,8,2,2,"#6a4020");r(9,9,2,2,"#6a4020");r(6,11,2,1,"#6a4020");}
   else if(id==="pace"){r(1,6,3,1,"#8a6a40");r(0,9,4,1,"#8a6a40");r(2,12,3,1,"#8a6a40");r(5,3,3,10,"#c0361e");r(8,5,2,6,"#c0361e");r(10,6,2,4,"#c0361e");r(12,7,2,2,"#c0361e");}
@@ -3390,13 +4478,14 @@ function miniSlider(c,v){var mx=c.id==="pot"?Math.max(1,sim.potMax()):c.max,p=(v
   for(var i=0;i<=tn;i++)tk+='<i class="tk" style="left:'+(i/tn*100)+'%"></i>';
   return '<div class="mini"><span class="e">'+esc(c.hi)+'</span><div class="mt"><div class="ln"></div><div class="mf" style="width:'+(p*100)+'%"></div>'+tk+'<div class="mk" style="left:'+((1-p)*100)+'%"></div></div><span class="e r">'+esc(c.lo)+'</span></div>';}
 function pageHtml(pg){var s=sim.s,N=bookPages(),pn='<span class="pn">'+(pg+1)+' / '+N+'</span>';
-  if(pg===0)return '<div id="pg" class="cover"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><div class="t1">PAPA POTATO</div><div class="t2">HANDBOOK</div><button class="go2" type="button" data-act="book:next">OPEN THE BOOK</button><div class="note" style="margin-top:12px;color:#d8b878">'+CMDS.length+' commands, plus levels, the line, the editor, inventory and decor</div></div>';
-  if(pg===N-1)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE LOOP</b></div><div class="lb">WHAT HE DOES</div><div class="chips"><span>PILE</span><span>&gt; PEEL TABLE</span><span>&gt; SHIP IN</span><span>&gt; RETURN</span><span>&gt; PILE</span></div><div class="tx">Or buy the work line: pile &gt; suction &gt; conveyor &gt; auto-peeler &gt; out-conveyor &gt; shipping. Peels land on the floor inside the room. CLEAN sends him to the peels (nearest pile first) and he sweeps them there.</div><div class="lb">YOUR COINS GO TO</div><div class="chips"><span>LEVELS</span><span>ITEMS</span><span>FOOD</span><span>POTATOES</span><span>UPGRADES</span></div><div class="tx">Open the SHOP to buy. New items go to your INVENTORY. Equip tools on Papa, or open EDIT and drag furniture and machines into the room. The view always fits the whole room. EDIT moves furniture (not the pile, return or shipping).</div></div>';
-  if(pg===N-6)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>LEVELS</b></div><div class="lb">PAY TO LEVEL UP</div><div class="tx">You start at Level 1. Pay coins in the SHOP to reach the next level (up to 5). Each level UNLOCKS items; you still BUY them in the shop. Bought items go to your inventory first. Lv1 is the six starters (better peeler, carry bag, sink, broom, small cooler, cot).</div><div class="lb">UPGRADES</div><div class="tx">Old upgrades (sharp peeler, boots, chute, cooler, broom, soft bed) stay. New ones speed the auto-peeler and belts and grow the carry bag. Unused items stay in the game, just hidden until unlocked.</div></div>';
-  if(pg===N-5)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE WORK LINE</b></div><div class="lb">MACHINES</div><div class="tx">CONVEYOR, AUTO SUCTION, AUTO-PEELER and OUT-CONVEYOR. Buy them, then place them from EDIT. Each has an on/off or speed slider once bought. The out-conveyor butts the shipping intake and is drawn under it. Peels always land inside the room.</div><div class="lb">COMMANDS</div><div class="tx">SUCTION, CONVEYOR SPEED, AUTO-PEELER SPEED, OUT-CONVEYOR SPEED. Faster belts and peelers come from the BETTER BELTS / FASTER AUTO-PEELER upgrades.</div></div>';
-  if(pg===N-4)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="wake" width="16" height="16"></canvas><b>EDITOR</b></div><div class="lb">EDITOR</div><div class="tx">Tap EDIT. The room always fits the screen (no zoom or scroll arrows). Drag any item except the potato pile, the return chute and the shipping chute. Those three stay put. The cutting board, knife, peel stand and the seat move with their objects. Your layout is saved with the game.</div><div class="lb">ROTATE + INFO</div><div class="tx">Pick an item and tap ROTATE to turn it a quarter. Things can sit close together, but never on top of each other or on the shipping X, and never so packed he cannot get through. Tap anything in the room (editing or not) to see its name and what it does on the right.</div><div class="lb">THE TRAY</div><div class="tx">EDIT opens an inventory tray under the room (never over it). Drag an unplaced item from the tray into the room. Select a placed item and tap PUT AWAY to send it back to the inventory.</div></div>';
-  if(pg===N-3)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>INVENTORY</b></div><div class="lb">BUY, THEN USE</div><div class="tx">Bought items go to your inventory first, not straight into the room. Open INV (same style as the shop). Tools (better peeler, carry bag, broom) can be equipped or unequipped on Papa. Furniture, machines and decorations are placed in the room from the EDIT tray.</div><div class="lb">OLD SAVES</div><div class="tx">If you already owned items before inventory, they stay in the room (and tools stay equipped). Nothing is lost.</div></div>';
-  if(pg===N-2)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="nap" width="16" height="16"></canvas><b>DECORATIONS</b></div><div class="lb">WHAT HE DOES</div><div class="tx">LAMP on/off. RADIO on/off — he walks over to tune it. PLANT dries out; WATER WHEN DRY sends him to water it. TV + ARMCHAIR: turn the TV on and set WATCH WHEN ENERGY &lt; so he sits and watches (slow energy, not a nap). He walks around furniture and only gets in the bed for a nap, through the side. Sleep is still the 0.3.1 bed, unchanged.</div></div>';
+  if(pg===0)return '<div id="pg" class="cover"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><div class="t1">PAPA POTATO</div><div class="t2">HANDBOOK</div><button class="go2" type="button" data-act="book:next">OPEN THE BOOK</button><div class="note" style="margin-top:12px;color:#d8b878">'+CMDS.length+' commands, plus levels, the line, the editor, inventory, decor and the wash room</div></div>';
+  if(pg===N-1)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE LOOP</b></div><div class="lb">WHAT HE DOES</div><div class="chips"><span>PILE</span><span>&gt; PEEL TABLE</span><span>&gt; KITCHEN SHIP 2c</span><span>&gt; RETURN</span><span>&gt; PILE</span></div><div class="tx">After he peels, he puts potatoes in the hole in the north kitchen wall. Unwashed pay 2c there (3c if already washed in the sink) and come back raw. WASH, a hold on WASH, or AUTO-WASH sends them through that same hole: they come out into the wash-room basin and pile up in the water, and a canal along the right wall pulls them to a ship opening for 3c. The work line uses the same split. Peels land on the floor. CLEAN (or the CLEAN button) sends him to the peels.</div><div class="lb">YOUR COINS GO TO</div><div class="chips"><span>LEVELS</span><span>ITEMS</span><span>FOOD</span><span>POTATOES</span><span>UPGRADES</span></div><div class="tx">Open the SHOP to buy. New items go to your INVENTORY. Equip tools on Papa, or open EDIT and drag furniture and machines into either room. The view always fits the whole room. EDIT moves furniture (not the kitchen pile, return, shipping, or the wash-room hole).</div></div>';
+  if(pg===N-7)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>LEVELS</b></div><div class="lb">PAY TO LEVEL UP</div><div class="tx">You start at Level 1. Pay coins in the SHOP to reach the next level (up to 5). Each level UNLOCKS items; you still BUY them in the shop. Bought items go to your inventory first. Lv1 is the starters (room key, better peeler, carry bag, sink, broom, small cooler, cot).</div><div class="lb">UPGRADES</div><div class="tx">Old upgrades (sharp peeler, boots, chute, cooler, broom, soft bed) stay. New ones speed the auto-peeler and belts and grow the carry bag. Unused items stay in the game, just hidden until unlocked.</div></div>';
+  if(pg===N-6)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="loop" width="16" height="16"></canvas><b>THE WORK LINE</b></div><div class="lb">MACHINES</div><div class="tx">CONVEYOR, AUTO SUCTION, AUTO-PEELER and OUT-CONVEYOR. Buy them, then place them from EDIT. Each has an on/off or speed slider once bought. The out-conveyor butts the shipping intake and is drawn under it. Peels always land inside the room.</div><div class="lb">COMMANDS</div><div class="tx">SUCTION, CONVEYOR SPEED, AUTO-PEELER SPEED, OUT-CONVEYOR SPEED. Faster belts and peelers come from the BETTER BELTS / FASTER AUTO-PEELER upgrades.</div></div>';
+  if(pg===N-5)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="wake" width="16" height="16"></canvas><b>EDITOR</b></div><div class="lb">EDITOR</div><div class="tx">Tap EDIT. The room always fits the screen (no zoom or scroll arrows). Drag any item except the potato pile, the return chute and the shipping chute. Those three stay put. The cutting board, knife and peel stand move with the table. The seat is its own object and does not follow the cooler. Your layout is saved with the game.</div><div class="lb">ROTATE + INFO</div><div class="tx">Pick an item and tap ROTATE to turn it a quarter. Things can sit close together, but never on top of each other or on the shipping X, and never so packed he cannot get through. Tap anything in the room (editing or not) to see its name and what it does on the right.</div><div class="lb">THE TRAY</div><div class="tx">EDIT opens an inventory tray under the room (never over it). Drag an unplaced item from the tray into the room. Select a placed item and tap PUT AWAY to send it back to the inventory.</div></div>';
+  if(pg===N-4)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="cover" width="16" height="16"></canvas><b>INVENTORY</b></div><div class="lb">BUY, THEN USE</div><div class="tx">Bought items go to your inventory first, not straight into the room. Open INV (same style as the shop). Tools (better peeler, carry bag, broom) can be equipped or unequipped on Papa. Furniture, machines and decorations are placed in the room from the EDIT tray.</div><div class="lb">OLD SAVES</div><div class="tx">If you already owned items before inventory, they stay in the room (and tools stay equipped). Nothing is lost.</div></div>';
+  if(pg===N-3)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="nap" width="16" height="16"></canvas><b>DECORATIONS</b></div><div class="lb">WHAT HE DOES</div><div class="tx">LAMP on/off. RADIO on/off — he walks over to tune it. PLANT dries out; WATER WHEN DRY sends him to water it. TV + ARMCHAIR: turn the TV on and set WATCH WHEN ENERGY &lt; so he sits and watches (slow energy, not a nap). He walks around furniture and only gets in the bed for a nap, through the side. Sleep is still the 0.3.1 bed, unchanged.</div></div>';
+  if(pg===N-2)return '<div id="pg">'+pn+'<div class="hd"><canvas class="ic" data-ic="wash" width="16" height="16"></canvas><b>THE WASH ROOM</b></div><div class="lb">THE KEY</div><div class="tx">Buy a ROOM KEY (40c) in the SHOP. It unlocks the metal door on the north wall. Both rooms are ready from the start; tapping the open door swaps instantly with a short fade. This back room is a WASH room, not a shipping room.</div><div class="lb">THE INLET, POOL AND CANAL</div><div class="tx">He walks up to the kitchen X-ray scanner and places each peeled potato on the belt. That machine sends them through the wall; they come out a matching scanner at the bottom of the wash room into a basin, and a canal along the right wall runs straight into a ship opening at the top-right, where they ship at full pay (3c) and come back raw. Unwashed potatoes that he places in the kitchen scanner without WASH still pay 2c there (1c if sloppy) and never appear in this room. A sink wash before peeling also counts as washed and pays 3c at the kitchen scanner. They pile up in the basin water when more come out than the current can carry, and the heap shrinks when the canal keeps up. The current is very slow at first. WIDER CHANNEL (70c, then 180c) speeds it up a lot and makes the canal a little wider. AUTO-WASH (220c, level 4) lets him take peeled potatoes to the kitchen scanner on his own. EDIT works in this room too, but the basin heap, machines, canal and ship opening stay put.</div><div class="lb">INSTANT COMMANDS</div><div class="tx">EAT, NAP, CLEAN, WASH and WORK at the bottom make him do that job right now. Hold a button to keep going (hold WASH to keep sending peeled potatoes through the hole). WASH makes him drop peeled potatoes into the kitchen hole so they come out in the pool. WORK sends him back to peeling.</div></div>';
   if(pg-1>=CMDS.length)return '<div id="pg">'+pn+'<div class="tx">Missing page.</div></div>';
   var c=CMDS[pg-1],v=s.box[c.id];
   return '<div id="pg" data-cmd="'+c.id+'">'+pn+'<div class="hd"><canvas class="ic" data-ic="'+c.id+'" width="16" height="16"></canvas><b>'+esc(c.name)+'</b></div><div class="lb">DOES</div><div class="tx">'+esc(c.does)+'</div><div class="lb">SLIDER</div>'+miniSlider(c,v)+'<div class="now">NOW: '+esc(fmt(c.id,v))+'</div><div class="lb">AFFECTS</div><div class="tx">'+esc(c.affects)+'</div><div class="lb">RANGE</div><div class="rg">'+esc(c.range)+'</div></div>';}
@@ -3414,7 +4503,7 @@ function shopBuy(what){var r,btn=ovl.querySelector('[data-act="buy:'+what+'"]'),
   else if(what==="pot"){pr=sim.potPrice();r=sim.buyPotatoes();}
   else if(what==="lv"){pr=sim.levelPrice();r=sim.buyLevel();}
   else if(what.indexOf("item:")===0){var iid=what.slice(5);pr=sim.itemPrice(iid);r=sim.buyItem(iid);if(r==="ok"){rebuildPanel();rebuildTray();}}
-  else if(what.indexOf("up:")===0){var id=what.slice(3);pr=sim.upPrice(id);r=sim.buyUp(id);}
+  else if(what.indexOf("up:")===0){var id=what.slice(3);pr=sim.upPrice(id);r=sim.buyUp(id);if(r==="ok"&&id==="channel")bustRoomCache();}
   else return "bad";
   if(r==="ok"){if(btn)btn.innerHTML="BOUGHT!";setTimeout(function(){ovlDirty=true;},600);changed();}
   else if(r==="poor"){if(btn)btn.innerHTML="NEED<br>"+pr+"c";setTimeout(function(){ovlDirty=true;},800);}
@@ -3437,12 +4526,14 @@ ovl.addEventListener("pointercancel",function(e){endO(e,true);});
 ovl.addEventListener("click",function(e){e.preventDefault();});
 
 /* ---------- main loop: time runs only while the game is open and visible ---------- */
-function events(){var ev=sim.s.ev;while(ev.length){var e=ev.shift();if(e.k==="coin"){popCoin(e.v,e.sloppy);pushSuck(e.sloppy);}else if(e.k==="peel")spawnPeel(e.slot);}}
+function events(){var ev=sim.s.ev;while(ev.length){var e=ev.shift();if(e.k==="coin"){popCoin(e.v,e.sloppy);pushSuck(e.sloppy);}else if(e.k==="peel")spawnPeel(e.slot);else if(e.k==="room"||e.k==="view"){if(e.room&&e.room!==sim.s.viewRoom)beginFade(e.room);}}}
 var last=0,acc=0,STEP=0.05,paused=false,frames=0;
 function frame(ts){
   var dt=last?Math.min(0.25,(ts-last)/1000):0;last=ts;
   var man=window.__tt&&window.__tt.manual;
   if(!paused&&!man){acc+=dt;while(acc>=STEP){sim.step(STEP);acc-=STEP;}events();tickFlights(dt);tickDust(dt);tickSucks(dt);tickPops(dt);}
+  if(sim.s.followRoom&&sim.s.followRoom!==sim.s.viewRoom&&!fading)beginFade(sim.s.followRoom);
+  tickFade(dt);
   RT=sim.s.t+acc;drawScene(ts);frames++;updateLabels();if(frames%10===0)tickInfo();
   if(frames%6===0)updateHud();
   if(ts-lastSave>2000)saveGame();
@@ -3452,14 +4543,14 @@ window.addEventListener("pagehide",saveGame);window.addEventListener("beforeunlo
 window.addEventListener("resize",function(){layout();drawScene(performance.now());});
 /* what is on screen, for the HANDOFF object table and the tests */
 var OBJECTS=[
-  {id:"ship",name:"SHIP IN (X-ray)",use:"He drops each peeled potato on the conveyor: it rides the belt into the scanner and is sucked in. +2c (+1c sloppy).",gameplay:true},
-  {id:"door",name:"METAL DOOR (LOCKED)",use:"No use yet. Heavy industrial door with a red lock light — decoration only.",gameplay:false},
+  {id:"ship",name:"DROP HOLE",use:"He puts each peeled potato in the hole in the north kitchen wall: unwashed pay 2c, sink-washed pay 3c (1c sloppy unwashed). WASH or AUTO-WASH sends them through that same hole into the wash-room pool.",gameplay:true},
+  {id:"door",name:"METAL DOOR",use:"Locked until you buy a ROOM KEY in the SHOP. Then tap it to swap to the wash room (instant, with a short fade).",gameplay:true},
   {id:"return",name:"RETURN chute",use:"A full batch (or an empty pile) spills back out of its mouth onto the pile, raw again.",gameplay:true},
   {id:"table",name:"PEEL TABLE",use:"Where he stands to peel (never walked over: he goes around it).",gameplay:true},
   {id:"bed",name:"BED",use:"NAP WHEN ENERGY < sends him here; SOFT BED upgrade speeds naps.",gameplay:true},
-  {id:"cooler",name:"FOOD cooler",use:"Holds the food cans (HUD FOOD count, BIGGER COOLER upgrade); EAT WHEN HUNGER < sends him here.",gameplay:true},
-  {id:"stool",name:"SEAT (stool)",use:"The spot he stands on to eat. Position only: it has no effect of its own.",gameplay:false},
-  {id:"pile",name:"POTATOES pile",use:"The raw potatoes (POTATOES IN PLAY, shop potatoes). He grabs from its top edge.",gameplay:true},
+  {id:"cooler",name:"FOOD cooler",use:"Holds the food cans (HUD FOOD count, BIGGER COOLER upgrade). He stands at the cooler to eat. EAT WHEN HUNGER < or the EAT button sends him here.",gameplay:true},
+  {id:"stool",name:"SEAT (stool)",use:"A seat. Its own object: it does not move with the cooler, and he eats at the cooler, not here.",gameplay:false},
+  {id:"pile",name:"POTATOES pile",use:"The raw potatoes in the kitchen (stock locked at 9999). He grabs from its top edge.",gameplay:true},
   {id:"peels",name:"Peels on the floor",use:"Mess: slows him up to 30%; CLEAN WHEN PEELS > and STIFF BROOM deal with it. Auto-peeler peels always land inside the room.",gameplay:true},
   {id:"light",name:"Soft light pool under the table",use:"Lighting only. No gameplay.",gameplay:false},
   {id:"conveyor",name:"CONVEYOR",use:"Inbound belt, pile to auto-peeler. CONVEYOR SPEED. Hidden until bought.",gameplay:true},
@@ -3476,9 +4567,9 @@ var OBJECTS=[
 coinIcon();layout();rebuildPanel();rebuildTray();syncZoomLabel();updateHud();migUntil=performance.now()+9000;RT=sim.s.t;showLabels(30000);drawScene(performance.now());
 requestAnimationFrame(frame);
 /* test + debug hooks */
-window.PP={get sim(){return sim;},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:function(seed){sim=PPSim.fresh(seed);focusId=null;hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;if(editMode)toggleEditor();rebuildPanel();rebuildTray();updateHud();saveGame();layout();},
+window.PP={get sim(){return sim;},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:function(seed){sim=PPSim.fresh(seed);focusId=null;hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;kitLayer=null;washLayer=null;roomsPreloaded=false;fading=false;fadeT=0;fadeTo=null;if(editMode)toggleEditor();rebuildPanel();rebuildTray();updateHud();saveGame();layout();},
   reload:function(){sim=loadGame();hud={};flights=[];flying={};messVer++;renderAll();updateHud();},focus:function(){return focusId;},
-  pause:function(p){paused=!!p;},layout:function(){return {W:W,H:H,k:k,roomW:roomW,roomH:roomH,offX:offX,offY:offY,detail:DETAIL,fitW:RW*k,fitH:RH*k,dpr:DPR,SC:SC};},version:"0.4.2",rotate:function(id){var r=sim.rotateItem(id);staticLayer=null;return r;},info:function(){var el=$("objInfo");return {id:infoId,on:!!el&&el.className!=="off",name:el?$("oiName").textContent:"",desc:el?$("oiDesc").textContent:""};},tapWorld:function(x,y){return hitAny(x,y);},select:function(id){dragId=id;rebuildTray();showInfo(id);},zoom:function(){return {i:1,k:1,panX:0,panY:0,fit:true};},setZoom:function(i){resetView();},edit:function(on){if(on==null)return editMode;if(!!on!==editMode)toggleEditor();return editMode;},move:function(id,x,y){var r=sim.moveItem(id,x,y);if(r){staticLayer=null;messLayer=null;messVer++;saveGame();}return r;},
+  pause:function(p){paused=!!p;},layout:function(){return {W:W,H:H,k:k,roomW:roomW,roomH:roomH,offX:offX,offY:offY,detail:DETAIL,fitW:roomW*k,fitH:roomH*k,dpr:DPR,SC:SC};},version:"0.4.9",rotate:function(id){var r=sim.rotateItem(id);staticLayer=null;return r;},info:function(){var el=$("objInfo");return {id:infoId,on:!!el&&el.className!=="off",name:el?$("oiName").textContent:"",desc:el?$("oiDesc").textContent:""};},tapWorld:function(x,y){return hitAny(x,y);},commandNow:function(id){return sim.commandNow(id);},setHold:function(id,on){return sim.setHold(id,on);},setView:function(r,instant){if(instant){sim.s.viewRoom=r;sim.s.followRoom=null;staticLayer=null;roomsPreloaded=false;layout();drawScene(performance.now());return true;}return beginFade(r);},viewRoom:function(){return sim.s.viewRoom;},hasKey:function(){return sim.hasKey();},fade:function(){return {on:fading,t:fadeT,to:fadeTo};},select:function(id){dragId=id;rebuildTray();showInfo(id);},zoom:function(){return {i:1,k:1,panX:0,panY:0,fit:true};},setZoom:function(i){resetView();},edit:function(on){if(on==null)return editMode;if(!!on!==editMode)toggleEditor();return editMode;},move:function(id,x,y){var r=sim.moveItem(id,x,y);if(r){if(id==="washPile"||id==="streetMouth")bustRoomCache();else{staticLayer=null;messLayer=null;}messVer++;saveGame();}return r;},
   drawAt:function(t){drawScene(t);},animF:function(){return ANIM_F;},sitWorld:sitWorld,setPan:function(x,y){panX=+x||0;panY=+y||0;applyCam();if(playRect)placeTags();syncZoomLabel();},seedSucks:function(arr){sucks=arr||[];},
   setPileMax:function(n){PILEMAX=n;buildPile();pileLayer=null;pileKey=-1;},forcePile:function(n){sim.s.pile=n;},get migrated(){return migrated;},
   stats:function(){return {pileRenders:renders.pile,messRenders:renders.mess,maxVis:MAXVIS,tiers:TIER.slice(),messVis:MESSPOS.length,flights:flights.length,sucks:sucks.length};},
@@ -3501,15 +4592,15 @@ window.PP={get sim(){return sim;},Sim:PPSim,save:saveGame,key:SAVE_KEY,reset:fun
   tagRects:function(){var o={};for(var i=0;i<TAGDEF.length;i++){var r=$(TAGDEF[i].id).getBoundingClientRect();o[TAGDEF[i].id]={x:r.left,y:r.top,w:r.width,h:r.height,on:$(TAGDEF[i].id).className.indexOf("off")<0,display:getComputedStyle($(TAGDEF[i].id)).display};}return o;},
 
   flightsNow:function(){return flights.map(function(f){return {slot:f.slot,t:f.t,dur:f.dur,x0:f.x0,y0:f.y0,tx:f.tx,ty:f.ty,h:f.h};});},cv:function(){return cv;}};
-/* 0.4.2: tough-tools hook (HOOKS.md). Fixed 0.05 s ticks, seeded RNG, every player-visible command. */
+/* 0.4.9: tough-tools hook (HOOKS.md). Fixed 0.05 s ticks, seeded RNG, every player-visible command. */
 var TT_MOV=["table","cooler","stool","mat"];
 window.__tt={version:1,manual:false,
   getState:function(){var s=sim.s,g=s.g,a=g.act;return {tick:Math.round(s.t/STEP),over:false,paused:paused,entityCount:s.peels+Math.min(s.pile,MAXVIS),caps:{maxEntities:C.peelMax+MAXVIS},
     coins:s.coins,food:s.food,hunger:Math.round(s.hunger*100)/100,energy:Math.round(s.energy*100)/100,peels:s.peels,pile:s.pile,total:sim.total(),peeled:s.stats.peeled,
-    act:a?a.t:"none",then:a&&a.then||"",x:Math.round(g.x*RW*100)/100,y:Math.round(g.y*RH*100)/100,hold:g.hold||"",box:JSON.parse(JSON.stringify(s.box)),
+    act:a?a.t:"none",then:a&&a.then||"",x:Math.round(g.x*RW*100)/100,y:Math.round(g.y*RH*100)/100,hold:g.hold||"",box:JSON.parse(JSON.stringify(s.box)),viewRoom:s.viewRoom||"kitchen",where:g.where||"kitchen",hasKey:!!sim.hasKey(),wash:s.wash?s.wash.pots.length+(s.wash.bulk|0):0,washedShip:s.stats.washedShip|0,unwashedShip:s.stats.unwashedShip|0,
     table:{x0:GEO.table.x0,y0:GEO.table.y0,r:GEO.table.r|0},loopBreaks:s.stats.loopBreaks|0};},
   step:function(n){n=Math.max(0,Math.min(100000,n|0));for(var i=0;i<n;i++)sim.step(STEP);drawScene(performance.now());},
-  setSeed:function(sd){sim=PPSim.fresh((sd>>>0)||1);hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;focusId=null;rebuildPanel();rebuildTray();updateHud();layout();},
+  setSeed:function(sd){sim=PPSim.fresh((sd>>>0)||1);hud={};boxSnap="";flights=[];flying={};messVer++;sucks=[];staticLayer=null;messLayer=null;kitLayer=null;washLayer=null;roomsPreloaded=false;fading=false;fadeT=0;fadeTo=null;focusId=null;rebuildPanel();rebuildTray();updateHud();layout();},
   listCommands:function(){var o=[],i;for(i=0;i<CMDS.length;i++)o.push({name:"set_"+CMDS[i].id,args:[{name:"v",min:CMDS[i].min,max:CMDS[i].id==="pot"?POTS.length-1:CMDS[i].max}]});
     o.push({name:"buyFood"});o.push({name:"move",args:[{name:"i",min:0,max:3},{name:"x",min:0,max:RW},{name:"y",min:0,max:RH}]});o.push({name:"rotate",args:[{name:"i",min:0,max:3}]});return o;},
   runCommand:function(name,args){args=args||[];
