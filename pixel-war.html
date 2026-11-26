@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>PIXEL WAR 0.5.0</title>
+<title>PIXEL WAR 0.5.1</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d1c;color:#dfe3ff;font:600 13px/1.2 system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 #app{display:flex;flex-direction:column;height:100%}
@@ -142,8 +142,8 @@ input.notch::-webkit-slider-thumb{margin-top:-7px;border-radius:7px;width:26px;b
   <div id="result"><h2 id="rTitle">-</h2><div id="rBody"></div><div class="rb"><button id="btnRev">AI REVIEW</button><button id="btnAgain" class="go">PLAY AGAIN</button></div></div>
  </div>
 </div>
-<div class="view" id="menu"><h1>PIXEL WAR 0.5.0</h1><p class="sub">You vs Pixie, the AI. Destroy the enemy circle with streams of pixels.</p>
- <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff" style="display:none">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><div id="mPix" class="pixmem">PIXIE MEMORY</div><div class="mrow2"><button id="mExp">EXPORT MEMORY</button><button id="mImp">IMPORT MEMORY</button><button id="mSfx">SOUND ON</button></div><input id="mImpF" type="file" accept=".json,application/json,text/plain" style="display:none"><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
+<div class="view" id="menu"><h1>PIXEL WAR 0.5.1</h1><p class="sub">You vs Pixie, the AI. Destroy the enemy circle with streams of pixels.</p>
+ <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff" style="display:none">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><div id="mPix" class="pixmem">PIXIE MEMORY</div><div class="mrow2"><button id="mExp">EXPORT MEMORY</button><button id="mImp">IMPORT MEMORY</button><button id="mSfx">SOUND ON</button></div><button id="mFx" style="min-height:44px;font-size:13px;margin-bottom:8px">EFFECTS: LOW</button><input id="mImpF" type="file" accept=".json,application/json,text/plain" style="display:none"><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
 <div class="view" id="stages"><h1>STAGES</h1><p class="sub">Four stages unlock the mechanics one step at a time. QUICK MATCH and CUSTOM GAME have everything.</p><div class="btns" id="stlist" style="flex:1;overflow-y:auto"></div><div class="btns" style="padding-top:0"><button id="stBack">BACK</button></div></div>
 <div class="view" id="editor"><h1>SHAPE EDITOR</h1><p class="sub">Draw ONE closed outline with your finger; the top edge is the FRONT. The outline is the shape's yellow hitbox: its pixels wander freely inside it. Saved shapes are abilities in the SHAPE tab (the AI designs its own).</p><div id="edwrap"><canvas id="edc"></canvas></div><div id="edmsg"></div><div id="edlist"></div>
  <div class="edrow"><button id="edClear">CLEAR</button><button id="edSave" class="go">SAVE</button><button id="edDel">DELETE</button></div><div class="btns" style="padding:4px 10px 6px"><button id="edBack" style="margin:0">BACK</button></div></div>
@@ -1381,7 +1381,7 @@ function vAdd(x,y,dx,dy,life,col,kind){if(vpN>=VPMAX){VFX.dropped++;return;}cons
 function sparkAt(i){if(VFX.on)fwBurst(px[i],py[i],i<POOL?0:1,0);if(!VFX.on||vBud<=0)return;vBud--;const cols=i<POOL?K_BITB:K_BITR;VFX.sparkBursts++;const a0=vr()*6.2832,nb=vBits;
   for(let k=0;k<nb;k++){const a=a0+k*(6.2832/nb)+(vr()-.5)*0.7,sp=9+vr()*16;vAdd(px[i],py[i],Math.cos(a)*sp,Math.sin(a)*sp,34+((vr()*26)|0),cols[k&1],0);VFX.bits++;}}
 // a ricochet: the pixel glows for ~0.5 s and drops fading trail bits where it has been, so the bounce shows as a visible V
-function bounceMark(i){if(!VFX.on)return;VFX.bounces++;if(vr()<0.5)fwBurst(px[i],py[i],i<POOL?0:1,1);if(pbnc[i]===0&&bN<BMAX)bList[bN++]=i;pbnc[i]=32;}
+function bounceMark(i){if(!VFX.on)return;VFX.bounces++;if(FXP.rico>0&&vr()<FXP.rico)fwBurst(px[i],py[i],i<POOL?0:1,1);if(pbnc[i]===0&&bN<BMAX)bList[bN++]=i;pbnc[i]=32;}
 function vfxStep(){fwTickBudget();const act=(S.sides[0].active+S.sides[1].active)||1,sc=clamp(800/Math.max(800,act),0.45,1);vBud=Math.max(8,Math.round(VBUD*sc));vBits=sc<0.7?2:4;
   for(let k=0;k<bN;k++){const i=bList[k];if(pbnc[i]>0){pbnc[i]--;if(pst[i]&&(pbnc[i]&3)===0&&vpN<VPMAX-8){vAdd(px[i],py[i],0,0,26,(i<POOL?K_BITB:K_BITR)[1],1);VFX.trails++;}}
     if(pbnc[i]===0||!pst[i]){pbnc[i]=0;bList[k]=bList[--bN];k--;}}
@@ -1392,13 +1392,20 @@ function vfxStep(){fwTickBudget();const act=(S.sides[0].active+S.sides[1].active
 const SPMAX=760,spX=new Float32Array(SPMAX),spY=new Float32Array(SPMAX),spVX=new Float32Array(SPMAX),spVY=new Float32Array(SPMAX),spL=new Float32Array(SPMAX),spT=new Float32Array(SPMAX),spC=new Uint8Array(SPMAX),spF=new Uint8Array(SPMAX);   // spF 1 = contact flash (no motion, white-hot, 2x size)
 const STMAX=900,stX=new Float32Array(STMAX),stY=new Float32Array(STMAX),stR=new Float32Array(STMAX),stC=new Uint8Array(STMAX),stA=new Uint8Array(STMAX);
 let spN=0,stN=0,fwBud=3,scorchLive=0;const FW={bursts:0,dropped:0,stamps:0,on:1,pops:0};
-function fwTickBudget(){if(!S)return;const act=S.sides[0].active+S.sides[1].active;fwBud=act>3500?2:act>2500?3:5;}   // t1223: more bursts get through (was 3/2/1), the spark cap still holds
+// EFFECTS levels. HIGH = exactly the 0.5.0 numbers. LOW: 2-3 tiny sparks per kill under 0.25 s, ricochet sparks almost never, no flash,
+// sparks UNDER the stream, faint translucent burns that halve in ~5 s. OFF: no collision sparks or burns (the finale burst still plays).
+const FXL=[{kill:0,rico:0,flash:0,tiny:1,life:0,stK:0,stR:0,stEnd:0,aK:0,aR:0,aEnd:0,amax:0,rows:36,fade:59,over:0,bud:[0,0,0]},
+  {kill:2,kill1:1,rico:0.05,ricoN:2,flash:0,tiny:1,life:0.12,lifeR:0.1,sp:34,stK:1.7,stR:1.2,stEnd:0,aK:62,aR:48,aEnd:0,amax:95,rows:36,fade:59,over:0,bud:[2,1,1]},
+  {kill:11,killHeavy:5,rico:0.5,ricoN:7,flash:1,tiny:0,life:0.48,lifeR:0.35,sp:60,stK:3.8,stR:3.0,stEnd:0.7,aK:220,aR:190,aEnd:140,amax:250,rows:72,fade:31,over:1,bud:[5,3,2]}];
+let FXP=FXL[1];const fxLevel=()=>FXL.indexOf(FXP);function setFxLevel(n){FXP=FXL[clamp(n|0,0,2)];prefs.fx=FXL.indexOf(FXP);}
+function fwTickBudget(){if(!S)return;const act=S.sides[0].active+S.sides[1].active;fwBud=act>3500?FXP.bud[2]:act>2500?FXP.bud[1]:FXP.bud[0];}   // t1223: more bursts get through (was 3/2/1), the spark cap still holds
 function fwStamp(x,y,r,c,a){if(stN>=STMAX)return;const k=stN++;stX[k]=x;stY[k]=y;stR[k]=r;stC[k]=c;stA[k]=a;FW.stamps++;}
-function fwBurst(x,y,side,kind,big){if(!FW.on)return;if(!big){if(fwBud<=0){FW.dropped++;return;}fwBud--;}const n=big?22:kind?7:(S&&S.sides[0].active+S.sides[1].active>3500?5:11);if(spN+n+1>SPMAX){FW.dropped++;return;}FW.bursts++;
-  const a0=vr()*6.2832,sp0=big?84:kind?46:60;for(let k=0;k<n;k++){const a=a0+k*6.2832/n+(vr()-.5)*0.6,v=sp0*(0.55+vr()*0.8),q=spN++;spX[q]=x;spY[q]=y;spVX[q]=Math.cos(a)*v;spVY[q]=Math.sin(a)*v;spT[q]=spL[q]=(big?0.9:0.48)+vr()*0.35;spC[q]=side*3+((vr()*3)|0);spF[q]=0;}
-  {const q=spN++;spX[q]=x;spY[q]=y;spVX[q]=0;spVY[q]=0;spT[q]=spL[q]=big?0.22:0.13;spC[q]=side*3+2;spF[q]=1;}
-  fwStamp(x,y,big?6:kind?3.0:3.8,side*2,big?240:kind?190:220);sfxPop(big?2:kind);}
-function fwStep(dt){const dr=Math.pow(0.04,dt);for(let k=0;k<spN;k++){spL[k]-=dt;if(spL[k]<=0){if(!spF[k]&&vr()<0.7)fwStamp(spX[k],spY[k],1.3,(spC[k]>=3?2:0)+(vr()<0.3?1:0),140);const l=--spN;spX[k]=spX[l];spY[k]=spY[l];spVX[k]=spVX[l];spVY[k]=spVY[l];spL[k]=spL[l];spT[k]=spT[l];spC[k]=spC[l];spF[k]=spF[l];k--;continue;}
+function fwBurst(x,y,side,kind,big){if(!FW.on)return;const P=big?FXL[2]:FXP;if(!big){if(!P.kill||fwBud<=0){FW.dropped++;return;}fwBud--;}
+  const n=big?22:kind?P.ricoN:(P.killHeavy&&S&&S.sides[0].active+S.sides[1].active>3500?P.killHeavy:P.kill+(P.kill1&&vr()<0.5?P.kill1:0));if(spN+n+1>SPMAX){FW.dropped++;return;}FW.bursts++;
+  const a0=vr()*6.2832,sp0=big?84:P.tiny?P.sp:kind?46:60,tf=P.tiny?2:0;for(let k=0;k<n;k++){const a=a0+k*6.2832/n+(vr()-.5)*0.6,v=sp0*(0.55+vr()*0.8),q=spN++;spX[q]=x;spY[q]=y;spVX[q]=Math.cos(a)*v;spVY[q]=Math.sin(a)*v;spT[q]=spL[q]=(big?0.9:P.life)+vr()*(big?0.35:P.lifeR);spC[q]=side*3+((vr()*3)|0);spF[q]=tf;}
+  if(P.flash){const q=spN++;spX[q]=x;spY[q]=y;spVX[q]=0;spVY[q]=0;spT[q]=spL[q]=big?0.22:0.13;spC[q]=side*3+2;spF[q]=1;}
+  const sr=big?6:kind?P.stR:P.stK;if(sr>0)fwStamp(x,y,sr,side*2,big?240:kind?P.aR:P.aK);sfxPop(big?2:kind);}
+function fwStep(dt){const dr=Math.pow(0.04,dt);for(let k=0;k<spN;k++){spL[k]-=dt;if(spL[k]<=0){if(spF[k]===0&&FXP.stEnd>0&&vr()<FXP.stEnd)fwStamp(spX[k],spY[k],1.3,(spC[k]>=3?2:0)+(vr()<0.3?1:0),FXP.aEnd);const l=--spN;spX[k]=spX[l];spY[k]=spY[l];spVX[k]=spVX[l];spVY[k]=spVY[l];spL[k]=spL[l];spT[k]=spT[l];spC[k]=spC[l];spF[k]=spF[l];k--;continue;}
   spX[k]+=spVX[k]*dt;spY[k]+=spVY[k]*dt;spVX[k]*=dr;spVY[k]*=dr;}}
 // small sound pops for the bursts (WebAudio, made on the first touch; at most ~12 a second; SOUND in the menu turns them off)
 let ACX=null,popT=0;function sfxPop(kind){if(!ACX||!prefs.sfx||document.hidden)return;const t=ACX.currentTime;if(t-popT<0.085)return;popT=t;FW.pops++;try{const o=ACX.createOscillator(),g=ACX.createGain();o.type=kind===2?'triangle':'square';const f0=kind===2?220:kind?1300+vr()*500:700+vr()*400;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*0.45,t+0.06);
@@ -1551,14 +1558,15 @@ function fxHits(){for(const sd of S.sides){const h=sd.circle.hp,l=FXS.last[sd.id
 function scorchBake(sc,fw,fh){if(!SC32)return;
   for(let k=0;k<stN;k++){const cx=(stX[k]*sc)|0,cy=(stY[k]*sc)|0,r=Math.max(1,Math.round(stR[k]*sc*0.95)),C=SOOT[stC[k]],A=stA[k];
     for(let yy=-r;yy<=r;yy++){const y=cy+yy;if(y<0||y>=fh)continue;for(let xx=-r;xx<=r;xx++){const x=cx+xx;if(x<0||x>=fw)continue;const d=(xx*xx+yy*yy)/((r+0.5)*(r+0.5));if(d>1)continue;
-      const a1=(A*(1-d*d*0.55))|0,o=y*fw+x,v0=SC32[o],a0=v0>>>24;let a,cc=C;if(a1>a0)a=a1;else{a=Math.min(250,a0+(a1>>3));if(a===a0)continue;if(v0!==0)cc=null;}
+      const a1=(A*(1-d*d*0.55))|0,o=y*fw+x,v0=SC32[o],a0=v0>>>24;let a,cc=C;if(a1>a0)a=a1;else{a=Math.min(FXP.amax||250,a0+(a1>>3));if(a<=a0)continue;if(v0!==0)cc=null;}
       SC32[o]=P32[o]=cc?((a<<24)|(cc[2]<<16)|(cc[1]<<8)|cc[0])>>>0:(((a<<24)|(v0&0xffffff))>>>0);}}}
   if(stN)scorchLive=600;stN=0;
-  if(scorchLive>0){scorchLive--;const rows=Math.max(1,Math.ceil(fh/72)),y0=scRow,y1=Math.min(fh,y0+rows);let any=false;
-    for(let o=y0*fw,e=y1*fw;o<e;o++){const v=SC32[o];if(v===0)continue;const a=v>>>24,na=(a*31)>>5;P32[o]=SC32[o]=na<8?0:(((na<<24)|(v&0xffffff))>>>0);any=true;}
+  if(scorchLive>0){scorchLive--;const rows=Math.max(1,Math.ceil(fh/FXP.rows)),y0=scRow,y1=Math.min(fh,y0+rows);let any=false;
+    for(let o=y0*fw,e=y1*fw;o<e;o++){const v=SC32[o];if(v===0)continue;const a=v>>>24,na=FXP.fade===31?(a*31)>>5:(a*FXP.fade)>>6;P32[o]=SC32[o]=na<8?0:(((na<<24)|(v&0xffffff))>>>0);any=true;}
     scRow=y1>=fh?0:y1;if(any&&scorchLive<80)scorchLive=80;}}
 function sparksDraw(sc,fw,fh){for(let k=0;k<spN;k++){const t=spL[k]/spT[k],x=(spX[k]*sc)|0,y=(spY[k]*sc)|0;if(x<3||y<3||x>fw-7||y>fh-7)continue;const c=SPK[spC[k]];
   if(spF[k]){const a=Math.min(255,(90+200*t)|0),o0=(y-3)*fw+x-3;for(let yy=0,o=o0;yy<6;yy++,o+=fw)for(let xx=0;xx<6;xx++){const e=(xx===0||xx===5)+(yy===0||yy===5);if(e===2)continue;P32[o+xx]=(((e?a>>1:a)<<24)|SPK[spC[k]])>>>0;}if(dN<DMAX){DO[dN]=o0;DZ[dN++]=6;}continue;}
+  if(spF[k]===2){const a=Math.min(255,(120+135*t)|0),o0=(y-1)*fw+x-1,cv=((a<<24)|c)>>>0;P32[o0]=cv;P32[o0+1]=cv;P32[o0+fw]=cv;P32[o0+fw+1]=cv;if(dN<DMAX){DO[dN]=o0;DZ[dN++]=2;}continue;}
   const a=Math.min(255,(110+260*t)|0),z=t>0.5?4:3,o0=(y-(z>>1))*fw+x-(z>>1),cv=((a<<24)|c)>>>0;for(let yy=0,o=o0;yy<z;yy++,o+=fw)for(let xx=0;xx<z;xx++)P32[o+xx]=cv;if(dN<DMAX){DO[dN]=o0;DZ[dN++]=z;}
   const tc=SPK[spC[k]-(spC[k]%3)+1];for(let j=1;j<=2;j++){const tx=((spX[k]-spVX[k]*0.022*j)*sc)|0,ty=((spY[k]-spVY[k]*0.022*j)*sc)|0;if(tx>0&&ty>0&&tx<fw-1&&ty<fh-1){const o2=ty*fw+tx;if(o2!==o0){const ta=(a*(j===1?0.6:0.32))|0;if((P32[o2]>>>24)<ta){P32[o2]=((ta<<24)|tc)>>>0;if(dN<DMAX){DO[dN]=o2;DZ[dN++]=1;}}}}}}}
 const GLOW={};function glowSpr(side,R){const key=side+':'+Math.round(R);if(GLOW[key])return GLOW[key];const s2=Math.ceil(R*4),c=document.createElement('canvas');c.width=c.height=s2;const x=c.getContext('2d'),T=TEAM[side],g=x.createRadialGradient(s2/2,s2/2,R*0.7,s2/2,s2/2,s2/2);
@@ -1634,14 +1642,14 @@ function draw(){
   if(anyPx||PLdirty||!PL||PL.width!==fw||PL.height!==fh){PLdirty=anyPx;
     if(!PL||PL.width!==fw||PL.height!==fh){PL=document.createElement('canvas');PL.width=fw;PL.height=fh;PLc=PL.getContext('2d');PI=PLc.createImageData(fw,fh);P32=new Uint32Array(PI.data.buffer);SC32=new Uint32Array(fw*fh);scRow=0;dN=0;}
     else{for(let k=0;k<dN;k++){const o0=DO[k],z=DZ[k];if(z===1)P32[o0]=SC32[o0];else for(let yy=0,o=o0;yy<z;yy++,o+=fw)for(let xx=0;xx<z;xx++)P32[o+xx]=SC32[o+xx];}}dN=0;   // 0.5 perf: put back only what last frame drew (scorch under it, or clear) instead of clearing the whole 2.9 MB layer
-    scorchBake(sc,fw,fh);
+    scorchBake(sc,fw,fh);const spOver=FXP.over||S.over;if(!spOver)sparksDraw(sc,fw,fh);
     const hh=CFG.pixHP*0.25,szd=szdOf(sc);   // 0.4.12: dot side per size (2x2 device px at size 5, like 0.4.11)
     for(let k=0;k<vpN;k++){const x=(vX[k]*sc)|0,y=(vY[k]*sc)|0;if(x<0||y<0||x>fw-2||y>fh-2)continue;const a=vKind[k]===0?Math.min(255,Math.round(255*vLife[k]/vTot[k]*1.25)):Math.round(200*vLife[k]/vTot[k]);const o1=y*fw+x;P32[o1]=((a<<24)|(vCol[k]&0xffffff))>>>0;if(dN<DMAX){DO[dN]=o1;DZ[dN++]=1;}}
     for(let sidx=0;sidx<2;sidx++){const cols=sidx===0?K_BLUE:K_RED,b=sidx*CAPMAX,e=b+CAPMAX;
       for(let i=b;i<e;i++){if(!pst[i])continue;const col=pbnc[i]>0?K_BNC:(CFG.tint&&pst[i]>=4)?(sidx?K_SQR:K_SQB):cols[php[i]>hh*ZL.HP[psz[i]]?0:1],big=false,dz=szd[psz[i]],ho=dz>>1,x=((pox[i]+(px[i]-pox[i])*RA)*sc-ho)|0,y=((poy[i]+(py[i]-poy[i])*RA)*sc-ho)|0,cf=pfade[i]>0?(((40+215*pfade[i]/FADE_T())<<24)|(col&0xffffff))>>>0:col;
         if(x<0||y<0||x>fw-1-dz||y>fh-1-dz)continue;let o=y*fw+x;if(dN<DMAX){DO[dN]=o;DZ[dN++]=dz;}if(dz===2){P32[o]=cf;P32[o+1]=cf;o+=fw;P32[o]=cf;P32[o+1]=cf;}else for(let yy=0;yy<dz;yy++,o+=fw)for(let xx=0;xx<dz;xx++)P32[o+xx]=cf;
         if(big){P32[o+2]=col;P32[o+fw]=col;P32[o+fw+1]=col;P32[o+fw+2]=col;P32[o-fw+2]=col;}}}
-    sparksDraw(sc,fw,fh);   // t1223: sparks over the stream so the bursts read in a dense fight
+    if(spOver)sparksDraw(sc,fw,fh);   // HIGH (0.5.0 look) and the finale draw sparks over the stream; LOW/OFF under it (t1233)
     PLc.putImageData(PI,0,0);}
   ctx.drawImage(PL,fx,fy);
   drawEdgeFlash(fx,fy,fw,fh,sc);drawFinale(fx,fy,fw,fh,sc);
@@ -1874,7 +1882,9 @@ $('mDiff').addEventListener('click',()=>{prefs.diff=prefs.diff>=4?1:prefs.diff+1
 $('mCustom').addEventListener('click',()=>{buildCustom();showView('custom');});
 $('mHelp').addEventListener('click',()=>showView('help'));
 let memMsg='';const memSay=t=>{memMsg=t;aiMemLabel();setTimeout(()=>{memMsg='';aiMemLabel();},5000);};
-const sfxLabel=()=>setT('mSfx',prefs.sfx?'SOUND ON':'SOUND OFF');$('mSfx').addEventListener('click',()=>{prefs.sfx=prefs.sfx?0:1;sfxLabel();try{savePrefs();}catch(e){}});
+const FXN=['OFF','LOW','HIGH'];const fxLabel=()=>setT('mFx','EFFECTS: '+FXN[fxLevel()]+(fxLevel()===1?' (clear collisions)':fxLevel()===2?' (fireworks + scorch)':' (no sparks or burns)'));
+$('mFx').addEventListener('click',()=>{setFxLevel((fxLevel()+1)%3);fxLabel();try{savePrefs();}catch(e){}});
+const sfxLabel=()=>{setT('mSfx',prefs.sfx?'SOUND ON':'SOUND OFF');fxLabel();};$('mSfx').addEventListener('click',()=>{prefs.sfx=prefs.sfx?0:1;sfxLabel();try{savePrefs();}catch(e){}});
 $('mExp').addEventListener('click',()=>{const r=memExportFile();memSay(r==='ok'||r===true?'Memory file saved ('+AIMEM.matches+' matches).':r==='busy'?'Another save is still writing, try again.':'Could not save the file: '+r);});
 $('mImp').addEventListener('click',()=>{const f=$('mImpF');f.value='';f.click();});
 $('mImpF').addEventListener('change',e=>{const fl=e.target.files&&e.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>{const r=memImportText(String(rd.result||''));memSay(r.ok?'Imported: +'+r.added+' matches, '+r.matches+' total.':'Import failed: '+r.why);};rd.readAsText(fl);});
@@ -1884,15 +1894,15 @@ $('cReset').addEventListener('click',()=>{CUS=Object.assign({},DEFCFG);saveCusto
 $('cBack').addEventListener('click',()=>showView('menu'));$('hBack').addEventListener('click',()=>showView('menu'));
 $('hbody').innerHTML=HELP.map(t=>'<p>'+t+'</p>').join('');
 // ---------- prefs (validated, never throws)
-const prefs={wins:0,losses:0,stage:0,diff:3,autoDist:0,sfx:1};
+const prefs={wins:0,losses:0,stage:0,diff:3,autoDist:0,sfx:1,fx:1};
 function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY415)||localStorage.getItem(KEY414)||localStorage.getItem(KEY413)||localStorage.getItem(KEY412)||localStorage.getItem(KEY411)||localStorage.getItem(KEY410)||localStorage.getItem(KEY49)||localStorage.getItem(KEY48)||localStorage.getItem(KEY47)||localStorage.getItem(KEY46)||localStorage.getItem(KEY45)||localStorage.getItem(KEY44)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
   for(const k of['speed','sdens','compact','width'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
   if(!DENSITY_OFF&&(fin(+v.density)||fin(+v.spacing)))setSetting(0,'density',migDensity(v.density,v.spacing));   // 0.4.12: old density is never loaded
   if(fin(+v.size)&&v.size!==null&&typeof v.size!=='boolean')setSetting(0,'size',+v.size);   // pixel size (0.4.12 saves only; older saves have none, so 5)
   if(fin(+v.release))setSetting(0,'release',migRelease(v.release));
   if(fin(+v.cap))setSetting(0,'cap',(+v.cap>=400)?CFG.capDef:+v.cap);
-  prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;prefs.autoDist=v.autoDist?1:0;CFG.autoDist=prefs.autoDist;prefs.sfx=v.sfx===0?0:1;}}catch(e){}}
-function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,size:sizeOf(s),release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff,autoDist:prefs.autoDist|0,sfx:prefs.sfx?1:0}));}catch(e){}}
+  prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;prefs.autoDist=v.autoDist?1:0;CFG.autoDist=prefs.autoDist;prefs.sfx=v.sfx===0?0:1;prefs.fx=v.fx===0||v.fx===2?v.fx:1;}}catch(e){}setFxLevel(prefs.fx);}
+function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,size:sizeOf(s),release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff,autoDist:prefs.autoDist|0,sfx:prefs.sfx?1:0,fx:fxLevel()}));}catch(e){}}
 // ---------- loop
 let last=0,acc=0,counted=false,RA=1;   // RA: render alpha (0..1) between the previous and the current sim tick
 
@@ -1969,7 +1979,7 @@ window.__tt={version:1,manual:false,
 window.__pw={get PXB(){return pixieBrain();},get PXB_OFF(){return PXB_OFF;},set PXB_OFF(v){PXB_OFF=!!v;},pixieRead0,get PixieBrain(){return typeof PixieBrain!=='undefined'?PixieBrain:null;},get S(){return S;},get CFG(){return CFG;},set CFG(v){CFG=v;},get ME(){return ME;},set ME(v){ME=v;},get selP(){return selP;},set selP(v){selP=v;},get L(){return{LX:LX,LY:LY,LS:LS};},get view(){return view;},
  C:{W,H,CAPMAX,PSP,CONTACT,STUN,MAXP,MAXSQ,DEFCFG,SHAPES,NSH,MAXCUS,POLYMAX,MX,MY},
  px,py,pvx,pvy,pox,poy,php,pst,pstun,pps,pcd,pwc,pid,psq,pslot,plu,plv,pcnt,pspm,psh,pcap,release,recall,collide,movePixels,tick,startBattle,aiPlan,aiAdapt,placeCircle,pathExtend,pathTrim,wallBegin,wallExtend,wallEnd,eraseAt,eraseStroke,
- branchBegin,branchExtend,rateOf,flowPS,onField,flowRate,clearAiMem,saveAiMem,loadAiMem,get AIMEM(){return AIMEM;},parseMem,mergeMem,migrateAiMem05,memImportText,memExportObj,memExportFile,get MEMLOG(){return MEMLOG;},memFold,memIsCont,oldMemKeys,KEYAIM,pixMemText,ZSTOPS,snapZ,zIdx,FW,FXS,get spN(){return spN;},get SC32(){return SC32;},get VIEWXF(){return{LX,LY,LS,DPR,fw:Math.round(W*LS*DPR),fh:Math.round(H*LS*DPR)};},get scorchLive(){return scorchLive;},fwBurst,aiAdapt,aiOpenBranch,toolDown,toolMove,toolUp,wallSmooth,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},sbx,sandboxRefill,sandboxStep,setPathSetting,pfree,freePix,pfade,FADE_T,VFX,vfxStep,pbnc,get vpN(){return vpN;},VPMAX,vAdd,vX,vY,vLife,vKind,prepNeeds,tryStart,autoDefense,aiPrepPlan,wallLen,MINPATH,MINWALL,vkOf,tkOf,PACE_REF,
+ branchBegin,branchExtend,rateOf,flowPS,onField,flowRate,clearAiMem,saveAiMem,loadAiMem,get AIMEM(){return AIMEM;},parseMem,mergeMem,migrateAiMem05,memImportText,memExportObj,memExportFile,get MEMLOG(){return MEMLOG;},memFold,memIsCont,oldMemKeys,KEYAIM,pixMemText,ZSTOPS,snapZ,zIdx,FW,FXS,get spN(){return spN;},get SC32(){return SC32;},FXL,get FXP(){return FXP;},setFxLevel,fxLevel,get VIEWXF(){return{LX,LY,LS,DPR,fw:Math.round(W*LS*DPR),fh:Math.round(H*LS*DPR)};},get scorchLive(){return scorchLive;},fwBurst,aiAdapt,aiOpenBranch,toolDown,toolMove,toolUp,wallSmooth,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},sbx,sandboxRefill,sandboxStep,setPathSetting,pfree,freePix,pfade,FADE_T,VFX,vfxStep,pbnc,get vpN(){return vpN;},VPMAX,vAdd,vX,vY,vLife,vKind,prepNeeds,tryStart,autoDefense,aiPrepPlan,wallLen,MINPATH,MINWALL,vkOf,tkOf,PACE_REF,
  setRnd(f){rnd=f;},useShape,shapeLeft,cdTicks,shapeOk,rhoAt,burnPool,loseLife,plife,qN,cntA,nearOwnWall,nearOwnPath,clrOf,cellHP,aiShapes,aiOpenBranch,brCol,BRCOL,pset,selectAt,POOL,get qHead(){return qHead;},newGame,buildWallGrid,wallsLeft,prefs,endMatch,autoStart,startWith,showView,buildCustom,get CUS(){return CUS;},CUSTOM,pathAt,restart,canWall,canDef,canBr,canMain,nearDefense,laneHW,laneHalf,aiRevisePlan,aiOpenBranch,aiBestOpening,aiDefenseRoute,aiPathClash,aiFillDens,aiZoneFoeDom,aiMirror,aiNotePlayer,rebuildSegs,crossesOwnWall,compact,rejoinOf,nearestOnPath,mergeRad,flashConn,FINGER,LOOP_CAP,get ploop(){return ploop;},aiThreats,aiOpenGuard,aiGuardStep,aiHabits,aiGuardW,AISEED,AIR,LANE_SHAPES_ON,SHAPES_OFF,aiMainContest,aiObserve,aiHabitsCommit,aiCounterHabits,aiReserve,aiBudget,KEYAI,KEY,psz,SZ_CNT,SZ_DG,SZ_HP,SZ_DMG,SZ_CT,SZ_IN,SZ_PX,SZ_MASS,DENSITY_OFF,DENS_N,HPQ,densOf,sizeOf,ZL,rebuildSZ,zq,r1,get KEYAI412(){return KEYAI412;},KEY412,get KEYAI413(){return KEYAI413;},KEY413,PIXIE_BOOK,pixieRead,pixieSee,pixieMeet,pixieAct,brSlide,aiSizeFor,get KEYAI411(){return KEYAI411;}};
 // ---------- boot
 newGame(((Math.random()*4294967296)>>>0)||1,false);
