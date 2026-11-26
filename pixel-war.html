@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>PIXEL WAR 0.4.15</title>
+<title>PIXEL WAR 0.5.0</title>
 <style>
 html,body{margin:0;height:100%;background:#0b0d1c;color:#dfe3ff;font:600 13px/1.2 system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 #app{display:flex;flex-direction:column;height:100%}
@@ -81,6 +81,36 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
 .crow .cv{width:52px;text-align:right;font-size:11px;padding-left:4px;box-sizing:border-box}
 .crow button{width:150px}
 .cgrp{padding:8px 2px 2px;font-size:11px;color:#9aa4ff;letter-spacing:.5px}
+/* ---- 0.5 look (Jay t1216/t1218): same layout and sizes, cleaner surfaces; DENSITY is a 5-notch slider (t1219) */
+#top{background:linear-gradient(180deg,#1b2050,#11143a);border-bottom:2px solid #3a43a0;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+#status{font-weight:800;letter-spacing:.2px;text-shadow:0 1px 0 #000}
+#panel{background:linear-gradient(180deg,#151a44,#0f1233);border-top:2px solid #3a43a0;box-shadow:0 -2px 10px rgba(0,0,0,.4)}
+button{border-radius:8px;background:linear-gradient(180deg,#2c3374,#1f2459);border-color:#5560c4;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.5);transition:transform .06s,filter .06s}
+button:active{transform:translateY(1px);filter:brightness(1.18)}
+button.on{background:linear-gradient(180deg,#4b57e6,#323cb8);border-color:#aab3ff;box-shadow:0 0 8px rgba(120,135,255,.55),inset 0 1px 0 rgba(255,255,255,.25)}
+button.go{background:linear-gradient(180deg,#27a35b,#187040);border-color:#7cf0ab;box-shadow:0 0 8px rgba(60,220,130,.35),inset 0 1px 0 rgba(255,255,255,.2)}
+button.wait{background:#3a3a55;border-color:#7a7a99;box-shadow:none}
+.box{background:linear-gradient(180deg,#1d2352,#171c45);border:1px solid #333b8a;border-radius:9px}
+.lab2{color:#c9cfff}
+.bar{height:10px;border-radius:5px;overflow:hidden;background:#090b19;border:1px solid #3d468f}
+.bar i{border-radius:4px}
+#hY i{background:linear-gradient(90deg,#0e7fa0,#17b9dc 60%,#8be8ff);box-shadow:0 0 6px #17b9dc}
+#hF i{background:linear-gradient(90deg,#9e1d12,#e0402f 60%,#ff9a85);box-shadow:0 0 6px #e0402f}
+#mP i,#mW i{background:linear-gradient(90deg,#9aa0c0,#f0f0f8)}
+.lab{color:#c9cfff;font-weight:800}
+#result h2{text-shadow:0 0 10px rgba(130,150,255,.6)}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent}
+input[type=range]:focus{outline:none}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(180deg,#080a18,#232a66);border:1px solid #4a52a8}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff,#a9b2ff 45%,#3a44c8);border:2px solid #e6e9ff;box-shadow:0 0 7px rgba(120,135,255,.8)}
+input.notch::-webkit-slider-runnable-track{height:14px;border-radius:7px;border:1px solid #5a63c0;background:
+ linear-gradient(#e6e9ff,#e6e9ff) 11.5px 50%/3px 10px no-repeat,linear-gradient(#e6e9ff,#e6e9ff) calc(25% + 5.75px) 50%/3px 10px no-repeat,linear-gradient(#e6e9ff,#e6e9ff) 50% 50%/3px 10px no-repeat,
+ linear-gradient(#e6e9ff,#e6e9ff) calc(75% - 5.75px) 50%/3px 10px no-repeat,linear-gradient(#e6e9ff,#e6e9ff) calc(100% - 11.5px) 50%/3px 10px no-repeat,linear-gradient(180deg,#080a18,#232a66)}
+input.notch::-webkit-slider-thumb{margin-top:-7px;border-radius:7px;width:26px;background:radial-gradient(circle at 35% 35%,#fff,#ffd27a 45%,#c77a10);border-color:#fff3d6;box-shadow:0 0 8px rgba(255,190,80,.8)}
+.pixmem{margin:2px 0 6px;padding:6px 8px;font-size:11.5px;line-height:14px;color:#cfd5ff;background:#141a44;border:1px solid #333b8a;border-radius:8px;min-height:28px}
+.mrow2{display:flex;margin:0 0 8px}.mrow2 button{flex:1;margin:0!important;min-height:44px!important;font-size:12px!important;display:block}.mrow2 button+button{margin-left:6px!important}
+.view{background:radial-gradient(ellipse at 50% 0%,#1a2060,#0b0d1c 70%)}
+.view h1{text-shadow:0 0 12px rgba(120,140,255,.6)}
 </style></head><body>
 <div id="app">
  <div id="top"><div id="status">PIXEL WAR</div><button id="btnPause">PAUSE</button><button id="btnStep" style="display:none">STEP</button><button id="btnRestart">NEW</button><button id="btnMenu">MENU</button></div>
@@ -94,7 +124,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
    <div id="sl">
     <div id="slh"></div>
     <div class="box"><span class="lab2" id="lSp"></span><button class="pm" data-d="-1" data-for="sSp" aria-label="pace down">&minus;</button><input id="sSp" type="range" min="1" max="10" step="0.1" value="5" aria-label="pace"><button class="pm" data-d="1" data-for="sSp" aria-label="pace up">+</button></div>
-    <div class="box"><span class="lab2" id="lDe"></span><button class="pm" data-d="-1" data-for="sDe" aria-label="pixel size down">&minus;</button><input id="sDe" type="range" min="1" max="10" step="0.1" value="5" aria-label="density (pixel size)"><button class="pm" data-d="1" data-for="sDe" aria-label="pixel size up">+</button></div>
+    <div class="box"><span class="lab2" id="lDe"></span><button class="pm" data-d="-1" data-for="sDe" aria-label="pixel size down">&minus;</button><input id="sDe" class="notch" type="range" min="1" max="5" step="1" value="3" aria-label="density (pixel size), 5 stops"><button class="pm" data-d="1" data-for="sDe" aria-label="pixel size up">+</button></div>
     <div class="box" id="boxSpc" style="display:none"><span class="lab2" id="lSpc"></span><button class="pm" data-d="-1" data-for="sSpc" aria-label="spacing down">&minus;</button><input id="sSpc" type="range" min="1" max="10" step="1" value="5" aria-label="spacing"><button class="pm" data-d="1" data-for="sSpc" aria-label="spacing up">+</button></div>
     <div class="box"><span class="lab2" id="lWd"></span><button class="pm" data-d="-1" data-for="sWd" aria-label="lane width down">&minus;</button><input id="sWd" type="range" min="1" max="10" step="0.1" value="5" aria-label="lane width"><button class="pm" data-d="1" data-for="sWd" aria-label="lane width up">+</button></div>
     <div class="box"><span class="lab2" id="lRe"></span><button class="pm" data-d="-1" data-for="sRe" aria-label="flow down">&minus;</button><input id="sRe" type="range" min="200" max="1000" step="5" value="290" aria-label="flow"><button class="pm" data-d="1" data-for="sRe" aria-label="flow up">+</button></div>
@@ -104,7 +134,7 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
      <div class="row" id="chipsL"></div><div class="row" id="shbtns"></div>
      <div class="row srow"><div class="cell"><span class="lab" id="lSh">SHARE</span><input id="sSh" type="range" min="0" max="100" step="5" value="40" aria-label="branch share"></div><div class="cell"><span class="lab" id="lAt">FORM AT</span><input id="sAt" type="range" min="0" max="100" step="5" value="0" aria-label="form at"></div></div>
      <div class="row srow"><div class="cell"><span class="lab" id="lSD">SHAPE DENS</span><input id="sSD" type="range" min="1" max="10" step="1" value="7" aria-label="shape density"></div><div class="cell"><span class="lab" id="lCo">COMPACT</span><input id="sCo" type="range" min="1" max="10" step="1" value="6" aria-label="compactness"></div></div>
-     <div class="row srow"><div class="cell"><span class="lab" id="lCa">OUT</span><input id="sCa" type="range" min="200" max="1000" step="50" value="1000" aria-label="active count"></div><div class="cell"><span class="lab" id="lPu">PULL</span><input id="sPu" type="range" min="0" max="100" step="5" value="90" aria-label="shape pull"></div></div>
+     <div class="row srow"><div class="cell"><span class="lab" id="lCa">OUT</span><input id="sCa" type="range" min="200" max="3000" step="50" value="1000" aria-label="active count"></div><div class="cell"><span class="lab" id="lPu">PULL</span><input id="sPu" type="range" min="0" max="100" step="5" value="90" aria-label="shape pull"></div></div>
     </div>
    </div>
    <div id="info" style="display:none"></div><div style="display:none"><button id="shPrev">&lt;</button><span id="shn">LINE</span><button id="shNext">&gt;</button></div>
@@ -112,8 +142,8 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
   <div id="result"><h2 id="rTitle">-</h2><div id="rBody"></div><div class="rb"><button id="btnRev">AI REVIEW</button><button id="btnAgain" class="go">PLAY AGAIN</button></div></div>
  </div>
 </div>
-<div class="view" id="menu"><h1>PIXEL WAR 0.4.15</h1><p class="sub">You vs Pixie, the AI. Destroy the enemy circle with streams of pixels.</p>
- <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff" style="display:none">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
+<div class="view" id="menu"><h1>PIXEL WAR 0.5.0</h1><p class="sub">You vs Pixie, the AI. Destroy the enemy circle with streams of pixels.</p>
+ <div class="btns"><button id="mResume" class="go">RESUME</button><button id="mQuick">QUICK MATCH</button><button id="mSandbox">SANDBOX (test both sides)</button><button id="mDiff" style="display:none">DIFFICULTY: HARD</button><button id="mStages">STAGES</button><button id="mCustom">CUSTOM GAME</button><button id="mForms">SHAPE EDITOR</button><button id="mHelp">HELP</button><div id="mPix" class="pixmem">PIXIE MEMORY</div><div class="mrow2"><button id="mExp">EXPORT MEMORY</button><button id="mImp">IMPORT MEMORY</button><button id="mSfx">SOUND ON</button></div><input id="mImpF" type="file" accept=".json,application/json,text/plain" style="display:none"><button id="mAiMem" style="min-height:44px;font-size:13px;margin-bottom:0">DELETE AI MEMORY</button></div></div>
 <div class="view" id="stages"><h1>STAGES</h1><p class="sub">Four stages unlock the mechanics one step at a time. QUICK MATCH and CUSTOM GAME have everything.</p><div class="btns" id="stlist" style="flex:1;overflow-y:auto"></div><div class="btns" style="padding-top:0"><button id="stBack">BACK</button></div></div>
 <div class="view" id="editor"><h1>SHAPE EDITOR</h1><p class="sub">Draw ONE closed outline with your finger; the top edge is the FRONT. The outline is the shape's yellow hitbox: its pixels wander freely inside it. Saved shapes are abilities in the SHAPE tab (the AI designs its own).</p><div id="edwrap"><canvas id="edc"></canvas></div><div id="edmsg"></div><div id="edlist"></div>
  <div class="edrow"><button id="edClear">CLEAR</button><button id="edSave" class="go">SAVE</button><button id="edDel">DELETE</button></div><div class="btns" style="padding:4px 10px 6px"><button id="edBack" style="margin:0">BACK</button></div></div>
@@ -121,6 +151,113 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
  <div class="btns" style="display:flex"><button id="cPlay" class="go" style="flex:2;margin:0 6px 0 0">PLAY</button><button id="cReset" style="flex:1;margin:0 6px 0 0">RESET</button><button id="cBack" style="flex:1;margin:0">BACK</button></div></div>
 <div class="view" id="help"><h1>HELP</h1><div class="hlp" id="hbody"></div><div class="btns"><button id="hBack">BACK</button></div></div>
 <script>
+/* ==== PixieBrain inline: source /workspace/game/tools/pixie-brain/pixie-brain.js (re-run tools/patch05e.py to refresh) ==== */
+/* PixieBrain 1.0 - a small "living AI" you can implant into any game.
+   No dependencies, no DOM needed, ES2017. Works in browsers (window.PixieBrain) and node (module.exports).
+   It gives a game: a rulebook reader (priority + learned bias, per-hit cooldowns, per-tick budget), memory
+   (match records, opponent habits, win-weighted learning of what beat her, migrate/merge/export/import/delete),
+   and a debug hook. The game supplies: sense(state)->facts, a rulebook, actions, and (optionally) its own memory format. */
+(function(root){'use strict';
+const VERSION='1.0.0',KIND='pixie-brain-memory';
+const fin=Number.isFinite,clampN=(v,a,b)=>v<a?a:v>b?b:v,int=(v,d)=>fin(+v)?clampN(Math.floor(+v),0,1e9):d;
+const nowMs=()=>(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+function memStore(){const m=new Map();return{getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>m.set(k,String(v)),removeItem:k=>m.delete(k),key:i=>[...m.keys()][i]||null,get length(){return m.size;}};}
+function defaultStorage(){try{if(typeof localStorage!=='undefined'&&localStorage){const k='__pb_probe';localStorage.setItem(k,'1');localStorage.removeItem(k);return localStorage;}}catch(e){}return memStore();}
+
+function create(opt){
+  opt=opt||{};
+  const game=String(opt.game||'game'),book=Array.isArray(opt.rulebook)?opt.rulebook:[],HK=Array.isArray(opt.habitKeys)?opt.habitKeys.slice():[];
+  const store=opt.storage||defaultStorage(),KEY=opt.storageKey||('pixiebrain.'+game),FLAG=KEY+'.merged';
+  const CD=fin(+opt.cooldown)?+opt.cooldown:300,EVERY=fin(+opt.every)?Math.max(1,+opt.every):60,MAXE=fin(+opt.maxEvals)?Math.max(1,+opt.maxEvals):Infinity;
+  const BUDGET=fin(+opt.budgetMs)?+opt.budgetMs:0,WINW=fin(+opt.winWeight)?+opt.winWeight:3,BEAT=fin(+opt.beatShare)?clampN(+opt.beatShare,0,1):0.45,HCAP=fin(+opt.habitCap)?+opt.habitCap:12;
+  const LEARN=opt.learnRules!==false,MAXL=fin(+opt.maxLessons)?+opt.maxLessons:60,hitKey=typeof opt.hitKey==='function'?opt.hitKey:(h=>h&&h.id!=null?String(h.id):'x');
+  const log=typeof opt.onLog==='function'?opt.onLog:null;
+
+  // ---- memory format (generic unless the game brings its own: empty / parse / merge / isCont / get / set)
+  const H=opt.memory||{};
+  const habClean=x=>{if(!x||typeof x!=='object')return null;const h={n:int(x.n,0)};for(const k of Object.keys(x))if(k!=='n'&&fin(+x[k]))h[k]=clampN(+x[k],-1e6,1e6);return h.n>0?h:null;};
+  const rulesClean=x=>{const o={};if(x&&typeof x==='object')for(const k of Object.keys(x).slice(0,500)){const r=x[k];if(r&&typeof r==='object')o[k]={n:int(r.n,0),w:int(r.w,0)};}return o;};
+  const gEmpty=()=>({kind:KIND,v:1,game,matches:0,wins:0,losses:0,lessons:[],habits:null,beat:null,rules:{},data:{},merged:{keys:[],imports:0}});
+  function gParse(v){if(!v||typeof v!=='object'||Array.isArray(v))return null;const m=gEmpty();m.matches=int(v.matches,0);m.wins=int(v.wins,0);m.losses=int(v.losses,0);
+    m.lessons=Array.isArray(v.lessons)?v.lessons.filter(x=>typeof x==='string').slice(-MAXL).map(x=>x.slice(0,200)):[];m.habits=habClean(v.habits);m.beat=habClean(v.beat);
+    m.data=v.data&&typeof v.data==='object'?JSON.parse(JSON.stringify(v.data)):{};m.merged=v.merged&&typeof v.merged==='object'?{keys:Array.isArray(v.merged.keys)?v.merged.keys.filter(k=>typeof k==='string').slice(0,40):[],imports:int(v.merged.imports,0)}:{keys:[],imports:0};return m;}
+  const empty=()=>{const m=H.empty?H.empty():gEmpty();if(!m.rules)m.rules={};if(!m.merged)m.merged={keys:[],imports:0};return m;};
+  const parse=v=>{const m=H.parse?H.parse(v):gParse(v);if(!m)return null;m.rules=rulesClean(v&&v.rules);if(!m.merged)m.merged={keys:[],imports:0};if(!('beat' in m))m.beat=habClean(v&&v.beat);return m;};
+  // b CONTINUES a (a later copy of the same brain) when it has at least a's counts and shares a lesson; otherwise they are separate brains and add up
+  function isCont(a,b){if(H.isCont)return H.isCont(a,b);if(!a.matches)return true;if(b.matches<a.matches||b.wins<a.wins||b.losses<a.losses)return false;if(!a.lessons.length||!b.lessons.length)return true;const L=new Set(b.lessons);for(const l of a.lessons)if(L.has(l))return true;return false;}
+  const habMerge=(a,b)=>{if(!a)return b?Object.assign({},b):null;if(!b)return Object.assign({},a);const na=a.n|0,nb=b.n|0,o={n:na+nb},ks=new Set(Object.keys(a).concat(Object.keys(b)));ks.delete('n');for(const k of ks){const x=fin(+a[k])?+a[k]:null,y=fin(+b[k])?+b[k]:null;const v=x===null?y:y===null?x:(x*na+y*nb)/Math.max(1,na+nb);if(v!==null)o[k]=+v.toFixed(3);}return o;};
+  function rulesMerge(a,b,cont){const o={};for(const k of Object.keys(a||{}))o[k]={n:a[k].n,w:a[k].w};for(const k of Object.keys(b||{})){const r=b[k];if(cont||!o[k])o[k]={n:r.n,w:r.w};else{o[k].n+=r.n;o[k].w+=r.w;}}return o;}
+  function merge(a,b,mode){if(!b)return a;if(!a)return b;const cont=mode==='add'?false:mode==='cont'?true:isCont(a,b);let m;
+    if(H.merge)m=H.merge(a,b,cont?'cont':'add');
+    else{m=gEmpty();if(cont){m.matches=b.matches;m.wins=b.wins;m.losses=b.losses;m.habits=b.habits&&(!a.habits||b.habits.n>=a.habits.n)?b.habits:habMerge(a.habits,b.habits);m.beat=b.beat&&(!a.beat||b.beat.n>=a.beat.n)?b.beat:(a.beat||b.beat);m.data=Object.assign({},a.data,b.data);}
+      else{m.matches=a.matches+b.matches;m.wins=a.wins+b.wins;m.losses=a.losses+b.losses;m.habits=habMerge(a.habits,b.habits);m.beat=habMerge(a.beat,b.beat);m.data=Object.assign({},a.data,b.data);}
+      const seen=new Set();m.lessons=a.lessons.concat(b.lessons).filter(l=>!seen.has(l)&&seen.add(l)).slice(-MAXL);
+      m.merged={keys:a.merged.keys.concat(b.merged.keys).filter((x,i,r)=>r.indexOf(x)===i).slice(0,40),imports:(a.merged.imports|0)+(b.merged.imports|0)};}
+    m.rules=rulesMerge(a.rules,b.rules,cont);delete m.cont;return m;}
+  // fold several saves: each one either continues a lineage it grew from, or starts a new one; the lineages add up (no double counting)
+  function fold(list){const comps=[],out=[];for(const it of list){const m=it.m;let hit=-1;for(let c=comps.length-1;c>=0;c--)if(isCont(comps[c],m)){hit=c;break;}
+      if(hit>=0)comps[hit]=merge(comps[hit],m,'cont');else comps.push(m);out.push({key:it.k,matches:m.matches,mode:hit>=0?'continued':'added'});}
+    let acc=null;for(let c=0;c<comps.length;c++)acc=acc?merge(acc,comps[c],'add'):merge(empty(),comps[c],'cont');return{acc:acc||empty(),log:out,parts:comps.length};}
+
+  let own=empty();const getMem=()=>H.get?H.get():own,setMem=m=>{if(H.set)H.set(m);else own=m;};
+  const read=k=>{try{return parse(JSON.parse(store.getItem(k)||'null'));}catch(e){return null;}};
+  const useful=m=>m&&(m.matches>0||(m.lessons&&m.lessons.length)||m.habits);
+  function save(){try{store.setItem(KEY,JSON.stringify(getMem()));return true;}catch(e){return false;}}
+  function oldKeys(){let ks=typeof opt.oldKeys==='function'?opt.oldKeys():(opt.oldKeys||[]);if(opt.keyPattern instanceof RegExp)try{for(let i=0;i<store.length;i++){const k=store.key(i);if(k&&opt.keyPattern.test(k)&&ks.indexOf(k)<0)ks=ks.concat([k]);}}catch(e){}return ks.filter(k=>k!==KEY);}
+  // first load: MERGE every older save into this one (dedupe, never delete the old keys). Later loads just read the current key.
+  function migrate(){const list=[];for(const k of oldKeys()){const m=read(k);if(!useful(m))continue;m.merged={keys:[k],imports:0};list.push({k,m});}
+    const cur=read(KEY);if(useful(cur)){if(cur.merged.keys.indexOf(KEY)<0)cur.merged.keys.push(KEY);list.push({k:KEY,m:cur});}
+    const F=fold(list);setMem(F.acc);save();const rep={at:Date.now(),keys:F.log.map(x=>x.key),parts:F.parts,matches:F.acc.matches,log:F.log};try{store.setItem(FLAG,JSON.stringify(rep));}catch(e){}return rep;}
+  function load(){let done=null;try{done=store.getItem(FLAG);}catch(e){}if(!done)return migrate();const m=read(KEY);if(m)setMem(m);return null;}
+  function clear(){setMem(empty());try{store.removeItem(KEY);store.setItem(FLAG,JSON.stringify({at:Date.now(),cleared:1}));}catch(e){}return true;}   // old keys stay as backups
+  function exportObj(extra){return Object.assign({kind:KIND,v:1,game,brain:VERSION,exported:new Date().toISOString(),memory:JSON.parse(JSON.stringify(getMem()))},extra||{});}
+  // import MERGES: an older copy of this brain adds nothing, a grown copy replaces, a different brain adds up
+  function importText(txt){let o;try{o=typeof txt==='string'?JSON.parse(txt):txt;}catch(e){return{ok:false,why:'not a JSON file'};}const src=o&&(o.kind===KIND||o.memory)?o.memory:o,m=parse(src);
+    if(!useful(m))return{ok:false,why:'no memory in that file'};const cur=getMem(),before=cur.matches;m.merged={keys:[],imports:1};
+    const nx=cur.matches>0&&isCont(m,cur)?merge(m,cur,'cont'):merge(cur,m,'auto');setMem(nx);save();return{ok:true,added:nx.matches-before,matches:nx.matches,file:o};}
+
+  // ---- habits: the opponent's play as running averages; a match the OPPONENT won counts winWeight x, and also feeds 'beat' (how they beat her)
+  function observe(v,oppWon){const m=getMem(),h=m.habits||(m.habits={n:0}),n=Math.min(h.n|0,HCAP),wt=oppWon?WINW:1;
+    for(const k of (HK.length?HK:Object.keys(v)))if(fin(+v[k])){const old=fin(+h[k])?+h[k]:+v[k];h[k]=+((old*n+(+v[k])*wt)/(n+wt)).toFixed(3);}h.n=(h.n|0)+1;
+    if(oppWon){const b=m.beat||(m.beat={n:0}),nb=Math.min(b.n|0,HCAP);for(const k of (HK.length?HK:Object.keys(v)))if(fin(+v[k])){const old=fin(+b[k])?+b[k]:+v[k];b[k]=+((old*nb+(+v[k]))/(nb+1)).toFixed(3);}b.n=(b.n|0)+1;}}
+  // what to expect from the opponent: their habits, pulled up to beatShare toward how they beat her
+  function expect(prior,keys){const m=getMem(),h=m.habits,b=m.beat,o={};const ks=keys||HK;for(const k of ks){const p=prior&&fin(+prior[k])?+prior[k]:0;o[k]=h&&fin(+h[k])?+h[k]:p;}
+    if(b&&b.n>0){const bw=BEAT*Math.min(1,b.n/3);for(const k of ks)if(fin(+b[k]))o[k]=o[k]*(1-bw)+(+b[k])*bw;o.beatN=b.n|0;}o.n=h?h.n|0:0;return o;}
+  function lesson(t){const m=getMem();if(typeof t!=='string')return;if(m.lessons[m.lessons.length-1]===t)return;m.lessons.push(t.slice(0,200));if(m.lessons.length>MAXL)m.lessons.shift();}
+
+  // ---- rulebook reader
+  let S=null,nextT=0,cursor=0;const last={reads:0,fired:[],evals:0,ms:0,skipped:0};
+  function startMatch(session){S=session&&typeof session==='object'?session:{};S.reads=S.reads|0;S.fired=S.fired||{};S.cd=S.cd||{};S.err=S.err|0;S.used=S.used||{};nextT=0;cursor=0;return S;}
+  const bias=id=>{if(!LEARN)return 0;const r=getMem().rules&&getMem().rules[id];if(!r||r.n<5)return 0;return (r.w+1)/(r.n+2)-0.5;};   // -0.5..+0.5, only after 5 matches with that rule
+  function order(f){const L=book.map((e,i)=>({e,i,p:(typeof e.score==='function'?(()=>{try{return +e.score(f,api)||0;}catch(x){return 0;}})():(+e.score||0))+bias(e.id)}));L.sort((a,b)=>b.p-a.p||a.i-b.i);return L;}
+  function readNow(state,tick){if(!S)startMatch();const t0=nowMs();S.reads++;last.reads++;let facts;try{facts=opt.sense?opt.sense(state,api):state;}catch(e){S.err++;return 0;}if(facts==null)return 0;
+    let did=0;const raw=typeof opt.actions==='function'?opt.actions(facts,state,api):(opt.actions||{}),act={};
+    for(const k of Object.keys(raw))act[k]=typeof raw[k]==='function'?function(){const r=raw[k].apply(raw,arguments);if(r)did++;return r;}:raw[k];
+    const L=order(facts),n=L.length;let ev=0,fired=0;last.fired=[];last.skipped=0;const start=MAXE<n?cursor%n:0;
+    for(let j=0;j<n;j++){const it=L[(start+j)%n],e=it.e;if(ev>=MAXE||(BUDGET>0&&nowMs()-t0>BUDGET)){last.skipped=n-j;cursor=(start+j)%n;break;}
+      if(typeof e.when!=='function')continue;ev++;let hits=null;try{hits=e.when(facts,api);}catch(x){S.err++;continue;}if(!hits)continue;if(!Array.isArray(hits))hits=[hits];
+      if(typeof e.rank==='function')hits=hits.slice().sort((a,b)=>(+e.rank(facts,b)||0)-(+e.rank(facts,a)||0));
+      for(const h of hits){const key=e.id+':'+hitKey(h);if(tick<(S.cd[key]||0))continue;did=0;
+        try{if(typeof e.use==='function')e.use(facts,h,act,api,e);else if(e.action&&act[e.action])act[e.action].apply(null,typeof e.args==='function'?e.args(facts,h):[h]);}catch(x){S.err++;}
+        if(did){S.cd[key]=tick+(fin(+e.cd)?+e.cd:CD);S.fired[e.id]=(S.fired[e.id]||0)+1;S.used[e.id]=1;fired++;last.fired.push(e.id);if(log)log(e.id,h);}}}
+    if(MAXE>=n&&!(last.skipped))cursor=0;last.evals=ev;last.ms=+(nowMs()-t0).toFixed(3);return fired;}
+  // call every tick: reads only every `every` ticks (and within the eval / ms budget)
+  function think(state,tick){if(!S)startMatch();if(tick<nextT)return 0;nextT=tick+EVERY;return readNow(state,tick);}
+  // end of a match: record it, credit the rules she used, learn the opponent's habits (their wins weigh more)
+  function endMatch(r){r=r||{};const m=getMem();if(r.count!==false){m.matches=(m.matches|0)+1;if(r.won===true)m.wins=(m.wins|0)+1;else if(r.won===false)m.losses=(m.losses|0)+1;}   // count:false = the game keeps its own match record
+    if(S&&S.used&&r.won!=null){m.rules=m.rules||{};for(const id of Object.keys(S.used)){const x=m.rules[id]||(m.rules[id]={n:0,w:0});x.n++;if(r.won)x.w++;}}
+    if(r.opp&&typeof r.opp==='object')observe(r.opp,r.won===false);if(r.lesson)lesson(r.lesson);if(r.save!==false)save();S=null;return m;}
+  function debug(){const m=getMem();return{brain:VERSION,game,key:KEY,matches:m.matches,wins:m.wins,losses:m.losses,habitsN:m.habits?m.habits.n:0,beatN:m.beat?m.beat.n:0,rules:book.length,
+    session:S?{reads:S.reads,fired:Object.assign({},S.fired),err:S.err,cooldowns:Object.keys(S.cd).length}:null,last:Object.assign({},last,{fired:last.fired.slice()}),bias:book.map(e=>[e.id,+bias(e.id).toFixed(3)]).filter(x=>x[1])};}
+  function hook(target,name){if(target&&typeof target==='object'){target[name||'pixieBrain']={debug,brain:api};}return api;}
+  const api={VERSION,game,key:KEY,get mem(){return getMem();},set mem(m){setMem(m);},empty,parse,merge,fold,isCont,load,save,migrate,clear,exportObj,exportText:x=>JSON.stringify(exportObj(x)),importText,
+    observe,expect,lesson,startMatch,think,read:readNow,endMatch,debug,hook,get session(){return S;},rulebook:book};
+  return api;}
+const PixieBrain={create,VERSION,KIND,memStore};
+if(typeof module!=='undefined'&&module.exports)module.exports=PixieBrain;else root.PixieBrain=PixieBrain;
+})(typeof globalThis!=='undefined'?globalThis:this);
+/* ==== /PixieBrain inline ==== */
+
 'use strict';
 (function(){
 /* =====================================================================
@@ -135,9 +272,9 @@ button.tab{flex:1;margin:0}button.tab+button.tab{margin-left:4px}
    ===================================================================== */
 const W=360,H=500,STEP=1/60,CELL=4,GW=Math.ceil(W/CELL)+2,GH=Math.ceil(H/CELL)+2,WCELL=8,WGW=Math.ceil(W/WCELL)+2,WGH=Math.ceil(H/WCELL)+2;
 // pool 10000 = HP / reserve; at most 200..1000 pixels per side are on the field at once
-const POOL=10000,CAPMAX=POOL,NP=POOL*2,CAPMIN=200,CAPSTEP=50,PERFCAP=1000,MAXP=6,MAXSQ=40,PSP=4,LGX=9,LGY=12;
+const POOL=10000,CAPMAX=POOL,NP=POOL*2,CAPMIN=200,CAPSTEP=50,PERFCAP=3000,MAXP=6,MAXSQ=40,PSP=4,LGX=9,LGY=12;
 const WST=3,WALL_HALF=2,MAX_STROKES=12,CONTACT=3.5,LOOK=14,EXIT_T=14,STUN=24,CD_HIT=10,CD_WALL=8;
-const KEY='pixelwar.v415',KEYC='pixelwar.v415.custom',KEYF='pixelwar.v415.forms',KEY414='pixelwar.v414',KEYC414='pixelwar.v414.custom',KEYF414='pixelwar.v414.forms',KEY413='pixelwar.v413',KEYC413='pixelwar.v413.custom',KEYF413='pixelwar.v413.forms',KEY412='pixelwar.v412',KEYC412='pixelwar.v412.custom',KEYF412='pixelwar.v412.forms',KEY411='pixelwar.v411',KEYC411='pixelwar.v411.custom',KEYF411='pixelwar.v411.forms',KEY410='pixelwar.v410',KEYC410='pixelwar.v410.custom',KEYF410='pixelwar.v410.forms',KEY49='pixelwar.v49',KEYC49='pixelwar.v49.custom',KEYF49='pixelwar.v49.forms',KEY48='pixelwar.v48',KEYC48='pixelwar.v48.custom',KEYF48='pixelwar.v48.forms',KEY47='pixelwar.v47',KEYC47='pixelwar.v47.custom',KEYF47='pixelwar.v47.forms',KEY46='pixelwar.v46',KEYC46='pixelwar.v46.custom',KEYF46='pixelwar.v46.forms',KEY45='pixelwar.v45',KEYC45='pixelwar.v45.custom',KEYF45='pixelwar.v45.forms',KEY44='pixelwar.v44',KEYC44='pixelwar.v44.custom',KEYF44='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
+const KEY='pixelwar.v05',KEYC='pixelwar.v05.custom',KEYF='pixelwar.v05.forms',KEY415='pixelwar.v415',KEYC415='pixelwar.v415.custom',KEYF415='pixelwar.v415.forms',KEY414='pixelwar.v414',KEYC414='pixelwar.v414.custom',KEYF414='pixelwar.v414.forms',KEY413='pixelwar.v413',KEYC413='pixelwar.v413.custom',KEYF413='pixelwar.v413.forms',KEY412='pixelwar.v412',KEYC412='pixelwar.v412.custom',KEYF412='pixelwar.v412.forms',KEY411='pixelwar.v411',KEYC411='pixelwar.v411.custom',KEYF411='pixelwar.v411.forms',KEY410='pixelwar.v410',KEYC410='pixelwar.v410.custom',KEYF410='pixelwar.v410.forms',KEY49='pixelwar.v49',KEYC49='pixelwar.v49.custom',KEYF49='pixelwar.v49.forms',KEY48='pixelwar.v48',KEYC48='pixelwar.v48.custom',KEYF48='pixelwar.v48.forms',KEY47='pixelwar.v47',KEYC47='pixelwar.v47.custom',KEYF47='pixelwar.v47.forms',KEY46='pixelwar.v46',KEYC46='pixelwar.v46.custom',KEYF46='pixelwar.v46.forms',KEY45='pixelwar.v45',KEYC45='pixelwar.v45.custom',KEYF45='pixelwar.v45.forms',KEY44='pixelwar.v44',KEYC44='pixelwar.v44.custom',KEYF44='pixelwar.v44.forms',KEY43='pixelwar.v43',KEYC43='pixelwar.v43.custom',KEYF43='pixelwar.v43.forms',KEY41='pixelwar.v41',KEYC41='pixelwar.v41.custom',KEYF41='pixelwar.v41.forms',KEY4='pixelwar.v4',KEYC4='pixelwar.v4.custom',KEYF4='pixelwar.v4.forms',KEY3='pixelwar.v3',KEYC3='pixelwar.v3.custom';
 const MAXCUS=6,NSH=7+MAXCUS,POLYMAX=24,MX=22,MY=18;
 const SHAPES=['LINE','ARROW','WEDGE','RING','DIAMOND','DOUBLE','SPIRAL','C1','C2','C3','C4','C5','C6'];
 const LANES=['NORMAL','WIDE','NARROW','TAPERED','ARROW'],LMAX=[1,2.0,0.4,2.0,1.2];
@@ -163,12 +300,14 @@ const SZ_CNT=[1.1,1.075,1.05,1.025,1,0.98,0.96,0.94,0.92,0.9],SZ_HP=[1.7,1.75,1.
 //   linearly interpolated at every tenth (index = tenths), rebuilt by rebuildSZ() if a test retunes SZ_*.
 const ZL={};function rebuildSZ(){for(const [k,t] of [['CNT',SZ_CNT],['HP',SZ_HP],['DMG',SZ_DMG],['DG',SZ_DG],['CT',SZ_CT],['IN',SZ_IN],['PX',SZ_PX],['MASS',SZ_MASS]]){const a=new Float64Array(101);for(let q=0;q<=100;q++){const z=clamp(q/10,1,10),f=Math.min(8,Math.floor(z-1)),u=z-1-f;a[q]=t[f]+(t[f+1]-t[f])*u;}ZL[k]=a;}ZL.v=(ZL.v|0)+1;}
 const r1=v=>Math.round(v*10)/10,zq=z=>clamp(Math.round(z*10),10,100);
-const densOf=set=>DENSITY_OFF?DENS_N:((set&&set.density)|0||DENS_N),sizeOf=set=>{const v=set?+set.size:NaN;return fin(v)&&v!==0?clamp(r1(v),1,10):5;};   // 0.4.11 (Jay t1196): lane shapes and shapes are hidden for now; the code is kept. Every path (player + AI, old saves, AI memory) is NORMAL; no shape logic runs.
+const densOf=set=>DENSITY_OFF?DENS_N:((set&&set.density)|0||DENS_N),sizeOf=set=>{const v=set?+set.size:NaN;return fin(v)&&v!==0?snapZ(v):5;};
+// 0.5 (Jay t1219): pixel size has exactly 5 stops on the 0.4.15 size tables. Any value (old fractional / 1-10 saves, AI memory, Pixie's picks) snaps to the nearest stop; a tie goes to the smaller stop.
+const ZSTOPS=[1,3,5,7.5,10];function snapZ(v){v=+v;if(!fin(v))return 5;let b=ZSTOPS[0],bd=1e9;for(const z of ZSTOPS){const d=Math.abs(v-z);if(d<bd-1e-9){bd=d;b=z;}}return b;}const zIdx=v=>ZSTOPS.indexOf(snapZ(v))+1,stepZ=(v,d)=>ZSTOPS[clamp(zIdx(v)-1+d,0,4)];   // 0.4.11 (Jay t1196): lane shapes and shapes are hidden for now; the code is kept. Every path (player + AI, old saves, AI memory) is NORMAL; no shape logic runs.
 // ---------- CONFIG: every constant a rule (quick match uses DEFCFG; CUSTOM GAME edits a copy)
 const DEFCFG={poolSize:POOL,lives:20,burn:20,circleDmg:1,circleR:22,pixHP:2,pixDmg:1,missP:20,ricoP:45,ricoMode:3,leash:108,fadeSec:1.2,shapesOn:0,sbxEnd:0,
- paceMax:38,pathMax:640,brMax:400,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
+ paceMax:41.5,pathMax:640,brMax:400,maxBr:3,wallMax:220,segHP:1000,wallDmg:5,wsp:8,wcell:4,matchSec:300,prepSec:0,zoneH:52,
  sqN:300,tint:0,borrowSec:2,shapeCD:10,armSec:7,sqPull:50,shapeLane:0.8,shapeLen:3,ring:0,rhoRef:10,kSurv:0.9,kPush:0.8,survMax:0.85,pushMax:0.9,aiLevel:4,aiLearn:1,liveBr:1,liveWall:1,converge:0,momentum:0,orient:0,bias:0,autoDist:0,pattern:0,duel:0,halo:1,reveal:1,capDef:PERFCAP,relMul:120,
- laneDef:0,brWaste:0,koMargin:5,knockK:24,gate:1,arrowFront:60,reformSec:2.5,shockK:3,breakLive:20,kSpeed:100,aiForms:1,aiReview:1,stage:0,stageAll:1};
+ laneDef:0,brWaste:0,koMargin:5,knockK:22,gate:1,arrowFront:60,reformSec:2.5,shockK:3,breakLive:20,kSpeed:100,aiForms:1,aiReview:1,stage:0,stageAll:1};
 let CFG=Object.assign({},DEFCFG);
 const LBL={ricoMode:['RANDOM','ANGLE','HYBRID','FULL HYBRID'],aiLevel:['OFF','EASY','NORMAL','HARD','BRUTAL'],laneDef:LANES,stage:['FREE PLAY','1 FUNDAMENTALS','2 TACTICAL','3 ADVANCED','4 STRATEGIC'],converge:['SEPARATE','MERGE','REFORM'],orient:['TIP FIRST','TIP LAST'],bias:['EVEN','FRONT','REAR'],pattern:['STEADY','PULSE'],duel:['VS AI','SANDBOX']};
 // [key,label,hint,type(r=range,e=enum,b=bool),min,max,step]
@@ -178,7 +317,7 @@ const CUSTOM=[
  ['matchSec','Time limit (s)','higher circle HP wins at time','r',30,300,10],['prepSec','Prep timer (s)','0 = no limit, press START','r',0,120,10],['zoneH','Circle placement strip','how far up you may place it','r',30,150,10],
  ['duel','Players','SANDBOX = you control BOTH sides, draw and change anything any time, no win or lose (test the mechanics)','e'],['sbxEnd','Sandbox: end the game when a circle is empty','off = nothing ever ends; use REFILL to top the pools up','b'],
  ['_','PIXELS'],
- ['paceMax','Fastest pace (units per second)','the PACE slider runs from a quarter of this up to this. 38 is about 23% quicker than 0.4.8: roughly 13 seconds to cross the field at the fastest','r',6,90,2],
+ ['paceMax','Fastest pace (units per second)','the PACE slider runs from a quarter of this up to this. 41.5 (0.5) is 9% quicker than 0.4.15 (38): roughly 12 seconds to cross the field at the fastest','r',6,90,0.5],
  ['pixHP','Pixel HP','Jay locked 2','r',1,6,1],['pixDmg','Pixel damage per hit','Jay locked 1','r',1,3,1],['missP','Miss: ricochet instead of damage %','','r',0,60,5],['ricoP','Ricochet alongside a hit %','','r',0,80,5],
  ['ricoMode','Ricochet rule','random / angle / hybrid (angle + density) / FULL HYBRID (angle + closing speed + packing)','e'],['kSpeed','Impact speed effect %','FULL HYBRID: fast impacts hit harder and push farther, slow ones glance','r',0,150,10],['leash','Leash distance','how far a pixel may stray from its path (1.5x the old distance); past it the pixel fades out, then goes home','r',30,220,6],['fadeSec','Fade-out time (s)','a pixel past the leash fades for this long; it can still be hit while it fades, with less chance as it fades','r',0.2,4,0.2],['capDef','Max on screen per side (performance cap)','0.2 used 3000; 10000 = whole pool','r',250,POOL,250],['relMul','Release rate per notch','pixels/s per slider step','r',20,120,20],['pattern','Release pattern','steady stream or pulsing waves','e'],['momentum','Formation momentum','speed builds when not hit','b'],
  ['_','PATHS AND BRANCHES'],
@@ -205,7 +344,8 @@ const fin=v=>typeof v==='number'&&Number.isFinite(v);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 rebuildSZ();ZL.SV=0.05;   // 0.4.15 (t1212) SIZE EDGE: per whole size step of difference, the BIGGER pixel of a contact gets +5% to shrug the hit off (continuous, so 9.3 beats 9.0 a little)
 const PACE_REF=75;   // the old (0.4.1) default pace; absolute velocities, knock, jitter and tick timers are scaled by speedOf/PACE_REF so slow pixels behave like slow-motion fast ones
-const RICO_LEASH_K=0.28,RICO_SPD=0.33,RICO_PAD=14;   // short ricochet / path-end range (Jay t1140/t1141/t1143). Each spray rolls a random chance, then a random heading and a random takeoff in 0.15..0.38 of current speed (t1148).
+const RICO_LEASH_K=0.28,RICO_SPD=0.33*38/41.5,RICO_PAD=14;   // 0.5 (t1217): pace +9.2%, so the spray takeoff fraction is scaled back by 38/41.5 -> same absolute ricochet speed and range as 0.4.15 (still short)
+   // short ricochet / path-end range (Jay t1140/t1141/t1143). Each spray rolls a random chance, then a random heading and a random takeoff in 0.15..0.38 of current speed (t1148).
 const endLeash=hw=>Math.max((hw||0)+RICO_PAD,CFG.leash*RICO_LEASH_K);
 function migRelease(v){if(!fin(+v))return 289;v=+v;if(v<=10)return Math.round(200+(clamp(v,1,10)-1)/9*200);return clamp(Math.round(v),200,1000);}
 function migDensity(d,s){const dd=fin(+d)?clamp(Math.round(+d),1,10):5;if(!fin(+s))return dd;return clamp(Math.round((2*dd+(11-clamp(Math.round(+s),1,10)))/3),1,10);}
@@ -243,7 +383,7 @@ function cleanForm(f){if(!f||typeof f!=='object')return null;let poly=[];
   if(r.length<3||Math.abs(polyArea(r))<0.03)return null;
   return{name:String(typeof f.name==='string'&&f.name?f.name:'FORM').slice(0,10),poly:r.map(a=>[Math.round(a[0]*1000)/1000,Math.round(a[1]*1000)/1000])};}
 function cloneForms(){return PRESETS.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));}
-function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF414)||localStorage.getItem(KEYF413)||localStorage.getItem(KEYF412)||localStorage.getItem(KEYF411)||localStorage.getItem(KEYF410)||localStorage.getItem(KEYF49)||localStorage.getItem(KEYF48)||localStorage.getItem(KEYF47)||localStorage.getItem(KEYF46)||localStorage.getItem(KEYF45)||localStorage.getItem(KEYF44)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
+function loadForms(){const a=[];let raw=null;try{raw=JSON.parse(localStorage.getItem(KEYF)||localStorage.getItem(KEYF415)||localStorage.getItem(KEYF414)||localStorage.getItem(KEYF413)||localStorage.getItem(KEYF412)||localStorage.getItem(KEYF411)||localStorage.getItem(KEYF410)||localStorage.getItem(KEYF49)||localStorage.getItem(KEYF48)||localStorage.getItem(KEYF47)||localStorage.getItem(KEYF46)||localStorage.getItem(KEYF45)||localStorage.getItem(KEYF44)||localStorage.getItem(KEYF43)||localStorage.getItem(KEYF41)||localStorage.getItem(KEYF4)||'null');}catch(e){}
   if(Array.isArray(raw))for(const f of raw){if(a.length>=MAXCUS)break;const c=cleanForm(f);if(c)a.push(c);}PRESETS=a;}
 function saveForms(){try{localStorage.setItem(KEYF,JSON.stringify(PRESETS.map(f=>({name:f.name,poly:f.poly}))));}catch(e){}}
 function syncForms(){if(!S)return;for(const sd of S.sides)if(sd.human){sd.forms=cloneForms();for(let t=7;t<NSH;t++)sd.shReady[t]=0;}}
@@ -281,7 +421,7 @@ function newGame(sd,keepSet){
   S.sides[0].forms=cloneForms();if(CFG.duel)S.sides[1].forms=cloneForms();
   if(keepSet&&old){S.sides[0].set=Object.assign({},old.sides[0].set);S.sides[0].set.cap=Math.min(S.sides[0].set.cap,CFG.capDef);}
   for(const sd2 of S.sides){sd2.set.cap=Math.min(keepSet&&sd2.id===0?sd2.set.cap:CFG.capDef,CFG.capDef);}
-  ME=0;selP=0;
+  ME=0;selP=0;if(typeof SC32!=='undefined'&&SC32){SC32.fill(0);if(P32)P32.fill(0);dN=0;}if(typeof spN!=='undefined'){spN=0;stN=0;scorchLive=0;}if(typeof FXS!=='undefined'){FXS.shake=0;FXS.flash=0;FXS.pulse=[0,0];FXS.last=[-1,-1];FXS.fin=-1;}
   const e=S.sides[1].circle;e.x=clamp(40+rnd()*(W-80),CR+6,W-CR-6);e.y=28+Math.round(rnd()*(CFG.zoneH*0.6));
   for(const sd2 of S.sides)sd2.paths[0].p=[sd2.circle.x,sd2.circle.y];
   pgc.fill(0);pfree.fill(0);pfade.fill(0);pst.fill(0);php.fill(0);pcd.fill(0);pwc.fill(0);pstun.fill(0);psq.fill(-1);pid.fill(0);pcap.fill(0);pdec.fill(0);psh.fill(0);pmom.fill(0);pdst.fill(0);ploop.fill(0);pbnc.fill(0);vpN=0;bN=0;
@@ -420,7 +560,7 @@ function eraseAt(side,x,y){const sd=S.sides[side];if(!fin(x)||!fin(y))return fal
   return did;}
 function setSetting(side,key,v){const sd=S.sides[side];if(!fin(v))return false;
   if(key==='density'&&DENSITY_OFF){sd.set.density=DENS_N;return true;}   // 0.4.12: old density is off; nothing (save, AI memory, command) can set it
-  if(key==='size'){sd.set.size=clamp(r1(v),1,10);sizeLive(side,0);return true;}
+  if(key==='size'){sd.set.size=snapZ(v);sizeLive(side,0);return true;}
   if(key==='width'){sd.set.width=clamp(r1(v),1,10);if(sd.human)for(const P of sd.paths)if(P&&P.id&&P.set&&!P.wOwn)P.set.width=sd.set.width;return true;}   // 0.4.13 (t1204): a player branch follows the main LANE WIDTH until you set that branch's own width
   if(key==='speed')sd.set.speed=clamp(r1(v),1,10);
   else if(key==='density'||key==='sdens'||key==='compact')sd.set[key]=clamp(Math.round(v),1,10);
@@ -432,7 +572,7 @@ function sizeLive(side,id){if(!S||!S.sides)return;const sd=S.sides[side],P=sd.pa
 function setPathSetting(side,id,key,v){const sd=S.sides[side],P=sd.paths[id];if(!P||!fin(v))return false;if(id===0)return setSetting(side,key,v);
   if(key==='share'||key==='flow')return setShare(side,id,v);
   if(key==='density'&&DENSITY_OFF){P.set.density=DENS_N;return true;}
-  if(key==='size'){P.set.size=clamp(r1(v),1,10);sizeLive(side,id);return true;}
+  if(key==='size'){P.set.size=snapZ(v);sizeLive(side,id);return true;}
   if(key==='width'){P.set.width=clamp(r1(v),1,10);P.wOwn=1;return true;}
   if(key==='speed'){P.set.speed=clamp(r1(v),1,10);return true;}
   if(key==='density'){P.set.density=clamp(Math.round(v),1,10);return true;}
@@ -550,13 +690,15 @@ const HABK=['brT','brN','width','size','offS','speed','flow','offW','detour','lo
 function aiSizeFor(job,foeS,foeW){const h=S.ai&&S.ai.hab,hs=foeS!=null?foeS:(h?h.size:5);
   if(!AIR.size)return 5;
   // 0.4.13 (t1204): big now clearly wins straight head-on fights (size 10 vs 1 ~70% of kills, 8 vs 3 ~62%); small wins by coverage (1.2x pixels per flow, fits more across a lane).
-  if(job==='punch')return 9;if(job==='intercept')return 8;
-  if(job==='guard'){if(fin(+foeW)&&+foeW>=7)return clamp(Math.round(hs)-1,4,6);return clamp(Math.round(hs)+1,6,9);}   // a guard is a head-on fight: one size bigger than a normal stream (6..9). Against a WIDE stream (7+) coverage matters more: 4..6, so enough pixels span its lane and catch the outer pixels
-  if(job==='block')return 4;   // a wide blocking lane wants coverage
+  // 0.5 (t1219): the same choices on the 5 stops (1 / 3 / 5 / 7.5 / 10); 'one size bigger' = the next stop up
+  if(job==='punch')return 10;if(job==='intercept')return 7.5;
+  if(job==='guard'){if(fin(+foeW)&&+foeW>=7)return clamp(stepZ(hs,-1),3,5);return clamp(stepZ(hs,1),7.5,10);}   // a guard is a head-on fight: one size bigger than a normal stream (6..9). Against a WIDE stream (7+) coverage matters more: 4..6, so enough pixels span its lane and catch the outer pixels
+  if(job==='block')return 3;   // a wide blocking lane wants coverage
   if(job==='flank')return 3;   // a flank slips around: coverage, not trading head-on
   if(AIR.forceMainZ)return AIR.forceMainZ;   // test hook only (unset in play)
-  if(hs>=7)return clamp(Math.round(hs)+1,8,10);if(hs<=3)return 7;return 6;}   // main / detour: meet big with bigger, beat small head-on with big
-function aiHabits(){const m=AIMEM.habits,o={},n1=(m&&m.n)|0;for(const k of HABK){const n0=(k==='size'||k==='offS')?1:AISEED.n,a=AISEED[k],b=m&&fin(+m[k])?+m[k]:a;o[k]=(a*n0+b*n1)/(n0+n1);}o.n=n1;return o;}   // 0.4.12: the prior games had no size choice, so the size prior counts as 1 match, not 3
+  if(hs>=6.25)return 10;return 7.5;}   // 0.5 stops: vs big (7.5+) go huge; vs medium or small go big   // main / detour: meet big with bigger, beat small head-on with big
+function aiHabits(){const o0=aiHabits0(),b=AIMEM.beat;if(!b||!(b.n>0))return o0;const bw=0.45*Math.min(1,b.n/3);for(const k of ['size','width','brT','brN','flow','speed','offS','offW','offense','detour'])if(fin(+b[k]))o0[k]=o0[k]*(1-bw)+(+b[k])*bw;o0.beatN=b.n|0;return o0;}
+function aiHabits0(){const m=AIMEM.habits,o={},n1=(m&&m.n)|0;for(const k of HABK){const n0=(k==='size'||k==='offS')?1:AISEED.n,a=AISEED[k],b=m&&fin(+m[k])?+m[k]:a;o[k]=(a*n0+b*n1)/(n0+n1);}o.n=n1;return o;}   // 0.4.12: the prior games had no size choice, so the size prior counts as 1 match, not 3
 function aiGuardW(foeW){const h=S.ai&&S.ai.hab;return clamp(Math.max(fin(+foeW)?r1(+foeW):5,h?Math.round(h.offW||0):0)+AIR.edge,4,10);}   // cover the enemy lane + its outer pixels (10 = circle diameter, the max)
 function aiThreats(side){const sd=S.sides[side],foe=S.sides[1-side],c=sd.circle,out=[];
   for(const F of foe.paths){if(!F||pathN(F)<4)continue;const n=pathN(F);let md=1e9,mk=-1;for(let k=Math.floor(n*0.3);k<n;k++){const d=Math.hypot(F.p[k*2]-c.x,F.p[k*2+1]-c.y);if(d<md){md=d;mk=k;}}
@@ -589,7 +731,7 @@ function aiGuardStep(side){const sd=S.sides[side],ai=S.ai,foe=S.sides[1-side];if
     const T=th.find(t=>t.F===F);if(!T){B.idle=(B.idle|0)+1;if(B.idle>=4){removeBranch(sd,b);aiLearn('guard '+b+' released: that stream no longer threatens my circle');continue;}}else B.idle=0;
     guards++;const fs=pset(foe,F),w=aiGuardW(fs.width);if(Math.abs((+B.set.width||0)-w)>=0.5||(w>=10&&B.set.width<10)){setPathSetting(side,b,'width',w);aiLearn('matched your lane width: guard '+b+' now '+w);}
     const fl=clamp(Math.round(Math.max(460,onField(fs)+80)),200,1000);if(onField(B.set)<fl)setPathSetting(side,b,'release',fl);
-    const kl=sd.pathKill[b]||0,ls=sd.pathLoss[b]||0;if(ls>kl+10&&sizeOf(B.set)<9&&S.tick-(B.szT|0)>=240){B.szT=S.tick;setPathSetting(side,b,'size',Math.min(9,sizeOf(B.set)+1));aiLearn('guard '+b+' losing contacts: bigger pixels ('+sizeOf(B.set)+')');}}
+    const kl=sd.pathKill[b]||0,ls=sd.pathLoss[b]||0;if(ls>kl+10&&sizeOf(B.set)<10&&S.tick-(B.szT|0)>=240){B.szT=S.tick;setPathSetting(side,b,'size',stepZ(sizeOf(B.set),1));aiLearn('guard '+b+' losing contacts: bigger pixels ('+sizeOf(B.set)+')');}}
   for(const T of th){if(guards>=AIR.guardMax)break;let have=false;for(const B of sd.paths)if(B&&B.job==='guard'&&B.guardOf===T.pid){have=true;break;}if(have)continue;
     // only spend a slot when the stream is really coming: pixels on the way, it already hit me, or this player's habit says it will
     const early=ai.earlyGuard&&S.tick>=60;
@@ -597,7 +739,7 @@ function aiGuardStep(side){const sd=S.sides[side],ai=S.ai,foe=S.sides[1-side];if
     if(!aiFreeSlot(side))break;const B=aiOpenGuard(side,T);if(B)guards++;}}
 // FLOW BUDGET: a side has at most cap (1000) pixels out and paths are fed in order (main first), so a guard behind over-fed attack paths starves.
 // When a guarded stream is still landing on my circle, the weakest attack paths give up flow until the guards fit under the cap (same sliders as the player).
-function aiBudget(side){const sd=S.sides[side],foe=S.sides[1-side],cap=sd.set.cap||1000;let g=0,o=0,press=false;const os=[];
+function aiBudget(side){const sd=S.sides[side],foe=S.sides[1-side],cap=sd.set.cap||PERFCAP;let g=0,o=0,press=false;const os=[];
   for(const P of sd.paths){if(!P||(P.id&&pathN(P)<2))continue;const f=onField(pset(sd,P));
     if(P.job==='guard'){g+=f;const h=foe.pathCirc[P.guardOf]||0;if(h-(P.fh|0)>=3)press=true;P.fh=h;}else{o+=f;os.push(P);}}
   let need=g+o-cap;if(!press||need<=0||!os.length)return false;
@@ -615,7 +757,8 @@ function aiHabitsCommit(){const ai=S.ai,foe=S.sides[0],o=ai&&ai.obs;if(!o||!o.t)
   const v={brT:o.brT>=0?o.brT:900,brN:o.brN,width:o.w/o.t,size:o.z/o.t,offS:o.offN?o.offZ/o.offN:AISEED.offS,speed:o.s/o.t,flow:o.f/o.t,offW:o.offN?o.offW/o.offN:AISEED.offW,detour:o.det>0?1:0,loop:o.loop>0?1:0,offense:o.off>0?1:0,straight:0,L:0,R:0,C:0};
   if(FM&&pathN(FM)>=4){const n=pathN(FM),sx=FM.p[0],sy=FM.p[1],ex=FM.p[n*2-2],ey=FM.p[n*2-1],ch=Math.hypot(ex-sx,ey-sy)||1;v.straight=pathLen(FM)/ch<1.15?1:0;
     let mx=W/2,bd=1e9;for(let k=0;k<n;k++){const d=Math.abs(FM.p[k*2+1]-H/2);if(d<bd){bd=d;mx=FM.p[k*2];}}if(mx<W/3)v.L=1;else if(mx>W*2/3)v.R=1;else v.C=1;}
-  const h=AIMEM.habits||(AIMEM.habits={n:0});const n=Math.min(h.n|0,12);for(const k of HABK){const old=fin(+h[k])?+h[k]:v[k];h[k]=+((old*n+v[k])/(n+1)).toFixed(3);}h.n=(h.n|0)+1;}
+  const h=AIMEM.habits||(AIMEM.habits={n:0});const n=Math.min(h.n|0,12),wt=S.winner===0?3:1;for(const k of HABK){const old=fin(+h[k])?+h[k]:v[k];h[k]=+((old*n+v[k]*wt)/(n+wt)).toFixed(3);}h.n=(h.n|0)+1;   // 0.5 (t1220): a match Jay WON counts 3x
+  if(S.winner===0){const b=AIMEM.beat||(AIMEM.beat={n:0});const nb=Math.min(b.n|0,12);for(const k of HABK){const old=fin(+b[k])?+b[k]:v[k];b[k]=+((old*nb+v[k])/(nb+1)).toFixed(3);}b.n=(b.n|0)+1;}}
 // COUNTER-PLAN at START: read the remembered habits and set up against them (same sliders the player has)
 function aiCounterHabits(side){const sd=S.sides[side],ai=S.ai;if(!ai)return;const h=aiHabits();ai.hab=h;
   sd.set.density=DENS_N;sd.set.size=aiSizeFor('main',h.size);   // 0.4.12: old density off; main size counters the player's usual main size
@@ -832,11 +975,11 @@ const PIXIE_BOOK=[
   use:(o,t,a)=>{a.guard(t,'behind (or late) and your main is landing: guarded it');},
   counter:'Behind on HP or in the last minute, guard their main as soon as it lands instead of waiting.'},
  {id:'size_swarm',topic:'Pixel size (DENSITY slider) vs a small swarm',
-  rule:'Size 1 (tiny) to 10 (huge), per path, 0.1 steps. Size 5 is the standard pixel.',
-  physics:'BIG (10): HP 2.75, damage 1.4, hit radius 4.0, the bigger pixel of a contact shrugs off +5% of hits per size step and shoves the smaller one back, but only 0.9x pixels per flow and they stay 2.5 in from the lane edges. SMALL (1): HP 1.7, damage 0.85, hit radius 3.1, 1.1x pixels per flow, 3% harder to hit. Head-on, 10 v 1 takes about 90% of the kills, 9 v 6 and 8 v 5 about 70%, 6 v 5 about 62%; the big side pushes the front back.',
+  rule:'Five sizes per path (0.5 notches): 1, 3, 5, 7.5, 10 (tiny, small, medium = the standard pixel, big, huge). Bigger = fewer on screen.',
+  physics:'Sizes 1, 3, 5, 7.5, 10. BIG (10): HP 2.75, damage 1.4, hit radius 4.0, the bigger pixel of a contact shrugs off +5% of hits per size step and shoves the smaller one back, but only 0.9x pixels per flow and they stay 2.5 in from the lane edges. SMALL (1): HP 1.7, damage 0.85, hit radius 3.1, 1.1x pixels per flow, 3% harder to hit. Head-on at equal flow, one stop bigger takes about 70% of the kills (10 v 7.5 and 7.5 v 5 about 70%, 5 v 3 about 62%, 10 v 5 about 75%), 10 v 1 about 90%; the big side pushes the front back. Never a sure win: a dense small pack with far more flow (1000 v 400) stalls a thin big stream at the middle.',
   when:o=>o.meets.filter(k=>k.headOn&&k.t.size<=3.5&&PX_HEAD[k.m.job]&&k.m.size<k.t.size+3&&!(k.m.job==='guard'&&k.t.w>=7)),
-  use:(o,k,a)=>{const v=k.m.id===0?aiSizeFor('main',k.t.size):clamp(Math.round(k.t.size)+5,7,9);if(v>k.m.size)a.set(k.m.P,'size',v,'your small swarm meets my '+k.m.job+' head-on: big pixels ('+v+') win that');},
-  counter:'Use big to punch straight through. Against a small swarm, meet it head-on with big. (A guard against a WIDE stream, 7+, keeps coverage sizes 4-6 instead.)'},
+  use:(o,k,a)=>{const v=k.m.id===0?aiSizeFor('main',k.t.size):snapZ(clamp(Math.round(k.t.size)+5,7.5,10));if(v>k.m.size)a.set(k.m.P,'size',v,'your small swarm meets my '+k.m.job+' head-on: big pixels ('+v+') win that');},
+  counter:'Use big to punch straight through. Against a small swarm, meet it head-on with big. (A guard against a WIDE stream, 7+, keeps coverage sizes 3-5 instead.)'},
  {id:'size_big',topic:'Pixel size vs big pixels',
   rule:'Same slider. Big pixels win straight fights; they cost coverage.',
   physics:'Big pixels are fewer per flow and stay off the lane edges, so a stream that goes AROUND them, or comes in from the side, is not fighting their strength.',
@@ -850,7 +993,7 @@ const PIXIE_BOOK=[
   use:(o,k,a)=>{const v=Math.min(10,k.t.w+(k.m.job==='guard'?AIR.edge:1));a.set(k.m.P,'width',v,'matched your lane '+k.t.w+' with '+v+' so your outer pixels are caught');},
   counter:'Match or exceed the enemy width (+1, guards +2) to catch the outer pixels; against a lane at 10, sit at 10. Thin lanes are for punching (punch branches run at 2).'},
  {id:'flow',topic:'Flow',
-  rule:'FLOW 200-1000 = pixels of that path on the field at once. Every branch has its own. A side has at most 1000 out (cap).',
+  rule:'FLOW 200-1000 = pixels of that path on the field at once. Every branch has its own. A side has at most 3000 out (cap, 0.5).',
   physics:'More flow = more pixels in the fight. Flow is a budget: flow given to one path is taken from another.',
   when:o=>o.meets.filter(k=>k.headOn&&(k.m.job==='guard'||k.m.job==='intercept')&&k.t.flow>k.m.flow+60),
   use:(o,k,a)=>{a.set(k.m.P,'release',Math.min(1000,k.t.flow+80),'your flow '+k.t.flow+' outnumbers my '+k.m.job+': fed it '+Math.min(1000,k.t.flow+80));},
@@ -888,7 +1031,7 @@ function pixieSee(side){const sd=S.sides[side],foe=S.sides[1-side],ai=S.ai;
   o.threats=aiThreats(side);o.slots=CFG.maxBr-brCount(sd)-aiReserve(side);return o;}
 // the ONLY things the book can do (same API as the player): set a path slider, open a guard, open a branch, draw a branch further. No walls.
 function pixieAct(side,o){const sd=S.sides[side],tag=()=>'Pixie\'s book ['+(a.e?a.e.id:'?')+']: ';const a={e:null,did:0,
-  set(P,key,v,why){if(!P||sd.paths[P.id]!==P||!fin(v))return false;const s=pset(sd,P),cur=key==='size'?sizeOf(s):key==='release'?onField(s):+s[key];const nv=key==='release'?migRelease(v):clamp(r1(v),1,10);if(Math.abs(nv-cur)<0.05)return false;
+  set(P,key,v,why){if(!P||sd.paths[P.id]!==P||!fin(v))return false;const s=pset(sd,P),cur=key==='size'?sizeOf(s):key==='release'?onField(s):+s[key];const nv=key==='release'?migRelease(v):key==='size'?snapZ(v):clamp(r1(v),1,10);if(Math.abs(nv-cur)<0.05)return false;
     // the older AI code wins a tie: if it moved this slider away from what the book set less than 15 s ago, the book does not fight it
     const bk=S.ai&&S.ai.book,ok=bk?(bk.own||(bk.own={})):{},ky=P.id+':'+key+':'+(P.born|0),was=ok[ky];if(was&&Math.abs(cur-was.v)>=0.05&&S.tick-was.t<900)return false;
     setPathSetting(side,P.id,key,nv);ok[ky]={v:nv,t:S.tick};a.did++;aiLearn(tag()+(why||key+' '+nv));return true;},
@@ -897,7 +1040,19 @@ function pixieAct(side,o){const sd=S.sides[side],tag=()=>'Pixie\'s book ['+(a.e?
   extend(P,x,y,why){if(!P||sd.paths[P.id]!==P||!canBr(sd))return 0;let n=0;for(let g=0;g<40;g++){const k=branchExtend(side,P,x,y);if(!k)break;n+=k;const q=P.p;if(Math.hypot(q[q.length-2]-x,q[q.length-1]-y)<6)break;}
     if(n){branchEnd(side,P);a.did++;aiLearn(tag()+why);}return n;}};return a;}
 function pixieKey(h){if(h&&h.m&&h.t)return 'P'+h.m.id+'F'+h.t.id;if(h&&h.pid!=null)return 'T'+h.pid;if(h&&h.id!=null)return 'P'+h.id;return 'x';}
-function pixieRead(side){const ai=S.ai;if(!ai||!AIR.book||S.phase!=='battle')return 0;const bk=ai.book||(ai.book={reads:0,fired:{},cd:{}});bk.reads++;const o=pixieSee(side),a=pixieAct(side,o);let n=0;
+// 0.5 (t1221): Pixie's book is read by PixieBrain (the reusable living-AI module). Same entries, same order, same cooldowns, same actions;
+// the brain adds rule credit (which entries were used in matches she won / lost, kept in her memory) and a window.__tt debug hook.
+// If the module is missing or throws, the old reader below (pixieRead0) runs exactly as in 0.4.15.
+let PXB=null,PXB_A=null,PXB_FAIL=0,PXB_OFF=false;
+function pixieBrain(){if(PXB||PXB_FAIL)return PXB;try{if(typeof PixieBrain==='undefined'||!PixieBrain.create)throw new Error('no PixieBrain');
+  PXB=PixieBrain.create({game:'pixelwar',storageKey:KEYAI,habitKeys:HABK,winWeight:3,beatShare:0.45,cooldown:PIXIE_CD,every:1,maxEvals:64,
+    rulebook:PIXIE_BOOK.filter(e=>typeof e.when==='function'&&typeof e.use==='function').map(e=>({id:e.id,cd:e.cd||PIXIE_CD,when:o=>e.when(o),use:(o,h,act)=>{if(PXB_A)PXB_A.e=e;e.use(o,h,act);}})),
+    sense:st=>pixieSee(st.side),actions:(o,st)=>(PXB_A=pixieAct(st.side,o)),hitKey:pixieKey,
+    memory:{get:()=>AIMEM,set:m=>{AIMEM=m;},empty:aiMemEmpty,parse:parseMem,merge:(a,b,mode)=>{const m=mergeMem(a,b,mode);delete m.cont;return m;},isCont:memIsCont}});
+  try{PXB.hook(window.__tt||(window.__tt={}),'pixieBrain');}catch(e){}}catch(e){PXB_FAIL=1;PXB=null;}return PXB;}
+function pixieRead(side){const ai=S.ai;if(!ai||!AIR.book||S.phase!=='battle')return 0;const B=PXB_OFF?null:pixieBrain();if(!B)return pixieRead0(side);
+  const bk=ai.book||(ai.book={reads:0,fired:{},cd:{}});if(B.session!==bk)B.startMatch(bk);try{return B.read({side:side},S.tick);}catch(e){bk.err=(bk.err|0)+1;return 0;}}
+function pixieRead0(side){const ai=S.ai;if(!ai||!AIR.book||S.phase!=='battle')return 0;const bk=ai.book||(ai.book={reads:0,fired:{},cd:{}});bk.reads++;const o=pixieSee(side),a=pixieAct(side,o);let n=0;
   for(const e of PIXIE_BOOK){if(typeof e.when!=='function'||typeof e.use!=='function')continue;let hits=null;try{hits=e.when(o);}catch(err){bk.err=(bk.err|0)+1;continue;}if(!hits)continue;if(!Array.isArray(hits))hits=[hits];
     for(const h of hits){const key=e.id+':'+pixieKey(h);if(S.tick<(bk.cd[key]||0))continue;a.e=e;a.did=0;try{e.use(o,h,a);}catch(err){bk.err=(bk.err|0)+1;}if(a.did){bk.cd[key]=S.tick+(e.cd||PIXIE_CD);bk.fired[e.id]=(bk.fired[e.id]||0)+1;n++;}}}
   return n;}
@@ -914,10 +1069,10 @@ function aiDesignForm(sd){if(sd.forms.length>=MAXCUS)return null;const fam=(rnd(
   for(const p of pts){p[0]=clamp(p[0]+(rnd()-.5)*0.05,0,1);p[1]=clamp(p[1]+(rnd()-.5)*0.05,0,1);}
   const f=cleanForm({name:names[fam],poly:pts});if(!f)return null;sd.forms.push(f);if(S.ai&&S.ai.designs)S.ai.designs.push(f.name);return f;}
 // ---- AI MEMORY: kept between matches on this device (lessons, best shape, designed shapes, where its stream keeps dying, the slider setup that worked). DELETE AI MEMORY in the menu clears it.
-const KEYAI='pixelwar.v415.aimem',KEYAI414='pixelwar.v414.aimem',KEYAI413='pixelwar.v413.aimem',KEYAI412='pixelwar.v412.aimem',KEYAI411='pixelwar.v411.aimem',KEYAI410='pixelwar.v410.aimem',KEYAI49='pixelwar.v49.aimem',KEYAI48='pixelwar.v48.aimem',KEYAI47='pixelwar.v47.aimem',KEYAI46='pixelwar.v46.aimem',KEYAI45='pixelwar.v45.aimem',KEYAI44='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
-const aiMemEmpty=()=>({matches:0,wins:0,losses:0,lessons:[],best:-1,forms:[],loss:[],tune:null,open:{L:0,R:0,gap:0},mirror:{hits:0,detour:0,offense:0,aimX:0,aimN:0,split:0},habits:null,v:412});
+const KEYAI='pixelwar.v05.aimem',KEYAI415='pixelwar.v415.aimem',KEYAI414='pixelwar.v414.aimem',KEYAI413='pixelwar.v413.aimem',KEYAI412='pixelwar.v412.aimem',KEYAI411='pixelwar.v411.aimem',KEYAI410='pixelwar.v410.aimem',KEYAI49='pixelwar.v49.aimem',KEYAI48='pixelwar.v48.aimem',KEYAI47='pixelwar.v47.aimem',KEYAI46='pixelwar.v46.aimem',KEYAI45='pixelwar.v45.aimem',KEYAI44='pixelwar.v44.aimem',KEYAI43='pixelwar.v43.aimem';
+const aiMemEmpty=()=>({rules:{},matches:0,wins:0,losses:0,lessons:[],best:-1,forms:[],loss:[],tune:null,open:{L:0,R:0,gap:0},mirror:{hits:0,detour:0,offense:0,aimX:0,aimN:0,split:0},habits:null,v:412});
 let AIMEM=aiMemEmpty();
-function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localStorage.getItem(KEYAI414)||localStorage.getItem(KEYAI413)||localStorage.getItem(KEYAI412)||localStorage.getItem(KEYAI411)||localStorage.getItem(KEYAI410)||localStorage.getItem(KEYAI49)||localStorage.getItem(KEYAI48)||localStorage.getItem(KEYAI47)||localStorage.getItem(KEYAI46)||localStorage.getItem(KEYAI45)||localStorage.getItem(KEYAI44)||localStorage.getItem(KEYAI43)||'null');if(!v||typeof v!=='object'||Array.isArray(v))return;const m=aiMemEmpty();
+function parseMem(v){if(!v||typeof v!=='object'||Array.isArray(v))return null;const m=aiMemEmpty();
   m.matches=fin(+v.matches)?clamp(v.matches|0,0,1e6):0;m.wins=fin(+v.wins)?clamp(v.wins|0,0,1e6):0;m.losses=fin(+v.losses)?clamp(v.losses|0,0,1e6):0;
   m.lessons=Array.isArray(v.lessons)?v.lessons.filter(x=>typeof x==='string').slice(-60).map(x=>x.slice(0,140)):[];m.best=fin(+v.best)?clamp(v.best|0,-1,NSH-1):-1;
   m.forms=Array.isArray(v.forms)?v.forms.slice(0,MAXCUS).map(cleanForm).filter(Boolean):[];
@@ -926,9 +1081,64 @@ function loadAiMem(){try{const v=JSON.parse(localStorage.getItem(KEYAI)||localSt
   if(v.open&&typeof v.open==='object'){m.open={L:0,R:0,gap:0};for(const k of['L','R','gap'])if(fin(+v.open[k]))m.open[k]=clamp(+v.open[k],-6,12);}else m.open={L:0,R:0,gap:0};
   if(v.mirror&&typeof v.mirror==='object'){const mr=m.mirror;for(const k of['hits','detour','offense','aimN','split'])if(fin(+v.mirror[k]))mr[k]=clamp(v.mirror[k]|0,0,1e6);if(fin(+v.mirror.aimX))mr.aimX=+v.mirror.aimX;} 
   if(v.habits&&typeof v.habits==='object'){const h={n:fin(+v.habits.n)?clamp(v.habits.n|0,0,1e6):0};for(const k of HABK)if(fin(+v.habits[k]))h[k]=clamp(+v.habits[k],-1e4,1e4);m.habits=h.n>0?h:null;}   // 0.4.11 habits; v410-and-older memories migrate with everything else kept
-  AIMEM=m;}catch(e){}}
+  const hab=x=>{if(!x||typeof x!=='object')return null;const h={n:fin(+x.n)?clamp(x.n|0,0,1e6):0};for(const k of HABK)if(fin(+x[k]))h[k]=clamp(+x[k],-1e4,1e4);return h.n>0?h:null;};
+  m.rules={};if(v.rules&&typeof v.rules==='object')for(const k of Object.keys(v.rules).slice(0,200)){const r=v.rules[k];if(r&&typeof r==='object')m.rules[k]={n:fin(+r.n)?clamp(r.n|0,0,1e6):0,w:fin(+r.w)?clamp(r.w|0,0,1e6):0};}   // 0.5 (t1221) PixieBrain rule credit
+  m.beat=hab(v.beat);   // 0.5 (t1220): Jay's habits from the matches HE WON (what beat Pixie)
+  if(v.merged&&typeof v.merged==='object'){m.merged={keys:Array.isArray(v.merged.keys)?v.merged.keys.filter(x=>typeof x==='string').slice(0,40):[],imports:fin(+v.merged.imports)?clamp(v.merged.imports|0,0,1e4):0};}
+  return m;}
+// ---- 0.5 (Jay t1220) PIXIE'S BRAIN MERGE. On the first 0.5 load, the AI memory (and Jay's win/loss record) from EVERY older save key is merged into pixelwar.v05.
+// Older versions copied memory forward (v414 -> v415 ...), so a newer save that has at least the older one's matches/wins/losses and shares its lessons is a CONTINUATION
+// (counted once, the newer numbers win); anything else is an INDEPENDENT memory and is ADDED (counts summed, habits averaged by match count). Lessons and designed shapes are unioned without
+// duplicates. The old keys are only read, never removed: they stay on the phone as backups. pixelwar.v05.merged records that the merge ran and what it took in.
+const KEYAIM='pixelwar.v05.merged';
+const memKeyVer=k=>{const q=/^pixelwar\.v(\d+)\.aimem$/.exec(k);if(!q)return -1;const d=q[1];return d[0]==='0'?(+d[1]||0)*1000+(+(d.slice(2)||0)):(+d[0])*1000+(+(d.slice(1)||0));};   // major*1000+minor: v3 -> 3000, v43 -> 4003, v49 -> 4009, v410 -> 4010, v415 -> 4015, v05 -> 5000 (excluded below)
+function oldMemKeys(){const ks=new Set([KEYAI43,KEYAI44,KEYAI45,KEYAI46,KEYAI47,KEYAI48,KEYAI49,KEYAI410,KEYAI411,KEYAI412,KEYAI413,KEYAI414,KEYAI415]);try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k!==KEYAI&&/^pixelwar\.v\d+\.aimem$/.test(k))ks.add(k);}}catch(e){}
+  return [...ks].filter(k=>k!==KEYAI).sort((a,b)=>memKeyVer(a)-memKeyVer(b));}
+const habMerge=(a,b)=>{if(!a)return b?Object.assign({},b):null;if(!b)return Object.assign({},a);const na=a.n|0,nb=b.n|0,o={n:na+nb};for(const k of HABK){const x=fin(+a[k])?+a[k]:null,y=fin(+b[k])?+b[k]:null;o[k]=x===null?y:y===null?x:+((x*na+y*nb)/Math.max(1,na+nb)).toFixed(3);if(o[k]===null)delete o[k];}return o;};
+function memIsCont(a,b){if(!a.matches)return true;if(b.matches<a.matches||b.wins<a.wins||b.losses<a.losses)return false;if(!a.lessons.length||!b.lessons.length)return true;const L=new Set(b.lessons);for(const l of a.lessons)if(L.has(l))return true;return false;}
+function mergeMem(a,b,mode){if(!b)return a;const cont=mode==='add'?false:mode==='cont'?true:memIsCont(a,b),m=aiMemEmpty();
+  if(cont){m.matches=b.matches;m.wins=b.wins;m.losses=b.losses;m.habits=b.habits&&(!a.habits||b.habits.n>=a.habits.n)?b.habits:habMerge(a.habits,b.habits);m.beat=b.beat&&(!a.beat||b.beat.n>=a.beat.n)?b.beat:(a.beat||b.beat||null);m.mirror=Object.assign({},b.mirror);m.open=Object.assign({},b.open);m.loss=b.loss.length?b.loss.slice():a.loss.slice();}
+  else{m.matches=a.matches+b.matches;m.wins=a.wins+b.wins;m.losses=a.losses+b.losses;m.habits=habMerge(a.habits,b.habits);m.beat=habMerge(a.beat,b.beat);const mr={};for(const k in a.mirror)mr[k]=(+a.mirror[k]||0)+(+b.mirror[k]||0);m.mirror=mr;m.open=Object.assign({},b.matches>=a.matches?b.open:a.open);
+    m.loss=a.loss.length&&b.loss.length?a.loss.map((x,i)=>+(x+b.loss[i]).toFixed(1)):(b.loss.length?b.loss.slice():a.loss.slice());}
+  const seen=new Set(),ls=[];for(const l of a.lessons.concat(b.lessons))if(!seen.has(l)){seen.add(l);ls.push(l);}m.lessons=ls.slice(-60);
+  const fs=[],fk=new Set();for(const fm of a.forms.concat(b.forms)){const key=JSON.stringify(fm.poly);if(fk.has(key)||fs.length>=MAXCUS)continue;fk.add(key);fs.push(fm);}m.forms=fs;
+  m.best=b.best>=0?b.best:a.best;m.tune=b.tune||a.tune;m.merged={keys:((a.merged&&a.merged.keys)||[]).concat((b.merged&&b.merged.keys)||[]).filter((x,i,arr)=>arr.indexOf(x)===i).slice(0,40),imports:((a.merged&&a.merged.imports)|0)+((b.merged&&b.merged.imports)|0)};
+  {const R={},ar=a.rules||{},br=b.rules||{};for(const k in ar)R[k]={n:ar[k].n|0,w:ar[k].w|0};for(const k in br){if(cont||!R[k])R[k]={n:br[k].n|0,w:br[k].w|0};else{R[k].n+=br[k].n|0;R[k].w+=br[k].w|0;}}m.rules=R;}   // 0.5 (t1221) rule credit
+  m.cont=cont;return m;}
+const readMem=k=>{try{return parseMem(JSON.parse(localStorage.getItem(k)||'null'));}catch(e){return null;}};
+// old memories never recorded which matches Jay won, so on the merge his old wins seed the 'what beat me' profile with his habits from those saves (weight = his wins, max 12). New wins record it exactly.
+function seedBeat(m){if(!m.beat&&m.losses>0&&m.habits){m.beat=Object.assign({},m.habits,{n:Math.min(12,m.losses)});}return m;}
+let MEMLOG=null;   // what the last merge did (read by tests and the readout)
+// each save is matched against the memories already taken in ONE BY ONE: if it continues one of them (same lineage, copied forward and grown) it replaces it; otherwise it is a separate memory and is added
+function memFold(list){const comps=[],log=[];for(const it of list){const m=it.m;let hit=-1;for(let c=comps.length-1;c>=0;c--)if(memIsCont(comps[c],m)){hit=c;break;}
+    if(hit>=0){comps[hit]=mergeMem(comps[hit],m,'cont');delete comps[hit].cont;}else comps.push(m);log.push({key:it.k,matches:m.matches,jayWins:m.losses,mode:hit>=0?'continued':'added'});}
+  let acc=aiMemEmpty();acc.merged={keys:[],imports:0};for(let c=0;c<comps.length;c++){acc=c===0?mergeMem(acc,comps[c],'cont'):mergeMem(acc,comps[c],'add');delete acc.cont;}return{acc,log,parts:comps.length};}
+function migrateAiMem05(){const list=[];for(const k of oldMemKeys()){const m=readMem(k);if(!m||!(m.matches>0||m.lessons.length||m.habits))continue;m.merged={keys:[k],imports:0};list.push({k,m});}
+  const cur=readMem(KEYAI);if(cur&&(cur.matches>0||cur.lessons.length||cur.habits)){cur.merged=cur.merged||{keys:[KEYAI],imports:0};if(cur.merged.keys.indexOf(KEYAI)<0)cur.merged.keys.push(KEYAI);list.push({k:KEYAI,m:cur});}
+  const F=memFold(list),acc=F.acc,log=F.log;
+  seedBeat(acc);AIMEM=acc;MEMLOG={log,parts:F.parts};saveAiMem();
+  // Jay's own win/loss record (prefs) the same way: a newer record with at least the older numbers continued it, otherwise they add up
+  const pk=[KEY3,KEY4,KEY41,KEY43,KEY44,KEY45,KEY46,KEY47,KEY48,KEY49,KEY410,KEY411,KEY412,KEY413,KEY414,KEY415,KEY];let w=0,l=0;
+  const pc=[];for(const k of pk){let v=null;try{v=JSON.parse(localStorage.getItem(k)||'null');}catch(e){}if(!v||typeof v!=='object')continue;const vw=fin(+v.wins)?Math.max(0,Math.floor(+v.wins)):0,vl=fin(+v.losses)?Math.max(0,Math.floor(+v.losses)):0;if(!vw&&!vl)continue;let hit=-1;for(let c=pc.length-1;c>=0;c--)if(vw>=pc[c][0]&&vl>=pc[c][1]){hit=c;break;}if(hit>=0)pc[hit]=[vw,vl];else pc.push([vw,vl]);}for(const c of pc){w+=c[0];l+=c[1];}
+  prefs.wins=Math.max(prefs.wins|0,w);prefs.losses=Math.max(prefs.losses|0,l);
+  try{localStorage.setItem(KEYAIM,JSON.stringify({at:Date.now(),keys:log.map(x=>x.key),parts:F.parts,matches:AIMEM.matches,jayWins:AIMEM.losses,prefs:[prefs.wins,prefs.losses]}));}catch(e){}
+  try{let pv=null;for(const k of[KEY,KEY415,KEY414,KEY413,KEY412,KEY411,KEY410,KEY49,KEY48,KEY47,KEY46,KEY45,KEY44,KEY43,KEY41,KEY4,KEY3]){const t=localStorage.getItem(k);if(t){pv=JSON.parse(t);break;}}if(!pv||typeof pv!=='object')pv={};pv.wins=prefs.wins;pv.losses=prefs.losses;localStorage.setItem(KEY,JSON.stringify(pv));}catch(e){}return log;}
+function loadAiMem(){let done=null;try{done=localStorage.getItem(KEYAIM);}catch(e){}if(!done){try{migrateAiMem05();}catch(e){}return;}const m=readMem(KEYAI);if(m)AIMEM=m;}
+// EXPORT / IMPORT a memory file (JSON): back the phone brain up, or move it between versions / apps. Import MERGES into the current brain (same dedupe), it never replaces it.
+const MEMFILE_KIND='pixelwar-pixie-memory';
+function memExportObj(){return{kind:MEMFILE_KIND,v:1,game:'PIXEL WAR 0.5.0',exported:new Date().toISOString(),aimem:JSON.parse(JSON.stringify(AIMEM)),record:{wins:prefs.wins|0,losses:prefs.losses|0}};}
+function memImportText(txt){let o;try{o=JSON.parse(txt);}catch(e){return{ok:false,why:'not a JSON file'};}const src=o&&o.kind===MEMFILE_KIND?o.aimem:o;const m=parseMem(src);if(!m||!(m.matches>0||m.lessons.length||m.habits))return{ok:false,why:'no Pixie memory in that file'};
+  const before=AIMEM.matches;m.merged={keys:[],imports:1};let nx;if(AIMEM.matches>0&&memIsCont(m,AIMEM)){nx=mergeMem(m,AIMEM,'cont');}else nx=mergeMem(AIMEM,m);delete nx.cont;seedBeat(nx);AIMEM=nx;saveAiMem();
+  if(o&&o.record&&typeof o.record==='object'){const w=fin(+o.record.wins)?Math.max(0,Math.floor(+o.record.wins)):0,l=fin(+o.record.losses)?Math.max(0,Math.floor(+o.record.losses)):0;prefs.wins=Math.max(prefs.wins|0,w);prefs.losses=Math.max(prefs.losses|0,l);try{savePrefs();}catch(e){}}
+  return{ok:true,added:AIMEM.matches-before,matches:AIMEM.matches};}
+function memExportFile(){const txt=JSON.stringify(memExportObj(),null,1),name='pixie-memory-'+new Date().toISOString().slice(0,10)+'.json';
+  let br=null;try{br=window.TJApp||(window.parent&&window.parent!==window&&window.parent.TJApp)||null;}catch(e){br=null;}
+  if(br&&br.beginSave){try{const b=new TextEncoder().encode(txt);let bin='';for(let i=0;i<b.length;i++)bin+=String.fromCharCode(b[i]);if(!br.beginSave(name,'application/json'))return 'busy';for(let i=0;i<bin.length;i+=24000)br.saveChunk(btoa(bin.slice(i,i+24000)));return br.endSaveChecked?br.endSaveChecked(String(b.length)):br.endSave();}catch(e){}}
+  try{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return 'ok';}catch(e){return 'fail';}}
+
 function saveAiMem(){try{localStorage.setItem(KEYAI,JSON.stringify(AIMEM));}catch(e){}}
-function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI414);localStorage.removeItem(KEYAI413);localStorage.removeItem(KEYAI412);localStorage.removeItem(KEYAI411);localStorage.removeItem(KEYAI410);localStorage.removeItem(KEYAI49);localStorage.removeItem(KEYAI48);localStorage.removeItem(KEYAI47);localStorage.removeItem(KEYAI46);localStorage.removeItem(KEYAI45);localStorage.removeItem(KEYAI44);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
+function clearAiMem(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.setItem(KEYAIM,JSON.stringify({at:Date.now(),cleared:1}));}catch(e){}return true;}
+function clearAiMemOld(){AIMEM=aiMemEmpty();try{localStorage.removeItem(KEYAI);localStorage.removeItem(KEYAI415);localStorage.removeItem(KEYAI414);localStorage.removeItem(KEYAI413);localStorage.removeItem(KEYAI412);localStorage.removeItem(KEYAI411);localStorage.removeItem(KEYAI410);localStorage.removeItem(KEYAI49);localStorage.removeItem(KEYAI48);localStorage.removeItem(KEYAI47);localStorage.removeItem(KEYAI46);localStorage.removeItem(KEYAI45);localStorage.removeItem(KEYAI44);localStorage.removeItem(KEYAI43);}catch(e){}return true;}
 const aiMemForms=()=>AIMEM.forms.map(f=>({name:f.name,poly:f.poly.map(c=>[c[0],c[1]])}));
 function aiLearn(note){const ai=S.ai;if(!ai)return;const L=ai.lessons;if(L.length&&L[L.length-1]===note)return;if(L.length>=60)L.shift();L.push(note);}
 function eraseStroke(sd,st){if(!st||(!st.gate&&!sbx()))return;const i=sd.strokes.indexOf(st);if(i>=0){sd.strokes.splice(i,1);if(S.phase==='battle')rebuildSegs(sd);}}
@@ -991,7 +1201,8 @@ function aiCounterStart(side){const sd=S.sides[side],foe=S.sides[1-side];if(sd.h
     let near0=false;for(const st of sd.strokes)for(let q=0;q<st.pts.length;q+=2)if(Math.hypot(st.pts[q]-ex,st.pts[q+1]-ey)<30){near0=true;break;}
     if(near0)continue;const a=wallBegin(side,ex-nx*44,ey-ny*44);if(a){wallExtend(side,a,ex+nx*44,ey+ny*44);wallEnd(side,a);if(a.pts.length>=4){added++;S.planInfo[side].walls++;aiLearn('walled your path at the start');}}}
 }
-function startBattle(){if(S.phase!=='prep')return false;S.aiRev=1;
+function startBattle(){if(S.phase!=='prep')return false;S.aiRev=1;S.msg='';   // 0.5: a stale prep hint never stays on the battle status line
+
   for(const sd of S.sides)if(!sd.human&&!sd.planned)aiPlan(sd.id);
   if(!CFG.duel)aiRevisePlan();
   for(const sd of S.sides)if(!sd.human)aiCounterStart(sd.id);
@@ -1017,10 +1228,11 @@ function endMatch(w){S.over=true;S.winner=w;S.phase='over';
     AIMEM.matches++;if(w===1)AIMEM.wins++;else if(w===0)AIMEM.losses++;AIMEM.lessons=S.ai.lessons.slice(-60);AIMEM.best=S.ai.best;
     if(!sd.human){AIMEM.forms=sd.forms.map(f=>({name:f.name,poly:f.poly.map(c=>[+(+c[0]).toFixed(3),+(+c[1]).toFixed(3)])}));AIMEM.loss=Array.from(sd.lossGrid,x=>+(+x).toFixed(1));
       const t={speed:sd.set.speed,size:sizeOf(sd.set),release:sd.set.release,width:sd.set.width};
-      if(w===0){const hz=AIMEM.habits&&fin(+AIMEM.habits.size)?+AIMEM.habits.size:5;t.size=hz>=6?clamp(Math.round(hz)+1,8,10):7;t.width=clamp(t.width-1,2,10);t.release=clamp(migRelease(t.release)+40,200,1000);}
+      if(w===0){const hz=AIMEM.habits&&fin(+AIMEM.habits.size)?+AIMEM.habits.size:5;t.size=hz>=6.25?10:7.5;t.width=clamp(t.width-1,2,10);t.release=clamp(migRelease(t.release)+40,200,1000);}
       AIMEM.tune=t;}
     if(S.ai&&S.ai.opened){for(const o of S.ai.opened)aiMarkOpen(o.kind||'gap',(sd.pathCirc[o.id]||0)>0);}
     aiNotePlayer();aiHabitsCommit();
+    try{const B=PXB_OFF?null:pixieBrain();if(B&&S.ai.book){if(B.session!==S.ai.book)B.startMatch(S.ai.book);B.endMatch({won:w===1?true:w===0?false:null,count:false,save:false});}}catch(e){}   // 0.5 (t1221) rule credit
     saveAiMem();}
   S.ai=null;if(!sd.human){sd.forms=[];}   // the match state is cleared; the AI's memory (AIMEM) is NOT
   if(w===0&&(CFG.stage|0)>0&&!S.sides[1].human&&prefs.stage<CFG.stage){prefs.stage=CFG.stage;}
@@ -1099,15 +1311,17 @@ function strayStart(i,sd){if(pfade[i]===0){pfade[i]=FADE_T();sd.stats.strayed=(s
 // Inside the hitbox: free forward motion + each pixel's own slight lateral drift and wander; the lane edges are a hard bound (soft-reflect / clamp). Only ricochet sprays (pfree) and past-the-end strays may leave, and they use the short leash.
 const fv=[0,0];
 function spreadIntoLane(i,P,sd,along,spd){if(!P||pathN(P)<2)return;const s=clamp(along||0,0,pathLen(P));pathAt(P.p,s,tmp);const sp=Math.hypot(pvx[i],pvy[i])||spd||1;pvx[i]=tmp[2]*sp;pvy[i]=tmp[3]*sp;pps[i]=s;pdr[i]=(rnd()-.5)*1.8;}   // keep the pixel's current world position; only take the branch's forward direction (no centerline snap, no lateral remap)
-function freeFwd(i,p,s,lw,spd,stun,vx,vy,wob){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;let vt=vx*tx+vy*ty,vn=-vx*ty+vy*tx;if(!stun){const kk=Math.min(1,2.2*STEP);vt+=(spd-vt)*kk;vn+=pdr[i]*spd*0.55*STEP+(rnd()-.5)*spd*wob*STEP;}if((lat>lw&&vn>0)||(lat<-lw&&vn<0)){vn*=-0.35;vn+=(lat>0?-1:1)*spd*0.05;}if((lat>lw||lat<-lw)&&pdr[i]*lat>0)pdr[i]=(lat>0?-1:1)*(0.2+rnd()*0.7);fv[0]=vt*tx-vn*ty;fv[1]=vt*ty+vn*tx;}   // gentle tangent field only; pixels keep going mostly straight and wander; no pull toward the path line. 0.4.13 (t1204): a pixel that reaches the lane edge turns its own drift around, so it wanders back across the road instead of riding the edge (0.4.8-0.4.12 drift pinned ~60% of a lane to its two edges: a wide lane looked like two thin rails with an empty middle)
-function holdLane(i,p,s,lw){pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;if(lat<=lw&&lat>=-lw)return;const over=lat>0?lat-lw:lat+lw,k=over>lw?0.7:0.32;px[i]+=ty*over*k;py[i]-=tx*over*k;let vt=pvx[i]*tx+pvy[i]*ty,vn=-pvx[i]*ty+pvy[i]*tx;if((lat>0&&vn>0)||(lat<0&&vn<0))vn*=-0.4;vn+=(lat>0?-1:1)*Math.max(2,Math.hypot(pvx[i],pvy[i])*0.05);pvx[i]=vt*tx-vn*ty;pvy[i]=vt*ty+vn*tx;}   // inside the hitbox: do nothing. Soft edge only when a pixel actually leaves. Thinning pushes inward; widening does not remap.
+let paP=null,paS=-1;const tmpF=new Float64Array(4);
+function freeFwd(i,p,s,lw,spd,stun,vx,vy,wob){pathAt(p,s,tmp);paP=p;paS=s;tmpF[0]=tmp[0];tmpF[1]=tmp[1];tmpF[2]=tmp[2];tmpF[3]=tmp[3];const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;let vt=vx*tx+vy*ty,vn=-vx*ty+vy*tx;if(!stun){const kk=Math.min(1,2.2*STEP);vt+=(spd-vt)*kk;vn+=pdr[i]*spd*0.55*STEP+(rnd()-.5)*spd*wob*STEP;}if((lat>lw&&vn>0)||(lat<-lw&&vn<0)){vn*=-0.35;vn+=(lat>0?-1:1)*spd*0.05;}if((lat>lw||lat<-lw)&&pdr[i]*lat>0)pdr[i]=(lat>0?-1:1)*(0.2+rnd()*0.7);fv[0]=vt*tx-vn*ty;fv[1]=vt*ty+vn*tx;}   // gentle tangent field only; pixels keep going mostly straight and wander; no pull toward the path line. 0.4.13 (t1204): a pixel that reaches the lane edge turns its own drift around, so it wanders back across the road instead of riding the edge (0.4.8-0.4.12 drift pinned ~60% of a lane to its two edges: a wide lane looked like two thin rails with an empty middle)
+function holdLane(i,p,s,lw){if(p===paP&&s===paS){tmp[0]=tmpF[0];tmp[1]=tmpF[1];tmp[2]=tmpF[2];tmp[3]=tmpF[3];}else pathAt(p,s,tmp);const tx=tmp[2],ty=tmp[3],lat=-(px[i]-tmp[0])*ty+(py[i]-tmp[1])*tx;if(lat<=lw&&lat>=-lw)return;const over=lat>0?lat-lw:lat+lw,k=over>lw?0.7:0.32;px[i]+=ty*over*k;py[i]-=tx*over*k;let vt=pvx[i]*tx+pvy[i]*ty,vn=-pvx[i]*ty+pvy[i]*tx;if((lat>0&&vn>0)||(lat<0&&vn<0))vn*=-0.4;vn+=(lat>0?-1:1)*Math.max(2,Math.hypot(pvx[i],pvy[i])*0.05);pvx[i]=vt*tx-vn*ty;pvy[i]=vt*ty+vn*tx;}   // inside the hitbox: do nothing. Soft edge only when a pixel actually leaves. Thinning pushes inward; widening does not remap.
 function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
   for(let side=0;side<2;side++){const sd=S.sides[side],set=sd.set,spd0=speedOf(set),hw=laneHW(set),cc=sd.circle,base=side*POOL,end=base+POOL,paths=sd.paths,np=paths.length;
     const pn=[],pex=[],pey=[],pF=[],pL=[],pTx=[],pTy=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pn.push(0);pex.push(0);pey.push(0);pF.push(0);pL.push(1);pTx.push(0);pTy.push(1);continue;}const n=P.p.length>>1;pn.push(n);{const q=P.p,a=n>=4?n-4:0,ex=n>=2?q[(n-1)*2]-q[a*2]:0,ey=n>=2?q[(n-1)*2+1]-q[a*2+1]:1,dd=Math.hypot(ex,ey)||1;pTx.push(ex/dd);pTy.push(ey/dd);}pL.push(Math.max(1,(n-1)*PSP));pex.push(P.p[(n-1)*2]);pey.push(P.p[(n-1)*2+1]);pF.push(P.arm?fPos(P):1e9);}
     const hwEx=Math.min(cc.r*0.95,laneHalf(set,paths[0].lane,0)),compactK=1.2+0.9*set.compact,vk=vkOf(spd0),jit=(11-set.compact)*2.2*vk,conv=CFG.converge,rev=0.04*densOf(set),spc=(set.spacing-1)/9*0.25,spcOn=spc>0&&S.phase==='battle';
-    const pSpd=[],pHw=[],pRev=[],pSpc=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pSpd.push(0);pHw.push(1);pRev.push(0);pSpc.push(0);continue;}const ps=pset(sd,P);pSpd.push(speedOf(ps));pHw.push(laneHW(ps));{const th=clamp((5-ps.width)/4,0,1);pRev.push(0.006*densOf(ps)*(1+0.6*th));pSpc.push((ps.spacing-1)/9*0.25*(1-0.35*th));}}  // hybrid pack: half of 0.4.3's thin-lane squeeze so the hitbox still fills like 0.4.2
+    const pSpd=[],pHw=[],pRev=[],pSpc=[],pLH=[],pWob=[];for(let k=0;k<np;k++){const P=paths[k];if(!P){pSpd.push(0);pHw.push(1);pRev.push(0);pSpc.push(0);pLH.push(-1);pWob.push(0);continue;}const ps=pset(sd,P);pSpd.push(speedOf(ps));pHw.push(laneHW(ps));pLH.push((!LANE_SHAPES_ON||!P.lane)?laneHalf(ps,P.lane,0):-1);{const th0=clamp((5-ps.width)/4,0,1);pWob.push((0.90-(densOf(ps)-1)/9*0.56)*(1-0.55*th0));}   // 0.5 perf: per-path lane half-width + wander, once per tick (same numbers as the per-pixel calls)
+{const th=clamp((5-ps.width)/4,0,1);pRev.push(0.006*densOf(ps)*(1+0.6*th));pSpc.push((ps.spacing-1)/9*0.25*(1-0.35*th));}}  // hybrid pack: half of 0.4.3's thin-lane squeeze so the hitbox still fills like 0.4.2
     squadTick(sd,spd0,dt);
-    for(let i=base;i<end;i++){const st=pst[i];if(!st)continue;
+    for(let i=base;i<end;i++){const st=pst[i];if(!st)continue;paP=null;
       let pi=pid[i];if(!paths[pi]){pi=0;pid[i]=0;}const P=paths[pi],p=P.p,n=pn[pi];let spd=pSpd[pi]*pspm[i];
       if(mom){if(pmom[i]<255)pmom[i]++;spd*=1+0.3*Math.min(1,pmom[i]/180);}
       pox[i]=px[i];poy[i]=py[i];
@@ -1129,7 +1343,7 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
         if(best>=n-1&&pi===pid[i]){
           if(pi>0&&P.rj>=0){const dest=P.rjTo||0,T=paths[dest];if(T){if((ploop[i]|0)>=LOOP_CAP){pst[i]=3;pend[i]=0;vx=pTx[pi]*spd;vy=pTy[pi]*spd;}else{ploop[i]=(ploop[i]|0)+1;pid[i]=dest;reSize(i,sd,T);pps[i]=P.rj*PSP;pcap[i]=1;pathAt(T.p,pps[i],tmp);pvx[i]=tmp[2]*spd;pvy[i]=tmp[3]*spd;continue;}}}
           pst[i]=3;pend[i]=0;vx=pTx[pi]*spd;vy=pTy[pi]*spd;}   // keep the stream's width; head the path's final direction only (Jay t1154)
-        else{const ps=pset(sd,P),lw=laneHalf(pset(sd,P),P.lane,pps[i]/pL[pi]),th=clamp((5-ps.width)/4,0,1),wob=(0.90-(densOf(ps)-1)/9*0.56)*(1-0.55*th);freeFwd(i,p,pps[i],Math.max(1,lw-ZL.IN[psz[i]]),spd,stun,vx,vy,wob);vx=fv[0];vy=fv[1];}   // DENSITY: higher = tighter wander / more packed (spacing folded in). Thin hitbox: less wander so packing rises (t1132), still no pull to the line
+        else{const lw=pLH[pi]>=0?pLH[pi]:laneHalf(pset(sd,P),P.lane,pps[i]/pL[pi]),wob=pWob[pi];freeFwd(i,p,pps[i],Math.max(1,lw-ZL.IN[psz[i]]),spd,stun,vx,vy,wob);vx=fv[0];vy=fv[1];}   // DENSITY: higher = tighter wander / more packed (spacing folded in). Thin hitbox: less wander so packing rises (t1132), still no pull to the line
       }else if(cur===4||cur===5){ // AREA MEMBER: wanders freely inside its shape's soft hitbox (spring to its own wander spot); a hard knock can push it out (5), it re-enters or goes home past the leash
         const q=sd.sq[psq[i]];
         if(!q){pst[i]=3;psq[i]=-1;pend[i]=0;}
@@ -1154,7 +1368,7 @@ function movePixels(){const dt=STEP,L2=CFG.leash*CFG.leash,mom=CFG.momentum;
         if((dx*dx+dy*dy>lim*lim||pend[i]*spd>CFG.leash*RICO_LEASH_K)&&pfade[i]===0)pfade[i]=FADE_T();}
       }
       pvx[i]=vx;pvy[i]=vy;px[i]+=vx*dt;py[i]+=vy*dt;
-      if((pst[i]===1||pst[i]===2)&&n>=2&&pwc[i]===0){const lw=(pst[i]===1)?hwEx:laneHalf(pset(sd,P),P.lane,Math.min(1,pps[i]/pL[pi]));holdLane(i,p,pps[i],lw);}   // don't fight a wall bounce (pwc) by clamping back into the defense line
+      if((pst[i]===1||pst[i]===2)&&n>=2&&pwc[i]===0){const lw=(pst[i]===1)?hwEx:pLH[pi]>=0?pLH[pi]:laneHalf(pset(sd,P),P.lane,Math.min(1,pps[i]/pL[pi]));holdLane(i,p,pps[i],lw);}   // don't fight a wall bounce (pwc) by clamping back into the defense line
       if(!(px[i]>2&&px[i]<W-2&&py[i]>2&&py[i]<H-2)){recall(i);}
     }}}
 // ---------- VFX (visual only): destroyed pixels split into 1x1 bits that fade; ricocheting pixels glow and leave a fading trail. Fixed typed-array pool, own RNG, per-tick spawn budget, drops spawns when full.
@@ -1164,15 +1378,32 @@ const VFX={sparkBursts:0,bits:0,bounces:0,trails:0,dropped:0,on:1};
 const vr=()=>{vs^=vs<<13;vs^=vs>>>17;vs^=vs<<5;return((vs>>>0)%65536)/65536;};
 function vAdd(x,y,dx,dy,life,col,kind){if(vpN>=VPMAX){VFX.dropped++;return;}const k=vpN++;vX[k]=x;vY[k]=y;vVX[k]=dx;vVY[k]=dy;vLife[k]=life;vTot[k]=life;vCol[k]=col;vKind[k]=kind;}
 // a destroyed pixel: 4 bits fly apart and fade (1x1 device pixels)
-function sparkAt(i){if(!VFX.on||vBud<=0)return;vBud--;const cols=i<POOL?K_BITB:K_BITR;VFX.sparkBursts++;const a0=vr()*6.2832,nb=vBits;
+function sparkAt(i){if(VFX.on)fwBurst(px[i],py[i],i<POOL?0:1,0);if(!VFX.on||vBud<=0)return;vBud--;const cols=i<POOL?K_BITB:K_BITR;VFX.sparkBursts++;const a0=vr()*6.2832,nb=vBits;
   for(let k=0;k<nb;k++){const a=a0+k*(6.2832/nb)+(vr()-.5)*0.7,sp=9+vr()*16;vAdd(px[i],py[i],Math.cos(a)*sp,Math.sin(a)*sp,34+((vr()*26)|0),cols[k&1],0);VFX.bits++;}}
 // a ricochet: the pixel glows for ~0.5 s and drops fading trail bits where it has been, so the bounce shows as a visible V
-function bounceMark(i){if(!VFX.on)return;VFX.bounces++;if(pbnc[i]===0&&bN<BMAX)bList[bN++]=i;pbnc[i]=32;}
-function vfxStep(){const act=(S.sides[0].active+S.sides[1].active)||1,sc=clamp(800/Math.max(800,act),0.45,1);vBud=Math.max(8,Math.round(VBUD*sc));vBits=sc<0.7?2:4;
+function bounceMark(i){if(!VFX.on)return;VFX.bounces++;if(vr()<0.5)fwBurst(px[i],py[i],i<POOL?0:1,1);if(pbnc[i]===0&&bN<BMAX)bList[bN++]=i;pbnc[i]=32;}
+function vfxStep(){fwTickBudget();const act=(S.sides[0].active+S.sides[1].active)||1,sc=clamp(800/Math.max(800,act),0.45,1);vBud=Math.max(8,Math.round(VBUD*sc));vBits=sc<0.7?2:4;
   for(let k=0;k<bN;k++){const i=bList[k];if(pbnc[i]>0){pbnc[i]--;if(pst[i]&&(pbnc[i]&3)===0&&vpN<VPMAX-8){vAdd(px[i],py[i],0,0,26,(i<POOL?K_BITB:K_BITR)[1],1);VFX.trails++;}}
     if(pbnc[i]===0||!pst[i]){pbnc[i]=0;bList[k]=bList[--bN];k--;}}
   for(let k=0;k<vpN;k++){if(--vLife[k]===0){const l=--vpN;vX[k]=vX[l];vY[k]=vY[l];vVX[k]=vVX[l];vVY[k]=vVY[l];vLife[k]=vLife[l];vTot[k]=vTot[l];vCol[k]=vCol[l];vKind[k]=vKind[l];k--;continue;}
     vX[k]+=vVX[k]*STEP;vY[k]+=vVY[k]*STEP;if(vKind[k]===0){vVX[k]*=0.97;vVY[k]*=0.97;}}}
+// ---------- 0.5 (Jay t1217) FIREWORK SCORCH: a kill or a ricochet throws a small burst of sparks in that pixel's team colours; where the sparks burn out they leave
+// soot marks baked into a field-sized scorch buffer that slowly fades. Fixed typed-array pools, a per-tick burst budget that shrinks as the field fills, own RNG. Pixels are drawn on top, unchanged.
+const SPMAX=760,spX=new Float32Array(SPMAX),spY=new Float32Array(SPMAX),spVX=new Float32Array(SPMAX),spVY=new Float32Array(SPMAX),spL=new Float32Array(SPMAX),spT=new Float32Array(SPMAX),spC=new Uint8Array(SPMAX),spF=new Uint8Array(SPMAX);   // spF 1 = contact flash (no motion, white-hot, 2x size)
+const STMAX=900,stX=new Float32Array(STMAX),stY=new Float32Array(STMAX),stR=new Float32Array(STMAX),stC=new Uint8Array(STMAX),stA=new Uint8Array(STMAX);
+let spN=0,stN=0,fwBud=3,scorchLive=0;const FW={bursts:0,dropped:0,stamps:0,on:1,pops:0};
+function fwTickBudget(){if(!S)return;const act=S.sides[0].active+S.sides[1].active;fwBud=act>3500?2:act>2500?3:5;}   // t1223: more bursts get through (was 3/2/1), the spark cap still holds
+function fwStamp(x,y,r,c,a){if(stN>=STMAX)return;const k=stN++;stX[k]=x;stY[k]=y;stR[k]=r;stC[k]=c;stA[k]=a;FW.stamps++;}
+function fwBurst(x,y,side,kind,big){if(!FW.on)return;if(!big){if(fwBud<=0){FW.dropped++;return;}fwBud--;}const n=big?22:kind?7:(S&&S.sides[0].active+S.sides[1].active>3500?5:11);if(spN+n+1>SPMAX){FW.dropped++;return;}FW.bursts++;
+  const a0=vr()*6.2832,sp0=big?84:kind?46:60;for(let k=0;k<n;k++){const a=a0+k*6.2832/n+(vr()-.5)*0.6,v=sp0*(0.55+vr()*0.8),q=spN++;spX[q]=x;spY[q]=y;spVX[q]=Math.cos(a)*v;spVY[q]=Math.sin(a)*v;spT[q]=spL[q]=(big?0.9:0.48)+vr()*0.35;spC[q]=side*3+((vr()*3)|0);spF[q]=0;}
+  {const q=spN++;spX[q]=x;spY[q]=y;spVX[q]=0;spVY[q]=0;spT[q]=spL[q]=big?0.22:0.13;spC[q]=side*3+2;spF[q]=1;}
+  fwStamp(x,y,big?6:kind?3.0:3.8,side*2,big?240:kind?190:220);sfxPop(big?2:kind);}
+function fwStep(dt){const dr=Math.pow(0.04,dt);for(let k=0;k<spN;k++){spL[k]-=dt;if(spL[k]<=0){if(!spF[k]&&vr()<0.7)fwStamp(spX[k],spY[k],1.3,(spC[k]>=3?2:0)+(vr()<0.3?1:0),140);const l=--spN;spX[k]=spX[l];spY[k]=spY[l];spVX[k]=spVX[l];spVY[k]=spVY[l];spL[k]=spL[l];spT[k]=spT[l];spC[k]=spC[l];spF[k]=spF[l];k--;continue;}
+  spX[k]+=spVX[k]*dt;spY[k]+=spVY[k]*dt;spVX[k]*=dr;spVY[k]*=dr;}}
+// small sound pops for the bursts (WebAudio, made on the first touch; at most ~12 a second; SOUND in the menu turns them off)
+let ACX=null,popT=0;function sfxPop(kind){if(!ACX||!prefs.sfx||document.hidden)return;const t=ACX.currentTime;if(t-popT<0.085)return;popT=t;FW.pops++;try{const o=ACX.createOscillator(),g=ACX.createGain();o.type=kind===2?'triangle':'square';const f0=kind===2?220:kind?1300+vr()*500:700+vr()*400;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*0.45,t+0.06);
+  g.gain.setValueAtTime(kind===2?0.07:0.022,t);g.gain.exponentialRampToValueAtTime(0.0005,t+(kind===2?0.35:0.06));o.connect(g);g.connect(ACX.destination);o.start(t);o.stop(t+(kind===2?0.36:0.07));}catch(e){}}
+window.addEventListener('pointerdown',()=>{if(ACX||!prefs.sfx)return;try{const A=window.AudioContext||window.webkitAudioContext;if(A)ACX=new A();}catch(e){ACX=null;}},true);
 // ---------- COLLISION
 // Pixel-vs-pixel ricochet spray (Jay t1148): one random chance already decided the bounce. Heading is random in the outward hemisphere; speed is random inside the short range — unpatterned, not a mirrored bounce at a fixed fraction of speed.
 function ricoSpray(i,nx,ny){const sp0=Math.hypot(pvx[i],pvy[i])||1,sp=sp0*RICO_SPD*(0.45+rnd()*0.7),a=Math.atan2(ny,nx)+(rnd()-0.5)*Math.PI;
@@ -1266,7 +1497,7 @@ function tick(){
   const ms=performance.now()-t0;stat.ticks++;stat.ms+=ms;if(ms>stat.maxMs)stat.maxMs=ms;
 }
 // ---------- RENDER (Swarm-style: DPR-native canvas, imageSmoothing off, integer-snapped, no blur)
-const canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),stage=document.getElementById('stage');
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d',{alpha:false}),stage=document.getElementById('stage');
 let DPR=1,CW=0,CH=0,LX=0,LY=0,LS=1;
 function layout(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return false;
   DPR=Math.min(3,window.devicePixelRatio||1);
@@ -1303,16 +1534,70 @@ function laneLayer(){let key=S.phase+'|'+ME+'|'+(CFG.reveal?1:0)+'|'+(CFG.duel?1
 // the white field + soft lane bands are baked into ONE opaque field-sized canvas, rebuilt only when the bands, the size or the halo setting change (a per-frame alpha blit of the band layer cost ~20 fps on the A03s)
 function bgLayer(fw,fh){const LL=CFG.halo?laneLayer():null;if(BGC&&BGC.width===fw&&BGC.height===fh&&BGSRC===LL&&BGC._h===!!CFG.halo)return BGC;
   if(!BGC||BGC.width!==fw||BGC.height!==fh){BGC=document.createElement('canvas');BGC.width=fw;BGC.height=fh;}
-  const x=BGC.getContext('2d');x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.fillStyle='#fff';x.fillRect(0,0,fw,fh);if(LL){x.imageSmoothingEnabled=false;x.globalAlpha=0.5;x.drawImage(LL,0,0,fw,fh);x.globalAlpha=1;}
+  const x=BGC.getContext('2d');x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;drawBackdrop(x,fw,fh);if(LL){x.imageSmoothingEnabled=false;x.globalAlpha=0.5;x.drawImage(LL,0,0,fw,fh);x.globalAlpha=1;}
   BGSRC=LL;BGC._h=!!CFG.halo;return BGC;}
 function showSide(sd){return sd.id===ME||CFG.duel===1||(S.phase!=='prep'?!!CFG.reveal:!CFG.duel);}
 const foePrep=sd=>sd.id!==ME&&S.phase==='prep'&&S.aiRev<1;
 let SZD=null,SZDk='';function szdOf(sc){const k=sc+':'+ZL.v;if(k!==SZDk){SZDk=k;SZD=new Uint8Array(101);for(let q=0;q<=100;q++)SZD[q]=Math.max(1,Math.round(Math.round(ZL.PX[q])*sc/2));}return SZD;}   // dot side per size tenth (cached; 2x2 device px at size 5)
+// ---------- 0.5 LOOK (Jay t1216/t1217/t1218). The pixels are drawn exactly as in 0.4.15; everything here is around them.
+let SC32=null,scRow=0,dN=0;const DMAX=NP+SPMAX*3+VPMAX+64,DO=new Int32Array(DMAX),DZ=new Uint8Array(DMAX);const FXS={shake:0,flash:0,pulse:[0,0],last:[-1,-1],fin:-1,finW:-1,t0:0,dt:1/60};
+const TEAM=[[18,181,214],[224,38,28]];
+// sparks: 3 shades per team (blue: deep, cyan, white-hot / red: red, orange, warm white); soot: 2 per team (dark tint, ember)
+const SPK=[rgba('#2f9bff'),rgba('#8ff0ff'),rgba('#f4fdff'),rgba('#ff6a1a'),rgba('#ffc23d'),rgba('#fff3c4')].map(c=>c&0xffffff);
+const SOOT=[[10,18,46],[22,44,110],[46,12,6],[120,40,10]];   // t1223: darker burn cores; ember specks
+function fxFrame(){const n=performance.now(),dt=FXS.t0?clamp((n-FXS.t0)/1000,0,0.05):1/60;FXS.t0=n;FXS.dt=dt;if(!(window.__tt&&window.__tt.manual)&&!S.paused)fwStep(dt);else if(window.__tt&&window.__tt.manual)fwStep(1/60);}
+function fxHits(){for(const sd of S.sides){const h=sd.circle.hp,l=FXS.last[sd.id];if(l>=0&&h<l){FXS.pulse[sd.id]=1;if(sd.id===ME&&!S.over){FXS.shake=Math.min(1,FXS.shake+0.35);FXS.flash=Math.min(1,FXS.flash+0.5);}}FXS.last[sd.id]=h;
+    FXS.pulse[sd.id]*=0.88;}FXS.shake*=0.84;FXS.flash*=0.9;if(S.phase==='prep'){FXS.shake=0;FXS.flash=0;}}
+function scorchBake(sc,fw,fh){if(!SC32)return;
+  for(let k=0;k<stN;k++){const cx=(stX[k]*sc)|0,cy=(stY[k]*sc)|0,r=Math.max(1,Math.round(stR[k]*sc*0.95)),C=SOOT[stC[k]],A=stA[k];
+    for(let yy=-r;yy<=r;yy++){const y=cy+yy;if(y<0||y>=fh)continue;for(let xx=-r;xx<=r;xx++){const x=cx+xx;if(x<0||x>=fw)continue;const d=(xx*xx+yy*yy)/((r+0.5)*(r+0.5));if(d>1)continue;
+      const a1=(A*(1-d*d*0.55))|0,o=y*fw+x,v0=SC32[o],a0=v0>>>24;let a,cc=C;if(a1>a0)a=a1;else{a=Math.min(250,a0+(a1>>3));if(a===a0)continue;if(v0!==0)cc=null;}
+      SC32[o]=P32[o]=cc?((a<<24)|(cc[2]<<16)|(cc[1]<<8)|cc[0])>>>0:(((a<<24)|(v0&0xffffff))>>>0);}}}
+  if(stN)scorchLive=600;stN=0;
+  if(scorchLive>0){scorchLive--;const rows=Math.max(1,Math.ceil(fh/72)),y0=scRow,y1=Math.min(fh,y0+rows);let any=false;
+    for(let o=y0*fw,e=y1*fw;o<e;o++){const v=SC32[o];if(v===0)continue;const a=v>>>24,na=(a*31)>>5;P32[o]=SC32[o]=na<8?0:(((na<<24)|(v&0xffffff))>>>0);any=true;}
+    scRow=y1>=fh?0:y1;if(any&&scorchLive<80)scorchLive=80;}}
+function sparksDraw(sc,fw,fh){for(let k=0;k<spN;k++){const t=spL[k]/spT[k],x=(spX[k]*sc)|0,y=(spY[k]*sc)|0;if(x<3||y<3||x>fw-7||y>fh-7)continue;const c=SPK[spC[k]];
+  if(spF[k]){const a=Math.min(255,(90+200*t)|0),o0=(y-3)*fw+x-3;for(let yy=0,o=o0;yy<6;yy++,o+=fw)for(let xx=0;xx<6;xx++){const e=(xx===0||xx===5)+(yy===0||yy===5);if(e===2)continue;P32[o+xx]=(((e?a>>1:a)<<24)|SPK[spC[k]])>>>0;}if(dN<DMAX){DO[dN]=o0;DZ[dN++]=6;}continue;}
+  const a=Math.min(255,(110+260*t)|0),z=t>0.5?4:3,o0=(y-(z>>1))*fw+x-(z>>1),cv=((a<<24)|c)>>>0;for(let yy=0,o=o0;yy<z;yy++,o+=fw)for(let xx=0;xx<z;xx++)P32[o+xx]=cv;if(dN<DMAX){DO[dN]=o0;DZ[dN++]=z;}
+  const tc=SPK[spC[k]-(spC[k]%3)+1];for(let j=1;j<=2;j++){const tx=((spX[k]-spVX[k]*0.022*j)*sc)|0,ty=((spY[k]-spVY[k]*0.022*j)*sc)|0;if(tx>0&&ty>0&&tx<fw-1&&ty<fh-1){const o2=ty*fw+tx;if(o2!==o0){const ta=(a*(j===1?0.6:0.32))|0;if((P32[o2]>>>24)<ta){P32[o2]=((ta<<24)|tc)>>>0;if(dN<DMAX){DO[dN]=o2;DZ[dN++]=1;}}}}}}}
+const GLOW={};function glowSpr(side,R){const key=side+':'+Math.round(R);if(GLOW[key])return GLOW[key];const s2=Math.ceil(R*4),c=document.createElement('canvas');c.width=c.height=s2;const x=c.getContext('2d'),T=TEAM[side],g=x.createRadialGradient(s2/2,s2/2,R*0.7,s2/2,s2/2,s2/2);
+  g.addColorStop(0,'rgba('+T+',0.42)');g.addColorStop(0.45,'rgba('+T+',0.14)');g.addColorStop(1,'rgba('+T+',0)');x.fillStyle=g;x.fillRect(0,0,s2,s2);return GLOW[key]=c;}
+// a fixed crack pattern per side (same every match); more cracks open as HP falls
+const CRK=[0,1].map(side=>{let q=side?0x51ed270b:0x2545f491;const r=()=>{q^=q<<13;q^=q>>>17;q^=q<<5;return((q>>>0)%10000)/10000;};const L=[];for(let k=0;k<10;k++){const a=k*0.6283+(r()-.5)*0.5,pts=[[a,1.08]];let aa=a,rr=1.08;for(let j=0;j<3;j++){aa+=(r()-.5)*0.45;rr-=0.16+r()*0.12;pts.push([aa,rr]);}L.push(pts);}
+  const ord=[0,5,2,7,4,9,1,6,3,8];return ord.map(i=>L[i]);});
+function drawCircle05(sd,cx,cy,sc){const c=sd.circle,T=TEAM[sd.id],f=clamp(c.hp/poolN(),0,1),pu=FXS.pulse[sd.id]||0,R=c.r*sc,tt=performance.now()/1000,br=0.5+0.5*Math.sin(tt*2.4+sd.id*1.7);
+  const gs=glowSpr(sd.id,R);ctx.globalAlpha=clamp(0.55+0.3*br*f+0.6*pu,0,1);ctx.drawImage(gs,cx-gs.width/2,cy-gs.height/2);ctx.globalAlpha=1;
+  ctx.fillStyle='#12152e';ctx.beginPath();ctx.arc(cx,cy,R,0,6.2832);ctx.fill();
+  const cr=R*(0.5+0.12*f+0.03*br)+pu*R*0.1,g=ctx.createRadialGradient(cx-cr*0.25,cy-cr*0.25,cr*0.05,cx,cy,cr);g.addColorStop(0,'#ffffff');g.addColorStop(0.35,'rgba('+T+',1)');g.addColorStop(1,'rgba('+T.map(v=>v*0.35|0)+',0.9)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,cr,0,6.2832);ctx.fill();
+  const rr=(c.r-2.5)*sc;ctx.lineCap='butt';ctx.lineWidth=Math.max(2,5*sc);ctx.strokeStyle='rgba('+T+',0.22)';ctx.beginPath();ctx.arc(cx,cy,rr,0,6.2832);ctx.stroke();
+  if(f>0){ctx.strokeStyle='rgb('+T+')';ctx.beginPath();ctx.arc(cx,cy,rr,-Math.PI/2,-Math.PI/2+6.2832*f);ctx.stroke();ctx.lineWidth=Math.max(1,1.2*sc);ctx.strokeStyle='rgba(255,255,255,0.55)';ctx.beginPath();ctx.arc(cx,cy,rr-1.6*sc,-Math.PI/2,-Math.PI/2+6.2832*f);ctx.stroke();}
+  const nC=Math.min(10,Math.floor((1-f)*11));if(nC>0){ctx.lineJoin='miter';for(let k=0;k<nC;k++){const P=CRK[sd.id][k];ctx.beginPath();for(let j=0;j<P.length;j++){const a=P[j][0],d=P[j][1]*R;if(j)ctx.lineTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);else ctx.moveTo(cx+Math.cos(a)*d,cy+Math.sin(a)*d);}
+      ctx.strokeStyle='#05060f';ctx.lineWidth=Math.max(1.2,1.5*sc);ctx.stroke();if(f<0.35){ctx.strokeStyle='rgba(255,'+(170+60*br|0)+',90,'+(0.5+0.4*br)+')';ctx.lineWidth=Math.max(0.6,0.6*sc);ctx.stroke();}}}
+  if(pu>0.04){ctx.strokeStyle='rgba(255,255,255,'+(0.75*pu)+')';ctx.lineWidth=Math.max(1.5,2.2*sc);ctx.beginPath();ctx.arc(cx,cy,R+(1-pu)*7*sc,0,6.2832);ctx.stroke();}}
+function drawBackdrop(x,fw,fh){const sc=fw/W;x.fillStyle='#f3f5fb';x.fillRect(0,0,fw,fh);
+  let g=x.createLinearGradient(0,0,0,fh);g.addColorStop(0,'rgba(224,38,28,0.085)');g.addColorStop(0.42,'rgba(224,38,28,0)');g.addColorStop(0.58,'rgba(18,140,214,0)');g.addColorStop(1,'rgba(18,140,214,0.09)');x.fillStyle=g;x.fillRect(0,0,fw,fh);
+  x.lineWidth=1;for(let u=20;u<W;u+=20){x.strokeStyle=u%60?'rgba(40,50,110,0.045)':'rgba(40,50,110,0.085)';const px0=Math.round(u*sc)+0.5;x.beginPath();x.moveTo(px0,0);x.lineTo(px0,fh);x.stroke();}
+  for(let v=20;v<H;v+=20){x.strokeStyle=v%60?'rgba(40,50,110,0.045)':'rgba(40,50,110,0.085)';const py0=Math.round(v*sc)+0.5;x.beginPath();x.moveTo(0,py0);x.lineTo(fw,py0);x.stroke();}
+  x.strokeStyle='rgba(40,50,110,0.2)';x.lineWidth=Math.max(1,1.4*sc);x.setLineDash([6*sc,5*sc]);x.beginPath();x.moveTo(0,fh/2);x.lineTo(fw,fh/2);x.stroke();x.setLineDash([]);
+  x.strokeStyle='rgba(40,50,110,0.13)';x.beginPath();x.arc(fw/2,fh/2,26*sc,0,6.2832);x.stroke();
+  g=x.createRadialGradient(fw/2,fh/2,Math.min(fw,fh)*0.35,fw/2,fh/2,Math.hypot(fw,fh)*0.6);g.addColorStop(0,'rgba(20,24,60,0)');g.addColorStop(1,'rgba(20,24,60,0.16)');x.fillStyle=g;x.fillRect(0,0,fw,fh);
+  x.strokeStyle='rgba(44,50,112,0.55)';x.lineWidth=Math.max(1,1.5*sc);x.strokeRect(0.5,0.5,fw-1,fh-1);}
+// my circle took a hit: a short red flash on the field edges (thin strips, cheap) to go with the screen nudge
+function drawEdgeFlash(fx,fy,fw,fh,sc){const a=FXS.flash;if(a<0.04)return;const t=Math.round(16*sc);const mk=(x0,y0,x1,y1)=>{const g=ctx.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,'rgba(255,40,30,'+(0.45*a)+')');g.addColorStop(1,'rgba(255,40,30,0)');return g;};
+  ctx.fillStyle=mk(0,fy+fh,0,fy+fh-t);ctx.fillRect(fx,fy+fh-t,fw,t);ctx.fillStyle=mk(fx,0,fx+t,0);ctx.fillRect(fx,fy,t,fh);ctx.fillStyle=mk(fx+fw,0,fx+fw-t,0);ctx.fillRect(fx+fw-t,fy,t,fh);ctx.fillStyle=mk(0,fy,0,fy+t);ctx.fillRect(fx,fy,fw,t);}
+// match end: fireworks over the losing circle in the winner's colours, then a VICTORY / DEFEAT banner (the result panel below is unchanged)
+function drawFinale(fx,fy,fw,fh,sc){if(!S.over){FXS.fin=-1;return;}if(FXS.fin<0){FXS.fin=0;FXS.finW=S.winner;}const t=FXS.fin++,w=FXS.finW,lo=w===0||w===1?S.sides[1-w].circle:null;
+  if(lo&&t<110&&t%9===0){const a=t*0.9;fwBurst(lo.x+Math.cos(a)*14,lo.y+Math.sin(a)*14,w,0,true);if(t%18===0)fwBurst(lo.x,lo.y,1-w,0,true);}
+  if(t>=12&&t<230){const a=clamp((t-12)/18,0,1)*clamp((230-t)/40,0,1),sb=sbx(),txt=w===ME?(sb?(w?'RED WINS':'BLUE WINS'):'VICTORY'):w===1-ME?(sb?(w?'RED WINS':'BLUE WINS'):'DEFEAT'):'DRAW',col=w===0?'18,181,214':w===1?'224,38,28':'200,200,220',fs=Math.round(46*sc*(0.9+0.1*clamp((t-12)/14,0,1)));
+    ctx.save();ctx.globalAlpha=a;ctx.font='900 '+fs+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=Math.max(3,6*sc);ctx.strokeStyle='rgba(11,13,28,0.85)';ctx.strokeText(txt,fx+fw/2,fy+fh/2);ctx.fillStyle='rgb('+col+')';ctx.fillText(txt,fx+fw/2,fy+fh/2);
+    ctx.font='700 '+Math.round(13*sc)+'px system-ui,sans-serif';ctx.lineWidth=Math.max(2,3*sc);const sub=fmtT(S.tick)+'  ·  pools '+Math.max(0,S.sides[0].pool)+' / '+Math.max(0,S.sides[1].pool);ctx.strokeText(sub,fx+fw/2,fy+fh/2+fs*0.75);ctx.fillStyle='#f4f6ff';ctx.fillText(sub,fx+fw/2,fy+fh/2+fs*0.75);ctx.restore();}}
 function draw(){
   if(!layout())return;
-  const sc=LS*DPR,fx=Math.round(LX*DPR),fy=Math.round(LY*DPR),fw=Math.round(W*sc),fh=Math.round(H*sc);
+  fxHits();const shk=FXS.shake>0.05?FXS.shake:0;const sc=LS*DPR,fx=Math.round(LX*DPR+(shk?(Math.random()-.5)*5*shk:0)),fy=Math.round(LY*DPR+(shk?(Math.random()-.5)*5*shk:0)),fw=Math.round(W*sc),fh=Math.round(H*sc);
   ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=false;
-  ctx.fillStyle='#0b0d1c';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#0b0d1c';{const cw=canvas.width,chh=canvas.height;if(fy>0)ctx.fillRect(0,0,cw,fy);if(fy+fh<chh)ctx.fillRect(0,fy+fh,cw,chh-fy-fh);if(fx>0)ctx.fillRect(0,fy,fx,fh);if(fx+fw<cw)ctx.fillRect(fx+fw,fy,cw-fx-fw,fh);}   // 0.5 perf: only the margins (the opaque field image covers the rest)
   ctx.drawImage(bgLayer(fw,fh),fx,fy);
   const X=x=>fx+x*sc,Y=y=>fy+y*sc;
   if(S.phase==='prep'){ // placement strips
@@ -1343,22 +1628,23 @@ function draw(){
     const fl=S.connFlash;if(fl&&fl.t>0){const a=Math.min(1,fl.t/14);ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=fl.col||'#f4f6ff';ctx.lineWidth=Math.max(1.5,2.2*sc);ctx.beginPath();ctx.arc(X(fl.x),Y(fl.y),(8+(42-fl.t)*0.12)*sc,0,6.2832);ctx.stroke();ctx.fillStyle='#f4f6ff';ctx.font='700 '+Math.max(10,12*sc)+'px system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('CONNECTED',X(fl.x),Y(fl.y)-10*sc);ctx.restore();}
   if(S.phase==='prep'&&(S.tool==='main'||S.tool==='branch')){const sd=S.sides[ME],P=S.tool==='main'?sd.paths[0]:(sd.paths[selP]||sd.paths[0]),p=P.p;ctx.strokeStyle=P.id?brCol(P.id):'#161616';ctx.lineWidth=Math.max(1,1.2*sc);ctx.beginPath();ctx.arc(X(p[p.length-2]),Y(p[p.length-1]),6*sc,0,6.2832);ctx.stroke();}
   // circles (ring + hp arc)
-  for(const sd of S.sides){const c=sd.circle,col=sd.id===0?'#12b5d6':'#e0261c',f=clamp(c.hp/poolN(),0,1);
-    ctx.lineWidth=Math.max(2,5*sc);ctx.lineCap='butt';ctx.strokeStyle='#d6d9e6';ctx.beginPath();ctx.arc(X(c.x),Y(c.y),(c.r-2.5)*sc,0,6.2832);ctx.stroke();
-    if(f>0){ctx.strokeStyle=col;ctx.beginPath();ctx.arc(X(c.x),Y(c.y),(c.r-2.5)*sc,-Math.PI/2,-Math.PI/2+6.2832*f);ctx.stroke();}}
+  for(const sd of S.sides)drawCircle05(sd,X(sd.circle.x),Y(sd.circle.y),sc);
   // pixels: written straight into a field-sized Uint32 ImageData (2x2 device px dots), one putImageData + 1:1 drawImage per frame
-  const anyPx=S.sides[0].active+S.sides[1].active+vpN>0;
+  fxFrame();const anyPx=S.sides[0].active+S.sides[1].active+vpN+spN+stN>0||scorchLive>0;
   if(anyPx||PLdirty||!PL||PL.width!==fw||PL.height!==fh){PLdirty=anyPx;
-    if(!PL||PL.width!==fw||PL.height!==fh){PL=document.createElement('canvas');PL.width=fw;PL.height=fh;PLc=PL.getContext('2d');PI=PLc.createImageData(fw,fh);P32=new Uint32Array(PI.data.buffer);}
-    else P32.fill(0);
+    if(!PL||PL.width!==fw||PL.height!==fh){PL=document.createElement('canvas');PL.width=fw;PL.height=fh;PLc=PL.getContext('2d');PI=PLc.createImageData(fw,fh);P32=new Uint32Array(PI.data.buffer);SC32=new Uint32Array(fw*fh);scRow=0;dN=0;}
+    else{for(let k=0;k<dN;k++){const o0=DO[k],z=DZ[k];if(z===1)P32[o0]=SC32[o0];else for(let yy=0,o=o0;yy<z;yy++,o+=fw)for(let xx=0;xx<z;xx++)P32[o+xx]=SC32[o+xx];}}dN=0;   // 0.5 perf: put back only what last frame drew (scorch under it, or clear) instead of clearing the whole 2.9 MB layer
+    scorchBake(sc,fw,fh);
     const hh=CFG.pixHP*0.25,szd=szdOf(sc);   // 0.4.12: dot side per size (2x2 device px at size 5, like 0.4.11)
-    for(let k=0;k<vpN;k++){const x=(vX[k]*sc)|0,y=(vY[k]*sc)|0;if(x<0||y<0||x>fw-2||y>fh-2)continue;const a=vKind[k]===0?Math.min(255,Math.round(255*vLife[k]/vTot[k]*1.25)):Math.round(200*vLife[k]/vTot[k]);P32[y*fw+x]=((a<<24)|(vCol[k]&0xffffff))>>>0;}
+    for(let k=0;k<vpN;k++){const x=(vX[k]*sc)|0,y=(vY[k]*sc)|0;if(x<0||y<0||x>fw-2||y>fh-2)continue;const a=vKind[k]===0?Math.min(255,Math.round(255*vLife[k]/vTot[k]*1.25)):Math.round(200*vLife[k]/vTot[k]);const o1=y*fw+x;P32[o1]=((a<<24)|(vCol[k]&0xffffff))>>>0;if(dN<DMAX){DO[dN]=o1;DZ[dN++]=1;}}
     for(let sidx=0;sidx<2;sidx++){const cols=sidx===0?K_BLUE:K_RED,b=sidx*CAPMAX,e=b+CAPMAX;
       for(let i=b;i<e;i++){if(!pst[i])continue;const col=pbnc[i]>0?K_BNC:(CFG.tint&&pst[i]>=4)?(sidx?K_SQR:K_SQB):cols[php[i]>hh*ZL.HP[psz[i]]?0:1],big=false,dz=szd[psz[i]],ho=dz>>1,x=((pox[i]+(px[i]-pox[i])*RA)*sc-ho)|0,y=((poy[i]+(py[i]-poy[i])*RA)*sc-ho)|0,cf=pfade[i]>0?(((40+215*pfade[i]/FADE_T())<<24)|(col&0xffffff))>>>0:col;
-        if(x<0||y<0||x>fw-1-dz||y>fh-1-dz)continue;let o=y*fw+x;if(dz===2){P32[o]=cf;P32[o+1]=cf;o+=fw;P32[o]=cf;P32[o+1]=cf;}else for(let yy=0;yy<dz;yy++,o+=fw)for(let xx=0;xx<dz;xx++)P32[o+xx]=cf;
+        if(x<0||y<0||x>fw-1-dz||y>fh-1-dz)continue;let o=y*fw+x;if(dN<DMAX){DO[dN]=o;DZ[dN++]=dz;}if(dz===2){P32[o]=cf;P32[o+1]=cf;o+=fw;P32[o]=cf;P32[o+1]=cf;}else for(let yy=0;yy<dz;yy++,o+=fw)for(let xx=0;xx<dz;xx++)P32[o+xx]=cf;
         if(big){P32[o+2]=col;P32[o+fw]=col;P32[o+fw+1]=col;P32[o+fw+2]=col;P32[o-fw+2]=col;}}}
+    sparksDraw(sc,fw,fh);   // t1223: sparks over the stream so the bursts read in a dense fight
     PLc.putImageData(PI,0,0);}
   ctx.drawImage(PL,fx,fy);
+  drawEdgeFlash(fx,fy,fw,fh,sc);drawFinale(fx,fy,fw,fh,sc);
   hud();
 }
 // ---------- VIEWS / HUD
@@ -1371,7 +1657,8 @@ function setC(id,on){const k='c'+id;if(hudCache[k]!==on){hudCache[k]=on;$(id).cl
 function fmtT(t){const s=Math.floor(t/60);return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
 const SHN=['LINE','ARROW','WEDGE','RING','DIAM','DOUBLE','SPIRAL'];
 let curTab='D',lastPhase='prep',view='app',chipKey='';
-function aiMemLabel(){setT('mAiMem',aiDelArm?'TAP AGAIN TO DELETE AI MEMORY':'DELETE AI MEMORY ('+AIMEM.matches+(AIMEM.matches===1?' match':' matches')+')');$('mAiMem').style.color=aiDelArm?'#ff8a7a':'';}
+function pixMemText(){const kz=(AIMEM.merged&&AIMEM.merged.keys)||[],old=kz.filter(k=>k!==KEYAI).length;return 'PIXIE MEMORY: '+AIMEM.matches+(AIMEM.matches===1?' match':' matches')+' learned, '+AIMEM.losses+' of your wins absorbed'+(old?' ('+old+' older save'+(old===1?'':'s')+' merged)':'')+(AIMEM.beat&&AIMEM.beat.n?'. Studying how you beat her.':'.');}
+function aiMemLabel(){setT('mPix',memMsg||pixMemText());if(typeof sfxLabel==='function')sfxLabel();setT('mAiMem',aiDelArm?'TAP AGAIN TO DELETE AI MEMORY':'DELETE AI MEMORY ('+AIMEM.matches+(AIMEM.matches===1?' match':' matches')+')');$('mAiMem').style.color=aiDelArm?'#ff8a7a':'';}
 let aiDelArm=0,aiDelTm=0;
 function showView(v){view=v;if(v==='menu'){aiMemLabel();setT('mDiff','DIFFICULTY: '+DIFFN[prefs.diff]);$('mForms').style.display=(CUS.shapesOn&&!SHAPES_OFF)?'block':'none';}for(const id of['menu','custom','help','stages','editor'])$(id).style.display=id===v?'flex':'none';$('app').style.display=v==='app'?'flex':'none';if(v!=='app'&&S&&S.phase==='battle')S.paused=true;CW=0;}
 const HELP=[
@@ -1380,11 +1667,13 @@ const HELP=[
 'PREP, STEP 2: draw a DEFENSE LINE of walls across your side. You need both before START lights up. Leave a gap if you want your own pixels to get through. You can place more than one piece for a gap. If you MOVE CIRCLE in prep, the defense line is cleared and the wall meter is refunded so you can redraw it. Once START is pressed the line is locked: ERASE ignores it, you cannot draw over it, and you cannot redraw it. Walls can go all the way to the screen edge.',
 'The match is slow on purpose. Pixels flow like a river, so there is time to think and change things.',
 'IN THE MATCH you can add BRANCHES. Press BRANCH, then drag out from your main path. Every branch has its own color and its own meter. ERASE is free for branches, so try and redraw those as often as you like. Every branch has enough meter to wrap around a wall end. If you draw a branch back into your main path — anywhere inside the lane, not just on the black line, including back upstream for a loop — the two CONNECT (a short flash says so). Pixels at the end rejoin and keep going, so you can detour or loop without losing that flow. A loop will not recirculate forever. A small marker shows the junction. The defense line cannot be built or rebuilt once the match starts — the button is gone, and the AI follows the same rule.',
-'TAP any path (the main path or a branch) and its SLIDERS open. Each path keeps its own settings: PACE (how fast), DENSITY (pixel size, 1 tiny to 10 huge. Big pixels win straight head-on fights: they are tougher, hit harder and hit the circle harder, but fewer come out for the same FLOW and fewer fit across a lane. Small pixels lose head-on, but more of them come out and they cover the lane, so they win by flanking, branches and coverage), LANE WIDTH (1 thin, 10 = the circle diameter; the stream fills that hitbox; this slider is the only lane control. A branch follows the main path width until you give that branch its own width) and FLOW (how many are on the field at once, 200 to 1000, a steady stream; every branch has its own). On a branch, SHARE is how many main-path pixels peel onto it; AUTO SHARE splits that for you. Every slider moves in fine steps (0.1, FLOW 5): drag it smoothly, tap the track to jump there, or use the big - and + buttons for one fine step; hold - or + to keep going (it speeds up). A vertical swipe on the slider panel scrolls it and will not move a slider; only a sideways drag or a tap on the track changes the value.',
+'TAP any path (the main path or a branch) and its SLIDERS open. Each path keeps its own settings: PACE (how fast), DENSITY (pixel size: 5 notches, 1 tiny, 3 small, 5 medium, 7.5 big, 10 huge; tap or drag to a notch. Big pixels win straight head-on fights: they are tougher, hit harder and hit the circle harder, but fewer come out for the same FLOW and fewer fit across a lane. Small pixels lose head-on, but more of them come out and they cover the lane, so they win by flanking, branches and coverage), LANE WIDTH (1 thin, 10 = the circle diameter; the stream fills that hitbox; this slider is the only lane control. A branch follows the main path width until you give that branch its own width) and FLOW (how many are on the field at once, 200 to 1000, a steady stream; every branch has its own). On a branch, SHARE is how many main-path pixels peel onto it; AUTO SHARE splits that for you. Every slider moves in fine steps (0.1, FLOW 5): drag it smoothly, tap the track to jump there, or use the big - and + buttons for one fine step; hold - or + to keep going (it speeds up). A vertical swipe on the slider panel scrolls it and will not move a slider; only a sideways drag or a tap on the track changes the value.',
 'When pixels from both sides touch, they bounce or get destroyed. A destroyed pixel breaks into tiny bits that fade away. A bounced pixel keeps flying straight and does not turn back.',
 'Past the end of a path or a branch, pixels keep going in that last direction as one loose, wide group — they do not fan out, taper to a point, or loop back — then fade. While they fade they can still hit things, a little less each moment.',
 'The AI always plays at full smart (there is no difficulty picker). Its goal: wipe out your circle and keep its own alive. It aims its main path at your circle and finishes from the side instead of head-on into your stream, routes through the weakest part of your defense or around an end, and when one of your streams heads for its circle it blocks it: a guard branch meets your lane head-on, at least as wide as your lane plus the edges, so your outer pixels do not slip past. It keeps a branch spare for that, cuts flow on a losing clash and reroutes, surges when your flow is split, and remembers your habits (when and where you branch, your width, pixel size, flow and pace) from match to match to counter them. It picks pixel sizes by job: big for a punch branch, small for a guard that has to cover your lane. DELETE AI MEMORY in the menu wipes what it learned. It uses the same rules and meters you do and never builds walls during the match.',
 'SANDBOX (in the menu): a free play area. Both sides are yours to edit at any time: move circles, draw paths and walls, change the sliders. Use SIDE to switch sides, STEP to move forward a little, REFILL to reset the pixels. Nobody wins or loses.',
+'Kills and ricochets throw small firework sparks in that side\'s colours and leave scorch marks on the field that slowly fade. Your circle glows, cracks as it loses health and pulses when it is hit; the screen nudges when YOUR circle takes a hit. SOUND in the menu turns the little pops on or off.',
+'PIXIE MEMORY (menu): Pixie remembers every match on this phone, including all older versions (merged in 0.5). Matches you win teach her the most. EXPORT MEMORY saves her brain to a file (Downloads/ToughAndJs in the app); IMPORT MEMORY merges a saved file back in. DELETE AI MEMORY (tap twice) empties her brain; older version saves stay on the phone as backups.',
 'Shapes (arrows, blocks and so on) and lane shapes are removed for now. The code is kept for later.'];
 const PW=['crawl','very slow','slow','easy','steady','steady','brisk','brisk','quick','top'],DW=v=>v<=3?'loose':v<=7?'medium':'tight',ZW=v=>v<=2?'tiny':v<=4?'small':v<=6?'medium':v<=8?'big':'huge',SW=v=>v<=3?'close':v<=7?'medium':'far',WW=v=>v>=10?'circle':v<=3?'narrow':v<=7?'medium':'wide';
 let chipK='';
@@ -1416,7 +1705,7 @@ function hud(){const me=S.sides[ME],foe=S.sides[1-ME],prep=S.phase==='prep',sb=s
     for(const b of $('chips').children){const i=+b.dataset.id,P=me.paths[i];if(!P)continue;const f=i?brLeft(me,P)/CFG.brMax:(CFG.pathMax-pathUsed(me))/CFG.pathMax,w=Math.round(clamp(f,0,1)*100)+'%';if(b.firstElementChild.style.width!==w)b.firstElementChild.style.width=w;}}
   // slider rows: they change the selected path only
   const nm=selP?'BRANCH '+selP:'MAIN PATH';setT('slh','Sliders: '+nm+(selP?'':'  (tap a path to switch)'));$('slh').style.color=selP?brCol(selP):'#e8e8f0';
-  setT('lSp','PACE\n'+(+ps.speed).toFixed(1)+' '+PW[clamp(Math.round(ps.speed),1,10)-1]);setT('lDe','DENSITY\n'+sizeOf(ps).toFixed(1)+' '+ZW(sizeOf(ps)));setT('lWd','LANE WIDTH\n'+(+ps.width).toFixed(1)+' '+WW(ps.width));
+  setT('lSp','PACE\n'+(+ps.speed).toFixed(1)+' '+PW[clamp(Math.round(ps.speed),1,10)-1]);setT('lDe','DENSITY\nSIZE '+zIdx(sizeOf(ps))+'/5 '+ZW(sizeOf(ps)));setT('lWd','LANE WIDTH\n'+(+ps.width).toFixed(1)+' '+WW(ps.width));
   const rm=$('sRe');if(rm.min!=='200'||rm.step!=='5'){rm.min=200;rm.max=1000;rm.step=5;}rm.dataset.m='flow';
   {const fs=pset(me,sP);setT('lRe','FLOW\n'+onField(fs)+' out');}rm.disabled=false;
   setT('tLane','LANE: '+LANES[sP.lane|0]);setD('boxLn',LANE_SHAPES_ON?'flex':'none');
@@ -1425,7 +1714,7 @@ function hud(){const me=S.sides[ME],foe=S.sides[1-ME],prep=S.phase==='prep',sb=s
   setT('lAt','AT '+sP.sh.at);setT('lSh',selP?'SHARE '+sP.share:'SHARE -');setT('lCa','OUT '+me.active);setT('lSD','SHAPE D '+me.set.sdens);setT('lCo','COMPACT '+me.set.compact);
   if(S.over){if(!revInit){revInit=true;revPane=!!S.aiReview;}setT('rTitle',st);const rk=S.tick+':'+revPane+':'+(S.aiReview?1:0);if(hudCache.rk!==rk){hudCache.rk=rk;renderResult();}
     setD('btnRev',S.aiReview?'block':'none');setT('btnRev',revPane?'STATS':'AI REVIEW');}else{hudCache.rk=null;revInit=false;revPane=false;}
-  const sl=[['sSp',r1(+ps.speed)],['sDe',sizeOf(ps)],['sWd',r1(+ps.width)],['sRe',onField(pset(me,sP))],['sCa',me.set.cap],['sSD',me.set.sdens],['sCo',me.set.compact],['sPu',sP.sh.pull],['sAt',sP.sh.at],['sSh2',sP.share],['sSh',sP.share]];
+  const sl=[['sSp',r1(+ps.speed)],['sDe',zIdx(sizeOf(ps))],['sWd',r1(+ps.width)],['sRe',onField(pset(me,sP))],['sCa',me.set.cap],['sSD',me.set.sdens],['sCo',me.set.compact],['sPu',sP.sh.pull],['sAt',sP.sh.at],['sSh2',sP.share],['sSh',sP.share]];
   for(const q of sl){const el=$(q[0]);if(document.activeElement!==el&&+el.value!==q[1])el.value=q[1];}
 }
 let revPane=false,revInit=false;
@@ -1441,7 +1730,9 @@ function resultLines(){const me=S.sides[0],foe=S.sides[1],a=me.stats,b=foe.stats
   L.push(['Shape performance',f.length?f.slice(0,3).map(q=>shName(me,q[0])+' x'+q[1]+' '+q[2].toFixed(2)+' k/l').join(', '):'none used']);
   L.push(['Shape areas','broke '+a.formBreaks+', regrouped '+a.formReforms+'; pixels knocked out '+a.knocked+', rejoined '+a.reentered+', recalled '+a.koRecall]);
   L.push(['Lives used','you '+a.livesUsed+' ('+a.lostForGood+' gone) / foe '+b.livesUsed+' ('+b.lostForGood+')']);
-  L.push(['Branch redraws',a.brRedraws+' (erasing is free)']);return L;}
+  L.push(['Branch redraws',a.brRedraws+' (erasing is free)']);
+  const zn=q=>q===7?'7.5':String(q),kz=st=>{const z=st.kz;if(!z)return 'none';let bg=0,eq=0,sm=0;const pr=[];for(let p=0;p<11;p++)for(let q=0;q<11;q++){const n=z[p*11+q];if(!n)continue;if(p>q)bg+=n;else if(p===q)eq+=n;else sm+=n;pr.push([p,q,n]);}pr.sort((u,v)=>v[2]-u[2]);const tot=bg+eq+sm;if(!tot)return 'none';return 'bigger '+bg+' / same '+eq+' / smaller '+sm+'  top: '+pr.slice(0,3).map(u=>zn(u[0])+' v '+zn(u[1])+' x'+u[2]).join(', ');};
+  L.splice(2,0,['Kills by size (you)',kz(a)],['Kills by size (foe)',kz(b)]);return L;}
 function renderResult(){const h=$('rBody');h.innerHTML='';h.scrollTop=0;
   const add=(lab,txt)=>{const p=document.createElement('p');if(lab){const b=document.createElement('b');b.textContent=lab+' ';p.appendChild(b);}p.appendChild(document.createTextNode(txt));h.appendChild(p);};
   if(revPane&&S.aiReview){add('AI REVIEW','');for(const l of S.aiReview.lines)add('',l);}else for(const r of resultLines())add(r[0],r[1]);}
@@ -1489,7 +1780,15 @@ $('btnPause').addEventListener('click',()=>{S.paused=!S.paused;});
 const restart=()=>{newGame((seed*1664525+1013904223)>>>0,true);ptr=null;chipKey='';curTab='D';lastPhase='prep';};
 $('btnRestart').addEventListener('click',restart);$('btnAgain').addEventListener('click',restart);
 $('btnMenu').addEventListener('click',()=>showView('menu'));
-for(const q of[['sSp','speed'],['sDe','size'],['sWd','width']]){$(q[0]).addEventListener('input',e=>setPathSetting(ME,selP,q[1],+e.target.value));$(q[0]).addEventListener('change',savePrefs);}
+$('sDe').addEventListener('input',e=>setPathSetting(ME,selP,'size',ZSTOPS[clamp(Math.round(+e.target.value),1,5)-1]));$('sDe').addEventListener('change',savePrefs);
+// 0.5 (t1219) clean notch snapping: the finger position picks the nearest notch (native range rounding drifts with the thumb), tap or drag
+(function(){const el=$('sDe'),bx=el.parentNode;let on=false;el.style.pointerEvents='none';bx.style.touchAction='none';   // the box takes the finger; the native range never rounds on its own
+  const inEl=e=>{const r=el.getBoundingClientRect();return e.clientX>=r.left-6&&e.clientX<=r.right+6&&e.clientY>=r.top-14&&e.clientY<=r.bottom+14;};
+  const pick=e=>{const r=el.getBoundingClientRect(),th=13,f=clamp((e.clientX-r.left-th)/Math.max(1,r.width-2*th),0,1),k=Math.round(f*4)+1;if(+el.value!==k){el.value=k;el.dispatchEvent(new Event('input'));}};
+  bx.addEventListener('pointerdown',e=>{if(e.target!==bx&&e.target!==el)return;if(!inEl(e))return;on=true;e.preventDefault();try{bx.setPointerCapture(e.pointerId);}catch(_){}pick(e);});
+  bx.addEventListener('pointermove',e=>{if(on){e.preventDefault();pick(e);}});
+  const up=()=>{if(on){on=false;savePrefs();}};bx.addEventListener('pointerup',up);bx.addEventListener('pointercancel',up);})();
+for(const q of[['sSp','speed'],['sWd','width']]){$(q[0]).addEventListener('input',e=>setPathSetting(ME,selP,q[1],+e.target.value));$(q[0]).addEventListener('change',savePrefs);}
 $('sRe').addEventListener('input',e=>{if(selP)setPathSetting(ME,selP,'release',+e.target.value);else setSetting(ME,'release',+e.target.value);});$('sRe').addEventListener('change',savePrefs);
 for(const q of[['sCa','cap'],['sSD','sdens'],['sCo','compact']]){$(q[0]).addEventListener('input',e=>setSetting(ME,q[1],+e.target.value));$(q[0]).addEventListener('change',savePrefs);}
 // 0.4.13 (Jay t1204): +/- nudge by the FINE step (0.1, flow 5). Hold to repeat: after 350 ms it repeats, speeding up to 1 step per frame-ish (40 ms).
@@ -1521,7 +1820,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){
 window.addEventListener('popstate',()=>{S.paused=true;});
 // menu / custom / help
 let CUS=Object.assign({},DEFCFG);
-function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC414)||localStorage.getItem(KEYC413)||localStorage.getItem(KEYC412)||localStorage.getItem(KEYC411)||localStorage.getItem(KEYC410)||localStorage.getItem(KEYC49)||localStorage.getItem(KEYC48)||localStorage.getItem(KEYC47)||localStorage.getItem(KEYC46)||localStorage.getItem(KEYC45)||localStorage.getItem(KEYC44)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
+function loadCustom(){try{let v=JSON.parse(localStorage.getItem(KEYC)||localStorage.getItem(KEYC415)||localStorage.getItem(KEYC414)||localStorage.getItem(KEYC413)||localStorage.getItem(KEYC412)||localStorage.getItem(KEYC411)||localStorage.getItem(KEYC410)||localStorage.getItem(KEYC49)||localStorage.getItem(KEYC48)||localStorage.getItem(KEYC47)||localStorage.getItem(KEYC46)||localStorage.getItem(KEYC45)||localStorage.getItem(KEYC44)||localStorage.getItem(KEYC43)||localStorage.getItem(KEYC41)||'null'),old=false;if(!v){v=JSON.parse(localStorage.getItem(KEYC4)||localStorage.getItem(KEYC3)||'null');old=true;}const pre05=!localStorage.getItem(KEYC);if(v&&typeof v==='object'&&!Array.isArray(v)){if(pre05){if(v.paceMax===38)v.paceMax=DEFCFG.paceMax;if(v.capDef===1000)v.capDef=DEFCFG.capDef;if(v.knockK===24)v.knockK=DEFCFG.knockK;}for(const k in DEFCFG){if(old&&(k==='segHP'||k==='wallDmg'||k==='brWaste'||k==='tint'||k==='shapeLane'))continue;if(typeof v[k]==='number'&&Number.isFinite(v[k]))CUS[k]=clampCus(k,v[k]);}}}catch(e){}}
 function schemaOf(k){for(const r of CUSTOM)if(r[0]===k)return r;return null;}
 function clampCus(k,v){const r=schemaOf(k);if(!r)return v;if(r[3]==='b')return v?1:0;if(r[3]==='e')return clamp(Math.round(v),0,(LBL[k]||[0,1]).length-1);return clamp(v,r[4],r[5]);}
 function saveCustom(){try{localStorage.setItem(KEYC,JSON.stringify(CUS));}catch(e){}}
@@ -1574,21 +1873,26 @@ $('mSandbox').addEventListener('click',()=>startWith({duel:1,aiLevel:0}));
 $('mDiff').addEventListener('click',()=>{prefs.diff=prefs.diff>=4?1:prefs.diff+1;setT('mDiff','DIFFICULTY: '+DIFFN[prefs.diff]);hudCache.mDiff=null;savePrefs();});
 $('mCustom').addEventListener('click',()=>{buildCustom();showView('custom');});
 $('mHelp').addEventListener('click',()=>showView('help'));
+let memMsg='';const memSay=t=>{memMsg=t;aiMemLabel();setTimeout(()=>{memMsg='';aiMemLabel();},5000);};
+const sfxLabel=()=>setT('mSfx',prefs.sfx?'SOUND ON':'SOUND OFF');$('mSfx').addEventListener('click',()=>{prefs.sfx=prefs.sfx?0:1;sfxLabel();try{savePrefs();}catch(e){}});
+$('mExp').addEventListener('click',()=>{const r=memExportFile();memSay(r==='ok'||r===true?'Memory file saved ('+AIMEM.matches+' matches).':r==='busy'?'Another save is still writing, try again.':'Could not save the file: '+r);});
+$('mImp').addEventListener('click',()=>{const f=$('mImpF');f.value='';f.click();});
+$('mImpF').addEventListener('change',e=>{const fl=e.target.files&&e.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>{const r=memImportText(String(rd.result||''));memSay(r.ok?'Imported: +'+r.added+' matches, '+r.matches+' total.':'Import failed: '+r.why);};rd.readAsText(fl);});
 $('mAiMem').addEventListener('click',()=>{if(!aiDelArm){aiDelArm=1;clearTimeout(aiDelTm);aiDelTm=setTimeout(()=>{aiDelArm=0;aiMemLabel();},4000);}else{aiDelArm=0;clearTimeout(aiDelTm);clearAiMem();}aiMemLabel();});   // two taps = confirm
 $('cPlay').addEventListener('click',()=>startWith(CUS));
 $('cReset').addEventListener('click',()=>{CUS=Object.assign({},DEFCFG);saveCustom();buildCustom();});
 $('cBack').addEventListener('click',()=>showView('menu'));$('hBack').addEventListener('click',()=>showView('menu'));
 $('hbody').innerHTML=HELP.map(t=>'<p>'+t+'</p>').join('');
 // ---------- prefs (validated, never throws)
-const prefs={wins:0,losses:0,stage:0,diff:3,autoDist:0};
-function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY414)||localStorage.getItem(KEY413)||localStorage.getItem(KEY412)||localStorage.getItem(KEY411)||localStorage.getItem(KEY410)||localStorage.getItem(KEY49)||localStorage.getItem(KEY48)||localStorage.getItem(KEY47)||localStorage.getItem(KEY46)||localStorage.getItem(KEY45)||localStorage.getItem(KEY44)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
+const prefs={wins:0,losses:0,stage:0,diff:3,autoDist:0,sfx:1};
+function loadPrefs(){try{const v=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem(KEY415)||localStorage.getItem(KEY414)||localStorage.getItem(KEY413)||localStorage.getItem(KEY412)||localStorage.getItem(KEY411)||localStorage.getItem(KEY410)||localStorage.getItem(KEY49)||localStorage.getItem(KEY48)||localStorage.getItem(KEY47)||localStorage.getItem(KEY46)||localStorage.getItem(KEY45)||localStorage.getItem(KEY44)||localStorage.getItem(KEY43)||localStorage.getItem(KEY41)||localStorage.getItem(KEY4)||localStorage.getItem(KEY3)||'null');if(v&&typeof v==='object'&&!Array.isArray(v)){
   for(const k of['speed','sdens','compact','width'])if(fin(+v[k])&&v[k]!==null&&typeof v[k]!=='boolean')setSetting(0,k,+v[k]);
   if(!DENSITY_OFF&&(fin(+v.density)||fin(+v.spacing)))setSetting(0,'density',migDensity(v.density,v.spacing));   // 0.4.12: old density is never loaded
   if(fin(+v.size)&&v.size!==null&&typeof v.size!=='boolean')setSetting(0,'size',+v.size);   // pixel size (0.4.12 saves only; older saves have none, so 5)
   if(fin(+v.release))setSetting(0,'release',migRelease(v.release));
   if(fin(+v.cap))setSetting(0,'cap',(+v.cap>=400)?CFG.capDef:+v.cap);
-  prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;prefs.autoDist=v.autoDist?1:0;CFG.autoDist=prefs.autoDist;}}catch(e){}}
-function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,size:sizeOf(s),release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff,autoDist:prefs.autoDist|0}));}catch(e){}}
+  prefs.wins=fin(+v.wins)?clamp(Math.floor(+v.wins),0,1e6):0;prefs.losses=fin(+v.losses)?clamp(Math.floor(+v.losses),0,1e6):0;prefs.stage=fin(+v.stage)?clamp(Math.floor(+v.stage),0,4):0;prefs.diff=fin(+v.diff)?clamp(Math.floor(+v.diff),1,4):3;prefs.autoDist=v.autoDist?1:0;CFG.autoDist=prefs.autoDist;prefs.sfx=v.sfx===0?0:1;}}catch(e){}}
+function savePrefs(){try{const s=S.sides[0].set;localStorage.setItem(KEY,JSON.stringify({speed:s.speed,size:sizeOf(s),release:s.release,cap:s.cap,sdens:s.sdens,compact:s.compact,width:s.width,wins:prefs.wins,losses:prefs.losses,stage:prefs.stage,diff:prefs.diff,autoDist:prefs.autoDist|0,sfx:prefs.sfx?1:0}));}catch(e){}}
 // ---------- loop
 let last=0,acc=0,counted=false,RA=1;   // RA: render alpha (0..1) between the previous and the current sim tick
 
@@ -1662,10 +1966,10 @@ window.__tt={version:1,manual:false,
   else{const i=+id.slice(1);if(pst[i]){c2.fillStyle='#000';{const z=Math.round(ZL.PX[psz[i]]);c2.fillRect(Math.round(LX+px[i]*LS-z/2),Math.round(LY+py[i]*LS-z/2),z,z);}}}}
 };
 // test/debug internals (engine only; harmless)
-window.__pw={get S(){return S;},get CFG(){return CFG;},set CFG(v){CFG=v;},get ME(){return ME;},set ME(v){ME=v;},get selP(){return selP;},set selP(v){selP=v;},get L(){return{LX:LX,LY:LY,LS:LS};},get view(){return view;},
+window.__pw={get PXB(){return pixieBrain();},get PXB_OFF(){return PXB_OFF;},set PXB_OFF(v){PXB_OFF=!!v;},pixieRead0,get PixieBrain(){return typeof PixieBrain!=='undefined'?PixieBrain:null;},get S(){return S;},get CFG(){return CFG;},set CFG(v){CFG=v;},get ME(){return ME;},set ME(v){ME=v;},get selP(){return selP;},set selP(v){selP=v;},get L(){return{LX:LX,LY:LY,LS:LS};},get view(){return view;},
  C:{W,H,CAPMAX,PSP,CONTACT,STUN,MAXP,MAXSQ,DEFCFG,SHAPES,NSH,MAXCUS,POLYMAX,MX,MY},
  px,py,pvx,pvy,pox,poy,php,pst,pstun,pps,pcd,pwc,pid,psq,pslot,plu,plv,pcnt,pspm,psh,pcap,release,recall,collide,movePixels,tick,startBattle,aiPlan,aiAdapt,placeCircle,pathExtend,pathTrim,wallBegin,wallExtend,wallEnd,eraseAt,eraseStroke,
- branchBegin,branchExtend,rateOf,flowPS,onField,flowRate,clearAiMem,saveAiMem,loadAiMem,get AIMEM(){return AIMEM;},aiAdapt,aiOpenBranch,toolDown,toolMove,toolUp,wallSmooth,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},sbx,sandboxRefill,sandboxStep,setPathSetting,pfree,freePix,pfade,FADE_T,VFX,vfxStep,pbnc,get vpN(){return vpN;},VPMAX,vAdd,vX,vY,vLife,vKind,prepNeeds,tryStart,autoDefense,aiPrepPlan,wallLen,MINPATH,MINWALL,vkOf,tkOf,PACE_REF,
+ branchBegin,branchExtend,rateOf,flowPS,onField,flowRate,clearAiMem,saveAiMem,loadAiMem,get AIMEM(){return AIMEM;},parseMem,mergeMem,migrateAiMem05,memImportText,memExportObj,memExportFile,get MEMLOG(){return MEMLOG;},memFold,memIsCont,oldMemKeys,KEYAIM,pixMemText,ZSTOPS,snapZ,zIdx,FW,FXS,get spN(){return spN;},get SC32(){return SC32;},get VIEWXF(){return{LX,LY,LS,DPR,fw:Math.round(W*LS*DPR),fh:Math.round(H*LS*DPR)};},get scorchLive(){return scorchLive;},fwBurst,aiAdapt,aiOpenBranch,toolDown,toolMove,toolUp,wallSmooth,branchEnd,removeBranch,setSetting,setShape,setLane,laneF,laneOk,LANES,formErr,shock,disband,brLeft,brTotal,brCap,feat,shapeOkS,shName,get PRESETS(){return PRESETS;},set PRESETS(v){PRESETS=v;},addPreset,delPreset,cleanForm,loadForms,saveForms,syncForms,aiDesignForm,buildReview,resultLines,renderResult,startStage,STG,DIFFN,ED,edPoly,edSave,edChips,edLayout,edDraw,edSimplify,areaDef,sdAt,areaSd,sampleArea,lanePoly,pgc,KEYF,KEY,KEYC,setPull,setAt,setShare,pathUsed,brUsed,wallUsed,brCount,draw,laneHW,speedOf,rateOf,fPos,inShape,get stat(){return stat;},sbx,sandboxRefill,sandboxStep,setPathSetting,pfree,freePix,pfade,FADE_T,VFX,vfxStep,pbnc,get vpN(){return vpN;},VPMAX,vAdd,vX,vY,vLife,vKind,prepNeeds,tryStart,autoDefense,aiPrepPlan,wallLen,MINPATH,MINWALL,vkOf,tkOf,PACE_REF,
  setRnd(f){rnd=f;},useShape,shapeLeft,cdTicks,shapeOk,rhoAt,burnPool,loseLife,plife,qN,cntA,nearOwnWall,nearOwnPath,clrOf,cellHP,aiShapes,aiOpenBranch,brCol,BRCOL,pset,selectAt,POOL,get qHead(){return qHead;},newGame,buildWallGrid,wallsLeft,prefs,endMatch,autoStart,startWith,showView,buildCustom,get CUS(){return CUS;},CUSTOM,pathAt,restart,canWall,canDef,canBr,canMain,nearDefense,laneHW,laneHalf,aiRevisePlan,aiOpenBranch,aiBestOpening,aiDefenseRoute,aiPathClash,aiFillDens,aiZoneFoeDom,aiMirror,aiNotePlayer,rebuildSegs,crossesOwnWall,compact,rejoinOf,nearestOnPath,mergeRad,flashConn,FINGER,LOOP_CAP,get ploop(){return ploop;},aiThreats,aiOpenGuard,aiGuardStep,aiHabits,aiGuardW,AISEED,AIR,LANE_SHAPES_ON,SHAPES_OFF,aiMainContest,aiObserve,aiHabitsCommit,aiCounterHabits,aiReserve,aiBudget,KEYAI,KEY,psz,SZ_CNT,SZ_DG,SZ_HP,SZ_DMG,SZ_CT,SZ_IN,SZ_PX,SZ_MASS,DENSITY_OFF,DENS_N,HPQ,densOf,sizeOf,ZL,rebuildSZ,zq,r1,get KEYAI412(){return KEYAI412;},KEY412,get KEYAI413(){return KEYAI413;},KEY413,PIXIE_BOOK,pixieRead,pixieSee,pixieMeet,pixieAct,brSlide,aiSizeFor,get KEYAI411(){return KEYAI411;}};
 // ---------- boot
 newGame(((Math.random()*4294967296)>>>0)||1,false);
