@@ -146,12 +146,12 @@ button{font-family:inherit}
  <div id="boot"><b>PAPA POTATO 2</b><span>Loading the kitchen…</span></div>
 </div>
 <script>
-/* ===== Papa Potato 2.0.2 — simulation (fresh rework, t1213/t1223). One continuous iso map: kitchen + wash room.
+/* ===== Papa Potato 2.0.3 — simulation (fresh rework, t1213/t1223). One continuous iso map: kitchen + wash room.
    Grid tiles (1 tile = 0.6 m). Papa, the potatoes and every machine are real objects on that grid.
    No Math.random / Date in here: everything runs off the seeded RNG so setSeed(n);step(k) is repeatable. ===== */
 var PP2=(function(){
 "use strict";
-var VERSION="2.0.2",SAVE_KEY="papaPotato2.save.v1";
+var VERSION="2.0.3",SAVE_KEY="papaPotato2.save.v1";
 var W=26,H=24,DT=1/60,POT_CAP=360,PEEL_CAP=260;
 var DIRS=[[1,0],[0,1],[-1,0],[0,-1]];
 var DNAME=["EAST","SOUTH","WEST","NORTH"];
@@ -165,8 +165,15 @@ var FIX={
   broom:{wall:"N",x:13},         /* 2.0.2: where the broom + dustpan lean against the wall when he isn't sweeping */
   pool:{x:17,y:12,w:3,h:4},
   hole:{x:25,y:0},
-  shipFront:{x:13,y:16,w:1,h:3}, /* 2.0.2 t1244: the floor lane in front of the SHIPPING machine, kept clear (Papa stands at its far end) */
-  dropSpot:{x:13,y:18},          /* 2.0.2 t1244: Papa's ONE drop spot, two tiles out on the open kitchen floor, so his whole sprite is in front of the box (he tosses potatoes into the intake) */
+  shipFront:{x:10,y:15,w:3,h:1}, /* 2.0.3 t1253: Papa's stand tile and the floor between it and the intake (kitchen-facing -x) face, kept clear (belts still allowed, so a belt can feed the face at 12,14) */
+  _shipFront1246:{x:13,y:16,w:1,h:1}, /* 2.0.3 t1246: the floor tile right in front of the SHIPPING machine's labeled (kitchen-side, +y) face, kept clear */
+  dropSpot:{x:10,y:15},          /* 2.0.3 t1253: Papa's ONE drop spot, on the open kitchen floor out from the intake face */
+  _dropSpot1246:{x:13,y:16},     /* 2.0.3 t1246: Papa's ONE drop spot = the tile touching the labeled face; he steps to DROP_STAND inside it (centred on the face on screen) */
+  dropStand:{x:10.9,y:15.0},     /* 2.0.3 t1253: his feet, on floor, facing the intake slot squarely (same y as the face centre 15.0) with a clear floor gap to the box */
+  slot:{x:12.83,y:15.0,h:0.98},  /* 2.0.3 t1253: the intake mouth on the -x face; the toss lands here */
+  _stand1246b:{x:13.55,y:16.3},  /* 2.0.3: where his feet go: 0.38 in front of the face (y 15.92) at its world centre (x 13.05..14.0); screen x-y -2.75 is inside the face span -2.87..-1.92, and his wheel stays clear of the low kitchen-edge wall at x 14.2 */
+  bedHome:{x:8,y:16},            /* 2.0.3 t1253: starter bed moved 2 tiles west (was 10,16) so it never hides Papa at the drop stand */
+  _old202:{x:13,y:18},           /* 2.0.2 t1244 spot (two tiles out), kept for reference (hidden, not deleted) */
   gate:{x:24,y:15},              /* 2.0.2 t1242: the canal FLOW tap (a sluice gate with a red wheel) */
   drain:{x:25,y:0},              /* the canal's last tile: the outlet grate + ship drain where potatoes leave */
   outlet:{wall:"W",y:8,x:0,range:4.5,cap:5}
@@ -324,7 +331,7 @@ P.reset=function(seed){
     pile:C.potTotal,ret:[],acc:{hat:"chef",glasses:0,bow:0,toy:0},want:null,wantT:150,lastAway:null,calFlipT:-99,shipT:-99,
     stats:{peeled:0,machPeeled:0,scrubbed:0,brushed:0,jams:0,fixed:0,beltMoved:0,doorTrips:0,washed:0,drumWashed:0,sackDowns:0,poolRuns:0,wantsMet:0,sorted:0,autoCleaned:0,dried:0}};
   UPS.forEach(function(u){this.s.ups[u.id]=0;},this);
-  this.addObj("table",5,9,0,true);this.addObj("cooler",11,5,0,true);this.addObj("bed",10,16,0,true);this.addObj("tub",19,4,0,true);
+  this.addObj("table",5,9,0,true);this.addObj("cooler",11,5,0,true);this.addObj("bed",FIX.bedHome.x,FIX.bedHome.y,0,true);this.addObj("tub",19,4,0,true);
   this.dirtyGrid=true;this._grid=null;this.power=null;this.events=[];
 };
 P.addObj=function(id,x,y,r,starter){var o={u:this.s.uid++,id:id,x:x,y:y,r:r|0};if(starter)o.st=1;if(isMach(id)){o.on=1;o.q=[];o.t=0;o.jam=0;o.out=null;}
@@ -590,7 +597,10 @@ P.peelTime=function(){var s=this.s,t=C.peel*Math.pow(0.85,this.up("peeler"));if(
 /* ---------- Papa's brain ---------- */
 P.jammed=function(){return this.s.objs.filter(function(m){return !!m.jam;});};
 P.mkTask=function(type,target,extra){var t={type:type,target:target,stage:"walk",t:0};if(extra)for(var k in extra)t[k]=extra[k];return t;};
-P.startTask=function(t,spots){var p=this.s.papa;if(!spots||!spots.length)return false;var r=this.route(spots);if(!r)return false;p.task=t;p.path=r.path;t.spot=r.spot;t.stage=r.path.length?"walk":"act";t.t=0;return true;};
+P.startTask=function(t,spots){var p=this.s.papa;if(!spots||!spots.length)return false;var r=this.route(spots);if(!r)return false;p.task=t;p.path=r.path;t.spot=r.spot;
+  /* 2.0.3 t1246: for a drop he walks the last bit to DROP_STAND, right in front of the labeled face of the SHIPPING machine */
+  if(t.type==="drop"&&r.spot&&r.spot[0]===FIX.dropSpot.x&&r.spot[1]===FIX.dropSpot.y&&(Math.abs(p.x-FIX.dropStand.x)>0.01||Math.abs(p.y-FIX.dropStand.y)>0.01||p.path.length))p.path=p.path.concat([[FIX.dropStand.x,FIX.dropStand.y]]);
+  t.stage=p.path.length?"walk":"act";t.t=0;return true;};
 P.ringSpots=function(x,y,r){var o=[],a,b;for(a=Math.floor(x-r-1);a<=Math.floor(x+r+1);a++)for(b=Math.floor(y-r-1);b<=Math.floor(y+r+1);b++)if(this.walkable(a,b)&&Math.hypot(a+0.5-x,b+0.5-y)<=r+1.2)o.push([a,b]);
   o.sort(function(A,B){return Math.hypot(A[0]+0.5-x,A[1]+0.5-y)-Math.hypot(B[0]+0.5-x,B[1]+0.5-y);});return o;};
 P.peelCluster=function(){var s=this.s,best=null,bn=-1,i,j,stp=Math.max(1,(s.peels.length/24)|0);for(i=0;i<s.peels.length;i+=stp){var a=s.peels[i],n=0;for(j=0;j<s.peels.length;j++){var b=s.peels[j];if(Math.abs(a.x-b.x)<1.4&&Math.abs(a.y-b.y)<1.4)n++;}if(n>bn){bn=n;best=a;}}return best?{x:best.x,y:best.y}:{x:6,y:12};};
@@ -642,7 +652,7 @@ P.decide=function(){
 P.tubBeltOut=function(tub){var f=this.frontOut(tub);return !!this.beltAt(f[0],f[1]);};
 P.facePt=function(x,y){var p=this.s.papa,dx=x-p.x,dy=y-p.y;if(Math.abs(dx)+Math.abs(dy)<0.01)return;p.fx=dx;p.fy=dy;p.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?0:2):(dy>0?1:3);};
 P.tgtCenter=function(t){var o=t.target;if(t.sink&&o){var sk=this.sinkTile(o);return [sk[0]+0.5,sk[1]+0.5];}if(o&&o.x!=null){var f=fp(o);return [f.x+f.w/2,f.y+f.h/2];}
-  if(t.type==="grab")return [clamp(this.s.papa.x,1,13),21.6];if(t.type==="drop")return [13.5,15.2];if(t.type==="getBroom"||t.type==="parkBroom")return [FIX.broom.x+0.5,0.1];if(t.type==="sweep")return [t.cx,t.cy];
+  if(t.type==="grab")return [clamp(this.s.papa.x,1,13),21.6];if(t.type==="drop")return [FIX.slot.x,FIX.slot.y];if(t.type==="getBroom"||t.type==="parkBroom")return [FIX.broom.x+0.5,0.1];if(t.type==="sweep")return [t.cx,t.cy];
   if(t.type==="toss"&&t.spot){for(var k=0;k<4;k++){var a=t.spot[0]+DIRS[k][0],b=t.spot[1]+DIRS[k][1];if(isCanal(a,b))return [a+0.5,b+0.5];}}
   if(t.type==="pickSack")return [this.s.papa.sack.x,this.s.papa.sack.y];
   if(t.type==="poolTake")return [HEAP.x,HEAP.y];
@@ -888,7 +898,9 @@ P.load=function(str){var d;try{d=JSON.parse(str);}catch(e){return false;}if(!d||
   /* objects go back in through the placement rules, so a bad save can't put anything inside a wall */
   var objs=Array.isArray(d.objs)?d.objs:[];var st={};objs.forEach(function(o){if(o&&STARTERS[o.id])st[o.id]=o;});
   s.objs=s.objs.filter(function(o){return false;});this.dirtyGrid=true;
-  ["table","cooler","bed","tub"].forEach(function(id){var o=st[id],def={table:[5,9],cooler:[11,5],bed:[10,16],tub:[19,4]}[id],ok=false;
+  ["table","cooler","bed","tub"].forEach(function(id){var o=st[id],def={table:[5,9],cooler:[11,5],bed:[FIX.bedHome.x,FIX.bedHome.y],tub:[19,4]}[id],ok=false;
+    /* 2.0.3 t1253: an older save with the starter bed still on its old home (10,16) moves it to the new home when nothing else is there */
+    if(id==="bed"&&o&&o.x===10&&o.y===16&&(o.r|0)===0&&String(d.ver||"")<"2.0.3"&&!objs.some(function(q){if(!q||q===o||!ITEMI[q.id]&&!STARTERS[q.id])return false;var f2=fp({id:q.id,x:q.x|0,y:q.y|0,r:q.r|0});return f2.x<FIX.bedHome.x+2&&f2.x+f2.w>FIX.bedHome.x&&f2.y<FIX.bedHome.y+3&&f2.y+f2.h>FIX.bedHome.y;}))o={id:"bed",x:FIX.bedHome.x,y:FIX.bedHome.y,r:0};
     if(o&&okn(o.x,0,W)&&okn(o.y,0,H)&&okn(o.r,0,3)){var ff=fp({id:id,x:o.x|0,y:o.y|0,r:o.r|0}),clash=false;for(var ax=ff.x;ax<ff.x+ff.w;ax++)for(var ay=ff.y;ay<ff.y+ff.h;ay++)if(fixedBlock(ax,ay)||inRect(ax,ay,FIX.shipFront)||!roomOf(ax,ay)||roomOf(ax,ay)==="door")clash=true;
       if(!clash){me.addObj(id,o.x|0,o.y|0,o.r|0,true);ok=true;}}
     if(!ok)me.addObj(id,def[0],def[1],0,true);});
@@ -1526,6 +1538,11 @@ function scanner(x,y,side,sim){box(x,y,2,2,0,1.9,"#5e6f7e");box(x+0.1,y+0.1,1.8,
    Wall section: a housing through the wall. Wash side: outlet with a spout that spits them into the pool, where they pile up and wait.
    It only moves when a potato goes through (flaps, light); otherwise it stands still. */
 function shipBusy(sim){return sim.s.t-(sim.s.shipT==null?-99:sim.s.shipT);}
+/* 2.0.3 t1246: the SHIPPING sign on posts above the machine, screen-aligned so it always reads, drawn after Papa */
+function shipSign(sim){var c=P(13.525,15.86,2.08),fs=Math.max(8,Math.round(8.5*Z)),s="SHIPPING";ctx.font="bold "+fs+"px monospace";var tw=ctx.measureText(s).width,aw=fs*0.9,pw=tw+aw+fs*1.2,ph=fs*1.6,px=Math.max(c[0]-pw/2,P(13.05,15.92,0)[0]),py=c[1]-ph/2;   /* t1253: never sticks out left of the box (Papa stands up-left of it) */
+  ctx.fillStyle="#123d24";rrect(px,py,pw,ph,ph*0.25);ctx.fill();ctx.lineWidth=Math.max(1.5,1.4*Z);ctx.strokeStyle="#f2c230";ctx.stroke();
+  ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillText(s,px+fs*0.5,c[1]+0.5);
+  var ax=px+fs*0.5+tw+fs*0.25+aw/2,ay=c[1];ctx.fillStyle="#f2c230";ctx.beginPath();ctx.moveTo(ax-aw/2,ay-aw*0.35);ctx.lineTo(ax+aw/2,ay-aw*0.35);ctx.lineTo(ax,ay+aw*0.45);ctx.closePath();ctx.fill();}
 function drawShipK(sim){var key=sim.key(),bz=shipBusy(sim),act=bz>=0&&bz<0.6,x=13.05,y=14.08,STEEL="#6d7c88";
   shadow(13.5,15,0.9);
   /* housing through the wall (over the low wall line) */
@@ -1533,10 +1550,17 @@ function drawShipK(sim){var key=sim.key(),bz=shipBusy(sim),act=bz>=0&&bz<0.6,x=1
   box(x,y,0.95,1.84,0,1.15,STEEL,{top:"#90a0ab"});
   /* yellow + black band and the sign */
   for(var i=0;i<4;i++)poly([P(x+i*0.2375,y+1.84,1.15),P(x+i*0.2375+0.2375,y+1.84,1.15),P(x+i*0.2375+0.2375,y+1.84,1.0),P(x+i*0.2375,y+1.84,1.0)],i%2?"#222":"#f2c230");
-  var sg=P(x+0.47,y+1.84,0.7);txt("SHIPPING",sg[0],sg[1],7,"#ffe9a8");
-  /* intake: a hopper mouth on top of the kitchen side (Papa drops potatoes in from his side); rubber flaps only swing while one goes in */
-  box(x+0.05,y+0.3,0.55,1.24,1.15,0.14,"#9aa8b2",{top:"#b9c6ce"});topQuad(x+0.12,y+0.38,0.41,1.08,1.295,"#10161a","#000");
-  for(var f=0;f<4;f++){var u=y+0.46+f*0.25,sw=act?Math.sin(bz*30+f)*0.06*(1-bz/0.6):0;line(P(x+0.14,u+sw,1.3),P(x+0.51,u+sw,1.3),"#3a4248",2);}
+  if(D.faceLabel){var sg=P(x+0.47,y+1.84,0.86);txt("SHIPPING",sg[0],sg[1],6,"#ffe9a8");}   /* 2.0.3: hidden (the raised sign above replaces it; Papa stands in front of this face) */
+  /* 2.0.3 t1246: sign posts up from the top of the box; the plate itself is drawn last (shipSign) so Papa standing in front never hides it */
+  line(P(x+0.12,y+1.78,1.15),P(x+0.12,y+1.78,1.98),"#39424a",Math.max(1.5,2*Z));line(P(x+0.83,y+1.78,1.15),P(x+0.83,y+1.78,1.98),"#39424a",Math.max(1.5,2*Z));
+  /* 2.0.3 t1253: the intake is on the KITCHEN-FACING side (the -x face, toward the open floor where Papa stands): a steel slot box sticks out of that face
+     with its dark mouth open on top, rubber flaps that swing while one goes in, and a yellow arrow pointing into the box. The old top hopper is hidden (D.topHopper). */
+  if(D.topHopper){box(x+0.05,y+0.3,0.55,1.24,1.15,0.14,"#9aa8b2",{top:"#b9c6ce"});topQuad(x+0.12,y+0.38,0.41,1.08,1.295,"#10161a","#000");}
+  var ix=x-0.44,iy=y+0.38,iw=0.44,id=1.08,ih0=0.62,ih=0.36;box(ix,iy,iw,id,ih0,ih,"#8794a0",{top:"#b9c6ce"});
+  topQuad(ix+0.05,iy+0.06,iw-0.08,id-0.12,ih0+ih+0.005,"#05080a","#f2c230");
+  for(var f=0;f<4;f++){var u=iy+0.2+f*0.22,sw=act?Math.sin(bz*30+f)*0.05*(1-bz/0.6):0;line(P(ix+0.06,u+sw,ih0+ih+0.01),P(ix+iw-0.03,u+sw,ih0+ih+0.01),"#3a4248",1.6);}
+  for(var c=0;c<3;c++)poly([P(ix,iy+c*0.4,ih0+ih),P(ix,iy+c*0.4+0.2,ih0+ih),P(ix,iy+c*0.4+0.2,ih0+ih-0.08),P(ix,iy+c*0.4,ih0+ih-0.08)],"#f2c230");
+  var aa=P(x+0.08,y+0.92,1.152),ab2=P(x+0.6,y+0.92,1.152);line(aa,ab2,"#f2c230",2.2);line(ab2,P(x+0.44,y+0.78,1.152),"#f2c230",2.2);line(ab2,P(x+0.44,y+1.06,1.152),"#f2c230",2.2);
   /* flow arrow pointing east through the wall */
   var ar=P(x+0.2,y+1.84,0.42),ab=P(x+0.8,y+1.84,0.42);line(ar,ab,"#ffe9a8",1.6);line(ab,P(x+0.66,y+1.84,0.52),"#ffe9a8",1.6);line(ab,P(x+0.66,y+1.84,0.32),"#ffe9a8",1.6);
   /* status light: green = to the pool, amber = ships them dirty right here (no key / SHIP DIRTY); white blink as one goes through */
@@ -1868,9 +1892,16 @@ function broomAt(top,head,k,ang){seg(top,head,"#9a6a3a",1.7*k,"rgba(60,40,20,0.7
   ctx.fillStyle="#b23a2a";ctx.fillRect(-2.6*k,-2.4*k,5.2*k,1.3*k);for(var i=-4;i<=4;i+=2){ctx.beginPath();ctx.moveTo(i*0.9*k,0);ctx.lineTo(i*1.15*k,3.4*k);ctx.stroke();}ctx.restore();}
 function dustpanAt(hand,pan,k){seg(hand,pan,"#2f6f9a",1.5*k,"rgba(20,40,60,0.7)");ctx.fillStyle="#3b86b8";ctx.beginPath();ctx.moveTo(pan[0]-5*k,pan[1]-1*k);ctx.lineTo(pan[0]+5*k,pan[1]-1*k);ctx.lineTo(pan[0]+4*k,pan[1]+2.5*k);ctx.lineTo(pan[0]-4*k,pan[1]+2.5*k);ctx.closePath();ctx.fill();ctx.strokeStyle="#1d4f72";ctx.lineWidth=Math.max(0.5,0.6*k);ctx.stroke();}
 /* 2.0.2 t1244: Papa stands two tiles out in front of the SHIPPING machine and tosses each potato in an arc into the intake */
-function drawToss(sim){var p=sim.s.papa,t=p.task;if(!t||t.type!=="drop"||t.stage!=="act"||!p.hold.length)return;var f=Math.min(1,t.t/0.45),e=f*f*(3-2*f);
-  var x0=p.x,y0=p.y-0.25,h0=0.95,x1=13.55,y1=15.0,h1=1.2,x=x0+(x1-x0)*e,y=y0+(y1-y0)*e,h=h0+(h1-h0)*e+Math.sin(f*3.1416)*0.75;
-  shadow(x,y,0.12,0.25);var a=P(x,y,h),r=3.4*Math.max(0.6,Z);ctx.save();ctx.translate(a[0],a[1]);ctx.rotate(f*7);ctx.fillStyle="#e2c27a";ctx.strokeStyle="#7a5a2a";ctx.lineWidth=Math.max(1,Z);
+/* 2.0.3 t1255: drop pose hands: f 0..REL the near hand swings forward-right holding the potato, then it stays reached out toward the slot */
+var TOSS_REL=0.3;
+function dropHands(cx,sy,k,m,f){var g=Math.min(1,f/TOSS_REL);return {l:[cx+9*k*m,sy+12*k],r:[cx+(8+8*g)*k*m,sy+(14-10*g)*k]};}
+/* the toss, in screen space: held in his hand until the release, then an arc from that hand into the slot mouth, sinking in at the end */
+function tossPos(sim,f){var hb=D._dropHB;if(!hb)return null;var R=dropHands(hb.cx,hb.sy,hb.k,hb.m,Math.min(f,TOSS_REL)),M=P(FIX.slot.x,FIX.slot.y,FIX.slot.h);
+  if(f<=TOSS_REL)return {x:R.r[0],y:R.r[1],s:1,f:f};var u=(f-TOSS_REL)/(1-TOSS_REL),e=u*u*(3-2*u)*0.4+u*0.6,lift=Math.sin(Math.min(1,u)*3.1416)*10*Z;
+  return {x:R.r[0]+(M[0]-R.r[0])*e,y:R.r[1]+(M[1]-R.r[1])*e-lift,s:u>0.85?Math.max(0.25,1-(u-0.85)/0.15*0.75):1,f:f,M:M};}
+D.tossPos=tossPos;
+function drawToss(sim){var p=sim.s.papa,t=p.task;if(!t||t.type!=="drop"||t.stage!=="act"||!p.hold.length)return;var f=Math.min(1,t.t/0.45),q=tossPos(sim,f);if(!q)return;
+  var r=3.4*Math.max(0.6,Z)*q.s;ctx.save();ctx.translate(q.x,q.y);ctx.rotate(f*7);ctx.fillStyle="#e2c27a";ctx.strokeStyle="#7a5a2a";ctx.lineWidth=Math.max(1,Z);
   ctx.beginPath();ctx.ellipse(0,0,r*1.3,r,0,0,6.283);ctx.fill();ctx.stroke();ctx.restore();}
 function drawPapa(sim){var s=sim.s,p=s.papa,t=p.task,act=t&&t.stage==="act",ty=t?t.type:"idle";
   if(act&&(ty==="nap"&&t.lying||ty==="watch"&&t.sit))return;   /* the bed / armchair draws him */
@@ -1897,7 +1928,8 @@ function drawPapa(sim){var s=sim.s,p=s.papa,t=p.task,act=t&&t.stage==="act",ty=t
   else if(act&&ty==="scrub"){o.lean=4;o.hands=function(cx,sy,k,m){var a=T*12;return {l:[cx+(12+Math.cos(a+2)*2)*k*m,sy+18*k+Math.sin(a+2)*1.2*k],r:[cx+(9+Math.cos(a)*3)*k*m,sy+17*k+Math.sin(a)*1.6*k]};};
     o.front=function(cx,sy,k,m,h){frontExtra(cx,sy,k,m,h);ctx.fillStyle="#b5462f";ctx.fillRect(h.r[0]-3.2*k,h.r[1]-0.6*k,6.4*k,2.4*k);ctx.fillStyle="#f0e0a0";ctx.fillRect(h.r[0]-3.2*k,h.r[1]+1.8*k,6.4*k,1.2*k);
       if(Math.random()<0.2)part({k:"foam",x:p.x+(sim.tgtCenter(t)[0]-p.x)*0.5,y:p.y+(sim.tgtCenter(t)[1]-p.y)*0.5,h:0.7,vh:0.4,t:0,life:0.8,r:2+Math.random()*2});};}
-  else if(act&&ty==="drop"){o.hands=function(cx,sy,k,m){var f=Math.min(1,t.t/0.45);return {l:[cx+11*k*m,sy+6*k-f*3*k],r:[cx+8*k*m,sy-2*k-f*5*k]};};}
+  else if(act&&ty==="drop"){o.face=false;o.mir=false;   /* 2.0.3 t1255: 3/4 back view turned right, toward the slot (the box is lower-right of him) */
+    o.hands=function(cx,sy,k,m){D._dropHB={cx:cx,sy:sy,k:k,m:m};return dropHands(cx,sy,k,m,Math.min(1,t.t/0.45));};}
   else if(act&&ty==="fix"){o.lean=2;o.hands=function(cx,sy,k,m){var a=Math.sin(T*14);return {l:[cx+13*k*m,sy+9*k],r:[cx+10*k*m,sy+4*k+a*4*k]};};
     o.front=function(cx,sy,k,m,h){frontExtra(cx,sy,k,m,h);var a=Math.sin(T*14);seg(h.r,[h.r[0]+6*k*m,h.r[1]+2*k+a*1.5*k],"#9aa3ab",1.8*k,"#5c646b");ctx.strokeStyle="#9aa3ab";ctx.lineWidth=1.4*k;ctx.beginPath();ctx.arc(h.r[0]+7*k*m,h.r[1]+2*k+a*1.5*k,1.8*k,0,5);ctx.stroke();
       if(Math.random()<0.2)part({k:"spark",x:p.x+(sim.tgtCenter(t)[0]-p.x)*0.5,y:p.y+(sim.tgtCenter(t)[1]-p.y)*0.5,h:1.0,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,vh:1.5,t:0,life:0.4,c:"#ffe27a"});};}
@@ -2014,6 +2046,7 @@ function render(c,sim,view){
   list.push({d:34.9,f:function(){drawPile(sim);}});
   /* 2.0.2: the old north-wall chute and the two X-RAY boxes are gone (drawChute/scanner kept in the file, not called) */
   list.push({d:13.5+15,f:function(){if(D.dbgHide&&D.dbgHide.shipK)return;if(view.edit)ctx.globalAlpha=0.45;drawShipK(sim);ctx.globalAlpha=1;}});
+  list.push({d:60,f:function(){if(D.dbgHide&&(D.dbgHide.shipK||D.dbgHide.sign))return;if(view.edit)ctx.globalAlpha=0.45;shipSign(sim);ctx.globalAlpha=1;}});
   list.push({d:15.85+15,f:function(){if(view.edit)ctx.globalAlpha=0.45;drawShipW(sim);ctx.globalAlpha=1;}});
   if(s.equip.broomDustpan&&!s.papa.broomHeld)list.push({d:FIX.broom.x+0.6+0.3,f:function(){drawBroomParked(sim);}});
   lowWalls(sim,list);
@@ -2037,7 +2070,9 @@ function render(c,sim,view){
     if(q.m!=="belt"){ell(q.x,q.y,WL+0.01,7,3,"rgba(255,255,255,0.25)");}potato(q.x,q.y,h,q,q.m==="belt"?0:Math.sin(T+q.u)*0.4);}});});
   /* 2.0.2 (Jay t1240/t1242): no see-through ghost at the wall SHIPPING machine */
   var atShip=p.x>=10.8&&p.x<=14&&p.y>=13.2&&p.y<=17;
-  list.push({d:p.x+p.y+0.01,f:function(){if(D.dbgHide&&D.dbgHide.papa)return;drawPapa(sim);if(!(D.dbgHide&&D.dbgHide.toss))drawToss(sim);}});   /* t1242: plain depth; his drop spot is on the floor in front of the machine */
+  list.push({d:p.x+p.y+0.01,f:function(){if(D.dbgHide&&D.dbgHide.papa)return;drawPapa(sim);}});
+  /* 2.0.3 t1255: the toss is its own drawable, after the kitchen box, so the potato is seen all the way into the slot mouth */
+  list.push({d:28.6,nh:1,f:function(){if(D.dbgHide&&(D.dbgHide.papa||D.dbgHide.toss))return;drawToss(sim);}});   /* t1242: plain depth; his drop spot is on the floor in front of the machine */
   if(s.equip.carrySack&&!p.sack.on)list.push({d:p.sack.x+p.sack.y,f:function(){drawSackFloor(sim);}});
   if(sim.placed("catBed"))list.push({d:s.cat.x+s.cat.y+0.02,f:function(){drawCat(sim);}});
   if(sim.placed("catBed")&&s.acc&&s.acc.toy){var cb=S.fp(sim.objsOf("catBed")[0]),yx=cb.x+1.25+Math.sin(T*0.7)*0.35,yy=cb.y+0.55+Math.cos(T*0.5)*0.25;
